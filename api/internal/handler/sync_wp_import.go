@@ -273,9 +273,13 @@ func importPostsOrPages(jobID, siteUUID, postType string, items []map[string]int
 			UpdatedAt:    updatedAtUnix,
 			PublishedAt:  &publishedAtTS,
 		}
+		// 记录旧 view_count 以便算 stats_global 的回填增量。新建的
+		// post 旧值是 0；更新的 post 是 existing.ViewCount。
+		oldViewCount := 0
 		if err == nil && id != 0 {
 			if existing, err := model.PostByID(id); err == nil {
 				post.CreatedAt = existing.CreatedAt
+				oldViewCount = existing.ViewCount
 			}
 			id, err = model.UpdatePost(id, post)
 		} else {
@@ -289,6 +293,18 @@ func importPostsOrPages(jobID, siteUUID, postType string, items []map[string]int
 				              source_type = 'wordpress', source_id = $3, source_site_uuid = $4
 				WHERE id = $5
 			`, t), template, viewCount, srcID, siteUUID, id)
+
+		// v2.2.0 起 UI "全部浏览量" 读 ul_stats_global.total_views，
+		// 不是 SUM(ul_posts.view_count)。WP 导入只写后者会导致历史
+		// PV "消失"。把 (viewCount - oldViewCount) 加到 stats_global，
+		// 让首页/dashboard 总数把导入的历史 PV 算进去。
+		// 用 delta 而非绝对值：重复跑同一份导入 delta=0，幂等；
+		// 重新拉取后 WP 数据 PV 上涨，只补差额，不会重复加。
+		if delta := viewCount - oldViewCount; delta != 0 {
+			config.DB.Exec(fmt.Sprintf(
+				"UPDATE %s SET total_views = total_views + $1, updated_at = $2 WHERE id = 1",
+				config.T("stats_global")), delta, time.Now().Unix())
+		}
 		syncMapSet(jobID, "post", srcID, id)
 
 		// Write term relationships from categories + tags slugs.
