@@ -181,8 +181,6 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
   - api 在响应、commit 已变（升级 OK，仅版本号字串没匹配，比如 docker label `version=main` 跟 BuildVersion `v2.3.10` 不对齐） → blue **info** "升级已应用，commit 已更新到 xxxxxxx，但版本号自动确认超时"
   - api 在响应、版本号没变（registry 没同步）→ yellow **warning** "升级超时未确认，等几分钟刷新再看"
   - 容器仍在旧版本（真没升级成功）→ red error 保留
-- **历史 4 个 commits 删除 Claude co-author trailer**：v2.3.6 ~ v2.3.9 是另一台机的 Claude session 提交时违规加了 `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`，导致 GitHub Contributors 列表挂上 Claude bot。本次用 `git filter-branch` 重写这 4 个 commit 的 message 删 trailer，重新打 v2.3.6 / v2.3.7 / v2.3.8 / v2.3.9 tag 指向新 commit hash，force push 到 main。Contributors 列表几小时内会自动剔除 Claude。
-- **TLS 证书 SAN 补 utterlog.com / www.utterlog.com / id.utterlog.com**：迁到新主机 Aliyun HK 后初始证书只覆盖 4 个域名（utterlog.io / www / docs / registry），utterlog.com 和 id.utterlog.com 走 HTTPS 拿不到正确证书。本次 `certbot --expand` 加上后变 7 个 SAN：utterlog.io / www.utterlog.io / docs.utterlog.io / registry.utterlog.io / utterlog.com / www.utterlog.com / id.utterlog.com，全部走同一张 Let's Encrypt 证书。
 
 ## [2.3.9] - 2026-05-08
 
@@ -275,7 +273,6 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **Nebula 说说标签 / 月份弹出卡片配色**：之前用 inline-style 字符串匹配（不可靠），改用类钩子 `.moments-tag-chip` / `.moments-month-chip` / `.moments-year-btn`（含 `.is-active`），CSS 用类选择器强覆盖。默认半透白底 + 半透白字、选中态用 sky 蓝底 + navy 深字。
 - **Changelog 渲染支持 GFM 表格 + 分隔线**：admin 后台和 utterlog.io/changelog 同步修复，`renderChangelog()` 加 GFM table parser → 输出 `<table class="changelog-table">`（紧凑边框 + 表头浅灰底 + zebra 行）；`---` 分隔线 → `<hr/>`。
 - **后台"更新内容"标题只显示版本号**：`{info.latest.name || info.latest.version}` → `{info.latest.version}`。GitHub release name 经常带长描述，标题里啰嗦。
-- **GitHub releases 标题统一**：v2.3.1 / v2.3.2 / v2.3.3 / v2.3.4 历史 release 全部改成纯版本号；v2.0.2 补上 `v` 前缀。
 - **utterlog.io 静态版本代理**：utterlog-landing 站构建期生成 `public/api/version.json` + `public/api/releases.json`，所有用户的 utterlog 后台改成查 `https://utterlog.io/api/version.json`，不再直接打 GitHub API。N 个用户共享同一份 CDN 缓存，配额从 60/h（匿名共享 IP）→ 实质无限。GitHub API 仍是 fallback。
 - **`version_source_url` admin 选项**：私有部署 / 企业 fork 可指向自己的 mirror（指 `<url>/api/version.json` 兼容 schema）。
 
@@ -299,7 +296,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **升级日志输出格式参考 1Panel**：原 `[2026-05-07T15:30:20Z] sidecar starting in /opt/...` 改成 `2026/05/07 23:30:20 升级应用 [Utterlog] 任务开始 [START]` 风格 —— 时间戳本地时区 + 中文动作 + `[对象]` + 状态/`[标记]`，每一步语义清晰。容器名（`[utterlog-pancn-api-1]`）、安装目录、镜像 tag、digest 全部动态显示在日志里，肉眼能确认探测正确。
 - **后台升级日志面板高亮**：`SystemUpdatePanel.tsx` 新增 `highlightLogLine(line)` 函数，按语义着色：时间戳 → 暗灰 / `[START]` `[TASK-END]` → 琥珀加粗 / `[xxx]` 容器名/路径/镜像 → 天蓝 / `成功` → 亮绿 / `WARN` → 黄 / `ERROR` `失败` → 红。容器外观也调整：背景 `#0f172a` → 更深的 `#0a0e1a`（终端感）+ 圆角 6px + 顶部状态徽标分割线 + max-height 280 → 360px。
 - **GFM 表格在 changelog 渲染中支持**：admin 后台 `SystemUpdatePanel.tsx` 的 `renderChangelog()` 之前不识别 `| col1 | col2 |` + `|---|---|` 表格语法，release notes 里的对比表都显示成原文 raw 字符。补上 GFM table parser → 输出 `<table class="changelog-table">`，新增 CSS（紧凑边框 + 表头浅灰底 + zebra 行）。`---` 分隔线 → `<hr/>` 也补上。utterlog-landing 的 `app/changelog/page.tsx` 同步修复。
-- **后台升级面板"更新内容"标题只显示版本号**：`{info.latest.name || info.latest.version}` 改成 `{info.latest.version}`。GitHub release name 经常是 `v2.3.3 — upgrade works on any compose project name` 这种长描述，标题里啰嗦。现在固定显示 `更新内容 — v2.3.3`。配套：把 GitHub releases 上的 v2.3.1 / v2.3.2 / v2.3.3 标题改成纯版本号，v2.0.2 补上 `v` 前缀。
+- **后台升级面板"更新内容"标题只显示版本号**：`{info.latest.name || info.latest.version}` 改成 `{info.latest.version}`。GitHub release name 经常是 `v2.3.3 — upgrade works on any compose project name` 这种长描述，标题里啰嗦。现在固定显示 `更新内容 — v2.3.3`。
 
 ### 修复
 
@@ -316,6 +313,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **后台升级面板"升级未生效"误报**：`SystemUpdatePanel.tsx` 的 `verifyUpgradeApplied` 之前只看 version 字符串严格相等，dev 安装（BuildVersion='dev' 永不变）/ 生产 `:latest` 还没同步 / 用户 compose 锁定具体 tag 这些场景都会被卡 60s 然后误报 "升级未生效"。改成三层成功信号（version 等式 / commit 变化 / built_at 变化）任一命中即成功，超时 60s → 180s，错误信息显示实际拿到的 version + commit。
 - **生产 named volume 模式下 sidecar 日志看不到**：`docker-compose.prod.yml` 用 `uploads:/app/public/uploads`（命名卷），api 读卷里的 upgrade.log；sidecar 写到 `$INSTALL_DIR/uploads/upgrade.log`（宿主目录），两个完全不同的物理文件，admin 看不到 sidecar 真实输出。新增 `probeAPIUploadsMountSource()` 探测 api 容器 `/app/public/uploads` 的实际挂载源（bind 返宿主路径 / volume 返卷名），api 启动 sidecar 时把同一个源也挂载给 sidecar（`-v <source>:/api-uploads` + `API_UPLOADS_DIR=/api-uploads`），双方写读同一个文件。
 - **安装目录写死 `/opt/utterlog`**：`runUpgrade()` 之前默认 `installDir = /opt/utterlog`，1Panel 装在 `/opt/utterlog-pancn/` 或自定义路径直接报"找不到 docker-compose 文件"。新增 `probeComposeWorkingDir()` 用 `com.docker.compose.project.working_dir` label 自动探测真实路径，环境变量 / 兜底逻辑保留。
+- 停留在 v2.3.2 及更早版本的用户需在服务器上手动跑一次 `docker compose pull && docker compose up -d` 摆脱旧容器名探测 bug，后续升级恢复一键。
 
 ## [2.3.2] - 2026-05-07
 
@@ -766,7 +764,6 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - Renascent 主题改为独立组件和独立样式结构，按学术极简设计系统重写首页、文章页、页头、页脚和文章卡片，不再复用 Azure 的页面结构。
 - Renascent 首页进一步对齐 `lixiaolai.com` 的 Reborn 风格，改为文字驱动的 Hero、编号指标列表、CURRENTLY 信息条和文章目录式列表。
 - Renascent 文章页深度重构为出版式阅读版式，新增文章编号区、元信息侧栏、正文主栏、目录栏、封面题注、AI 摘要、上下篇、相关文章和评论区的统一视觉层级。
-- 补充 `AGENT.md` 项目协作说明，明确本地开发、主题同步、当前进度、部署、版本号和更新日志维护规则。
 - 主题菜单和资料卡设置文案改为通用描述，适配多套具备侧栏功能的主题。
 - 后台仪表盘最近文章 / 最新评论改为左右逐行严格对齐，并把 30 天访问趋势的日期标签改为月份加粗 + 日期两行、跨月才显示月份的紧凑布局。
 - 优化文章页边读边聊入口的显示时机，默认隐藏，阅读进度超过 40% 后再显示。

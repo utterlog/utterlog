@@ -295,11 +295,6 @@ dedup 仍正常工作：同 visitor 同天访问同篇文章最多 +1。
 
 - 后台「常规设置 → Logo & Favicon」上传后预览空白：抽出 `BrandingPreview` 子组件用 `useState(error)` 跟踪加载状态，失败时降级到 `fa-image-slash` + 「加载失败」文字，不再让用户看到空白预览以为没存上。`key={val}` 让路径变化时重新挂载，修正 url 后立即重试
 
-### 重要
-
-- **如果你升级了 v1.4.0/v1.4.1 且改了固定链接结构，立刻升级到 v1.4.2 让阅读量重新累计**
-- 通过后台升级按钮直接拉取本版本镜像
-
 
 ---
 
@@ -338,17 +333,6 @@ v1.4.0 把 `public/themes//styles.css` 改成符号链接指向 source 文件，
 - `.btn`：8px → **10px**
 - `.btn-lg`：10px → **12px**
 - 修复用户反馈的「+ 添加菜单项 / 📄 从已有页面添加」icon 跟文字贴太近的视觉问题
-
-### 用户附带问题排查（不是代码 bug）
-
-- **`logo.jpg` / `favicon.jpg` 在生产 404**：生产 `uploads` volume 里没有对应文件，跨环境 volume 不共享。在生产 admin「常规设置 → Logo & Favicon」重新上传即可
-- **`ERR_CONNECTION_RESET`（FontAwesome / Google Sans / Ubuntu 字体）**：访问 `static.utterlog.com` CDN 网络抖动，跟 utterlog 代码无关
-- **`ERR_QUIC_PROTOCOL_ERROR`（Umami 统计）**：QUIC 协议失败，跟 utterlog 代码无关
-
-### 重要
-
-- **如果你的生产环境从 v1.4.0 升级且看到样式失效问题，立刻升级 v1.4.1**
-- 通过后台升级按钮直接拉取本版本镜像
 
 
 ---
@@ -417,7 +401,6 @@ v1.4.0 把 `public/themes//styles.css` 改成符号链接指向 source 文件，
 
 ### 重要
 
-- 后台升级按钮直接拉取本版本镜像
 - AI 评论功能默认 **关闭**，需在「评论设置」启用 + 在「AI 设置 → 用途路由」给 `comment-audit` / `comment-reply` purpose 绑 provider 后才工作
 - 主题视觉组件独立后，老站点升级不会丢失任何视觉，只是主题作者今后改 UI 路径变了（改 `themes//.tsx` 而不是 `components/blog/.tsx`）
 
@@ -431,11 +414,7 @@ v1.4.0 把 `public/themes//styles.css` 改成符号链接指向 source 文件，
 - **文章页"相关文章"列表丢内容**：tags 命中 ≥6 篇时，category / 全文搜索两个 fallback 的 `LIMIT 5-len(related)` 会算成负数，PostgreSQL 直接报错被 sqlx 静默吞掉，相当于 fallback 完全没跑。统一为 `LIMIT 20-len(related)`，保留 20 条总上限的语义
 - **文章页"友链更新"全部显示 1970-01-01**：后端 SQL 漏选 `fi.pub_date` 列，结构体里 `db:\"pub_date\"` 取不到值默认 0，前端 `new Date(0 * 1000)` 自然渲染成 1970；补上 SELECT 列即可
 - **PostNavigation setState during render 警告**：分页越界自愈逻辑原本写在渲染流里直接 `setPageIndex(0)`，触发 React "Cannot update during render" 警告；改到 `useEffect` 里依赖 `[activeTab, data, pageIndex]`，避免多余的同步 re-render
-
-### 重要
-
 - 仅影响文章页底部的 prev/next + 相关/随机/热门/分类/友链 tab 区
-- 通过后台升级按钮直接拉取本版本
 
 
 ---
@@ -458,7 +437,6 @@ v1.4.0 把 `public/themes//styles.css` 改成符号链接指向 source 文件，
 ### 重要
 
 - 后台 → AI 设置 → 自定义提示词，6 个 textarea 留空保存即可恢复 v1.3.1 内置中文默认
-- 通过后台升级按钮直接拉取本版本
 
 
 ---
@@ -737,7 +715,6 @@ UPDATE ul_media  SET url       = REPLACE(url,       $oldOrigin, $newOrigin) WHER
 - `globals.css` 的 fade 模式 `transition` 加上 `transform 0.6s`，cover hover 不再"卡顿"瞬间跳变
 - `PostNavigation` 的 LazyCardImage inline transition 同步加 transform
 - 站点标题字体 = 阿里妈妈方圆体（`.site-title` class，4 个主题 Header 全接入）
-- WordPress 导入残留的 `https://www.xifeng.net` 旧域名在本 DB 中被 SQL 批量替换为新 `site_url`（43 行）
 
 
 ---
@@ -916,30 +893,6 @@ Resend provider 不变（Resend 真用 `html`）。
 
 新增**行为速率 gate**：同一 visitor（按 `visitor_id` 或 IP）60 秒内已记录 ≥ 8 次页面访问，后续请求直接丢弃。真人读者几乎不会一分钟点 8 个不同页面，归档 / 标签云爬虫常年如此。
 
-#### 可选：清理已有脏数据
-
-如果想清掉 v1.1.1 之前积累的爆量行记录，可在后台 / psql 里跑：
-
--- 干跑，看会删多少
-SELECT COUNT(*) FROM ul_access_logs
-WHERE COALESCE(NULLIF(visitor_id,''), ip) IN (
-  SELECT COALESCE(NULLIF(visitor_id,''), ip)
-  FROM ul_access_logs
-  GROUP BY COALESCE(NULLIF(visitor_id,''), ip), (created_at / 60)
-  HAVING COUNT(*) >= 8
-);
-
--- 实删（保留每分钟前 8 条，多余的按 id 倒序删）
-WITH ranked AS (
-  SELECT id,
-         ROW_NUMBER() OVER (
-           PARTITION BY COALESCE(NULLIF(visitor_id,''), ip), (created_at / 60)
-           ORDER BY id
-         ) AS rn
-  FROM ul_access_logs
-)
-DELETE FROM ul_access_logs WHERE id IN (SELECT id FROM ranked WHERE rn > 8);
-
 **Full Changelog**: https://github.com/utterlog/utterlog/compare/v1.1.0...v1.1.1
 
 
@@ -1043,8 +996,6 @@ Posts 管理页右上角新增 ⚙️ 设置，支持 6 种预设 + 自定义模
 
 改为 `menus.header ?? []`，无配置 = 空数组 = Header 只剩 logo + 搜索框。想要传统导航就去 主题 → 菜单 → 顶部导航 → 点「重置默认」，一键填入 6 项
 
-### 镜像
-
 
 ---
 
@@ -1058,8 +1009,6 @@ Posts 管理页右上角新增 ⚙️ 设置，支持 6 种预设 + 自定义模
 - 旧 `/menus` URL 会 301 到 `/themes`，老书签不会 404
 - 页脚图标编辑器也从原来的主题页底部独立出一个 tab，结构更清晰
 
-### 镜像
-
 
 ---
 
@@ -1071,57 +1020,11 @@ Posts 管理页右上角新增 ⚙️ 设置，支持 6 种预设 + 自定义模
 
 改为读 `/proc/uptime` —— Linux 内核不对 uptime 做 namespace 隔离，非特权容器读出来就是宿主机的 uptime（已验证：容器里读到 860230 秒，宿主 `uptime` 命令也是 9 days 22:57，完全一致）。输出格式 `9天 22小时 57分钟`，macOS dev 环境没 `/proc/uptime` 就 fallback 到进程 uptime。
 
-### 镜像
-
 
 ---
 
 ## [1.0.15] - 2026-04-22
 
-### 定位结论
-
-你线上 `GET /api/v1/system/status` 实时返回：
-
-- `os: Alpine Linux v3.20 (容器)` ← fallback 路径触发
-- `hostname: 80e3f2a335af` ← 容器 ID
-- `ip: 149.202.94.166` ← ✅ 正确（新代码已在跑）
-
-新代码 `getOSInfo` / `getHostname` 都在跑（IP 修复证明了这点），但 `/host/etc/os-release` 和 `/host/etc/hostname` 文件**在容器里不存在** — 说明你的 `docker-compose.yml` 缺少这两个 bind mount
-
-### 根因
-
-后台「一键升级」的 sidecar 脚本只做了：
-
-```
-docker compose pull && docker compose up -d
-```
-
-**从来不重新下载 docker-compose.yml**。只有 `bash update.sh` 才会从 utterlog.io 重新拉 compose 文件。如果你只用后台升级按钮，docker-compose.yml 永远停留在首次安装时的版本，新加的挂载声明（v1.0.8 加的 /etc/os-release、v1.0.10 加的 /etc/hostname）都没生效
-
-### 修复（v1.0.15 起生效）
-
-Sidecar 脚本在 slim 模式（单 docker-compose.yml）下，先从 utterlog.io 重新下载 compose 文件，做完整性校验后再 pull + up。Overlay 模式（`docker-compose.prod.yml + docker-compose.pull.yml`）不动，那是用户自己维护的
-
-### 对你的影响（关键）
-
-**这次升级还是拿不到新 compose** — 因为执行 sidecar 脚本的是**当前运行的 v1.0.14 api 容器**，v1.0.14 sidecar 脚本没有刷新 compose 的逻辑
-
-所以这一次请在服务器上手动跑一次：
-
-bash update.sh
-
-它会：
-
-1. 从 utterlog.io 重新下载 docker-compose.yml（带 `/etc/os-release` 和 `/etc/hostname` 挂载）
-
-2. 拉最新镜像
-
-3. 用新 compose 重建容器
-
-重建完刷新后台，系统会显示真实的 OS 名（Ubuntu / Debian 等）和 hostname
-
-**下一次**（v1.0.15 → v1.0.16+）你点后台「一键升级」就会自动刷 compose，不再需要手动 update.sh
-
-### 镜像
+升级 sidecar 在 `docker compose pull && up -d` 前会从 utterlog.io 重新下载 `docker-compose.yml`，让既有安装在后续一键升级时自动同步新挂载（如 `/etc/os-release`、`/etc/hostname` 用于系统状态展示）。
 
 

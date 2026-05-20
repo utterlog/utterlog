@@ -335,12 +335,14 @@ gh release create vX.Y.Z --notes "..."
 - `2.x.0`：完整新功能或主题能力
 - 破坏性大改进入下一个大版本
 
-**`CHANGELOG.md` 规则**：
+**`CHANGELOG.md` / GitHub Release 规则**：
 
 - 每次改动完成立刻更新 `## 未发布`，不要等发布前补
 - 每个版本固定四段：`### 新增` / `### 优化` / `### 修复` / `### 移除`，没内容写 `暂无。`
 - 只写用户能理解的功能变化，不写过细 commit 细节
 - 不写 Docker images 列表，不写升级命令块
+- **只写代码变更**：服务器迁移 / IP 变动 / TLS 证书 / certbot / DNS / nginx 反代 / git 历史重写（filter-branch、Co-Authored-By trailer 清理、retag、force-push）/ 手动跑过的一次性 SQL / 个人服务器诊断 / 仓库管理凭据这些**全部不写**进 CHANGELOG 或 release notes，放运维笔记本。判断口径：用户拉新镜像后能感知的程序行为变化才进，否则属于 ops。
+- GitHub release 标题只写 `vX.Y.Z`，正文不要含 `### 镜像` 空段、不要重复"通过后台升级按钮直接拉取本版本镜像"这种 CTA 套话
 
 **构建注意**：
 
