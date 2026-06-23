@@ -1,24 +1,19 @@
 # ============================================================
-# Utterlog — production compose (single-file, pull-only)
+# Utterlog — Bun production compose (pull-only)
 # ------------------------------------------------------------
-# Published at https://utterlog.io/docker-compose.yml. The install.sh
-# one-liner fetches this file and runs `docker compose up -d` — no
-# local build, no source checkout, no toolchain needed.
+# Published installer target:
+#   app + postgres
 #
-# Data / config / uploads live on the host and survive image upgrades:
-#   ./pgdata/   — PostgreSQL data (NEVER wiped by compose commands)
-#   ./uploads/  — user-uploaded media + custom themes
-#   ./.env      — all configuration (random DB_PASSWORD, JWT_SECRET)
-#
-# Image source selection (set in .env):
-#   UTTERLOG_IMAGE_PREFIX=ghcr.io/utterlog               (default, authoritative)
-#   UTTERLOG_IMAGE_PREFIX=registry.utterlog.io/utterlog  (optional mirror)
-#   UTTERLOG_IMAGE_TAG=latest   (or pinned sha-xxxxxxx / v1.2.3 for rollback)
+# Runtime data:
+#   ./pgdata/   — PostgreSQL data
+#   ./uploads/  — user-uploaded media
+#   ./content/  — runtime themes/plugins
+#   ./.env      — configuration/secrets
 # ============================================================
 
 services:
   postgres:
-    image: ${POSTGRES_IMAGE:-pgvector/pgvector:pg18}
+    image: ${POSTGRES_IMAGE:-utterlog-postgres:19beta1-pgvector}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-utterlog}
@@ -34,45 +29,20 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    # Redis 8 — backwards compatible with 7 RDB/AOF files. Existing
-    # deployments coming from a redis:7-alpine image upgrade in place:
-    # `docker compose pull && docker compose up -d` swaps the container
-    # but the ./redisdata volume persists, so cached views/sessions
-    # survive the bump (and stale entries refresh naturally).
-    image: ${REDIS_IMAGE:-redis:8-alpine}
-    restart: unless-stopped
-    volumes:
-      - ./redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  api:
-    image: ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog}/utterlog-api:${UTTERLOG_IMAGE_TAG:-latest}
+  app:
+    image: ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog}/utterlog-app:${UTTERLOG_IMAGE_TAG:-latest}
     pull_policy: always
     restart: unless-stopped
     ports:
-      # Bind to loopback only — put your nginx/caddy in front for public access.
       - "127.0.0.1:${UTTERLOG_PORT:-9260}:8080"
     environment:
-      # DB_HOST / REDIS_HOST default to the bundled service names but
-      # accept .env overrides — e.g. set REDIS_HOST=host.docker.internal
-      # to point at a host-bound redis (1Panel / 宝塔 / system redis)
-      # instead of the bundled redis container. Pair with a redis:
-      # profiles: [disabled] override or run `docker compose stop redis`
-      # so they don't both run.
+      - PORT=8080
       - DB_HOST=${DB_HOST:-postgres}
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-utterlog}
       - DB_USER=${DB_USER:-utterlog}
       - DB_PASSWORD=${DB_PASSWORD:?Run install.sh or set DB_PASSWORD in .env}
       - DB_PREFIX=${DB_PREFIX:-ul_}
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET:?Run install.sh or set JWT_SECRET in .env}
       - APP_URL=${APP_URL:-http://127.0.0.1:${UTTERLOG_PORT:-9260}}
       - STORAGE_DRIVER=${STORAGE_DRIVER:-local}
@@ -82,41 +52,18 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY:-}
       - S3_REGION=${S3_REGION:-auto}
       - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
-      - WEB_PROXY_TARGET=http://web:3000
-      # One-click upgrade needs the install dir mapped 1:1 to host path.
-      - UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}
+      - WEB_RENDERER=bun
+      - NEXT_PUBLIC_API_URL=/api/v1
+      - INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
+      - UPLOAD_DIR=uploads
     volumes:
-      - ./uploads:/app/public/uploads
-      # One-click update feature (admin → "版本" → 一键升级) shells out
-      # to `docker compose` on the host via the mounted socket.
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${UTTERLOG_INSTALL_DIR:-/opt/utterlog}:${UTTERLOG_INSTALL_DIR:-/opt/utterlog}:ro
-      # Admin sidebar's 系统状态 panel needs the real host OS name and
-      # hostname — the container's /etc/os-release is always Alpine
-      # and `hostname` returns the container ID. Bind-mount both from
-      # the host read-only so getOSInfo() / getHostname() report what
-      # the admin actually cares about.
+      - ./uploads:/app/uploads
+      - ./content:/app/content
+      - ./.env:/app/.env:rw
       - /etc/os-release:/host/etc/os-release:ro
       - /etc/hostname:/host/etc/hostname:ro
-    # host.docker.internal lets api/web reach services bound to the
-    # host's loopback (e.g. 1Panel-redis on 127.0.0.1:6379) when the
-    # user sets REDIS_HOST=host.docker.internal in .env. Built into
-    # Docker Desktop on macOS/Windows; on Linux the host-gateway
-    # alias here resolves it to the container's gateway.
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_started
-
-  web:
-    image: ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog}/utterlog-web:${UTTERLOG_IMAGE_TAG:-latest}
-    pull_policy: always
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - INTERNAL_API_URL=http://api:8080/api/v1

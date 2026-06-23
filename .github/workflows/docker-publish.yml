@@ -1,24 +1,20 @@
-name: Build & publish Docker images
+name: Build & publish Docker image
 
 on:
   push:
     branches: [main]
     tags: ['v*']
     paths:
-      - 'api/**'
-      - 'web/**'
-      - 'docker-compose.prod.yml'
+      - 'app/server/**'
+      - 'app/admin/**'
+      - 'app/web/**'
+      - 'Dockerfile.bun'
+      - 'docker-compose*.yml'
       - '.github/workflows/docker-publish.yml'
   workflow_dispatch:
 
 env:
-  # GHCR is the authoritative image source. registry.utterlog.io is an
-  # optional first-party mirror; it must not block releases when its
-  # proxy/registry layer is slow or unavailable.
-  GHCR_API: ghcr.io/utterlog/utterlog-api
-  GHCR_WEB: ghcr.io/utterlog/utterlog-web
-  UTTERLOG_API: registry.utterlog.io/utterlog/utterlog-api
-  UTTERLOG_WEB: registry.utterlog.io/utterlog/utterlog-web
+  GHCR_APP: ghcr.io/utterlog/utterlog-app
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 permissions:
@@ -26,86 +22,8 @@ permissions:
   packages: write
 
 jobs:
-  api:
-    name: API image
-    runs-on: ubuntu-latest
-    steps:
-      # fetch-depth: 0 is required so `git describe --tags` below can find
-      # the nearest tag. Default shallow clone omits tags and every build
-      # on main ends up labeled "dev".
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ env.GHCR_API }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern=v{{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=sha-,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      # VERSION — always a human-readable release label (v1.0.18).
-      # On tag pushes: exactly the tag name.
-      # On main pushes: the latest reachable tag (via git describe).
-      # BUILD_COMMIT — 7-char short SHA, displayed as small subtitle
-      # in the admin UI so you can still trace the exact build.
-      - name: Compute version + commit
-        id: verlabel
-        run: |
-          COMMIT=$(echo "${{ github.sha }}" | cut -c1-7)
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            VERSION="${{ github.ref_name }}"
-          else
-            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
-          fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "commit=$COMMIT"  >> "$GITHUB_OUTPUT"
-
-      - name: Build & push API image to GHCR
-        uses: docker/build-push-action@v6
-        with:
-          context: ./api
-          file: ./api/Dockerfile.prod
-          platforms: linux/amd64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VERSION=${{ steps.verlabel.outputs.version }}
-            BUILD_COMMIT=${{ steps.verlabel.outputs.commit }}
-            BUILD_TIME=${{ github.event.head_commit.timestamp }}
-          cache-from: type=gha,scope=api
-          cache-to: type=gha,scope=api,mode=max
-
-      - name: Verify pushed API manifests
-        run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            VERIFY_TAG="${{ github.ref_name }}"
-          else
-            VERIFY_TAG="latest"
-          fi
-          docker buildx imagetools inspect "${GHCR_API}:${VERIFY_TAG}"
-
-  web:
-    name: Web image
+  app:
+    name: Bun app image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -126,75 +44,23 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.GHCR_WEB }}
+          images: ${{ env.GHCR_APP }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern=v{{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix=sha-,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build & push Web image to GHCR
+      - name: Build & push app image
         uses: docker/build-push-action@v6
         with:
-          context: ./web
-          file: ./web/Dockerfile.prod
+          context: .
+          file: ./Dockerfile.bun
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            NEXT_PUBLIC_API_URL=/api/v1
-          cache-from: type=gha,scope=web
-          cache-to: type=gha,scope=web,mode=max
-
-      - name: Verify pushed Web manifests
-        run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            VERIFY_TAG="${{ github.ref_name }}"
-          else
-            VERIFY_TAG="latest"
-          fi
-          docker buildx imagetools inspect "${GHCR_WEB}:${VERIFY_TAG}"
-
-  # ─────────────────────────────────────────────────────────────────
-  # On a v* tag push, ping utterlog/utterlog-landing so the marketing
-  # site rebuilds and the hero badge picks up the new tag + date from
-  # the GitHub releases API. Failure-tolerant: if the PAT secret is
-  # missing or the dispatch call errors, log it and move on — the
-  # daily cron in the landing workflow is the safety net.
-  notify-landing:
-    name: Notify landing rebuild
-    needs: [api, web]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dispatch repository_dispatch event
-        env:
-          # Fine-grained PAT scoped to utterlog/utterlog-landing with
-          # `actions: write`. If unset, curl 401s and we skip; the
-          # daily schedule in landing's workflow keeps the badge
-          # within 24h of GitHub regardless.
-          LANDING_DISPATCH_TOKEN: ${{ secrets.LANDING_DISPATCH_TOKEN }}
-        run: |
-          if [ -z "${LANDING_DISPATCH_TOKEN}" ]; then
-            echo "LANDING_DISPATCH_TOKEN secret is not set — skipping (landing daily cron will catch up)."
-            exit 0
-          fi
-          TAG="${GITHUB_REF#refs/tags/}"
-          echo "Dispatching utterlog-released for ${TAG} → utterlog-landing"
-          STATUS=$(curl -s -o /tmp/resp -w "%{http_code}" \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${LANDING_DISPATCH_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/utterlog/utterlog-landing/dispatches" \
-            -d "{\"event_type\":\"utterlog-released\",\"client_payload\":{\"tag\":\"${TAG}\"}}")
-          echo "Dispatch HTTP ${STATUS}"
-          if [ "${STATUS}" != "204" ]; then
-            echo "Dispatch failed; landing daily cron is the fallback."
-            cat /tmp/resp || true
-          fi
+          cache-from: type=gha,scope=bun-app
+          cache-to: type=gha,scope=bun-app,mode=max

@@ -1,0 +1,1654 @@
+@import "tailwindcss";
+
+/* Scrollbar: reserve space, track matches background, thumb hidden until scroll */
+/* ===== Scrollbar: prevent layout shift ===== */
+
+/* Both blog and dashboard use fixed layout with internal scroll */
+html {
+  overflow: hidden;
+  height: 100%;
+}
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Blog main: scrollbar always visible, footer sticks to bottom */
+.blog-main {
+  overflow-y: scroll !important;
+  background: inherit;
+}
+.blog-main::-webkit-scrollbar {
+  width: 10px;
+}
+.blog-main::-webkit-scrollbar-track {
+  background: inherit;
+}
+.blog-main::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 5px;
+}
+.blog-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+
+/* Dashboard main area: always show scrollbar, no gutter gap */
+.dashboard-shell main.overflow-y-auto {
+  overflow-y: scroll !important;
+}
+
+/* Global scrollbar styling: thin, subtle, track matches background */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 5px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.3);
+}
+
+/* Dashboard main scrollbar: track matches dashboard background */
+.dashboard-shell main::-webkit-scrollbar {
+  width: 10px;
+}
+.dashboard-shell main::-webkit-scrollbar-track {
+  background: var(--color-bg-main, #F5F7FA);
+}
+.dashboard-shell main::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 5px;
+  border: 2px solid var(--color-bg-main, #F5F7FA);
+}
+.dashboard-shell main::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+/* Firefox */
+.dashboard-shell main {
+  scrollbar-color: rgba(0,0,0,0.12) var(--color-bg-main, #F5F7FA);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover, *:focus-within {
+  scrollbar-color: rgba(0,0,0,0.15) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+}
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   System webfonts — served from static.utterlog.com (R2 + CF, 1y
+   immutable cache). Same set as app/web/app/globals.css so admin SPA
+   inherits the utterlog typography stack with zero local hosting.
+   All declared font-display: swap so the panel renders in fallback
+   immediately and swaps once woff2 lands.
+   ──────────────────────────────────────────────────────────────── */
+
+/* UI text — Ubuntu (latin) */
+@font-face {
+  font-family: "Ubuntu";
+  src: url("https://static.utterlog.com/fonts/ubuntu-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu";
+  src: url("https://static.utterlog.com/fonts/ubuntu-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ubuntu";
+  src: url("https://static.utterlog.com/fonts/ubuntu-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Code — Google Sans Code (replaces PaperMono) */
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("https://static.utterlog.com/fonts/google-sans-code-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("https://static.utterlog.com/fonts/google-sans-code-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* FontAwesome Pro 7.2.0 走 index.html 引入的 official all.min.css —— 不再
+   在这里 @font-face 覆盖一份，与前台保持一致，避免重复源。 */
+
+/* ========================================
+   Theme Variables — CSS custom properties
+   Overridden by [data-theme] selectors
+   ======================================== */
+
+/* ==================================================================
+   Admin — locked to Utterlog Azure Blue (#0052D9). Single theme only.
+   Other [data-theme="..."] blocks below are ignored because we never
+   set the attribute in the admin SPA.
+   ================================================================== */
+:root {
+  --color-primary: #0052D9;
+  --color-primary-hover: #0044B8;
+  --color-primary-active: #003A9E;
+  --color-bg-main: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #F5F7FA;
+  --color-border: #E1E6EB;
+  --color-divider: #EEF2F5;
+  --color-text-main: #0D1A2D;
+  --color-text-sub: #5A6B7F;
+  --color-text-dim: #9AA5B0;
+  --color-focus-ring: #0052D9;
+
+  /* =========================================================
+     Design tokens (plan A) — single source of truth for sizing.
+     Changing a value here should cascade to every button, input,
+     toggle, card in the admin.
+     ---------------------------------------------------------
+     Height tiers
+       sm 32 — compact toolbars (dense table rows)
+       md 40 — form inputs + inline toolbar buttons (input-aligned)
+       lg 48 — primary CTA + standalone page-level save buttons
+     Radius
+       0    — default, direct/Brutalist look
+       4    — cards
+       8    — login card (the only hero surface)
+     ========================================================= */
+  --ctrl-h-sm: 32px;
+  --ctrl-h-md: 40px;
+  --ctrl-h-lg: 48px;
+  --ctrl-pad-sm: 0 12px;
+  --ctrl-pad-md: 0 18px;
+  --ctrl-pad-lg: 0 24px;
+  --ctrl-radius: 0;
+  --card-radius: 0;       /* 统一直角 */
+  --card-radius-hero: 0;  /* Login 也直角 */
+
+  --settings-section-gap: 24px;
+  --settings-section-title-size: 13px;
+  --settings-section-desc-size: 12px;
+  --settings-row-label-width: 32%;
+  --settings-row-min-height: 56px;
+  --settings-row-label-padding: 10px 14px;
+  --settings-row-control-padding: 6px 14px;
+  --settings-panel-padding: 24px;
+}
+
+/* Blue — Icons8 Office L 风格天蓝 */
+[data-color="blue"] {
+  --color-primary: #5B9BD5;
+  --color-primary-hover: #4A8BC7;
+  --color-primary-active: #3D7CB5;
+  --color-bg-main: #F5F8FC;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #EAF1FA;
+  --color-border: #C8DAE8;
+  --color-divider: #E3EDF5;
+  --color-text-main: #1A2B3D;
+  --color-text-sub: #5A7A94;
+  --color-text-dim: #8EAAB8;
+  --color-focus-ring: #5B9BD5;
+}
+
+/* Green — 亲和/产品/转化 */
+[data-color="green"] {
+  --color-primary: #4CAF73;
+  --color-primary-hover: #3E9B62;
+  --color-primary-active: #358753;
+  --color-bg-main: #F6FBF8;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #EAFBF1;
+  --color-border: #BFE8CF;
+  --color-divider: #DFF5E7;
+  --color-text-main: #1F3D2B;
+  --color-text-sub: #4E7C64;
+  --color-text-dim: #8FAF9F;
+  --color-focus-ring: #4CAF73;
+}
+
+/* Mint — 清新/薄荷绿 */
+[data-color="mint"] {
+  --color-primary: #00A88E;
+  --color-primary-hover: #009078;
+  --color-primary-active: #007A66;
+  --color-bg-main: #F3FBF9;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #E6F7F3;
+  --color-border: #B8E8DD;
+  --color-divider: #D4F0E9;
+  --color-text-main: #1A3330;
+  --color-text-sub: #3D7068;
+  --color-text-dim: #7EADA4;
+  --color-focus-ring: #00A88E;
+}
+
+/* Claude — 温暖/优雅 */
+[data-color="claude"] {
+  --color-primary: #DA7756;
+  --color-primary-hover: #C4633F;
+  --color-primary-active: #B05535;
+  --color-bg-main: #FAF9F6;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #F5F0EB;
+  --color-border: #E8E0D8;
+  --color-divider: #F2EDE7;
+  --color-text-main: #1A1410;
+  --color-text-sub: #6B5B52;
+  --color-text-dim: #9B8E85;
+  --color-focus-ring: #DA7756;
+}
+
+/* Ocean — 纯白底 + 蔚蓝色 */
+[data-color="ocean"] {
+  --color-primary: #0052D9;
+  --color-primary-hover: #0044B8;
+  --color-primary-active: #003A9E;
+  --color-bg-main: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-soft: #F5F7FA;
+  --color-border: #E1E6EB;
+  --color-divider: #EEF2F5;
+  --color-text-main: #0D1A2D;
+  --color-text-sub: #5A6B7F;
+  --color-text-dim: #9AA5B0;
+  --color-focus-ring: #0052D9;
+}
+
+/* Dark — 深色 */
+[data-color="dark"] {
+  --color-primary: #7CA0C4;
+  --color-primary-hover: #93B5D5;
+  --color-primary-active: #5A86B2;
+  --color-bg-main: #0F1117;
+  --color-bg-card: #1A1D27;
+  --color-bg-soft: #252830;
+  --color-border: #353840;
+  --color-divider: #2D3039;
+  --color-text-main: #F0F1F3;
+  --color-text-sub: #A0A8B4;
+  --color-text-dim: #6B7280;
+  --color-focus-ring: #7CA0C4;
+}
+
+/* ========================================
+   Tailwind v4 @theme — static values for utility generation
+   Use semantic class names: bg-main, text-main, border-line etc.
+   Runtime overrides happen via CSS variables above.
+   ======================================== */
+@theme inline {
+  /* Fonts */
+  --font-sans: "Noto Sans SC", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Georgia", ui-serif, serif;
+  --font-mono: "Google Sans Code", "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --font-logo: "Ubuntu", "Fugaz One", sans-serif;
+}
+
+/* ========================================
+   Global Resets
+   ======================================== */
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  max-width: 100vw;
+  color: var(--color-text-main);
+  background: var(--color-bg-main);
+}
+
+/* ========================================
+   Semantic utility classes (theme-aware)
+   ======================================== */
+
+/* Background */
+.bg-main { background-color: var(--color-bg-main); }
+.bg-card { background-color: var(--color-bg-card); }
+.bg-soft { background-color: var(--color-bg-soft); }
+.bg-primary { background-color: var(--color-primary); }
+.hover\:bg-primary-hover:hover { background-color: var(--color-primary-hover); }
+.bg-primary-active { background-color: var(--color-primary-active); }
+
+/* Text */
+.text-main { color: var(--color-text-main); }
+.text-sub { color: var(--color-text-sub); }
+.text-dim { color: var(--color-text-dim); }
+
+/* Border */
+.border-line { border-color: var(--color-border); }
+.border-divider { border-color: var(--color-divider); }
+
+/* Logo font */
+.font-logo { font-family: "Ubuntu", "Fugaz One", sans-serif; }
+
+/* Primary accent text (for links, active tabs) */
+.text-primary-themed { color: var(--color-primary); }
+.hover\:text-primary-themed:hover { color: var(--color-primary-hover); }
+
+/* Focus */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 25%, transparent);
+  border-color: var(--color-focus-ring);
+}
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 25%, transparent);
+  border-color: var(--color-focus-ring);
+}
+
+/* ========================================
+   Admin Base Components
+   ------------------------------------------
+   Wrapped in @layer components so Tailwind v4's Preflight (in @layer base)
+   cannot override button backgrounds via its generic `button { background:
+   transparent }` reset. Cascade order: base → components → utilities.
+   ======================================== */
+@layer components {
+  /* =========================================================
+     Button system — plan A
+     ---------------------------------------------------------
+     Shared shape: flat, sharp corners, 1px transparent border
+     (so .btn and .input line up pixel-perfect when side by side
+     because .input has a 1px colored border).
+
+     Size is default MD (40px, input-aligned). Opt in to other
+     tiers via .btn-sm (32) or .btn-lg (48). Add .btn-square to
+     make any size icon-only (width collapses to height).
+
+     Variant is orthogonal: .btn-primary / -secondary / -danger /
+     -ghost — colors only, no sizing.
+     ========================================================= */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* icon 和文字间距：原来是 0.5rem (8px)，对于 fa-light/fa-regular 的
+       细线图标视觉上有点紧。加到 0.625rem (10px) 让带 icon 的按钮
+       icon 和文字之间有更明显的呼吸感 —— 影响所有 .btn 实例（72+ 处
+       JSX 用 `<i /> 文字` 模式的按钮全部受益，不需要逐个改）。 */
+    gap: 0.625rem;
+    height: var(--ctrl-h-md);
+    padding: var(--ctrl-pad-md);
+    min-width: 88px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: var(--ctrl-radius);
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+    flex-shrink: 0;
+  }
+  .btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-bg-card), 0 0 0 4px var(--color-focus-ring);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* ---- sizes ---- */
+  .btn.btn-sm {
+    height: var(--ctrl-h-sm);
+    padding: var(--ctrl-pad-sm);
+    min-width: 72px;
+    font-size: 12px;
+    /* sm 尺寸 gap 同步从 6px → 8px */
+    gap: 0.5rem;
+  }
+  .btn.btn-lg {
+    height: var(--ctrl-h-lg);
+    padding: var(--ctrl-pad-lg);
+    min-width: 120px;
+    font-size: 14px;
+    /* lg 尺寸 gap 同步从 10px → 12px */
+    gap: 0.75rem;
+  }
+  .btn.btn-square {
+    width: var(--ctrl-h-md);
+    min-width: var(--ctrl-h-md);
+    padding: 0;
+  }
+  .btn.btn-sm.btn-square {
+    width: var(--ctrl-h-sm);
+    min-width: var(--ctrl-h-sm);
+  }
+  .btn.btn-lg.btn-square {
+    width: var(--ctrl-h-lg);
+    min-width: var(--ctrl-h-lg);
+  }
+
+  /* ---- variants (colors only) ---- */
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+  }
+  .btn-primary:hover  { background-color: var(--color-primary-hover); }
+  .btn-primary:active { background-color: var(--color-primary-active); }
+
+  .btn-secondary {
+    background-color: var(--color-bg-soft);
+    color: var(--color-text-main);
+    border-color: var(--color-border);
+  }
+  .btn-secondary:hover { background-color: var(--color-divider); }
+
+  .btn-danger {
+    background-color: #dc2626;
+    color: #fff;
+  }
+  .btn-danger:hover { background-color: #b91c1c; }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-text-sub);
+  }
+  .btn-ghost:hover {
+    background-color: var(--color-bg-soft);
+    color: var(--color-text-main);
+  }
+
+  /* ---- legacy class aliases (keep existing pages working while
+     we migrate to the clean .btn / .btn-sm / .btn-lg / .btn-square
+     vocabulary) ---- */
+  .btn.btn-toolbar        { /* same as default MD */ }
+  .btn.btn-toolbar-square { width: var(--ctrl-h-md); min-width: var(--ctrl-h-md); padding: 0; }
+  .btn.btn-dialog         { /* same as default MD */ }
+  .btn.btn-icon           { width: var(--ctrl-h-lg); min-width: var(--ctrl-h-lg); height: var(--ctrl-h-lg); padding: 0; }
+
+  /* Cards wrap their content; buttons inside stay square regardless
+     of radius variable (card provides the rounded exterior). */
+  .card .btn,
+  .card .action-btn {
+    border-radius: 0;
+  }
+}
+
+/* Markdown preview typography inside the post editor. Tailwind v4
+   Preflight flattens headings / lists so ReactMarkdown output would
+   look unstyled without this — users perceive it as "preview not
+   rendering". Keep minimal and neutral; theme-level prose styles
+   live in the blog frontend, not the admin. */
+.blog-prose { line-height: 1.7; color: var(--color-text-main); }
+.blog-prose h1 { font-size: 1.75em; font-weight: 700; margin: 0.8em 0 0.4em; }
+.blog-prose h2 { font-size: 1.4em;  font-weight: 700; margin: 0.8em 0 0.4em; }
+.blog-prose h3 { font-size: 1.15em; font-weight: 600; margin: 0.6em 0 0.3em; }
+.blog-prose h4 { font-size: 1em;    font-weight: 600; margin: 0.6em 0 0.3em; }
+.blog-prose p  { margin: 0.5em 0; }
+.blog-prose ul, .blog-prose ol { margin: 0.5em 0 0.5em 1.5em; padding-left: 0; }
+.blog-prose ul { list-style: disc; }
+.blog-prose ol { list-style: decimal; }
+.blog-prose li { margin: 0.2em 0; }
+.blog-prose blockquote {
+  border-left: 3px solid var(--color-border);
+  padding: 0 12px;
+  margin: 0.6em 0;
+  color: var(--color-text-sub);
+}
+.blog-prose code {
+  background: var(--color-bg-soft);
+  padding: 1px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+.blog-prose pre {
+  background: var(--color-bg-soft);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0.6em 0;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+.blog-prose pre code { background: none; padding: 0; font-size: 1em; }
+.blog-prose a { color: var(--color-primary); text-decoration: underline; }
+.blog-prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1em 0;
+}
+.blog-prose img { max-width: 100%; height: auto; }
+.blog-prose table {
+  border-collapse: collapse;
+  margin: 0.6em 0;
+  font-size: 0.9em;
+}
+.blog-prose th, .blog-prose td {
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  text-align: left;
+}
+.blog-prose th { background: var(--color-bg-soft); }
+.blog-prose strong { font-weight: 700; }
+.blog-prose em { font-style: italic; }
+
+/* Login form — hero surface, buttons upgrade to LG tier (48px).
+   Radius follows the global direct-corner token so nothing is rounded. */
+.login-form .btn {
+  height: var(--ctrl-h-lg);
+  padding: var(--ctrl-pad-lg);
+  font-size: 14px;
+  gap: 0.625rem;
+}
+
+/* Login page logo — hover scales smoothly */
+.login-logo {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+.login-logo:hover {
+  transform: scale(1.2);
+}
+
+/* Action icon button — square with icon */
+/* Admin table/list action buttons — square, semantic colors.
+   Default (no modifier) = neutral gray for reads/previews/toggles.
+   Variants change the icon color; hover tint matches. Keep borders
+   neutral so a row of mixed actions still reads as a unit. */
+.action-btn {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  max-width: 30px;
+  max-height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-bg-card);
+  cursor: pointer;
+  color: var(--color-text-sub);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.action-btn:hover {
+  background: var(--color-bg-soft);
+  color: var(--color-text-main);
+}
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.action-btn > i,
+.action-btn > svg {
+  flex: 0 0 auto;
+  line-height: 1;
+}
+.action-btn.primary { color: var(--color-primary); }
+.action-btn.primary:hover { background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card)); border-color: var(--color-primary); }
+.action-btn.success { color: #16a34a; }
+.action-btn.success:hover { background: #f0fdf4; border-color: #86efac; }
+.action-btn.warning { color: #f59e0b; }
+.action-btn.warning:hover { background: #fffbeb; border-color: #fcd34d; }
+.action-btn.danger { color: #dc2626; }
+.action-btn.danger:hover { background: #fef2f2; border-color: #fca5a5; }
+
+/* Archive category card — background icon hover */
+.archive-cat-card { transition: box-shadow 0.3s ease; }
+.archive-cat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.archive-cat-card:hover > i:first-child {
+  transform: translateY(-50%) scale(1.25);
+  opacity: 0.1;
+}
+.archive-cat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  backdrop-filter: blur(0px);
+  transition: backdrop-filter 0.3s ease, background 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.archive-cat-card:hover::after {
+  backdrop-filter: blur(1.5px);
+  background: rgba(255,255,255,0.15);
+}
+
+/* Sidebar nav item hover */
+nav a:not([class*="text-main"]):hover {
+  background-color: var(--color-bg-soft) !important;
+}
+
+/* =========================================================
+   Input / select / textarea — plan A, tied to --ctrl-h-md (40)
+   ========================================================= */
+.input {
+  display: block;
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--ctrl-radius);
+  font-size: 13px;
+  color: var(--color-text-main);
+  background: var(--color-bg-card);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input.input,
+select.input {
+  height: var(--ctrl-h-md);
+}
+textarea.input {
+  /* textarea keeps vertical padding since content flows multi-line */
+  padding: 10px 12px;
+  min-height: 80px;
+  height: auto;
+  line-height: 1.6;
+}
+.input::placeholder {
+  color: var(--color-text-dim);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 20%, transparent);
+}
+
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+}
+
+/* ========================================
+   Settings pages — shared structure
+   ======================================== */
+.settings-page {
+  width: 100%;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--color-border);
+  scrollbar-width: thin;
+}
+
+.settings-tab {
+  height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text-sub);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.settings-tab:hover {
+  color: var(--color-text-main);
+  background: var(--color-bg-soft);
+}
+
+.settings-tab.is-active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+  background: transparent;
+}
+
+.settings-tab i {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.settings-section {
+  margin-bottom: var(--settings-section-gap);
+}
+
+.settings-section-head {
+  padding: 0 16px 10px;
+}
+
+.settings-section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-section-title-row.is-inline-description {
+  min-width: 0;
+}
+
+.settings-section-icon {
+  font-size: 13px;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.settings-section-title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: var(--settings-section-title-size);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.settings-section-description {
+  margin: 6px 0 0;
+  color: var(--color-text-sub);
+  font-size: var(--settings-section-desc-size);
+  line-height: 1.7;
+}
+
+.settings-section-description.is-inline {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-section-description.has-icon {
+  padding-left: 21px;
+}
+
+.settings-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.settings-panel {
+  padding: var(--settings-panel-padding);
+  margin-bottom: var(--settings-section-gap);
+}
+
+.settings-panel-title {
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.settings-panel-title i {
+  color: var(--color-primary);
+  font-size: 13px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: var(--settings-row-label-width) 1fr;
+  min-height: var(--settings-row-min-height);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.settings-row:last-child,
+.settings-row.is-last {
+  border-bottom: 0;
+}
+
+.settings-row-label-cell {
+  padding: var(--settings-row-label-padding);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.settings-row-control-cell {
+  padding: var(--settings-row-control-padding);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.settings-row-control-cell.is-right {
+  justify-content: flex-end;
+}
+
+.settings-row-control-cell.is-column {
+  display: block;
+  padding: 10px 14px;
+}
+
+.settings-field-label {
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-field-hint {
+  margin-top: 2px;
+  color: var(--color-text-dim);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.settings-input {
+  width: 100%;
+  height: var(--ctrl-h-md);
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--ctrl-radius);
+  background: var(--color-bg-card);
+  color: var(--color-text-main);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+textarea.settings-input {
+  height: auto;
+  min-height: 80px;
+  padding: 10px 12px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.settings-input[type="range"] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.settings-input:focus {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 14%, transparent);
+}
+
+.settings-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.settings-radio-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-main);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-radio-item input {
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.settings-display-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.settings-display-row.is-clickable {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.settings-display-row.is-clickable:hover {
+  background: var(--color-bg-soft);
+}
+
+.settings-display-icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-soft);
+  color: var(--color-primary);
+}
+
+.settings-display-icon.is-danger {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.settings-display-icon i {
+  font-size: 13px;
+}
+
+.settings-display-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-display-label {
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-display-label.is-danger {
+  color: #dc2626;
+}
+
+.settings-display-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.settings-actions {
+  padding-top: 24px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 760px) {
+  .settings-tabs {
+    margin-bottom: 20px;
+  }
+
+  .settings-tab {
+    padding: 0 14px;
+  }
+
+  .settings-row {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-row-label-cell {
+    padding: 12px 14px 4px;
+  }
+
+  .settings-row-control-cell,
+  .settings-row-control-cell.is-right {
+    padding: 6px 14px 14px;
+    justify-content: flex-start;
+  }
+
+  .settings-panel {
+    padding: 18px;
+  }
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 3px;
+}
+
+.table {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+.table th {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border);
+}
+.table td {
+  padding: 0.75rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: var(--color-text-main);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* ========================================
+   Blog Prose (Claude theme, independent)
+   ======================================== */
+:root {
+  --claude-bg: #FAF9F6;
+  --claude-surface: #FFFFFF;
+  --claude-primary: #DA7756;
+  --claude-primary-light: #E8956F;
+  --claude-primary-dark: #C4633F;
+  --claude-text: #1A1410;
+  --claude-text-secondary: #6B5B52;
+  --claude-text-muted: #9B8E85;
+  --claude-border: #E8E0D8;
+  --claude-tag: #F5F0EB;
+  --claude-code: #F8F5F1;
+  --claude-hover: #F2EDE7;
+}
+
+
+
+/* 评论 @昵称 悬浮卡片 */
+.reply-mention:hover .reply-mention-card { display: block !important; }
+
+/* 评论区礼仪提示 hover 提亮 */
+.comment-hint { transition: opacity 0.2s; }
+div:hover > .comment-hint { opacity: 0.75 !important; }
+
+/* 系统全局图片 blur 淡入（后台+前台通用） */
+.img-blur-in {
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out, filter 0.5s linear;
+}
+.img-blur-in.loaded {
+  filter: blur(0);
+  opacity: 1;
+}
+
+/* Blog image: lazy load with blur-fade effect */
+.blog-image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  min-height: 80px;
+  cursor: zoom-in;
+  background: var(--color-bg-soft);
+}
+.blog-image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out, filter 0.5s linear;
+}
+.blog-image.loaded img {
+  filter: blur(0);
+  opacity: 1;
+}
+
+/* Loading spinner */
+.blog-image-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: var(--color-text-dim);
+}
+.blog-image.loaded .blog-image-loader { display: none; }
+
+/* Post list hover — title changes to primary color */
+
+/* Image caption — bottom-right overlay inside image */
+.blog-image-caption {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 4px;
+  z-index: 3;
+  padding: 8px;
+  font-size: 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  cursor: default;
+  line-height: 1.4;
+  max-width: 70%;
+}
+
+/* ========================================
+   Image Grid Layout
+   ======================================== */
+.image-grid {
+  display: grid;
+  gap: 6px;
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.image-grid .blog-image {
+  margin: 0;
+  border-radius: 0;
+  min-height: 0;
+}
+.image-grid .blog-image img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* 1 image: centered, natural aspect ratio */
+.image-grid-1 {
+  max-width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.image-grid-1 .blog-image img {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+/* 2 images: side by side */
+.image-grid-2 { grid-template-columns: 1fr 1fr; }
+.image-grid-2 .blog-image img { aspect-ratio: 3 / 2; }
+
+/* 3 images: 3 columns */
+.image-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* 4 images: 2x2 */
+.image-grid-4 { grid-template-columns: 1fr 1fr; }
+
+/* 5 images: 2 on top (span 3 each) + 3 on bottom (span 2 each) */
+.image-grid-5 { grid-template-columns: repeat(6, 1fr); }
+.image-grid-5 .blog-image:nth-child(-n+2) { grid-column: span 3; }
+.image-grid-5 .blog-image:nth-child(n+3) { grid-column: span 2; }
+
+/* 6 images: 3x2 */
+.image-grid-6 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* 7+ images: 3 columns flowing */
+.image-grid-overflow { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Responsive: mobile collapse */
+@media (max-width: 640px) {
+  .image-grid-3,
+  .image-grid-5,
+  .image-grid-6,
+  .image-grid-overflow {
+    grid-template-columns: 1fr 1fr;
+  }
+  .image-grid-5 .blog-image { grid-column: span 1 !important; }
+  .image-grid-1 { max-width: 100%; }
+}
+@media (max-width: 400px) {
+  .image-grid { grid-template-columns: 1fr !important; }
+  .image-grid .blog-image img { aspect-ratio: 16 / 9; }
+  .image-grid-5 .blog-image { grid-column: span 1 !important; }
+}
+
+/* ========================================
+   EXIF Info Overlay
+   ======================================== */
+.blog-image-exif-trigger {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 12px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.blog-image:hover .blog-image-exif-trigger { opacity: 1; }
+
+.blog-image-exif-panel {
+  position: absolute;
+  bottom: 44px;
+  left: 8px;
+  z-index: 5;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.6;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.blog-image-exif-panel .exif-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.blog-image-exif-panel .exif-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  min-width: 48px;
+}
+.blog-image-exif-panel .exif-params {
+  display: flex;
+  gap: 10px;
+  margin: 4px 0;
+  padding: 4px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lightbox-in 200ms ease-out;
+}
+@keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  transition: transform 0.15s ease-out;
+  user-select: none;
+}
+
+/* ========================================
+   Scrollbar
+   ======================================== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--color-bg-soft); border-radius: 1px; }
+::-webkit-scrollbar-thumb { background: var(--color-text-dim); border-radius: 1px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-sub); }
+
+/* ========================================
+   Code Highlighting
+   ======================================== */
+.hljs { color: #3c3836; background: #F8F5F1; }
+.hljs-comment, .hljs-quote { color: #928374; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-addition { color: #9d0006; }
+.hljs-number, .hljs-string, .hljs-meta .hljs-meta-string, .hljs-literal, .hljs-doctag, .hljs-regexp { color: #b57614; }
+.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class { color: #DA7756; }
+.hljs-attribute, .hljs-tag .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-class .hljs-title, .hljs-type { color: #427b58; }
+.hljs-symbol, .hljs-bullet, .hljs-subst, .hljs-meta, .hljs-meta .hljs-keyword, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-link { color: #af3a03; }
+.hljs-built_in, .hljs-deletion { color: #076678; }
+.hljs-formula { background: #F5F0EB; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: bold; }
+
+[data-color="dark"] .hljs { color: #e5e7eb; background: #1e2130; }
+[data-color="dark"] .hljs-comment, [data-color="dark"] .hljs-quote { color: #6b7280; }
+[data-color="dark"] .hljs-keyword { color: #f87171; }
+[data-color="dark"] .hljs-string, [data-color="dark"] .hljs-number { color: #fbbf24; }
+[data-color="dark"] .hljs-title, [data-color="dark"] .hljs-section { color: #60a5fa; }
+[data-color="dark"] .hljs-attribute, [data-color="dark"] .hljs-type { color: #34d399; }
+
+/* ========================================
+   Animations
+   ======================================== */
+/* v2.3.1: 删 @keyframes spin / .animate-spin。
+   全 admin loading 走 components/ui/Spinner.tsx,使用 FontAwesome
+   自带的 fa-spin(动画在 FA CSS 内部定义),不再需要本地 keyframes。
+   .animate-spin 整个项目无人引用 —— 死代码。
+
+   v2.3.11: vinyl-spin / .vinyl-spinning / .vinyl-paused 也一并删 ——
+   admin 里没人用，应该是早期音乐播放器残留。前台播放器有自己的
+   CSS，与本文件无关。 */
+
+.utter-moment-embed {
+  --moment-accent: var(--color-primary, #0052d9);
+  margin: 16px 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(0, 82, 217, 0.18);
+  border-left: 4px solid var(--moment-accent);
+  background: linear-gradient(135deg, rgba(0, 82, 217, 0.06), rgba(255, 255, 255, 0.95));
+  color: var(--color-text);
+}
+
+.utter-moment-embed__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.utter-moment-embed__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--moment-accent);
+  color: #fff;
+  font-size: 13px;
+}
+
+.utter-moment-embed__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.utter-moment-embed__meta {
+  margin-left: auto;
+  color: var(--color-text-dim);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+.utter-moment-embed__content {
+  margin-top: 12px;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.github-repo-card {
+  --github-card-height: 150px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(var(--github-card-height) * 2);
+  gap: 14px;
+  height: var(--github-card-height);
+  margin: 16px 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(135deg, #fff 0%, var(--color-bg-soft, #f8fafc) 100%);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.github-repo-card__content {
+  padding: 16px;
+}
+
+.github-repo-card__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: var(--color-primary);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.github-repo-card__title {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.github-repo-card__desc {
+  margin: 8px 0 12px;
+  overflow: hidden;
+  color: var(--color-text-dim);
+  font-size: 13px;
+  line-height: 1.6;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.github-repo-card__meta {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow: hidden;
+  color: var(--color-text-dim);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+.github-repo-card__visual {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: var(--color-bg-soft, #f8fafc);
+}
+
+.x-post-embed__fallback {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0;
+  min-height: 110px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+ * Changelog / release-notes rendering
+ * Shared by SystemUpdatePanel (System → 系统更新 tab) for both the
+ * latest-version body and each expanded release in 更新历史.
+ * Rendered HTML comes from renderChangelog() which handles **bold**,
+ * `code`, ```fences```, lists, headings, links.
+ * ============================================================ */
+.changelog-body h3,
+.changelog-body h4,
+.changelog-body h5,
+.changelog-body h6 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 16px 0 6px;
+}
+.changelog-body h3:first-child,
+.changelog-body h4:first-child,
+.changelog-body h5:first-child,
+.changelog-body h6:first-child {
+  margin-top: 0;
+}
+.changelog-body p {
+  margin: 6px 0;
+}
+.changelog-body ul {
+  margin: 8px 0 12px;
+  padding-left: 22px;
+  list-style: disc;
+}
+.changelog-body li {
+  margin: 3px 0;
+}
+.changelog-body strong {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.changelog-body em {
+  font-style: italic;
+}
+.changelog-body code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  background: var(--color-bg-soft, #f1f5f9);
+  padding: 1px 5px;
+  border: 1px solid var(--color-border);
+}
+.changelog-body pre {
+  margin: 10px 0 14px;
+  padding: 12px 14px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #0f172a;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.changelog-body pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre;
+}
+.changelog-body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.changelog-body a:hover {
+  opacity: 0.8;
+}
+.changelog-body hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 16px 0;
+}
+/* GFM 表格：紧凑、有边框、表头加底色，整体跟 changelog 卡片融合 */
+.changelog-body .changelog-table-wrap {
+  margin: 10px 0 14px;
+  overflow-x: auto;
+}
+.changelog-body .changelog-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.changelog-body .changelog-table th,
+.changelog-body .changelog-table td {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.55;
+}
+.changelog-body .changelog-table th {
+  background: var(--color-bg-soft, #f1f5f9);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.changelog-body .changelog-table tr:nth-child(even) td {
+  background: var(--color-bg-soft, #f8fafc);
+}
+.changelog-body .changelog-table code {
+  font-size: 11.5px;
+}
+
+/* ============================================================
+ * 升级日志模态框 —— 终端式动态效果
+ * ============================================================
+ *  - 每条日志新挂载到 DOM 时跑一次飘入动画（opacity + 左滑 4px）
+ *  - 已挂载的旧行不会重新动（key=index 稳定，React 复用 DOM）
+ *  - 进行中时底部进度条左右往返扫，给用户"系统在做事"的反馈
+ */
+@keyframes upgradeLogLineIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+.upgrade-log-line {
+  animation: upgradeLogLineIn 0.28s ease-out backwards;
+  word-break: break-all;
+  white-space: pre-wrap;
+  /* 让超长行不撑爆 modal 宽度 */
+}
+/* 用户偏好减少动效 → 立即显示，不动画 */
+@media (prefers-reduced-motion: reduce) {
+  .upgrade-log-line { animation: none; }
+}
+
+@keyframes upgradeLogProgressBar {
+  0%   { left: -30%; width: 30%; }
+  50%  { left: 50%; width: 40%; }
+  100% { left: 100%; width: 30%; }
+}
+.upgrade-log-progress-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #60a5fa 50%,
+    transparent 100%);
+  animation: upgradeLogProgressBar 1.5s linear infinite;
+}
+
+/* 路由切换 lazy chunk 加载中的顶部进度条 —— 替代之前全屏 overlay
+   带来的闪烁感，目标是让用户感觉切页面"无感"。 */
+@keyframes routeFallbackBar {
+  0%   { background-position: -40% 0; }
+  100% { background-position: 140% 0; }
+}

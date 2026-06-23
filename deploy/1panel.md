@@ -93,7 +93,7 @@ proxy_set_header Connection "upgrade";
 说明 Utterlog 没跑起来 或 端口填错了。
 ```bash
 make ps              # 看容器状态
-make logs-api        # 看错误日志
+make logs-app        # 看错误日志
 cat .env | grep UTTERLOG_PORT   # 确认端口
 ```
 
@@ -112,14 +112,14 @@ proxy_read_timeout 300s;
 ```
 
 ### /admin 后台能打开但博客 404
-说明 Go 后端的 `WEB_PROXY_TARGET` 没生效（没反代到 Next.js）。
+说明 Bun app 的 `WEB_PROXY_TARGET` 没生效（没反代到 Next.js）。
 检查：
 ```bash
-docker compose -f docker-compose.prod.yml logs api | grep "Web proxy"
-# 应看到: Web proxy enabled → http://web:3000
+docker compose -f docker-compose.prod.yml logs app | grep "Bun app"
+# 应看到 Bun app 启动日志；WEB_PROXY_TARGET 默认为 http://127.0.0.1:3000
 ```
 
-重启 api：
+重启 app：
 ```bash
-docker compose -f docker-compose.prod.yml restart api
+docker compose -f docker-compose.prod.yml restart app
 ```

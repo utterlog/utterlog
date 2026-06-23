@@ -61,21 +61,20 @@ cd utterlog && make update
 
 ---
 
-## 复用现有的 PostgreSQL / Redis（低配 VPS / 1Panel / 宝塔 用户）
+## 复用现有的 PostgreSQL（低配 VPS / 1Panel / 宝塔 用户）
 
-如果你机器上已经跑了 PostgreSQL 和 Redis（比如 1Panel 自带、或者宝塔装的应用商店服务），不用再让 utterlog 起一对独占的容器 —— `install.sh` 会自动检测并询问：
+如果你机器上已经跑了 PostgreSQL（比如 1Panel 自带、或者宝塔装的应用商店服务），不用再让 utterlog 起独占的数据库容器 —— `install.sh` 会自动检测并询问：
 
 ```
-Scanning for existing PostgreSQL + Redis on this host ...
+Scanning for existing PostgreSQL on this host ...
 
   ✓ PostgreSQL detected: 1Panel-postgresql-z8nZ (postgres:18.3-alpine) on 127.0.0.1:5432
-  ✓ Redis detected: 1Panel-redis-EGkk (redis:8.6.2) on 127.0.0.1:6379
 
 Choose a deployment mode:
 
-  1) Bundled (recommended) — Utterlog 带自己的 postgres + redis 容器，完全隔离。
-     占用 ~150MB。
-  2) Reuse host services    — 接到上面的 postgres + redis（省 ~70MB 内存）。
+  1) Bundled (recommended) — Utterlog 带自己的 postgres 容器，完全隔离。
+     占用 ~120MB。
+  2) Reuse host PostgreSQL  — 接到上面的 postgres（省一个数据库容器）。
      pgvector 缺失会自动装（apk add postgresql-pgvector / apt install
      postgresql-XX-pgvector）。会问你 postgres 超级用户密码用来 CREATE EXTENSION
      和建立 utterlog 专用数据库。
@@ -101,7 +100,9 @@ UTTERLOG_DB_MODE=bundled curl -fsSL https://raw.githubusercontent.com/utterlog/u
 UTTERLOG_DB_MODE=external curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | bash
 ```
 
-**给已经跑起来想切到外部服务的老站**：编辑 `.env`，加 `UTTERLOG_DB_MODE=external` + 必要的 DB 连接配置，然后重跑 `bash scripts/deploy.sh`。`docker-compose.external-db.yml` overlay 自动启用，旧的 utterlog-postgres / utterlog-redis 容器会被 stop 掉（数据保留在 ./pgdata 里，需要手动迁移到外部 postgres）。
+Bun 版默认使用 app 内存做临时状态（验证码、在线访客等），不需要 Redis。
+
+**给已经跑起来想切到外部数据库的老站**：编辑 `.env`，加 `UTTERLOG_DB_MODE=external` + 必要的 DB 连接配置，然后重跑 `bash scripts/deploy.sh`。`docker-compose.external-db.yml` overlay 自动启用，旧的 utterlog-postgres 容器会被 stop 掉（数据保留在 ./pgdata 里，需要手动迁移到外部 postgres）。
 
 **手动跑 pgvector 安装**（绕过 install.sh）：
 
@@ -166,8 +167,8 @@ make stop                                             # 有 make
 
 ### 部署后打不开
 ```bash
-docker compose -f docker-compose.prod.yml ps          # 四个容器都应 healthy
-docker compose -f docker-compose.prod.yml logs api    # 看 API 错误
+docker compose -f docker-compose.prod.yml ps          # app + postgres 应 healthy
+docker compose -f docker-compose.prod.yml logs app    # 看 Bun app 错误
 ```
 
 ### 想重装
@@ -207,6 +208,6 @@ docker compose -f docker-compose.prod.yml logs caddy | grep -i 'certificate\|err
 bash scripts/dump-schema.sh     # 无 make
 make schema                     # 有 make（等价）
 
-git add api/schema.sql
+git add app/server/assets/schema.sql
 git commit -m "schema: <描述>"
 ```

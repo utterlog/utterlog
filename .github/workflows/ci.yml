@@ -6,82 +6,40 @@ on:
   pull_request:
     branches: [main]
 
-# Opt into Node 24 runtime for JS actions ahead of the 2026-09-16 forced cutover.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  api:
-    name: Go API build
+  app:
+    name: Bun app + frontend builds
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      # CGO system deps:
-      #   libwebp-dev — chai2010/webp (image upload re-encode path)
-      #   libaom-dev  — Kagami/go-avif (AVIF output for image-gen)
-      # Without these, `go vet ./...` on the api module fails to
-      # compile the underlying av1.c / encode.c bindings and the
-      # whole job dies before we ever get to the actual lint step.
-      # The runtime Docker image (api/Dockerfile.prod) installs the
-      # equivalent Alpine packages — this step keeps CI in sync.
-      - name: Install CGO image-codec headers
-        run: sudo apt-get update && sudo apt-get install -y libwebp-dev libaom-dev
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          go-version: '1.26'
-          cache: true
-          cache-dependency-path: api/go.sum
+          bun-version: '1.3.14'
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: api/admin/package-lock.json
+      - name: Install Bun app deps
+        run: bun install --frozen-lockfile
 
-      - name: Build admin SPA (required by go:embed)
-        working-directory: api/admin
-        run: |
-          npm ci
-          npm run build
+      - name: Type check Bun server
+        run: bun run server:check
 
-      - name: go vet
-        working-directory: api
-        run: go vet ./...
+      - name: Install admin deps
+        working-directory: app/admin
+        run: bun install
 
-      - name: go build
-        working-directory: api
-        run: go build ./...
+      - name: Build admin SPA
+        working-directory: app/admin
+        run: bun run build
 
-  web:
-    name: Next.js web build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+      - name: Sync theme styles
+        working-directory: app/web
+        run: bun run sync:themes
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
-
-      - name: Install deps
-        working-directory: web
-        run: npm ci
-
-      - name: Type check
-        working-directory: web
-        run: npx tsc --noEmit --skipLibCheck
-
-      - name: Build
-        working-directory: web
+      - name: Build blog client bundle
+        run: bun run build:blog-client
         env:
-          # Same-origin path — matches single-port production architecture
-          # (Go API reverse-proxies / to web container, so browser sees same host)
           NEXT_PUBLIC_API_URL: /api/v1
-          INTERNAL_API_URL: http://api:8080/api/v1
-        run: npm run build

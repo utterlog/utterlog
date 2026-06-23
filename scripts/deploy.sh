@@ -83,7 +83,7 @@ for arg in "$@"; do
 done
 
 # Auto-detect deployment strategy based on available RAM.
-# Building images locally needs ~2GB RAM (Node + Go + Next.js build).
+# Building images locally needs ~2GB RAM (Bun + Next.js build).
 # Below that, pulling pre-built images from GHCR is faster and safer.
 if [ "$PULL_MODE" -eq -1 ]; then
   if [ -r /proc/meminfo ]; then
@@ -156,6 +156,14 @@ set -a
 . ./.env
 set +a
 
+if [ "${UTTERLOG_DB_MODE:-bundled}" = "external" ]; then
+  if [ -z "${DB_HOST:-}" ] || [ "${DB_HOST:-}" = "postgres" ]; then
+    export DB_HOST="host.docker.internal"
+    persist_env DB_HOST "$DB_HOST"
+    warn "UTTERLOG_DB_MODE=external：DB_HOST 仍是默认值，已改为 host.docker.internal"
+  fi
+fi
+
 if [ "$PULL_MODE" -eq 1 ] && [ -z "${UTTERLOG_IMAGE_PREFIX:-}" ]; then
   export UTTERLOG_IMAGE_PREFIX="ghcr.io/utterlog"
   persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
@@ -209,7 +217,7 @@ if [ "$TLS_MODE" -eq 1 ]; then
     echo "DOMAIN=$DOMAIN" >> .env
   fi
   export DOMAIN
-  # Also set APP_URL to the public https URL so Go serves correct absolute links
+  # Also set APP_URL to the public https URL so the app serves correct absolute links
   if grep -q "^APP_URL=" .env; then
     sed -i.bak "s|^APP_URL=.*|APP_URL=https://$DOMAIN|" .env && rm -f .env.bak
   fi
@@ -220,28 +228,14 @@ fi
 # ============================================================
 # Step 4: build & start containers
 # ------------------------------------------------------------
-# UTTERLOG_DB_MODE=external (set by install.sh when the user picks
-# "use existing host services") adds the external-db overlay, which
-# disables the bundled postgres + redis services and rewires api/web
-# to reach the host via host.docker.internal.
+# UTTERLOG_DB_MODE=external disables the bundled postgres service and
+# lets the Bun app reach the host DB via host.docker.internal.
 # ============================================================
 EXTERNAL_OVERLAY=""
 DB_M="${UTTERLOG_DB_MODE:-bundled}"
-RD_M="${UTTERLOG_REDIS_MODE:-bundled}"
-if [ "$DB_M" = "external" ] && [ "$RD_M" = "external" ]; then
-  # Both external → full external-db overlay (disables both bundled services)
+if [ "$DB_M" = "external" ]; then
   EXTERNAL_OVERLAY="-f docker-compose.external-db.yml"
-  log "复用宿主 PostgreSQL + Redis（UTTERLOG_DB_MODE=$DB_M, UTTERLOG_REDIS_MODE=$RD_M）"
-elif [ "$RD_M" = "external" ]; then
-  # Only redis external → narrower overlay so postgres stays bundled
-  EXTERNAL_OVERLAY="-f docker-compose.external-redis.yml"
-  log "复用宿主 Redis，PostgreSQL 仍走独立容器（UTTERLOG_REDIS_MODE=external）"
-elif [ "$DB_M" = "external" ]; then
-  # Only postgres external — no overlay file for this exact mix yet,
-  # so we fall through to bundled and warn. In practice users hit
-  # this mostly because they edited .env by hand; the inverse (only
-  # redis external) is far more common.
-  warn "UTTERLOG_DB_MODE=external 但 UTTERLOG_REDIS_MODE=bundled —— 暂不支持仅切 postgres，按全 bundled 启动"
+  log "复用外部 PostgreSQL（UTTERLOG_DB_MODE=$DB_M）"
 fi
 
 if [ "$PULL_MODE" -eq 1 ]; then
@@ -263,14 +257,14 @@ else
 fi
 
 # ============================================================
-# Step 5: wait for api to respond
+# Step 5: wait for app to respond
 # ============================================================
-log "等待 API 就绪（最长 180 秒）..."
+log "等待 Bun app 就绪（最长 180 秒）..."
 HEALTHY=0
 for i in $(seq 1 36); do
   if curl -fsS "http://127.0.0.1:$UTTERLOG_PORT/api/v1/install/status" >/dev/null 2>&1; then
     HEALTHY=1
-    ok "API 已响应（用时 ${i}×5 秒）"
+    ok "Bun app 已响应（用时 ${i}×5 秒）"
     break
   fi
   printf "   %s... 启动中 (%ds)%s\r" "$C_DIM" "$((i*5))" "$C_RESET"
@@ -279,8 +273,8 @@ done
 echo
 
 if [ "$HEALTHY" -eq 0 ]; then
-  err "API 在 180 秒内未响应。下方是最近 40 行日志："
-  $COMPOSE logs api --tail=40
+  err "Bun app 在 180 秒内未响应。下方是最近 40 行日志："
+  $COMPOSE logs app --tail=40
   exit 1
 fi
 
@@ -345,7 +339,7 @@ fi
 cat <<EOF
   ${C_BOLD}常用命令：${C_RESET}
     $COMPOSE logs -f              # 实时查看全部日志
-    $COMPOSE logs -f api          # 只看 api 日志
+    $COMPOSE logs -f app          # 只看 Bun app 日志
     $COMPOSE ps                   # 容器状态
     $COMPOSE down                 # 停止
     make deploy                   # 重新部署（等价于 bash scripts/deploy.sh）

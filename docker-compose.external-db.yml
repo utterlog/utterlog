@@ -1,56 +1,15 @@
 # ============================================================
-# Utterlog — external Postgres + Redis overlay
+# Utterlog Bun — external PostgreSQL overlay
 # ------------------------------------------------------------
-# Disables BOTH bundled services and points api/web at host-bound
-# postgres + redis. Picked by scripts/deploy.sh when both
-# UTTERLOG_DB_MODE and UTTERLOG_REDIS_MODE are "external".
-#
-# For mixed scenarios use the more granular overlay instead:
-#   - bundled postgres + external redis  → docker-compose.external-redis.yml
-#   - external postgres + bundled redis  → would need a sibling overlay,
-#     not currently supported (no real-world ask — postgres is the
-#     hard one to share because of pgvector, redis is trivial).
-#
-# Required .env vars (provisioned by install.sh):
-#   DB_HOST=host.docker.internal   (or a LAN IP)
-#   DB_PORT=5432
-#   DB_USER=...
-#   DB_PASSWORD=...
-#   DB_NAME=utterlog
-#   REDIS_HOST=host.docker.internal
-#   REDIS_PORT=6379
-#   REDIS_PASSWORD=...             (empty if your redis has no auth)
-#
-# Why host.docker.internal:
-#   - On Linux, Compose resolves this to the host gateway IP via the
-#     extra_hosts entry below (host-gateway alias works in Docker 20.10+).
-#   - On macOS / Windows it Just Works (Docker Desktop handles it).
-#   - Same .env works on a developer laptop and a production VPS.
+# Disables bundled postgres and lets the Bun app use DB_HOST from .env.
+# External PostgreSQL overlay — no bundled postgres service.
 # ============================================================
 
 services:
-  # `replicas: 0` would still create the service in newer Compose
-  # versions. The portable way to disable a service inherited from
-  # a base file is the "disabled" profile — services with a profile
-  # name only spin up when that profile is explicitly activated, and
-  # we never activate "disabled".
   postgres:
     profiles: ["disabled"]
 
-  redis:
-    profiles: ["disabled"]
-
-  api:
+  app:
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    # Inherited depends_on includes both postgres + redis with
-    # service_healthy; with both disabled, that wait would deadlock.
-    # !reset followed by an empty `web`-only dict keeps the web
-    # ordering hint without blocking on either bundled DB service.
-    depends_on: !reset
-      web:
-        condition: service_started
-
-  web:
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on: !reset {}

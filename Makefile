@@ -35,14 +35,13 @@ help-advanced:
 	@echo "    make deploy-fast         重启容器, 跳过构建"
 	@echo ""
 	@echo "  \033[1m生命周期:\033[0m"
-	@echo "    make logs-api            只看 API 日志"
-	@echo "    make logs-web            只看博客前端日志"
+	@echo "    make logs-app            只看 Bun app 日志"
 	@echo "    make down                停止并删除容器 (保留数据)"
 	@echo "    make clean               删除容器 + 数据 (需确认)"
 	@echo ""
 	@echo "  \033[1m开发:\033[0m"
 	@echo "    make dev                 开发模式 (dev Dockerfile + hot reload)"
-	@echo "    make schema              导出当前 DB schema 到 api/schema.sql"
+	@echo "    make schema              导出当前 DB schema 到 app/server/assets/schema.sql"
 	@echo ""
 
 # --- Main commands ---
@@ -85,13 +84,9 @@ deploy-fast:
 logs:
 	docker compose -f docker-compose.prod.yml logs -f
 
-.PHONY: logs-api
-logs-api:
-	docker compose -f docker-compose.prod.yml logs -f api
-
-.PHONY: logs-web
-logs-web:
-	docker compose -f docker-compose.prod.yml logs -f web
+.PHONY: logs-app
+logs-app:
+	docker compose -f docker-compose.prod.yml logs -f app
 
 .PHONY: ps
 ps:
@@ -116,6 +111,10 @@ clean:
 .PHONY: dev
 dev:
 	docker compose up -d --build
+
+.PHONY: dev-local
+dev-local:
+	bun run server:dev
 
 .PHONY: schema
 schema:

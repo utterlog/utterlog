@@ -12,11 +12,11 @@
 # What it does:
 #   1. Verifies Docker + Compose plugin
 #   2. Clones the repo into ./utterlog
-#   3. Detects existing PostgreSQL + Redis on this host
-#      (e.g. 1Panel's managed services, or any host-bound 5432/6379)
+#   3. Detects existing PostgreSQL on this host
+#      (e.g. 1Panel's managed service, or any host-bound 5432)
 #   4. Asks the user to pick a deploy mode:
-#        a) Bundled (default)   — own postgres + redis containers, isolated
-#        b) Reuse host services — saves ~70MB, auto-installs pgvector
+#        a) Bundled (default)   — own postgres container, isolated
+#        b) Reuse host Postgres — app-only container, auto-installs pgvector
 #   5. Writes the choice into .env and runs scripts/deploy.sh
 #
 # Non-interactive override (skip the wizard):
@@ -115,17 +115,12 @@ cd "$INSTALL_DIR"
 # Otherwise we silently fall through to bundled (the previous default).
 # ============================================================
 DB_MODE="${UTTERLOG_DB_MODE:-}"
-REDIS_MODE="${UTTERLOG_REDIS_MODE:-}"
 
 if [ -z "$DB_MODE" ] && [ -f .env ] && grep -q '^UTTERLOG_DB_MODE=' .env; then
   DB_MODE=$(grep '^UTTERLOG_DB_MODE=' .env | tail -1 | cut -d= -f2-)
 fi
-if [ -z "$REDIS_MODE" ] && [ -f .env ] && grep -q '^UTTERLOG_REDIS_MODE=' .env; then
-  REDIS_MODE=$(grep '^UTTERLOG_REDIS_MODE=' .env | tail -1 | cut -d= -f2-)
-fi
-
 if [ -z "$DB_MODE" ] && [ -t 0 ]; then
-  log "扫描本机已有的 PostgreSQL / Redis 服务 ..."
+  log "扫描本机已有的 PostgreSQL 服务 ..."
   eval "$(bash scripts/detect-services.sh)"
 
   echo
@@ -139,32 +134,17 @@ if [ -z "$DB_MODE" ] && [ -t 0 ]; then
     printf "  ${C_DIM}—${C_RESET} 127.0.0.1:$PG_PORT 没有 PostgreSQL\n"
   fi
 
-  if [ "$REDIS_DETECTED" = 1 ]; then
-    if [ -n "$REDIS_CONTAINER" ]; then
-      ok "检测到 Redis：$REDIS_CONTAINER ($REDIS_IMAGE)，监听 127.0.0.1:$REDIS_PORT"
-    else
-      ok "检测到 Redis 在 127.0.0.1:$REDIS_PORT"
-    fi
-  else
-    printf "  ${C_DIM}—${C_RESET} 127.0.0.1:$REDIS_PORT 没有 Redis\n"
-  fi
-
   echo
-  if [ "$PG_DETECTED" = 1 ] || [ "$REDIS_DETECTED" = 1 ]; then
+  if [ "$PG_DETECTED" = 1 ]; then
     cat <<MENU
 ${C_BOLD}请选择部署模式：${C_RESET}
 
-  ${C_BOLD}1)${C_RESET} ${C_GREEN}独立容器（默认推荐）${C_RESET} — Utterlog 自带 postgres + redis，
-       完全隔离不影响其他应用，约占 ~150MB 内存。
+  ${C_BOLD}1)${C_RESET} ${C_GREEN}独立容器（默认推荐）${C_RESET} — Utterlog 自带 postgres，
+       完全隔离不影响其他应用。
 
-  ${C_BOLD}2)${C_RESET} ${C_BLUE}仅复用宿主 Redis${C_RESET} — postgres 仍用独立容器（保护数据 +
-       pgvector 扩展），但 Redis 直连宿主已有的（省 ~10MB，避免
-       多个 redis 进程互相竞争内存）。如果宿主 Redis 有密码会
-       提示你输入。${C_BOLD}最适合 1Panel / 宝塔用户。${C_RESET}
-
-  ${C_BOLD}3)${C_RESET} ${C_YELLOW}两者都复用宿主${C_RESET} — postgres + redis 都连宿主（省 ~70MB）。
-       会自动给宿主 postgres 装 pgvector 扩展，建立 utterlog 专用
-       数据库。需要 postgres 超级用户密码。
+  ${C_BOLD}2)${C_RESET} ${C_BLUE}复用宿主 PostgreSQL${C_RESET} — 只部署 app 容器。
+       会自动给宿主 postgres 装 pgvector 扩展，建立 utterlog 专用数据库。
+       需要 postgres 超级用户密码。
 
 MENU
     printf "  请选择 [1]: "
@@ -172,56 +152,20 @@ MENU
     CHOICE="${CHOICE:-1}"
     case "$CHOICE" in
       2)
-        DB_MODE="bundled"
-        REDIS_MODE="external"
-        ;;
-      3)
         DB_MODE="external"
-        REDIS_MODE="external"
         ;;
       *)
         DB_MODE="bundled"
-        REDIS_MODE="bundled"
         ;;
     esac
   else
-    log "本机没有现成的 postgres / redis —— 使用独立容器模式（唯一可选）"
+    log "本机没有现成的 postgres —— 使用独立容器模式（唯一可选）"
     DB_MODE="bundled"
-    REDIS_MODE="bundled"
-  fi
-fi
-
-# ============================================================
-# Step 4a: external Redis — discover its password if any
-# ------------------------------------------------------------
-# When the user picks mode 2 or 3 we need REDIS_PASSWORD in the .env.
-# Try a no-auth ping first; if AUTH is required, prompt.
-# ============================================================
-DETECTED_REDIS_PASSWORD=""
-if [ "$REDIS_MODE" = "external" ] && [ -t 0 ]; then
-  if command -v redis-cli >/dev/null 2>&1; then
-    if redis-cli -h 127.0.0.1 -p "${REDIS_PORT:-6379}" ping >/dev/null 2>&1; then
-      ok "宿主 Redis 无密码"
-    else
-      printf "  宿主 Redis 密码（输入不显示，无密码直接回车）: "
-      stty -echo
-      read -r DETECTED_REDIS_PASSWORD
-      stty echo
-      echo
-      if [ -n "$DETECTED_REDIS_PASSWORD" ]; then
-        if redis-cli -h 127.0.0.1 -p "${REDIS_PORT:-6379}" -a "$DETECTED_REDIS_PASSWORD" --no-auth-warning ping >/dev/null 2>&1; then
-          ok "Redis 密码验证通过"
-        else
-          warn "密码验证未通过，先继续 —— 启动后 utterlog 连不上 Redis 时再回来改 .env 里的 REDIS_PASSWORD"
-        fi
-      fi
-    fi
   fi
 fi
 
 # Default if still unset (non-interactive curl|bash with no override)
 DB_MODE="${DB_MODE:-bundled}"
-REDIS_MODE="${REDIS_MODE:-bundled}"
 
 # ============================================================
 # Step 4b: external mode — provision pgvector + utterlog DB
@@ -280,8 +224,8 @@ fi
 # ============================================================
 # Step 5: write/refresh the chosen mode + external creds into .env
 # ------------------------------------------------------------
-# deploy.sh reads UTTERLOG_DB_MODE / UTTERLOG_REDIS_MODE to decide
-# whether to add the docker-compose.external-db.yml overlay.
+# deploy.sh reads UTTERLOG_DB_MODE to decide whether to add the
+# docker-compose.external-db.yml overlay.
 # ============================================================
 upsert_env() {
   local key="$1" val="$2"
@@ -300,8 +244,7 @@ upsert_env() {
 # DB_USER/DB_PASSWORD ourselves before deploy.sh runs.
 [ -f .env ] || cp .env.example .env
 
-upsert_env "UTTERLOG_DB_MODE"    "$DB_MODE"
-upsert_env "UTTERLOG_REDIS_MODE" "$REDIS_MODE"
+upsert_env "UTTERLOG_DB_MODE" "$DB_MODE"
 
 if [ "$DB_MODE" = "external" ]; then
   upsert_env "DB_HOST"     "host.docker.internal"
@@ -310,13 +253,7 @@ if [ "$DB_MODE" = "external" ]; then
   upsert_env "DB_NAME"     "utterlog"
   upsert_env "DB_PASSWORD" "$UTTERLOG_DB_PASSWORD"
 fi
-if [ "$REDIS_MODE" = "external" ]; then
-  upsert_env "REDIS_HOST"     "host.docker.internal"
-  upsert_env "REDIS_PORT"     "${REDIS_PORT:-6379}"
-  upsert_env "REDIS_PASSWORD" "$DETECTED_REDIS_PASSWORD"
-fi
-
-ok "已选模式：数据库=$DB_MODE，Redis=$REDIS_MODE"
+ok "已选模式：数据库=$DB_MODE"
 
 # ============================================================
 # Step 6: run the deploy script

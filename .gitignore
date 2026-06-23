@@ -37,24 +37,14 @@ dist/
 build/
 out/
 
-# Uploads (user data) — both the real dir and dev-only symlink to project-root uploads/
+# Uploads (user data)
 uploads/
-api/public/uploads
-api/public/uploads/
-!api/public/uploads/.gitkeep
 
 # Runtime extensions (user data)
 content/themes/*
 !content/themes/.gitkeep
 content/plugins/*
 !content/plugins/.gitkeep
-
-# Go binaries (compiled artifacts — built in CI / deploy)
-api/utterlog-go
-api/utterlog-api
-api/utterlog-hub-linux
-api/api
-api/utterlog
 
 # TypeScript incremental build info
 *.tsbuildinfo
@@ -76,17 +66,18 @@ data/
 *.sql.zip
 *.sql.gz
 *.xml
-!api/schema.sql
+!app/server/assets/schema.sql
 
 # Backups (user data)
 backups/
-api/backups/
 
-# Package locks (keep package-lock.json for npm; exclude others)
+# Non-Bun package locks are legacy in this migration tree.
+package-lock.json
 yarn.lock
 pnpm-lock.yaml
+bun.lockb
 
-# Legacy / reference dirs (not part of source) — root-anchored so `web/themes/Westlife/` etc. are still tracked
+# Legacy / reference dirs (not part of source)
 /community/
 /v2/
 /id/
@@ -111,9 +102,7 @@ pnpm-lock.yaml
 /docs/
 
 # Misc
-# Root-anchor this so we only drop the stray copy at project root —
-# the "real" fonts at web/public/static/fonts/ and api/admin/public/fonts/
-# must be committed, otherwise CI Docker builds 404 on the font URL.
+# Root-anchor this so we only drop the stray copy at project root.
 /PaperMono-Regular.woff2
 backup/
 
@@ -122,5 +111,3 @@ backup/
 
 # Private SSL certs / keys
 /ssl/
-/api/preview-emails
-/api/cmd/preview-emails/preview-emails

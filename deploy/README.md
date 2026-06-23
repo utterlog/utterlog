@@ -21,12 +21,12 @@ DOMAIN=blog.yoursite.com make deploy-tls
 
 ## 单端口架构说明
 
-Go API 是唯一外部入口，内部分发：
+Bun app 是唯一外部入口，内部分发：
 - `/admin/*` → 嵌入的 Vite SPA
-- `/api/v1/*` → Go handlers
+- `/api/v1/*` → TypeScript handlers
 - `/uploads/*` → 本地文件
 - `/themes/*` → 用户主题资源与内置主题资源
-- 其他 → 内部反代到 Next.js 博客容器
+- 其他 → 内部反代到 Next.js 渲染进程
 
 反代配置只需指向一个端口（`127.0.0.1:9260`），无需分路径处理。
 
@@ -35,7 +35,7 @@ Go API 是唯一外部入口，内部分发：
 ```
 X-Real-IP         → 访客真实 IP（地理位置统计、防刷）
 X-Forwarded-For   → 多层代理链
-X-Forwarded-Proto → http/https（Go 生成绝对链接用）
+X-Forwarded-Proto → http/https（生成绝对链接用）
 X-Forwarded-Host  → 原始域名
 Upgrade/Connection → WebSocket / SSE（AI 流式输出必需）
 ```

@@ -1,0 +1,15 @@
+{
+  "name": "next",
+  "version": "16.2.6-shim",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./link": "./link.tsx",
+    "./navigation": "./navigation.ts",
+    "./script": "./script.tsx",
+    "./cache": "./cache.ts",
+    "./headers": "./headers.ts",
+    "./server": "./server.ts"
+  }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# detect-services.sh — find existing PostgreSQL + Redis on this host
+# detect-services.sh — find existing PostgreSQL on this host
 # ------------------------------------------------------------
 # Output: a single eval-able shell snippet on stdout. Sourcing it
 # defines:
@@ -11,20 +11,13 @@
 #   PG_IMAGE=...          # docker image label if found, else empty
 #   PG_FLAVOR=alpine|debian|other  # used by setup-pgvector.sh to pick installer
 #
-#   REDIS_DETECTED=0|1
-#   REDIS_HOST=127.0.0.1
-#   REDIS_PORT=6379
-#   REDIS_CONTAINER=...
-#   REDIS_IMAGE=...
-#
 # Why a sourceable snippet instead of JSON: install.sh is bash and
-# adding `jq` as a dependency just for two booleans + a few strings
+# adding `jq` as a dependency just for a few strings
 # is overkill. `eval "$(bash detect-services.sh)"` reads cleanly.
 # ============================================================
 set -u
 
 PG_PORT="${PG_PORT:-5432}"
-REDIS_PORT="${REDIS_PORT:-6379}"
 
 # Probe a TCP port without requiring `nc` — bash builtins work on
 # every distro that has bash. /dev/tcp is special: writing to it
@@ -91,21 +84,6 @@ if probe_port 127.0.0.1 "$PG_PORT"; then
 fi
 
 # ============================================================
-# Redis
-# ============================================================
-REDIS_DETECTED=0
-REDIS_CONTAINER=""
-REDIS_IMAGE=""
-if probe_port 127.0.0.1 "$REDIS_PORT"; then
-  REDIS_DETECTED=1
-  hit=$(find_container_by_port "$REDIS_PORT" || true)
-  if [ -n "$hit" ]; then
-    REDIS_CONTAINER="${hit%%|*}"
-    REDIS_IMAGE="${hit##*|}"
-  fi
-fi
-
-# ============================================================
 # Emit eval-able snippet
 # ============================================================
 printf 'PG_DETECTED=%s\n' "$PG_DETECTED"
@@ -114,8 +92,3 @@ printf 'PG_PORT=%s\n' "$PG_PORT"
 printf 'PG_CONTAINER=%q\n' "$PG_CONTAINER"
 printf 'PG_IMAGE=%q\n' "$PG_IMAGE"
 printf 'PG_FLAVOR=%q\n' "$PG_FLAVOR"
-printf 'REDIS_DETECTED=%s\n' "$REDIS_DETECTED"
-printf 'REDIS_HOST=%s\n' "127.0.0.1"
-printf 'REDIS_PORT=%s\n' "$REDIS_PORT"
-printf 'REDIS_CONTAINER=%q\n' "$REDIS_CONTAINER"
-printf 'REDIS_IMAGE=%q\n' "$REDIS_IMAGE"

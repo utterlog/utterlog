@@ -25,7 +25,7 @@
 #   UTTERLOG_DOCKER_MIRROR=https://...     # Docker Hub registry mirror
 #   UTTERLOG_PULL_TIMEOUT=900              # seconds before a pull is considered stuck
 #   UTTERLOG_DOCKERHUB_PREFIX=mirror.example.com
-#                                           # optional prefix for postgres/redis images
+#                                           # optional prefix for postgres image
 # ============================================================
 set -euo pipefail
 
@@ -153,8 +153,7 @@ image_source_has_tag() {
   local prefix="$1"
   local tag="${UTTERLOG_IMAGE_TAG:-$(env_value UTTERLOG_IMAGE_TAG)}"
   tag="${tag:-latest}"
-  run_with_timeout 20 docker manifest inspect "$prefix/utterlog-api:$tag" >/dev/null 2>&1 \
-    && run_with_timeout 20 docker manifest inspect "$prefix/utterlog-web:$tag" >/dev/null 2>&1
+  run_with_timeout 20 docker manifest inspect "$prefix/utterlog-app:$tag" >/dev/null 2>&1
 }
 
 select_image_source() {
@@ -191,8 +190,7 @@ if [ ! -f .env ]; then
   # Replace empty DB_PASSWORD= / JWT_SECRET= with generated values
   sed -i.bak "s|^DB_PASSWORD=.*|DB_PASSWORD=$DB_PASS|" .env
   sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=$JWT|" .env
-  # Write install dir so the one-click-update feature (admin UI) can
-  # find the compose file after the api container restarts itself.
+  # Write install dir for future update tooling.
   grep -q '^UTTERLOG_INSTALL_DIR=' .env \
     || echo "UTTERLOG_INSTALL_DIR=$INSTALL_DIR" >> .env
   # Apply registry override if user set one. Otherwise select_image_source()
@@ -207,9 +205,6 @@ if [ ! -f .env ]; then
     grep -q '^POSTGRES_IMAGE=' .env \
       && sed -i.bak "s|^POSTGRES_IMAGE=.*|POSTGRES_IMAGE=$HUB_PREFIX/pgvector/pgvector:pg18|" .env \
       || echo "POSTGRES_IMAGE=$HUB_PREFIX/pgvector/pgvector:pg18" >> .env
-    grep -q '^REDIS_IMAGE=' .env \
-      && sed -i.bak "s|^REDIS_IMAGE=.*|REDIS_IMAGE=$HUB_PREFIX/redis:8-alpine|" .env \
-      || echo "REDIS_IMAGE=$HUB_PREFIX/redis:8-alpine" >> .env
   fi
   rm -f .env.bak
   ok ".env created with random credentials"
@@ -220,20 +215,20 @@ fi
 # -------- 5. Pull prebuilt images --------
 select_image_source
 
-log "Pulling base images (postgres/redis), timeout ${PULL_TIMEOUT}s ..."
-if ! run_with_timeout "$PULL_TIMEOUT" docker compose pull postgres redis 2>&1; then
-  err "Failed to pull postgres/redis images."
+log "Pulling base image (postgres), timeout ${PULL_TIMEOUT}s ..."
+if ! run_with_timeout "$PULL_TIMEOUT" docker compose pull postgres 2>&1; then
+  err "Failed to pull postgres image."
   echo "  Default images come from Docker Hub via Docker mirror: $DOCKER_REGISTRY_MIRROR"
   echo "  If your host requires a private mirror, set UTTERLOG_DOCKER_MIRROR or UTTERLOG_DOCKERHUB_PREFIX."
   exit 1
 fi
 
-log "Pulling Utterlog images from ${UTTERLOG_IMAGE_PREFIX} (api/web), timeout ${PULL_TIMEOUT}s ..."
-if ! run_with_timeout "$PULL_TIMEOUT" docker compose pull api web 2>&1; then
+log "Pulling Utterlog app image from ${UTTERLOG_IMAGE_PREFIX}, timeout ${PULL_TIMEOUT}s ..."
+if ! run_with_timeout "$PULL_TIMEOUT" docker compose pull app 2>&1; then
   warn "${UTTERLOG_IMAGE_PREFIX} pull failed; retrying with GHCR fallback ..."
   export UTTERLOG_IMAGE_PREFIX="ghcr.io/utterlog"
   persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
-  if ! run_with_timeout "$PULL_TIMEOUT" docker compose pull api web 2>&1; then
+  if ! run_with_timeout "$PULL_TIMEOUT" docker compose pull app 2>&1; then
     err "Failed to pull Utterlog images from both registry.utterlog.io and ghcr.io."
     exit 1
   fi
@@ -244,8 +239,8 @@ ok "Images pulled"
 log "Starting services..."
 docker compose up -d
 
-# Wait for api to come up
-log "Waiting for API to become healthy..."
+# Wait for app to come up
+log "Waiting for Bun app to become healthy..."
 for i in $(seq 1 60); do
   if curl -fsS "http://127.0.0.1:${UTTERLOG_PORT:-9260}/api/v1/install/status" >/dev/null 2>&1; then
     break

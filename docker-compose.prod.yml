@@ -1,37 +1,26 @@
 # ============================================================
-# Utterlog — production deployment
+# Utterlog — Bun production deployment
 # ------------------------------------------------------------
-# Exposes ONE port (${UTTERLOG_PORT:-9260}) bound to 127.0.0.1 only.
-# Everything else (web / postgres / redis) is internal.
+# Exposes ONE loopback port (${UTTERLOG_PORT:-9260}).
 #
 # Architecture:
-#   Your nginx / caddy  ──→  127.0.0.1:${UTTERLOG_PORT}  (utterlog-api)
-#                                    │
-#                                    ├─→  /admin/*      (embedded SPA)
-#                                    ├─→  /api/*        (Go handlers)
-#                                    ├─→  /uploads/*    (local files)
-#                                    ├─→  /themes/*     (runtime + built-in theme assets)
-#                                    └─→  /*            (reverse proxy to web container)
+#   nginx/caddy -> 127.0.0.1:${UTTERLOG_PORT} -> app
+#   app = Bun gateway + TypeScript API + admin SPA + Next renderer
 #
-# Start:  docker compose -f docker-compose.prod.yml up -d --build
-# Better: make deploy   (runs scripts/deploy.sh with port auto-detect + healthcheck)
+# Redis and Go are not part of the production runtime.
 # ============================================================
 
 services:
   postgres:
-    image: registry.utterlog.io/utterlog/pgvector:pg18
+    image: ${POSTGRES_IMAGE:-utterlog-postgres:19beta1-pgvector}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-utterlog}
       POSTGRES_USER: ${DB_USER:-utterlog}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Run scripts/deploy.sh or set DB_PASSWORD in .env}
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: "--auth-host=md5"
     volumes:
-      # PG 18 expects the mount at /var/lib/postgresql (NOT .../data) so it can
-      # place data in a version subdir (.../18/) and run pg_upgrade --link
-      # without crossing mount boundaries. /data path causes "unused mount" warning
-      # and the container exits unhealthy.
       - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-utterlog} -d ${DB_NAME:-utterlog}"]
@@ -39,40 +28,22 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    # Redis 8 — backwards compatible with 7 RDB/AOF files, so existing
-    # deployments upgrade in place: docker compose pull && up -d. The
-    # redisdata volume is preserved across the swap, no rebuild needed.
-    image: registry.utterlog.io/utterlog/redis:8-alpine
-    restart: unless-stopped
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  api:
+  app:
     build:
-      context: ./api
-      dockerfile: Dockerfile.prod
+      context: .
+      dockerfile: Dockerfile.bun
     restart: unless-stopped
-    # Bind to loopback ONLY — user's nginx/caddy does the public-facing termination.
-    # No conflict with existing services on 80/443.
     ports:
       - "127.0.0.1:${UTTERLOG_PORT:-9260}:8080"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
+      - PORT=8080
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-utterlog}
       - DB_USER=${DB_USER:-utterlog}
-      - DB_PASSWORD=${DB_PASSWORD:-}
+      - DB_PASSWORD=${DB_PASSWORD:?Run scripts/deploy.sh or set DB_PASSWORD in .env}
       - DB_PREFIX=${DB_PREFIX:-ul_}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - JWT_SECRET=${JWT_SECRET:-}
+      - JWT_SECRET=${JWT_SECRET:?Run scripts/deploy.sh or set JWT_SECRET in .env}
       - APP_URL=${APP_URL:-http://127.0.0.1:${UTTERLOG_PORT:-9260}}
       - STORAGE_DRIVER=${STORAGE_DRIVER:-local}
       - S3_ENDPOINT=${S3_ENDPOINT:-}
@@ -81,83 +52,40 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY:-}
       - S3_REGION=${S3_REGION:-auto}
       - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
-      # Tell Go to reverse-proxy non-/admin non-/api requests to web container
-      - WEB_PROXY_TARGET=http://web:3000
-      # One-click update needs to know the host install path (where the
-      # docker-compose.yml lives) so its shell-out can `cd` there.
-      - UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}
+      - WEB_RENDERER=bun
+      - NEXT_PUBLIC_API_URL=/api/v1
+      - INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
+      - UPLOAD_DIR=uploads
     volumes:
-      - uploads:/app/public/uploads
+      - uploads:/app/uploads
       - content:/app/content
-      # Setup wizard writes config back to ./.env on the host. Without this
-      # bind mount, /app/.env lives only in the container layer and gets lost
-      # on the os.Exit(0) restart. NOTE: the host file MUST exist before
-      # `docker compose up` — install.sh / deploy.sh create it; manual users
-      # should `touch .env` first or Docker creates an empty directory here.
       - ./.env:/app/.env:rw
-      # Socket mount enables the admin "one-click update" feature. The API
-      # shells out to `docker compose pull && up -d` via this socket, and
-      # needs to see the same docker-compose.yml path that the host uses.
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${UTTERLOG_INSTALL_DIR:-/opt/utterlog}:${UTTERLOG_INSTALL_DIR:-/opt/utterlog}:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /etc/hostname:/host/etc/hostname:ro
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_started   # start in parallel; reverse proxy retries
 
-  web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile.prod
-      args:
-        # Browser-facing API URL — goes through the API reverse proxy since
-        # they share the same host (single entry point).
-        NEXT_PUBLIC_API_URL: /api/v1
-        NEXT_PUBLIC_SITE_URL: ${APP_URL:-}
-        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
-    restart: unless-stopped
-    # No `ports:` — web is only reachable from inside the docker network,
-    # via the Go reverse proxy. No public exposure.
-    environment:
-      - NODE_ENV=production
-      # Server-side (middleware / SSR) API URL — goes to api container directly
-      # over the docker network, not through reverse proxy (faster, no loop).
-      - INTERNAL_API_URL=http://api:8080/api/v1
-
-  # ============================================================
-  # Optional: bundled Caddy for users without existing reverse proxy
-  # ------------------------------------------------------------
-  # Enable by running:  DOMAIN=blog.example.com make deploy-tls
-  # Takes ports 80/443 directly, auto-acquires Let's Encrypt cert.
-  # Do NOT use this if you already have nginx/1Panel/caddy — it'll conflict.
-  # ============================================================
   caddy:
     profiles: [tls]
-    image: registry.utterlog.io/utterlog/caddy:2-alpine
+    image: caddy:2-alpine
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"   # HTTP/3
+      - "443:443/udp"
     environment:
-      # Plain default (not :?) — Compose interpolates ALL services before
-      # profile filtering, so :? would error out for users who never enable
-      # the tls profile. Caddy itself fails on empty $DOMAIN at startup.
       - DOMAIN=${DOMAIN:-}
     volumes:
       - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      api:
-        condition: service_healthy
+      app:
+        condition: service_started
 
 volumes:
   pgdata:
-  redisdata:
   uploads:
   content:
   caddy_data:

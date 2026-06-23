@@ -6,14 +6,13 @@
 #
 # What it mirrors:
 #   pgvector/pgvector:pg18  → utterlog/pgvector:pg18 + :<precise>
-#   redis:8-alpine          → utterlog/redis:8-alpine + :<precise>
 #   caddy:2-alpine          → utterlog/caddy:2-alpine + :<precise>
 #   docker:27-cli           → utterlog/docker:27-cli (upgrade sidecar)
 #
-# The floating tag (pg18, 8-alpine, 2-alpine) is what
+# The floating tag (pg18, 2-alpine) is what
 # docker-compose.prod.yml references — it always points at the
 # latest patch of the current major. The precise tag (e.g.
-# pg18.1, 8.2.1-alpine, 2.8.4-alpine) is also pushed for users
+# pg18.1, 2.8.4-alpine) is also pushed for users
 # who want to pin.
 #
 # Tool: skopeo — preserves the full multi-arch manifest list
@@ -55,14 +54,6 @@ precise_tag_for() {
                 | jq -r '.Env[] | select(startswith("PG_VERSION="))' \
                 | sed 's/^PG_VERSION=//' \
                 | awk -F'[.\\-]' '/^[0-9]/{print "pg"$1"."$2; exit}')
-      ;;
-    redis)
-      # No labels here either, but REDIS_VERSION is in .Env.
-      # REDIS_VERSION=8.6.3  →  8.6.3-alpine
-      precise=$(printf '%s' "$raw" \
-                | jq -r '.Env[] | select(startswith("REDIS_VERSION="))' \
-                | sed 's/^REDIS_VERSION=//')
-      [ -n "$precise" ] && precise="${precise}-alpine"
       ;;
     caddy)
       # Caddy's OCI label is "v2.11.3" — strip the v so the tag is
@@ -139,7 +130,6 @@ mirror() {
 log "===== sync-mirrors start ====="
 
 mirror "pgvector/pgvector" "pg18"     "pgvector"
-mirror "redis"             "8-alpine" "redis"
 mirror "caddy"             "2-alpine" "caddy"
 mirror "docker"            "27-cli"   "docker"
 

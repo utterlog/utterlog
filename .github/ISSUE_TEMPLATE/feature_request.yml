@@ -29,9 +29,9 @@ body:
       label: 涉及范围
       multiple: true
       options:
-        - 前端博客（web/）
-        - 管理后台（api/admin/）
-        - 后端 API（api/）
+        - 前端博客（app/web/）
+        - 管理后台（app/admin/）
+        - 后端 API（app/server/）
         - 主题
         - 插件
         - 部署

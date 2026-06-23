@@ -1,79 +1,44 @@
 # ============================================================
-# Utterlog — development (single-port, mirrors production)
+# Utterlog — Bun development/production-like compose
 # ------------------------------------------------------------
-# 跟生产架构一致：只暴露一个端口 ${UTTERLOG_PORT:-9260}，
-# 浏览器访问 http://localhost:9260：
-#   /admin/*    → embed Vite SPA
-#   /api/*      → Go handlers
-#   /uploads/*  → 本地文件
-#   content/    → 运行时主题/插件目录
-#   /*          → 反代到内网 web:3000 (Next.js dev server, hot reload)
-#
-# 启动: make dev   或   docker compose up -d --build
+# Default architecture after the migration:
+#   app (Bun gateway + TS API + admin SPA + Next renderer) + postgres
 # ============================================================
 
 services:
   postgres:
-    image: pgvector/pgvector:pg18
+    image: ${POSTGRES_IMAGE:-utterlog-postgres:19beta1-pgvector}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-utterlog}
       POSTGRES_USER: ${DB_USER:-utterlog}
-      # No literal fallback: every deploy must have its own random
-      # DB_PASSWORD in .env. Run `bash scripts/deploy.sh` (or curl
-      # install.sh) to auto-generate it. Compose refuses to start with
-      # an empty password so nobody ships the same default.
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?Run 'bash scripts/deploy.sh' to generate a random DB_PASSWORD into .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Run 'bash scripts/deploy.sh' to generate DB_PASSWORD into .env}
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: "--auth-host=md5"
-    # 仅内网访问，需调试时临时取消注释
-    # ports:
-    #   - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-utterlog} -d ${DB_NAME:-utterlog}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  redis:
-    # Redis 8 — backwards compatible with 7 RDB/AOF files, so existing
-    # deployments upgrade in place: docker compose pull && up -d. The
-    # ./redisdata volume is preserved across the swap.
-    image: redis:8-alpine
-    restart: unless-stopped
-    # 仅内网访问，需调试时临时取消注释
-    # ports:
-    #   - "127.0.0.1:${REDIS_PORT:-6379}:6379"
-    volumes:
-      - ./redisdata:/data
-
-  api:
+  app:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.bun
     restart: unless-stopped
-    # 唯一对外端口，绑 127.0.0.1 不公网暴露
     ports:
       - "127.0.0.1:${UTTERLOG_PORT:-9260}:8080"
-    volumes:
-      - ./api:/app
-      - ./api/public/uploads:/app/public/uploads
-      - ./content:/app/content
-      - api_go_cache:/go/pkg/mod
-      # One-click update feature — admin → 设置 → 系统更新 → 一键升级
-      # shells out to `docker compose` via the host socket. The install
-      # dir is mounted 1:1 so the shell's `cd $UTTERLOG_INSTALL_DIR`
-      # works both inside the container and from the host daemon's view.
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${UTTERLOG_INSTALL_DIR:-/Users/gentpan/projects/utterlog}:${UTTERLOG_INSTALL_DIR:-/Users/gentpan/projects/utterlog}:ro
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
+      - PORT=8080
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-utterlog}
       - DB_USER=${DB_USER:-utterlog}
-      - DB_PASSWORD=${DB_PASSWORD:?Run 'bash scripts/deploy.sh' to generate a random DB_PASSWORD into .env}
+      - DB_PASSWORD=${DB_PASSWORD:?Run 'bash scripts/deploy.sh' to generate DB_PASSWORD into .env}
       - DB_PREFIX=${DB_PREFIX:-ul_}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - JWT_SECRET=${JWT_SECRET:?Run 'bash scripts/deploy.sh' to generate a random JWT_SECRET into .env}
+      - JWT_SECRET=${JWT_SECRET:?Run 'bash scripts/deploy.sh' to generate JWT_SECRET into .env}
       - APP_URL=${APP_URL:-http://localhost:${UTTERLOG_PORT:-9260}}
       - STORAGE_DRIVER=${STORAGE_DRIVER:-local}
       - S3_ENDPOINT=${S3_ENDPOINT:-}
@@ -82,34 +47,15 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY:-}
       - S3_REGION=${S3_REGION:-auto}
       - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
-      # 让 Go 反代非 /admin 非 /api 的请求到 Next.js 容器
-      - WEB_PROXY_TARGET=http://web:3000
-      # One-click update needs to know the host project path so the
-      # shell-out can `cd` there before running `docker compose`.
-      - UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/Users/gentpan/projects/utterlog}
+      - WEB_RENDERER=bun
+      - NEXT_PUBLIC_API_URL=/api/v1
+      - INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
+      - UPLOAD_DIR=uploads
+    volumes:
+      - ./uploads:/app/uploads
+      - ./content:/app/content
+      - /etc/os-release:/host/etc/os-release:ro
+      - /etc/hostname:/host/etc/hostname:ro
     depends_on:
       postgres:
-        condition: service_started
-      redis:
-        condition: service_started
-      web:
-        condition: service_started
-
-  web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    # 不暴露端口，仅供 api 容器内网反代访问
-    volumes:
-      - ./web:/app
-      - /app/node_modules
-      - /app/.next
-    environment:
-      # 同源相对路径，浏览器走 9260 → api 反代 → web，无跨域
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api/v1}
-      # SSR/middleware 走容器内网直连，绕过反代
-      - INTERNAL_API_URL=${INTERNAL_API_URL:-http://api:8080/api/v1}
-
-volumes:
-  api_go_cache:
+        condition: service_healthy

@@ -4,7 +4,7 @@
 # Loaded when COMPOSE_PROFILES=tls and DOMAIN env is set.
 # Caddy automatically obtains & renews Let's Encrypt certificate.
 #
-# Uses internal docker network to reach api container —
+# Uses internal docker network to reach the Bun app container —
 # no host port binding needed for tls mode.
 # ============================================================
 
@@ -16,12 +16,12 @@
 	@static path /_next/static/* /admin/assets/*
 	handle @static {
 		header Cache-Control "public, max-age=31536000, immutable"
-		reverse_proxy api:8080
+		reverse_proxy app:8080
 	}
 
-	# Everything else → Utterlog (Go, which proxies to Next.js internally)
+	# Everything else → Utterlog Bun app, which proxies to Next.js internally
 	handle {
-		reverse_proxy api:8080 {
+		reverse_proxy app:8080 {
 			header_up X-Real-IP {remote_host}
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Host {host}

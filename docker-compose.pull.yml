@@ -19,12 +19,7 @@
 # ============================================================
 
 services:
-  api:
-    image: ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog}/utterlog-api:${UTTERLOG_IMAGE_TAG:-latest}
+  app:
+    image: ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog}/utterlog-app:${UTTERLOG_IMAGE_TAG:-latest}
     build: !reset null     # disable local build
-    pull_policy: always
-
-  web:
-    image: ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog}/utterlog-web:${UTTERLOG_IMAGE_TAG:-latest}
-    build: !reset null
     pull_policy: always
