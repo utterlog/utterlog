@@ -1,6 +1,6 @@
 {
   "name": "utterlog-web",
-  "version": "2.5.2",
+  "version": "1.3.7",
   "private": true,
   "scripts": {
     "sync:themes": "node ./scripts/sync-theme-styles.mjs",

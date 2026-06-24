@@ -1,7 +1,7 @@
 {
   "name": "utterlog-admin",
   "private": true,
-  "version": "2.5.2",
+  "version": "1.3.7",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -23,7 +23,28 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.5.2] - 2026-05-18
+## [1.3.7] - 2026-06-24
+
+### 新增
+
+- **Bun 单进程运行时**：以 Bun + Hono 替代 Go API，合并网关、管理后台与博客 SSR。
+- **Azure 中国红配色**：删除独立 Chred 主题，改为 Azure `data-accent=red`。
+- **路由模块化**：拆分 `telegram` / `security` / `footprints` / `extensions` 等路由模块。
+
+### 优化
+
+- **部署拓扑**：默认仅需 `app + postgres`，移除 Redis 运行时依赖。
+- **组织 Profile README**：更新为 Bun 技术栈说明。
+
+### 修复
+
+- **compat 路由**：修复提取脚本损坏的 WXR / RSS 辅助函数。
+
+### 移除
+
+- 删除 `api/` Go 后端与 Chred 独立主题目录。
+
+## [1.3.6] - 2026-05-18
 
 ### 新增
 
@@ -42,7 +63,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - 移除主仓库内的 `typecho-plugin/UtterlogSync` 插件源码，避免插件与主项目重复维护。
 
-## [2.5.1] - 2026-05-17
+## [1.3.5] - 2026-05-17
 
 ### 新增
 
@@ -70,7 +91,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.5.0] - 2026-05-16
+## [1.3.4] - 2026-05-16
 
 ### 新增
 
@@ -106,7 +127,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - 旧的 `<Button>` inline CSSProperties 实现：伪类写不出来 hover / focus / active 全失效，重写为 className composer 后由 `.btn` 类接管所有状态。
 - 后台时区选择器的硬编码 15 项 `COMMON_TIME_ZONES` 数组与 `buildTimeZoneOptions()` 函数：被新 `TimezoneCombobox` 组件取代。
 
-## [2.4.2] - 2026-05-16
+## [1.3.3] - 2026-05-16
 
 ### 新增
 
@@ -131,7 +152,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.4.1] - 2026-05-16
+## [1.3.2] - 2026-05-16
 
 ### 新增
 
@@ -171,7 +192,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - `vinyl-spin` keyframe + `.vinyl-spinning` / `.vinyl-paused` CSS 类（admin 无消费者，孤儿代码）。
 - 4 处手写 SVG 12 圆点环 loading + Button 内 96×96 齿轮 SVG + 5 处 `fa-circle-notch fa-spin`（全部统一为 `fa-spinner fa-spin`）。
 
-## [2.3.10] - 2026-05-09
+## [1.3.1] - 2026-05-09
 
 ### 修复
 
@@ -182,13 +203,13 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
   - api 在响应、版本号没变（registry 没同步）→ yellow **warning** "升级超时未确认，等几分钟刷新再看"
   - 容器仍在旧版本（真没升级成功）→ red error 保留
 
-## [2.3.9] - 2026-05-08
+## [1.3.0] - 2026-05-08
 
 ### 修复
 
 - **后台升级在自定义安装路径下"未找到 docker-compose 文件"**：v2.3.3 加的 `probeComposeWorkingDir()` (用 docker compose label 自动探测真实安装目录) 实际从来没被触发，因为 `docker-compose.yml` 默认 `UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}` 让 env 变量永远非空，老逻辑「env 优先 → 非空就直接用 → label 探测被跳过」导致用户装在 `/opt/utterlog-pancn/`、`/root/my-blog/` 等任何非 `/opt/utterlog` 路径时升级一律拿到错的 `/opt/utterlog` 然后报错。本次调整优先级 → docker compose label > env 变量 > `/opt/utterlog` 兜底。compose label 是 docker compose 自己起容器时打上的最权威路径，永远准确；env 变量退到 fallback（万一 label 探测失败 / docker socket 不可用时仍能用）。日志里也明确标出来源（`(来自 compose label)` / `(来自 UTTERLOG_INSTALL_DIR env)` / `(兜底默认)`）方便排查。
 
-## [2.3.8] - 2026-05-08
+## [1.2.9] - 2026-05-08
 
 ### 优化
 
@@ -206,7 +227,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.3.7] - 2026-05-08
+## [1.2.8] - 2026-05-08
 
 ### 修复
 
@@ -217,7 +238,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.3.6] - 2026-05-07
+## [1.2.7] - 2026-05-07
 
 ### 新增
 
@@ -252,7 +273,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.3.5] - 2026-05-07
+## [1.2.6] - 2026-05-07
 
 ### 新增
 
@@ -284,7 +305,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - 暂无。
 
-## [2.3.4] - 2026-05-07
+## [1.2.5] - 2026-05-07
 
 ### 新增
 
@@ -302,7 +323,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - 暂无。
 
-## [2.3.3] - 2026-05-07
+## [1.2.4] - 2026-05-07
 
 ### 修复
 
@@ -315,7 +336,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **安装目录写死 `/opt/utterlog`**：`runUpgrade()` 之前默认 `installDir = /opt/utterlog`，1Panel 装在 `/opt/utterlog-pancn/` 或自定义路径直接报"找不到 docker-compose 文件"。新增 `probeComposeWorkingDir()` 用 `com.docker.compose.project.working_dir` label 自动探测真实路径，环境变量 / 兜底逻辑保留。
 - 停留在 v2.3.2 及更早版本的用户需在服务器上手动跑一次 `docker compose pull && docker compose up -d` 摆脱旧容器名探测 bug，后续升级恢复一键。
 
-## [2.3.2] - 2026-05-07
+## [1.2.3] - 2026-05-07
 
 ### 新增
 
@@ -357,7 +378,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - **`<footer>` "重新打开陪读" 浮动按钮**：原本点 × 关闭后 footer 出现一个圆形 message-bot 按钮重新唤起卡片。按用户要求改为"关闭后只有强制刷新才重显"，简化交互。
 
-## [2.3.1] - 2026-05-07
+## [1.2.2] - 2026-05-07
 
 ### 新增
 
@@ -382,7 +403,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - 暂无。
 
-## [2.3.0] - 2026-05-05
+## [1.2.1] - 2026-05-05
 
 ### 优化
 
@@ -398,7 +419,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - `InitStatsSync()` 空 hook(v2.2.0 起只剩函数声明)以及 `main.go` 里的调用。
 - `web/next.config.js` 的 `experimental.staleTimes` 配置:Next 16.2.4 默认 `staleTimes.dynamic = 0`,显式写 0 是 no-op,删除以保持配置最小化。
 
-## [2.2.0] - 2026-05-05
+## [1.2.0] - 2026-05-05
 
 ### 新增
 
@@ -427,7 +448,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - 删除死代码 `IncrTotalViews()` / `GetTotalViews()` / Redis `stats:total_views` —— PV 真相已迁移到 SQL。
 - `analytics_rollup` 不再聚合 `_total` 维度（由 `logAccess` 实时写入）；维度 breakdown（browser / os / device / country）仍保留 cron 滚动。
 
-## [2.1.7] - 2026-05-04
+## [1.1.9] - 2026-05-04
 
 ### 优化
 
@@ -445,7 +466,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - 删除 `web/components/blog/LiveViewCount.tsx`(v2.1.6 引入的客户端 fetch 组件,被服务端 +1 取代)。
 
-## [2.1.6] - 2026-05-04
+## [1.1.8] - 2026-05-04
 
 ### 修复
 
@@ -455,7 +476,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.1.5] - 2026-05-04
+## [1.1.7] - 2026-05-04
 
 ### 修复
 
@@ -465,7 +486,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.1.4] - 2026-05-04
+## [1.1.6] - 2026-05-04
 
 ### 新增
 
@@ -488,7 +509,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.1.3] - 2026-05-04
+## [1.1.5] - 2026-05-04
 
 ### 新增
 
@@ -515,7 +536,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.1.2] - 2026-05-03
+## [1.1.4] - 2026-05-03
 
 ### 新增
 
@@ -533,7 +554,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.1.1] - 2026-05-03
+## [1.1.3] - 2026-05-03
 
 ### 新增
 
@@ -552,7 +573,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.1.0] - 2026-05-03
+## [1.1.2] - 2026-05-03
 
 ### 新增
 
@@ -572,7 +593,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.10] - 2026-05-03
+## [1.1.1] - 2026-05-03
 
 ### 新增
 
@@ -593,7 +614,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.9] - 2026-05-03
+## [1.1.0] - 2026-05-03
 
 ### 新增
 
@@ -611,7 +632,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.8] - 2026-05-03
+## [1.0.9] - 2026-05-03
 
 ### 新增
 
@@ -635,7 +656,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.7] - 2026-05-02
+## [1.0.8] - 2026-05-02
 
 ### 新增
 
@@ -666,7 +687,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.6] - 2026-05-01
+## [1.0.7] - 2026-05-01
 
 ### 新增
 
@@ -686,7 +707,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.5] - 2026-05-01
+## [1.0.6] - 2026-05-01
 
 ### 新增
 
@@ -704,7 +725,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.4] - 2026-05-01
+## [1.0.5] - 2026-05-01
 
 ### 新增
 
@@ -750,7 +771,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.3] - 2026-05-01
+## [1.0.4] - 2026-05-01
 
 ### 新增
 
@@ -790,7 +811,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.2] - 2026-04-29
+## [1.0.3] - 2026-04-29
 
 ### 新增
 
@@ -812,7 +833,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-## [2.0.1] - 2026-04-29
+## [1.0.2] - 2026-04-29
 
 ### 新增
 
@@ -843,7 +864,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - 移除安全设置中的 IP 信誉功能，后台不再显示 IP 信誉 tab，后端不再记录本地风险评分或按评分自动封禁。
 - 移除 API 侧重复的内置主题截图文件，内置主题静态资源统一由 web 侧构建产物提供。
 
-## [2.0.0] - 2026-04-29
+## [1.0.1] - 2026-04-29
 
 ### 新增
 
@@ -934,13 +955,42 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 暂无。
 
-[Unreleased]: https://github.com/utterlog/utterlog/compare/v2.0.7...HEAD
-[2.0.7]: https://github.com/utterlog/utterlog/releases/tag/v2.0.7
-[2.0.6]: https://github.com/utterlog/utterlog/releases/tag/v2.0.6
-[2.0.5]: https://github.com/utterlog/utterlog/releases/tag/v2.0.5
-[2.0.4]: https://github.com/utterlog/utterlog/releases/tag/v2.0.4
-[2.0.3]: https://github.com/utterlog/utterlog/releases/tag/v2.0.3
-[2.0.2]: https://github.com/utterlog/utterlog/releases/tag/v2.0.2
-[2.0.1]: https://github.com/utterlog/utterlog/releases/tag/v2.0.1
-[2.0.0]: https://github.com/utterlog/utterlog/releases/tag/v2.0.0
+[Unreleased]: https://github.com/utterlog/utterlog/compare/v1.3.7...HEAD
 [1.0.0]: https://github.com/utterlog/utterlog/releases/tag/v1.0.0
+[1.0.1]: https://github.com/utterlog/utterlog/compare/v1.0.0...v1.0.1
+[1.0.2]: https://github.com/utterlog/utterlog/compare/v1.0.1...v1.0.2
+[1.0.3]: https://github.com/utterlog/utterlog/compare/v1.0.2...v1.0.3
+[1.0.4]: https://github.com/utterlog/utterlog/compare/v1.0.3...v1.0.4
+[1.0.5]: https://github.com/utterlog/utterlog/compare/v1.0.4...v1.0.5
+[1.0.6]: https://github.com/utterlog/utterlog/compare/v1.0.5...v1.0.6
+[1.0.7]: https://github.com/utterlog/utterlog/compare/v1.0.6...v1.0.7
+[1.0.8]: https://github.com/utterlog/utterlog/compare/v1.0.7...v1.0.8
+[1.0.9]: https://github.com/utterlog/utterlog/compare/v1.0.8...v1.0.9
+[1.1.0]: https://github.com/utterlog/utterlog/compare/v1.0.9...v1.1.0
+[1.1.1]: https://github.com/utterlog/utterlog/compare/v1.1.0...v1.1.1
+[1.1.2]: https://github.com/utterlog/utterlog/compare/v1.1.1...v1.1.2
+[1.1.3]: https://github.com/utterlog/utterlog/compare/v1.1.2...v1.1.3
+[1.1.4]: https://github.com/utterlog/utterlog/compare/v1.1.3...v1.1.4
+[1.1.5]: https://github.com/utterlog/utterlog/compare/v1.1.4...v1.1.5
+[1.1.6]: https://github.com/utterlog/utterlog/compare/v1.1.5...v1.1.6
+[1.1.7]: https://github.com/utterlog/utterlog/compare/v1.1.6...v1.1.7
+[1.1.8]: https://github.com/utterlog/utterlog/compare/v1.1.7...v1.1.8
+[1.1.9]: https://github.com/utterlog/utterlog/compare/v1.1.8...v1.1.9
+[1.2.0]: https://github.com/utterlog/utterlog/compare/v1.1.9...v1.2.0
+[1.2.1]: https://github.com/utterlog/utterlog/compare/v1.2.0...v1.2.1
+[1.2.2]: https://github.com/utterlog/utterlog/compare/v1.2.1...v1.2.2
+[1.2.3]: https://github.com/utterlog/utterlog/compare/v1.2.2...v1.2.3
+[1.2.4]: https://github.com/utterlog/utterlog/compare/v1.2.3...v1.2.4
+[1.2.5]: https://github.com/utterlog/utterlog/compare/v1.2.4...v1.2.5
+[1.2.6]: https://github.com/utterlog/utterlog/compare/v1.2.5...v1.2.6
+[1.2.7]: https://github.com/utterlog/utterlog/compare/v1.2.6...v1.2.7
+[1.2.8]: https://github.com/utterlog/utterlog/compare/v1.2.7...v1.2.8
+[1.2.9]: https://github.com/utterlog/utterlog/compare/v1.2.8...v1.2.9
+[1.3.0]: https://github.com/utterlog/utterlog/compare/v1.2.9...v1.3.0
+[1.3.1]: https://github.com/utterlog/utterlog/compare/v1.3.0...v1.3.1
+[1.3.2]: https://github.com/utterlog/utterlog/compare/v1.3.1...v1.3.2
+[1.3.3]: https://github.com/utterlog/utterlog/compare/v1.3.2...v1.3.3
+[1.3.4]: https://github.com/utterlog/utterlog/compare/v1.3.3...v1.3.4
+[1.3.5]: https://github.com/utterlog/utterlog/compare/v1.3.4...v1.3.5
+[1.3.6]: https://github.com/utterlog/utterlog/compare/v1.3.5...v1.3.6
+[1.3.7]: https://github.com/utterlog/utterlog/compare/v1.3.6...v1.3.7
