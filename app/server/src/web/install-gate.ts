@@ -23,7 +23,7 @@ export async function installGate(request: Request): Promise<Response | null> {
   try {
     const r = await fetch(`${apiBase}/install/status`, {
       signal: AbortSignal.timeout(3000),
-      cache: 'no-store',
+      headers: { 'cache-control': 'no-cache' },
     });
     apiReachable = r.ok;
     if (r.ok) {
@@ -54,8 +54,7 @@ export async function proxyFeed(request: Request): Promise<Response | null> {
   const apiBase = process.env.INTERNAL_API_URL || `http://127.0.0.1:${config.port}/api/v1`;
   try {
     const res = await fetch(`${apiBase}/feed`, {
-      headers: { accept: 'application/xml' },
-      cache: 'no-store',
+      headers: { accept: 'application/xml', 'cache-control': 'no-cache' },
     });
     const body = await res.text();
     const headers: Record<string, string> = {

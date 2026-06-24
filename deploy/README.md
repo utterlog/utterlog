@@ -26,7 +26,8 @@ Bun app 是唯一外部入口，内部分发：
 - `/api/v1/*` → TypeScript handlers
 - `/uploads/*` → 本地文件
 - `/themes/*` → 用户主题资源与内置主题资源
-- 其他 → 内部反代到 Next.js 渲染进程
+- `/static/*` → 博客客户端 bundle
+- 其他 → Bun 内置 React SSR（`app/server/src/web/router.ts`）
 
 反代配置只需指向一个端口（`127.0.0.1:9260`），无需分路径处理。
 
@@ -44,7 +45,6 @@ Upgrade/Connection → WebSocket / SSE（AI 流式输出必需）
 
 ### 可缓存资源（长期）
 
-- `/_next/static/*` — Next.js hash 化 chunk
-- `/admin/assets/*` — Vite hash 化 chunk
+- `/static/*`、`/admin/assets/*` — hash 化或带版本号的静态资源
 
 这两个路径都是 content-addressed，可以 `max-age=31536000, immutable`。

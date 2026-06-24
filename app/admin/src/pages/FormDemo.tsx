@@ -85,10 +85,8 @@ export default function FormDemo() {
             <FormFieldA label="当前主题" hint="前台展示用的主题" horizontal>
               <select className="input text-sm" style={{ width: 200 }}
                 value={theme} onChange={(e) => setTheme(e.target.value)}>
-                <option>Utterlog</option>
                 <option>Azure</option>
-                <option>Flux</option>
-                <option>Chred</option>
+                <option>Nebula</option>
               </select>
             </FormFieldA>
           </FormSectionA>

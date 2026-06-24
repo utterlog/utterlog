@@ -5,13 +5,13 @@ Do not edit the original project at `/Users/gentpan/projects/utterlog` from this
 
 ## Current target architecture
 
-Utterlog is being migrated from the old `postgres + redis + api(Go) + web(Next)` split to:
+Utterlog is being migrated from the old `postgres + api(Go) + web(Next)` split to:
 
 - Bun TypeScript application gateway/API on one public app port.
 - PostgreSQL as the required database.
 - React blog SSR rendered by Bun (no Next.js subprocess).
 - Vite/React admin built as static assets and served by the Bun app.
-- Redis is not part of the runtime. Ephemeral state uses in-process memory only.
+- Ephemeral state (captcha, online users, coding cache, reader chat sessions) uses in-process memory only.
 - Deployment target is `app + postgres`, or one `app` container when PostgreSQL is external.
 
 ## Important directories
@@ -27,7 +27,7 @@ deploy/                 Deployment examples and site installer
 scripts/                Operational scripts
 ```
 
-The old Go backend source has been removed from this migration copy. Do not recreate `api/main.go`, `api/internal`, Go Dockerfiles, Go `go.mod`, or Redis compose services.
+The old Go backend source has been removed from this migration copy. Do not recreate `api/main.go`, `api/internal`, Go Dockerfiles, or Go `go.mod`.
 
 ## Local commands
 
@@ -70,7 +70,6 @@ The ignored `community/`, `id/`, `wordpress-plugin/`, and `Comment/` directories
 - Keep changes inside `/Users/gentpan/projects/utterlog-bun`.
 - Prefer Bun and TypeScript for new backend code.
 - Keep PostgreSQL-specific behavior; do not force SQLite.
-- Do not add Redis services, environment variables, or adapter code back to the project.
 - Keep the admin and web API paths compatible while replacing Go handlers.
 - Update deployment docs and scripts when changing runtime topology.
 - Do not remove runtime data or ignored reference projects as part of code cleanup.

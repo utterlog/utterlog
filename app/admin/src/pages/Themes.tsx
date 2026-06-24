@@ -15,6 +15,7 @@ export default function Themes() {
   const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activating, setActivating] = useState<string | null>(null);
+  const [azureAccent, setAzureAccent] = useState<'blue' | 'red'>('blue');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 当前 active 主题在 manifest 里声明了哪些自定义 admin panel —— tabs
@@ -36,6 +37,7 @@ export default function Themes() {
       setThemes(d.themes || []);
       setActive(d.active || '');
       setRequestedTheme(d.requested || null);
+      setAzureAccent(d.azure_accent === 'red' ? 'red' : 'blue');
     } catch {
       toast.error('获取主题列表失败');
     } finally {
@@ -64,15 +66,19 @@ export default function Themes() {
     }
   };
 
-  const handleActivate = async (id: string) => {
-    if (id === active) return;
+  const handleActivate = async (id: string, accent?: 'blue' | 'red') => {
+    if (id === active && id !== 'Azure') return;
+    if (id === active && id === 'Azure' && (!accent || accent === azureAccent)) return;
     setActivating(id);
     try {
-      await themesApi.activate(id);
+      const payload = id === 'Azure' ? { accent: accent || azureAccent } : undefined;
+      const res: any = await themesApi.activate(id, payload);
+      const nextAccent = res?.data?.azure_accent === 'red' || payload?.accent === 'red' ? 'red' : 'blue';
       setActive(id);
+      setAzureAccent(nextAccent);
       setRequestedTheme(null);
       setThemes((prev) => prev.map((t) => ({ ...t, enabled: t.id === id })));
-      toast.success('主题已切换，刷新前台即可生效');
+      toast.success(id === 'Azure' && accent ? 'Azure 配色已更新' : '主题已切换，刷新前台即可生效');
     } catch (e: any) {
       toast.error(e?.response?.data?.error?.message || '切换失败');
     } finally {
@@ -299,6 +305,27 @@ export default function Themes() {
                     <p style={{ fontSize: 11, color: '#d97706', margin: '0 0 12px' }}>
                       Bun 运行时已启用 Azure / Nebula，此主题暂不可切换
                     </p>
+                  )}
+                  {theme.id === 'Azure' && isActive && (
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                      {(['blue', 'red'] as const).map((accent) => (
+                        <button
+                          key={accent}
+                          type="button"
+                          className="btn btn-sm"
+                          disabled={activating === theme.id}
+                          onClick={() => handleActivate('Azure', accent)}
+                          style={{
+                            flex: 1,
+                            borderColor: azureAccent === accent ? 'var(--color-primary)' : 'var(--color-border)',
+                            background: azureAccent === accent ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent',
+                            color: accent === 'red' ? '#F53102' : 'var(--color-primary)',
+                          }}
+                        >
+                          {accent === 'blue' ? '蔚蓝' : '中国红'}
+                        </button>
+                      ))}
+                    </div>
                   )}
 
                   {/* marginTop:auto pushes the action row to the bottom of

@@ -297,8 +297,8 @@ html.lightbox-active body {
 }
 
 /* Azure — 蔚蓝极简（Utterlog 官方默认主题，与后台一致）*/
-[data-theme="Azure"],
-[data-theme="azure"] {
+[data-theme="Azure"]:not([data-accent="red"]),
+[data-theme="azure"]:not([data-accent="red"]) {
   --color-primary: #0052D9;
   --color-primary-hover: #0044B8;
   --color-primary-active: #003A9E;
@@ -313,14 +313,9 @@ html.lightbox-active body {
   --color-focus-ring: #0052D9;
 }
 
-/* Chred — 中国红极简（克隆 Azure 布局，主色 #F53102）。
-   Without this block, Chred fell through to :root's Azure tokens
-   and every `var(--color-primary)` rendered blue: Pagination,
-   blog-prose headings, quote bars, table thead, mark, list bullets,
-   prev/next chevrons, related-card hover etc. all wrong. Mirrors
-   Azure's neutral grays for text so red is reserved for accents. */
-[data-theme="Chred"],
-[data-theme="chred"] {
+/* Azure 中国红配色（原 Chred 主题主色，现作为 Azure accent） */
+[data-theme="Azure"][data-accent="red"],
+[data-theme="azure"][data-accent="red"] {
   --color-primary: #F53102;
   --color-primary-hover: #DC2C02;
   --color-primary-active: #B82301;

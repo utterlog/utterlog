@@ -9,6 +9,7 @@ import { SlotFooter, SlotHead } from '../../../web/lib/slots';
 import PageViewTracker from '../../../web/components/blog/PageViewTracker';
 import ImageEffects from '../../../web/components/blog/ImageEffects';
 import AIChatBubble from '../../../web/components/blog/AIChatBubble';
+import { blogThemeAccentAttr } from '../blog-themes';
 import { isValidTimeZone, localTimeZone } from '../../../web/lib/timezone';
 import { join } from 'node:path';
 import { runtimePaths } from '../paths';
@@ -85,8 +86,10 @@ export async function renderBlogPage(
 
   const bodyHtml = renderToString(app);
 
+  const accentAttr = blogThemeAccentAttr(ctx.theme.accent || 'blue');
+  const accentHtml = accentAttr ? ` data-accent="${escapeHtml(accentAttr)}"` : '';
   return `<!doctype html>
-<html lang="${escapeHtml(locale)}" data-theme="${escapeHtml(ctx.theme.name)}" data-timezone="${escapeHtml(timeZone)}">
+<html lang="${escapeHtml(locale)}" data-theme="${escapeHtml(ctx.theme.name)}"${accentHtml} data-timezone="${escapeHtml(timeZone)}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -103,15 +106,15 @@ export async function renderBlogPage(
   <link rel="stylesheet" href="https://static.utterlog.com/libs/fontawesome/7.2.0/css/all.min.css" />
   <link rel="stylesheet" href="https://static.utterlog.com/fonts/noto-sans-sc/result.css" />
   <link rel="stylesheet" href="https://static.utterlog.com/fonts/AlimamaFangYuanTi/result.css" />
-  <link rel="stylesheet" href="/blog-static/globals.css" />
-  <link rel="stylesheet" href="/blog-static/client.css" />
+  <link rel="stylesheet" href="/static/globals.css" />
+  <link rel="stylesheet" href="/static/client.css" />
   ${meta.jsonLd ? `<script type="application/ld+json">${JSON.stringify(meta.jsonLd)}</script>` : ''}
 </head>
 <body class="font-sans antialiased bg-page text-primary">
   <svg width="0" height="0" style="position:absolute"><defs><clipPath id="squircle" clipPathUnits="objectBoundingBox"><path d="M0.5 0C0.9 0 1 0.1 1 0.5 1 0.9 0.9 1 0.5 1 0.1 1 0 0.9 0 0.5 0 0.1 0.1 0 0.5 0Z" /></clipPath></defs></svg>
   <div id="root">${bodyHtml}</div>
   <script type="application/json" id="utterlog-boot-data">${safeJsonScript(boot)}</script>
-  <script type="module" src="/blog-static/client.js"></script>
+  <script type="module" src="/static/client.js"></script>
 </body>
 </html>`;
 }

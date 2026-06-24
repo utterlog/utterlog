@@ -45,13 +45,13 @@ export function renderStandalonePage(
   <title>${escapeHtml(title)}</title>
   <link rel="preconnect" href="https://static.utterlog.com" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://static.utterlog.com/libs/fontawesome/7.2.0/css/all.min.css" />
-  <link rel="stylesheet" href="/blog-static/globals.css" />
-  <link rel="stylesheet" href="/blog-static/client.css" />
+  <link rel="stylesheet" href="/static/globals.css" />
+  <link rel="stylesheet" href="/static/client.css" />
 </head>
 <body class="font-sans antialiased bg-page text-primary">
   <div id="root">${bodyHtml}</div>
   <script type="application/json" id="utterlog-boot-data">${safeJsonScript(boot)}</script>
-  <script type="module" src="/blog-static/client.js"></script>
+  <script type="module" src="/static/client.js"></script>
 </body>
 </html>`;
 }

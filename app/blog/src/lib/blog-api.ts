@@ -179,6 +179,7 @@ export async function getGames(params?: { page?: number; per_page?: number }) {
 export const SUPPORTED_THEMES = new Set(['Azure', 'Nebula']);
 
 export function normalizeThemeName(name: string) {
+  if (/^chred$/i.test(String(name || '').trim())) return 'Azure';
   const trimmed = String(name || '').trim();
   return SUPPORTED_THEMES.has(trimmed) ? trimmed : 'Azure';
 }

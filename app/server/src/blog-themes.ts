@@ -1,8 +1,10 @@
-export const SUPPORTED_BLOG_THEMES = new Set(['Azure', 'Nebula']);
-
-export const DEFAULT_BLOG_THEME = 'Azure';
-
-export function normalizeBlogTheme(name: string): 'Azure' | 'Nebula' {
-  const trimmed = String(name || '').trim();
-  return SUPPORTED_BLOG_THEMES.has(trimmed) ? (trimmed as 'Azure' | 'Nebula') : DEFAULT_BLOG_THEME;
-}
+export {
+  DEFAULT_BLOG_THEME,
+  SUPPORTED_BLOG_THEMES,
+  blogThemeAccentAttr,
+  normalizeBlogTheme,
+  normalizeThemeName,
+  resolveBlogTheme,
+  type BlogThemeAccent,
+  type BlogThemeName,
+} from '../../shared/blog-theme';

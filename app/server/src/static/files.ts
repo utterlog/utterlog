@@ -157,7 +157,7 @@ export function serveStaticFiles(app: Hono) {
     }
   }
 
-  app.get('/blog-static/globals.css', async (c) => {
+  app.get('/static/globals.css', async (c) => {
     const bundled = Bun.file(join('app/blog/dist', 'globals.css'));
     if (await bundled.exists()) {
       return new Response(bundled, {
@@ -174,7 +174,7 @@ export function serveStaticFiles(app: Hono) {
     return new Response(file, { headers: { 'content-type': 'text/css; charset=utf-8' } });
   });
 
-  app.get('/blog-static/client.js', async (c) => {
+  app.get('/static/client.js', async (c) => {
     const file = Bun.file(join('app/blog/dist', 'client.js'));
     if (!(await file.exists())) {
       return new Response('export {};', { headers: { 'content-type': 'application/javascript; charset=utf-8' } });
@@ -189,7 +189,7 @@ export function serveStaticFiles(app: Hono) {
     });
   });
 
-  app.get('/blog-static/client.css', async (c) => {
+  app.get('/static/client.css', async (c) => {
     const file = Bun.file(join('app/blog/dist', 'client.css'));
     if (!(await file.exists())) return c.notFound();
     return new Response(file, {
@@ -202,12 +202,25 @@ export function serveStaticFiles(app: Hono) {
     });
   });
 
-  app.get('/blog-static/*', async (c) => {
-    const rest = c.req.path.replace(/^\/blog-static\/?/, '');
+  app.get('/static/*', async (c) => {
+    const rest = c.req.path.replace(/^\/static\/?/, '');
     if (!rest || rest === 'globals.css' || rest === 'client.js' || rest === 'client.css') return c.notFound();
-    const path = safeJoin('app/blog/dist', rest);
     const acceptEncoding = c.req.header('accept-encoding') || '';
-    return (await fileResponse(path, acceptEncoding)) || c.notFound();
+    const blogPath = safeJoin('app/blog/dist', rest);
+    const blogHit = await fileResponse(blogPath, acceptEncoding);
+    if (blogHit) return blogHit;
+    const publicPath = safeJoin(join(runtimePaths.webAppDir, 'public', 'static'), rest);
+    return (await fileResponse(publicPath, acceptEncoding)) || c.notFound();
+  });
+  app.on('HEAD', '/static/*', async (c) => {
+    const rest = c.req.path.replace(/^\/static\/?/, '');
+    if (!rest || rest === 'globals.css' || rest === 'client.js' || rest === 'client.css') return c.notFound();
+    const acceptEncoding = c.req.header('accept-encoding') || '';
+    const blogPath = safeJoin('app/blog/dist', rest);
+    const blogHit = await fileResponse(blogPath, acceptEncoding);
+    if (blogHit) return blogHit;
+    const publicPath = safeJoin(join(runtimePaths.webAppDir, 'public', 'static'), rest);
+    return (await fileResponse(publicPath, acceptEncoding)) || c.notFound();
   });
 
   app.get('/styles/*', async (c) => {
@@ -229,7 +242,7 @@ export function serveStaticFiles(app: Hono) {
     const acceptEncoding = c.req.header('accept-encoding') || '';
     return (await fileResponse(path, acceptEncoding)) || c.notFound();
   };
-  for (const prefix of ['/emoji', '/icons', '/images', '/static']) {
+  for (const prefix of ['/emoji', '/icons', '/images']) {
     app.get(`${prefix}/*`, serveWebPublic(prefix));
     app.on('HEAD', `${prefix}/*`, serveWebPublic(prefix));
   }

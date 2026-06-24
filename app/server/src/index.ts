@@ -1,4 +1,5 @@
 import { assertSecureConfig, config } from './config';
+import { migrateLegacyBlogThemeOptions } from './blog-theme-options';
 import { startAnalyticsRollup } from './analytics/rollup';
 import { initDb } from './db/client';
 import { createApp } from './routes';
@@ -11,6 +12,9 @@ startCpuMonitor();
 const ready = await initDb();
 assertSecureConfig(ready);
 if (ready) {
+  await migrateLegacyBlogThemeOptions().catch((err) => {
+    console.error('blog theme migration failed:', err);
+  });
   startAnalyticsRollup();
   startTelegramDailyReport();
   startFeedFetchCron();

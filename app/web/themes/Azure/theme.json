@@ -1,13 +1,18 @@
 {
   "name": "Azure",
   "version": "2.0.5",
-  "description": "蔚蓝极简内容优先主题 — 直角设计，蓝色配色",
+  "description": "蔚蓝极简内容优先主题 — 直角设计，支持蔚蓝 / 中国红配色",
   "author": "Utterlog Team",
   "screenshot": "screenshot.png",
   "colors": {
     "primary": "#0052D9",
+    "primaryRed": "#F53102",
     "background": "#ffffff"
   },
+  "accents": [
+    { "key": "blue", "label": "蔚蓝", "primary": "#0052D9" },
+    { "key": "red", "label": "中国红", "primary": "#F53102" }
+  ],
   "layout": {
     "maxWidth": "900px",
     "headerStyle": "fixed"

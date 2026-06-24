@@ -7,6 +7,7 @@ import { handleBlogRequest } from '../web/router';
 import { config } from '../config';
 import { adminAuth } from '../auth/middleware';
 import { bodySizeLimit, rateLimit, securityDefense, securityHeaders } from '../http/security';
+import { handleRevalidate } from '../cache/revalidate';
 
 const adminMutationPrefixes = [
   '/api/v1/admin/',
@@ -97,7 +98,11 @@ export function createApp(dbReady: boolean) {
   }));
 
   serveStaticFiles(app);
-  app.post('/api/revalidate', adminAuth, (c) => c.json({ success: true, revalidated: true }));
+  app.post('/api/revalidate', adminAuth, async (c) => {
+    const body = await c.req.json().catch(() => ({}));
+    const result = await handleRevalidate(body);
+    return c.json({ success: true, message: 'Cache cleared', ...result });
+  });
   app.options('/api/revalidate', (c) => c.body(null, 204));
   app.use('/api/v1/*', async (c, next) => {
     if (['GET', 'HEAD', 'OPTIONS'].includes(c.req.method.toUpperCase())) return next();

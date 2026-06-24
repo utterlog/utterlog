@@ -5,7 +5,7 @@
 - 默认运行时：`app` + PostgreSQL。
 - 外部 PostgreSQL 模式：只运行一个 `app` 容器。
 - Go 后端移除。
-- Redis 移出核心运行时，后续作为可选 adapter/plugin 接入。
+- Redis 已从运行时移除；临时状态统一走 app 进程内 `MemoryStore`。
 - 前台 Next SSR、管理端 Vite SPA、TypeScript API 由 Bun app 统一承载。
 
 ## 已完成
@@ -21,7 +21,7 @@
   - `docker-compose.prod.yml`
   - `docker-compose.external-db.yml`
   - `deploy/site/docker-compose.yml`
-- Redis 从默认安装、部署、安装向导里移除；安装器显示为可选插件策略。
+- Redis 已从安装、部署、安装向导与 compose 中完全移除。
 - 前台 Next 与管理端 Vite 代理改为同源 `/api/v1` 或 Bun app。
 - CI 和 Docker publish workflow 改为单 app 镜像。
 - 已迁移的真实 Bun API：

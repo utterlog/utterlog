@@ -1,6 +1,6 @@
 import { getOptions, getCategories, getTags, getArchiveStats } from './blog-api';
 import type { ThemeContextData, MenuItem } from './theme-context';
-import { getThemeManifest, DEFAULT_THEME, normalizeThemeName } from './theme';
+import { getThemeManifest, DEFAULT_THEME, resolveBlogTheme } from './theme';
 import { resolveSiteTimeZone } from './timezone';
 import { serverApiBase } from './server-api';
 
@@ -90,7 +90,8 @@ export async function getThemeContextData(): Promise<ThemeContextData> {
     }
   }
 
-  const themeName = normalizeThemeName(opts.active_theme || DEFAULT_THEME);
+  const resolved = resolveBlogTheme(opts.active_theme || DEFAULT_THEME, opts.azure_accent || '');
+  const themeName = resolved.theme;
   const manifest = getThemeManifest(themeName);
   const timeZone = resolveSiteTimeZone(opts);
 
@@ -163,6 +164,7 @@ export async function getThemeContextData(): Promise<ThemeContextData> {
     },
     theme: {
       name: themeName,
+      accent: resolved.accent,
       manifest,
     },
     options: opts,

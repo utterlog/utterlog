@@ -2,7 +2,7 @@
 
 ## 1. 需求与 MVP 摘要
 
-目标是将 Utterlog 从 Go API + Redis + PostgreSQL + Next + Vite Admin 迁移为 Bun/TypeScript API + PostgreSQL + Next SSR + Vite Admin，并以单 app 容器加 PostgreSQL 为默认部署形态。Redis 不再是必需服务，后续仅作为可选 adapter。
+目标是将 Utterlog 从 Go API + PostgreSQL + Next + Vite Admin 迁移为 Bun/TypeScript API + PostgreSQL + Next SSR + Vite Admin，并以单 app 容器加 PostgreSQL 为默认部署形态。临时状态由 app 进程内内存承载，无独立缓存服务。
 
 MVP 必须保留安装、认证、内容、评论、媒体、主题、插件、统计、AI、同步、备份、联邦和管理端核心功能。暂不强制合并 Admin 到 Next，不引入 Kubernetes，不迁移 SQLite。
 
@@ -19,7 +19,6 @@ flowchart TD
   API --> Local["uploads/content volumes"]
   API --> S3["Optional S3/R2"]
   API --> Ephemeral["In-memory ephemeral store"]
-  API --> Redis["Optional Redis adapter"]
   API --> External["Mail / Telegram / AI / Mapbox / Federation"]
 ```
 
@@ -98,7 +97,7 @@ scripts      deploy/schema/maintenance scripts
 | APP_URL | 生产环境要求绝对 URL；`REQUIRE_PUBLIC_APP_URL=true` 时禁止 localhost/127.0.0.1 | 公网部署建议开启该开关 |
 | 安装 | 安装后锁定，一次性 install token | 安装完成后隐藏 `/install` UI |
 | 权限 | 写接口默认管理员，公开入口白名单 | 细化 author/editor 角色 |
-| 限流 | 内存限流 | Redis adapter 分布式限流 |
+| 限流 | 内存限流 | 多副本部署时改用共享存储或边缘限流 |
 | 上传 | 已有鉴权和体积限制 | MIME sniff、图片解码校验、病毒扫描 |
 | 外部 URL/SSRF | Federation、RSS、OGP、network pull 已拒绝本机/内网地址并做 DNS 校验 | 对所有第三方 provider URL 继续分级白名单 |
 | SQL | 参数化查询为主 | 逐步消除动态 SQL 表名以外的 unsafe |
@@ -130,5 +129,5 @@ docker compose -f docker-compose.prod.yml -f docker-compose.external-db.yml up -
 1. 拆分 `compat.ts` 为 auth-extra、ai、sync、federation、backup、security、extensions 模块。
 2. 建立正式 migration 目录，废弃运行期散落 DDL。
 3. 将 `app/shared` 扩展为 Zod contract 单一来源。
-4. 增加 Redis adapter、队列 worker、OpenTelemetry。
+4. 增加队列 worker、OpenTelemetry。
 5. 对访问日志和统计表做分区/归档。

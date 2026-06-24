@@ -23,7 +23,7 @@ export function isAssetPath(pathname: string) {
   if (pathname.startsWith('/api')) return true;
   if (pathname.startsWith('/admin')) return true;
   if (pathname.startsWith('/uploads')) return true;
-  if (pathname.startsWith('/blog-static')) return true;
+  if (pathname.startsWith('/static')) return true;
   if (pathname.startsWith('/styles/')) return true;
   if (pathname === '/feed' || pathname === '/rss' || pathname === '/rss.xml' || pathname === '/atom.xml') return false;
   return /\.[a-z0-9]+$/i.test(pathname);

@@ -119,8 +119,14 @@ export async function getLinks() {
 // via POST /api/revalidate with { tags: ['options'] }. Time-based
 // revalidate is a backstop only (10min ceiling for rare browsers that
 // bypass the tag flush).
+const getOptionsCached = unstable_cache(
+  () => fetchAPI<any>('/options'),
+  ['blog-options'],
+  { tags: ['options'], revalidate: 600 },
+);
+
 export async function getOptions() {
-  return fetchAPI<any>('/options', { next: { tags: ['options'], revalidate: 600 } });
+  return getOptionsCached();
 }
 
 export async function getFootprints(params?: { city?: string; country?: string; route?: string; keyword?: string }) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
+import type { BlogThemeAccent } from '@shared/blog-theme';
 
 export interface MenuItem {
   href: string;
@@ -64,6 +65,7 @@ export interface ThemeContextData {
   timeZone: string;
   theme: {
     name: string;
+    accent?: BlogThemeAccent;
     manifest?: import('./theme').ThemeManifest;
   };
   options: Record<string, string>;

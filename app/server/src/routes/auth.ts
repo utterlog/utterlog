@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { config, table } from '../config';
 import { many, nowUnix, one } from '../db/helpers';
+import { optionValue } from '../db/options';
 import { sendConfiguredEmail } from '../email';
 import { badRequest, ok, unauthorized } from '../http/response';
 import { nonEmptyString, parseJson } from '../http/validation';
@@ -103,11 +104,7 @@ function utterlogAvatarUrl(email: string) {
   return `https://id.utterlog.com/avatar/${emailHash(email)}`;
 }
 
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
-}
-
+import { optionValue } from '../db/options';
 async function authUser(user: UserRow) {
   const source = await optionValue('avatar_source', 'gravatar');
   return {

@@ -35,6 +35,13 @@ export interface ThemeManifest {
 
 // Bun blog theme registry — Azure + Nebula only.
 import type { ComponentType, ReactNode } from 'react';
+import {
+  DEFAULT_BLOG_THEME,
+  blogThemeAccentAttr,
+  normalizeThemeName,
+  resolveBlogTheme,
+  type BlogThemeAccent,
+} from '@shared/blog-theme';
 import * as Azure from '@/themes/Azure';
 import * as Nebula from '@/themes/Nebula';
 import AzureManifest from '@/themes/Azure/theme.json';
@@ -68,22 +75,19 @@ const manifestRegistry: Record<string, ThemeManifest> = {
   Nebula: NebulaManifest as ThemeManifest,
 };
 
-export const DEFAULT_THEME = 'Azure';
-
-export function normalizeThemeName(name: string) {
-  const trimmed = String(name || '').trim();
-  return SUPPORTED.has(trimmed) ? trimmed : DEFAULT_THEME;
-}
+export { DEFAULT_BLOG_THEME, blogThemeAccentAttr, normalizeThemeName, resolveBlogTheme, type BlogThemeAccent };
 
 export function getThemeComponents(themeName: string): ThemeComponents {
   const name = normalizeThemeName(themeName);
-  return themeRegistry[name] || themeRegistry[DEFAULT_THEME];
+  return themeRegistry[name] || themeRegistry[DEFAULT_BLOG_THEME];
 }
 
 export function getThemeManifest(themeName: string): ThemeManifest {
   const name = normalizeThemeName(themeName);
-  return manifestRegistry[name] || manifestRegistry[DEFAULT_THEME];
+  return manifestRegistry[name] || manifestRegistry[DEFAULT_BLOG_THEME];
 }
+
+export const DEFAULT_THEME = DEFAULT_BLOG_THEME;
 
 export function getAllManifests(): Record<string, ThemeManifest> {
   return manifestRegistry;

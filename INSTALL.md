@@ -100,7 +100,7 @@ UTTERLOG_DB_MODE=bundled curl -fsSL https://raw.githubusercontent.com/utterlog/u
 UTTERLOG_DB_MODE=external curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | bash
 ```
 
-Bun 版默认使用 app 内存做临时状态（验证码、在线访客等），不需要 Redis。
+Bun 版使用 app 进程内内存做临时状态（验证码、在线访客、Coding 缓存等），无需额外缓存服务。
 
 **给已经跑起来想切到外部数据库的老站**：编辑 `.env`，加 `UTTERLOG_DB_MODE=external` + 必要的 DB 连接配置，然后重跑 `bash scripts/deploy.sh`。`docker-compose.external-db.yml` overlay 自动启用，旧的 utterlog-postgres 容器会被 stop 掉（数据保留在 ./pgdata 里，需要手动迁移到外部 postgres）。
 

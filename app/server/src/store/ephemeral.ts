@@ -3,14 +3,7 @@ type Item = {
   expiresAt: number;
 };
 
-export interface EphemeralStore {
-  get(key: string): Promise<string | null>;
-  set(key: string, value: string, ttlSeconds?: number): Promise<void>;
-  del(key: string): Promise<void>;
-  scan(prefix: string): Promise<string[]>;
-}
-
-export class MemoryStore implements EphemeralStore {
+class MemoryStore {
   private items = new Map<string, Item>();
 
   constructor() {

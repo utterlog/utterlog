@@ -58,7 +58,6 @@ logs/
 
 # Docker volumes (user data)
 pgdata/
-redisdata/
 data/
 
 # Database / WordPress dumps (not part of source)

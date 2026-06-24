@@ -18,23 +18,26 @@ function normalizeLocale(locale?: string): string {
 // <html data-theme="…"> and <html lang="…"> as server-rendered attributes.
 // Falls back silently when the API isn't reachable (build-time, dev
 // cold-start, etc.) so we never block render on options-fetching.
-async function getRootDisplayOptions(): Promise<{ activeTheme: string; locale: string; timeZone: string }> {
+async function getRootDisplayOptions(): Promise<{ activeTheme: string; accentAttr: string; locale: string; timeZone: string }> {
   try {
     const ac = new AbortController();
     const timer = setTimeout(() => ac.abort(), 2000);
     const res = await fetch(`${API_BASE}/options`, { next: { revalidate: 60 }, signal: ac.signal });
     clearTimeout(timer);
-    if (!res.ok) return { activeTheme: 'Azure', locale: 'zh-CN', timeZone: localTimeZone() };
+    if (!res.ok) return { activeTheme: 'Azure', accentAttr: '', locale: 'zh-CN', timeZone: localTimeZone() };
     const json = await res.json();
     const opts = json.data || json || {};
     const timeZone = resolveSiteTimeZone(opts);
+    const { resolveBlogTheme, blogThemeAccentAttr } = await import('@shared/blog-theme');
+    const resolved = resolveBlogTheme(String(opts.active_theme || 'Azure'), String(opts.azure_accent || ''));
     return {
-      activeTheme: (opts.active_theme || 'Azure').toString().trim() || 'Azure',
+      activeTheme: resolved.theme,
+      accentAttr: blogThemeAccentAttr(resolved.accent),
       locale: normalizeLocale(opts.site_locale),
       timeZone: isValidTimeZone(timeZone) ? timeZone : localTimeZone(),
     };
   } catch {
-    return { activeTheme: 'Azure', locale: 'zh-CN', timeZone: localTimeZone() };
+    return { activeTheme: 'Azure', accentAttr: '', locale: 'zh-CN', timeZone: localTimeZone() };
   }
 }
 
@@ -115,9 +118,9 @@ export default async function RootLayout({
   // Server-render the blog theme name onto <html data-theme="…">.
   // Two-attribute split avoids fighting with the admin color theme
   // (which writes data-color via providers.tsx + lib/store.ts).
-  const { activeTheme, locale, timeZone } = await getRootDisplayOptions();
+  const { activeTheme, accentAttr, locale, timeZone } = await getRootDisplayOptions();
   return (
-    <html lang={locale} data-theme={activeTheme} data-timezone={timeZone} suppressHydrationWarning>
+    <html lang={locale} data-theme={activeTheme} {...(accentAttr ? { 'data-accent': accentAttr } : {})} data-timezone={timeZone} suppressHydrationWarning>
       <head>
         {/* System-immutable assets (FA Pro 7.2.0, all webfonts including
             CJK) served from R2 + Cloudflare with Cache-Control immutable

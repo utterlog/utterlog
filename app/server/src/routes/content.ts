@@ -8,11 +8,12 @@ import { auth, currentUserId, optionalAuth } from '../auth/middleware';
 import { config, table } from '../config';
 import { sql } from '../db/client';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
+import { optionValue, saveOption } from '../db/options';
 import { badRequest, notFound, ok, paginate } from '../http/response';
 import { nonEmptyString, parseJson } from '../http/validation';
 import { ephemeral } from '../store/ephemeral';
 import { runtimePaths } from '../paths';
-import { normalizeBlogTheme } from '../blog-themes';
+import { normalizeBlogTheme, resolveBlogTheme } from '../blog-themes';
 import { resolveThemePreviewUrl } from '../theme-assets';
 import { sendConfiguredEmail } from '../email';
 import { aiAuditFailAction, auditCommentContent, enqueueAiCommentReply } from '../ai/comments';
@@ -81,11 +82,6 @@ async function optionMap(includeSensitive: boolean) {
   result.site_timezone_effective = result.site_timezone || 'UTC';
   if (result.site_favicon) result.site_favicon = resolveFaviconUrl(result.site_favicon);
   return result;
-}
-
-async function optionValue(name: string, fallback = '') {
-  const row = await one<{ value: string }>(`select value from ${table('options')} where name = $1`, [name]).catch(() => null);
-  return row?.value ?? fallback;
 }
 
 function gravatarUrlForEmail(email: string, size = 64) {
@@ -200,16 +196,6 @@ async function searchEmbedding(text: string) {
   await logAiEvent(provider, 'search-embedding', 'success', `embedding:${embedding.length}`, { tokens: payload.usage || {} });
   const values = embedding.map((value: unknown) => Number(value)).filter((value: number) => Number.isFinite(value));
   return values.length ? `[${values.join(',')}]` : null;
-}
-
-async function saveOption(name: string, value: string) {
-  const now = nowUnix();
-  await exec(
-    `insert into ${table('options')} (name, value, created_at, updated_at)
-     values ($1,$2,$3,$3)
-     on conflict (name) do update set value = $2, updated_at = $3`,
-    [name, value, now],
-  );
 }
 
 function htmlEscape(value: string) {
@@ -3765,8 +3751,16 @@ export function registerContentRoutes(app: Hono) {
   });
 
   app.get('/api/v1/themes', auth, async (c) => {
-    const rawActive = await optionValue('active_theme', 'Azure');
-    const activeTheme = normalizeBlogTheme(rawActive);
+    let rawActive = await optionValue('active_theme', 'Azure');
+    let azureAccent = await optionValue('azure_accent', 'blue');
+    const resolved = resolveBlogTheme(rawActive, azureAccent);
+    if (resolved.migratedFrom === 'Chred') {
+      await saveOption('active_theme', 'Azure');
+      await saveOption('azure_accent', 'red');
+      rawActive = 'Azure';
+      azureAccent = 'red';
+    }
+    const activeTheme = resolved.theme;
     const seen = new Set<string>();
     const themes = [runtimePaths.builtinThemesDir, join(config.contentDir, 'themes')]
       .flatMap((dir, dirIndex) => existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => {
@@ -3775,6 +3769,7 @@ export function registerContentRoutes(app: Hono) {
         const manifestPath = existsSync(themeJson) ? themeJson : manifestJson;
         const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : { name: d.name };
         const id = String(manifest.id || d.name);
+        if (/^chred$/i.test(id)) return null;
         if (seen.has(id)) return null;
         seen.add(id);
         const screenshot = String(manifest.screenshot || '');
@@ -3793,6 +3788,7 @@ export function registerContentRoutes(app: Hono) {
     return ok(c, {
       themes,
       active: activeTheme,
+      azure_accent: activeTheme === 'Azure' ? (azureAccent === 'red' ? 'red' : 'blue') : 'blue',
       ...(rawActive !== activeTheme ? { requested: rawActive } : {}),
     });
   });

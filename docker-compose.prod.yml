@@ -7,7 +7,7 @@
 #   nginx/caddy -> 127.0.0.1:${UTTERLOG_PORT} -> app
 #   app = Bun gateway + TypeScript API + admin SPA + Next renderer
 #
-# Redis and Go are not part of the production runtime.
+# Go backend is not part of the production runtime.
 # ============================================================
 
 services:
@@ -52,7 +52,6 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY:-}
       - S3_REGION=${S3_REGION:-auto}
       - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
-      - WEB_RENDERER=bun
       - NEXT_PUBLIC_API_URL=/api/v1
       - INTERNAL_API_URL=http://127.0.0.1:8080/api/v1
       - UPLOAD_DIR=uploads
