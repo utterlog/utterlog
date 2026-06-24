@@ -2,6 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+echo "==> Export tag map (before delete)"
+MAP_FILE="$(mktemp)"
+bun scripts/remap-versions.mjs --export-shell > "$MAP_FILE"
+
 echo "==> Delete remote tags"
 while read -r t; do
   [[ -z "$t" ]] && continue
@@ -18,6 +22,7 @@ fi
 echo "==> Create remapped tags (v1.0.0 … v1.3.6)"
 while IFS=$'\t' read -r newTag commit; do
   git tag -a "$newTag" -m "Utterlog ${newTag#v}" "$commit"
-done < <(bun scripts/remap-versions.mjs --export-shell)
+done < "$MAP_FILE"
+rm -f "$MAP_FILE"
 
 echo "==> Tags created: $(git tag -l 'v1.*' | wc -l | tr -d ' ')"

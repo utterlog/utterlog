@@ -4,7 +4,6 @@
  * Usage: bun scripts/remap-versions.mjs [--write-changelog] [--print-tags]
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
 
 function newVersion(index) {
   const minor = Math.floor(index / 10);
@@ -12,17 +11,55 @@ function newVersion(index) {
   return `1.${minor}.${patch}`;
 }
 
-const tagLines = execSync(
-  `git tag -l | while read t; do echo "$(git log -1 --format='%ci' "$t") $t"; done | sort`,
-  { encoding: 'utf8' },
-).trim().split('\n').filter(Boolean);
+/** Legacy release tags in chronological order (oldTag → peeled commit). */
+const LEGACY_RELEASES = [
+  ['v1.0.0', '429d9dc69443796596d8aa620b060982ec0168e5'],
+  ['v2.0.0', '845ab50ce15824b589439ee5153ff2a6d4dd7fdf'],
+  ['v2.0.1', 'dbaae394735958b588e3664e455258c5ae4c8864'],
+  ['v2.0.10', '770537a42dbf009c91e54bb3f1bada8e0ae9d931'],
+  ['v2.0.2', '8c7ea7a88e0e76e672063de2a950ed4e77a411ce'],
+  ['v2.0.3', '5124d77494e2a299ce5a46e36bfa1a75cb1966e9'],
+  ['v2.0.4', '86158bee52aa67813591742b5981211628be1244'],
+  ['v2.0.5', 'c0d48bb2c52af1a2650dcfe15ddbeb7b23931382'],
+  ['v2.0.6', '398d1dce78b898a2fe1847d7a452ed0d02c19928'],
+  ['v2.0.7', 'b0cc21483db99090b31222b91878a64de30566f8'],
+  ['v2.0.8', '011cfe71c8463b91cf8fe089ba789a62a611e9d0'],
+  ['v2.0.9', 'ac409e25e9483ca42a3f47cbb8026f9f22ba0689'],
+  ['v2.1.0', 'cc77f823f78b2bf68f690f973e06875f7ac50c1b'],
+  ['v2.1.1', '4f6e27a4792b9a3bfc0da9f404204cece271ead3'],
+  ['v2.1.2', 'aa8c8ea2b00125d0ae2d1cf8dd6300f2c4595ed4'],
+  ['v2.1.3', '9f525da8eb748051a24c5954a0c2d88e09d15a96'],
+  ['v2.1.4', '66f292406ac542ed25cae10fa6dc5360464f8c56'],
+  ['v2.1.5', '616323c658790b25c1df74f7d6167a8a3cf80d34'],
+  ['v2.1.6', 'a164ac6b91bf264d8cf3e7a6f6299385933b8cc6'],
+  ['v2.1.7', '62a76062c1a63224a020a51f81b46b9be85b4c44'],
+  ['v2.2.0', '8c821054ed3ff60bbd8a97daaa16169fe1658eaa'],
+  ['v2.3.0', 'd371249e6aefe78e614794ed084fa857da60daf8'],
+  ['v2.3.1', '3655198b0908f3d574c26c0a21f7bb97ba5fc3b5'],
+  ['v2.3.10', '5d10045f4a9fb50f1492cb5a7263825d0dea06a9'],
+  ['v2.3.2', '9a4150a30ff3bd3dcc318770ef21fe8800f9a9af'],
+  ['v2.3.3', '47ee5ffc1fb9430bba02d5c7422b8d51163c6e5c'],
+  ['v2.3.4', '5dc291f82ef144e72a3793a4645843812b1970f2'],
+  ['v2.3.5', '2fe1ba62ee3448c5a1a16d016b5a2cbbb9d4ce05'],
+  ['v2.3.6', 'bd27ee2644b2c6b447b2ed2b86f8c9c7ca865a1d'],
+  ['v2.3.7', '2c116abbcca53e7f9b1845bd005c0a45e88ad5f9'],
+  ['v2.3.8', '82bb9d89453e4c27fa31ce7c8bfa47dfea4bf6b4'],
+  ['v2.3.9', '8ab4dc42f966927171487d11a8fadd73146b02c3'],
+  ['v2.4.1', '5478dc51f8d0c1f755c728921f9c7005cd05125e'],
+  ['v2.4.2', '5d6bbe5ec296dd7b2f6e157a010c195e219e1a33'],
+  ['v2.5.0', '2d91d8a1da395e08b58e354fbcfda6df7c59d252'],
+  ['v2.5.1', 'd80a8a29b70a0baa06a65db5234d4383cd1fd2b0'],
+  ['v2.5.2', 'a11d1c5c73c381f290935105a97c29d4d932a6cd'],
+];
 
-const mapping = tagLines.map((line, index) => {
-  const oldTag = line.trim().split(/\s+/).pop();
-  const newVer = newVersion(index);
-  const commit = execSync(`git rev-parse ${oldTag}^{}`, { encoding: 'utf8' }).trim();
-  return { oldTag, newVer, newTag: `v${newVer}`, commit };
-});
+function buildMapping() {
+  return LEGACY_RELEASES.map(([oldTag, commit], index) => {
+    const newVer = newVersion(index);
+    return { oldTag, newVer, newTag: `v${newVer}`, commit };
+  });
+}
+
+const mapping = buildMapping();
 
 const latest = '1.3.7';
 const map = Object.fromEntries(mapping.map((m) => [m.oldTag.replace(/^v/, ''), m.newVer]));
@@ -44,6 +81,19 @@ if (process.argv.includes('--print-tags')) {
     console.log(`${m.oldTag}\t${m.newTag}\t${m.commit.slice(0, 8)}`);
   }
   console.log(`HEAD\tv${latest}\t(current)`);
+  process.exit(0);
+}
+
+if (process.argv.includes('--fix-changelog-body')) {
+  let changelog = readFileSync('CHANGELOG.md', 'utf8');
+  for (const m of [...mapping].sort((a, b) => b.oldTag.length - a.oldTag.length)) {
+    const bare = m.oldTag.replace(/^v/, '');
+    changelog = changelog.replaceAll(m.oldTag, `v${m.newVer}`);
+    changelog = changelog.replaceAll(bare, m.newVer);
+  }
+  changelog = changelog.replace(/vv(\d)/g, 'v$1');
+  writeFileSync('CHANGELOG.md', changelog);
+  console.log('CHANGELOG body version references updated');
   process.exit(0);
 }
 

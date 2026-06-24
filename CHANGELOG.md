@@ -75,7 +75,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **`utterlog.io/install.sh` 默认国内友好**：Docker 缺失时默认走 Docker 官方脚本的 Aliyun mirror；fresh host 自动写 Docker Hub `registry-mirrors` 到 `https://registry.cn-hangzhou.aliyuncs.com`；`docker compose pull` 拆成基础镜像与应用镜像两段并加超时；`POSTGRES_IMAGE` / `REDIS_IMAGE` 可覆盖，应用镜像从 `registry.utterlog.io` 拉取失败时 fallback 到 GHCR。
 - **Docker 发布 / 安装 / 升级链路系统化兜底**：GHCR 明确作为权威应用镜像源，`registry.utterlog.io` 作为可探测镜像源；官网安装脚本与后台一键升级会先用 20 秒 manifest 探测选择可读源，并把选中的 `UTTERLOG_IMAGE_PREFIX` 写回 `.env`，避免 `pull` 和 `up` 使用不同镜像源。
 - **Docker workflow 改为 GHCR 阻塞发布源**：`docker-publish.yml` 推送并校验 GHCR 目标 tag manifest；`registry.utterlog.io` 降级为安装 / 升级时可探测镜像源，不再因为 registry 代理层卡顿拖死正式发布。
-- **Docker 镜像标签兼容 Git tag**：发布 `v2.5.1` 时同时保留 `2.5.1` 与 `v2.5.1` 两种镜像标签，避免校验脚本或服务器固定版本部署因为 tag 形式不同失败。
+- **Docker 镜像标签兼容 Git tag**：发布 `v1.3.5` 时同时保留 `1.3.5` 与 `v1.3.5` 两种镜像标签，避免校验脚本或服务器固定版本部署因为 tag 形式不同失败。
 - **README 快速开始改用官网安装入口**：默认推荐 `curl -fsSL https://utterlog.io/install.sh | bash`，把 GitHub raw 源码安装保留为源码 / 内置 Caddy HTTPS 场景。
 - **前台请求拦截迁移到 Next 16 Proxy 约定**：`web/middleware.ts` 按官方迁移方式改为 `web/proxy.ts`，导出函数从 `middleware` 改为 `proxy`，消除 Next 16 构建时的弃用警告。
 - **Nebula 页脚快捷入口对齐 Azure 布局**：Utterlog logo 与音乐入口移到页脚最左侧，Utterlog 使用整颗 logo 铺满显示；RSS 从页脚移到 header 右侧 actions，并复用 header 圆形透明按钮风格。
@@ -199,7 +199,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **后台升级"提示了升级失败"但实际升级成功**：`SystemUpdatePanel.tsx` 的 `pollStatus()` 调 `verifyUpgradeApplied(expected, 60)` 写死 60s 超时，但真实升级流程包括 sidecar 拉镜像（~30s）+ 重建容器（~5s）+ 新 api 启动 + DB 初始化 + cron 启动（~15s）+ utterlog.io 缓存同步（~10s），总计经常 60-90s。导致升级实际还在跑，UI 已经报"升级未生效"。本次超时 60s → 240s（verify 内部命中任一成功信号就立即 return，加长只惩罚真失败，不延后真成功的反馈）。
 - **错误语气分级**：之前所有 verify 失败都用红色 `toast.error('升级未生效 — ...')` 吓到用户。改成三档语气：
   - 网络/鉴权报错 → red error 保留（真坏了）
-  - api 在响应、commit 已变（升级 OK，仅版本号字串没匹配，比如 docker label `version=main` 跟 BuildVersion `v2.3.10` 不对齐） → blue **info** "升级已应用，commit 已更新到 xxxxxxx，但版本号自动确认超时"
+  - api 在响应、commit 已变（升级 OK，仅版本号字串没匹配，比如 docker label `version=main` 跟 BuildVersion `v1.2.3` 不对齐） → blue **info** "升级已应用，commit 已更新到 xxxxxxx，但版本号自动确认超时"
   - api 在响应、版本号没变（registry 没同步）→ yellow **warning** "升级超时未确认，等几分钟刷新再看"
   - 容器仍在旧版本（真没升级成功）→ red error 保留
 
@@ -207,17 +207,17 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 ### 修复
 
-- **后台升级在自定义安装路径下"未找到 docker-compose 文件"**：v2.3.3 加的 `probeComposeWorkingDir()` (用 docker compose label 自动探测真实安装目录) 实际从来没被触发，因为 `docker-compose.yml` 默认 `UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}` 让 env 变量永远非空，老逻辑「env 优先 → 非空就直接用 → label 探测被跳过」导致用户装在 `/opt/utterlog-pancn/`、`/root/my-blog/` 等任何非 `/opt/utterlog` 路径时升级一律拿到错的 `/opt/utterlog` 然后报错。本次调整优先级 → docker compose label > env 变量 > `/opt/utterlog` 兜底。compose label 是 docker compose 自己起容器时打上的最权威路径，永远准确；env 变量退到 fallback（万一 label 探测失败 / docker socket 不可用时仍能用）。日志里也明确标出来源（`(来自 compose label)` / `(来自 UTTERLOG_INSTALL_DIR env)` / `(兜底默认)`）方便排查。
+- **后台升级在自定义安装路径下"未找到 docker-compose 文件"**：v1.2.5 加的 `probeComposeWorkingDir()` (用 docker compose label 自动探测真实安装目录) 实际从来没被触发，因为 `docker-compose.yml` 默认 `UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}` 让 env 变量永远非空，老逻辑「env 优先 → 非空就直接用 → label 探测被跳过」导致用户装在 `/opt/utterlog-pancn/`、`/root/my-blog/` 等任何非 `/opt/utterlog` 路径时升级一律拿到错的 `/opt/utterlog` 然后报错。本次调整优先级 → docker compose label > env 变量 > `/opt/utterlog` 兜底。compose label 是 docker compose 自己起容器时打上的最权威路径，永远准确；env 变量退到 fallback（万一 label 探测失败 / docker socket 不可用时仍能用）。日志里也明确标出来源（`(来自 compose label)` / `(来自 UTTERLOG_INSTALL_DIR env)` / `(兜底默认)`）方便排查。
 
 ## [1.2.9] - 2026-05-08
 
 ### 优化
 
 - **coding 缓存键加版本号 `v2` —— 强制让旧形态缓存失效**：本次后端 contributions 数据从「自然年 Jan-Dec」形态改成「rolling 365 天」形态，但 Redis 缓存保留 30 天 stale-while-revalidate，旧 key 命中会继续返回旧形态数据 → 用户升级后看到的还是 ~19 周老视图。`coding.go` 加 `codingCacheVersion = "v2"` 常量并把它前缀到 cache key 上 (`v2:<usernames>:<repos>:<token>`)，旧 `<usernames>:<repos>:<token>` 形态的 key 全部失配，新代码冷启动就拉新数据，30 天 stale 期里那些条目自然 TTL 失效不再占用。未来 contributions 形态再调时把版本 bump 到 v3 / v4 即可。
-- **后端 coding contributions API 改成 rolling 365 天（修复"数量不对"）**：v2.3.5 前端把热力图改成 GitHub-style "今天落在最右、往前 1 整年"（53 周 / 12 个月）排版，但后端 `coding.go` 的 `currentYearContributionRange` / `emptyCodingContributions` 一直只取「自然年 Jan 1 到今天」(年中访问时只 ~18 周数据)，前端 `rollingDays` 过滤后只剩这一小段 → 热力图实际只渲染 ~18 列，看起来"数量不对，没有完整显示出来"。本次新增 `rolling365Range(now)` helper 返回 `[今天 - 364, 今天]`，`fetchGitHubContributionCalendar` 改用它向 GitHub 拉数据；`emptyCodingContributions` 同步改成 365 天 rolling 占位底盘。前端 53 周自动撑满，跨年边界正常。GraphQL `contributionsCollection` 接受任意 from/to 区间，跨年没问题。
-- **coding 热力图等分页面宽度（12 个月 / 53 周）**：v2.3.6 / v2.3.7 一直用 `min-width / max-width 720~740 + gap 3-4px` 的 grid 布局，整张图被强制锁在 720~740px，跟页面内容区宽度脱节；某些容器里 cell 还会被拉到 60+px。本次彻底重写：`globals.css` 的 `.coding-heatmap` 改成 flex 布局，`.coding-heatmap-week { flex: 1 0 0 }` 53 个 week 等分父级宽度，cell 走 `width: 100%; aspect-ratio: 1` 自然变方块。整张图自动撑满页面内容区不留白边、不出现横滚（Nebula 960px 容器 cell ~15px / Azure ~1300px 容器 cell ~22px / 各主题随自己页面宽度变化），跟 archive 页 `.nebula-heatmap` 同款行为，cell 尺寸跨页面自动一致。各主题之前 v2.3.7/v2.3.8 加的尺寸覆写（Azure / Chred / Flux / Nebula / Renascent / Utterlog 6 份各自的 `min-width / max-width / gap !important`）全部移除。`page.tsx` 在 `.coding-heatmap` 元素上 inline 设的 `gridTemplateColumns` 在 flex 容器下被自动忽略，无需改 React。
-- **Nebula 通用页宽度回到 960px**：v2.3.6 把 tags / categories / archive / search / links 这些页的容器从 960 临时拉到 1200，但跟 Nebula 首页 / 文章页 / coding 页统一的 960px 内容栏宽度对不上，破坏了全站视觉统一感。本次回退到 960px，跟其他页面对齐。tags / categories 多 chip 时换行多一些，但视觉一致优先。
-- **Nebula footer 默认高度跟 header 对齐（64px）**：v2.3.6 footer 用 `min-height: 86px`，跟 header 的 `.nebula-header-inner height: 64px` 不齐。本次 footer `min-height: 86 → 64`、`padding 10/10`（v2.3.6 是 16/13）—— 默认无备案号 / 单行内容时跟 header 完全对齐；有备案号 / 多行内容时 min-height 不限制上界，内容自然撑开。
+- **后端 coding contributions API 改成 rolling 365 天（修复"数量不对"）**：v1.2.7 前端把热力图改成 GitHub-style "今天落在最右、往前 1 整年"（53 周 / 12 个月）排版，但后端 `coding.go` 的 `currentYearContributionRange` / `emptyCodingContributions` 一直只取「自然年 Jan 1 到今天」(年中访问时只 ~18 周数据)，前端 `rollingDays` 过滤后只剩这一小段 → 热力图实际只渲染 ~18 列，看起来"数量不对，没有完整显示出来"。本次新增 `rolling365Range(now)` helper 返回 `[今天 - 364, 今天]`，`fetchGitHubContributionCalendar` 改用它向 GitHub 拉数据；`emptyCodingContributions` 同步改成 365 天 rolling 占位底盘。前端 53 周自动撑满，跨年边界正常。GraphQL `contributionsCollection` 接受任意 from/to 区间，跨年没问题。
+- **coding 热力图等分页面宽度（12 个月 / 53 周）**：v1.2.8 / v1.2.9 一直用 `min-width / max-width 720~740 + gap 3-4px` 的 grid 布局，整张图被强制锁在 720~740px，跟页面内容区宽度脱节；某些容器里 cell 还会被拉到 60+px。本次彻底重写：`globals.css` 的 `.coding-heatmap` 改成 flex 布局，`.coding-heatmap-week { flex: 1 0 0 }` 53 个 week 等分父级宽度，cell 走 `width: 100%; aspect-ratio: 1` 自然变方块。整张图自动撑满页面内容区不留白边、不出现横滚（Nebula 960px 容器 cell ~15px / Azure ~1300px 容器 cell ~22px / 各主题随自己页面宽度变化），跟 archive 页 `.nebula-heatmap` 同款行为，cell 尺寸跨页面自动一致。各主题之前 v1.2.9/v1.3.0 加的尺寸覆写（Azure / Chred / Flux / Nebula / Renascent / Utterlog 6 份各自的 `min-width / max-width / gap !important`）全部移除。`page.tsx` 在 `.coding-heatmap` 元素上 inline 设的 `gridTemplateColumns` 在 flex 容器下被自动忽略，无需改 React。
+- **Nebula 通用页宽度回到 960px**：v1.2.8 把 tags / categories / archive / search / links 这些页的容器从 960 临时拉到 1200，但跟 Nebula 首页 / 文章页 / coding 页统一的 960px 内容栏宽度对不上，破坏了全站视觉统一感。本次回退到 960px，跟其他页面对齐。tags / categories 多 chip 时换行多一些，但视觉一致优先。
+- **Nebula footer 默认高度跟 header 对齐（64px）**：v1.2.8 footer 用 `min-height: 86px`，跟 header 的 `.nebula-header-inner height: 64px` 不齐。本次 footer `min-height: 86 → 64`、`padding 10/10`（v1.2.8 是 16/13）—— 默认无备案号 / 单行内容时跟 header 完全对齐；有备案号 / 多行内容时 min-height 不限制上界，内容自然撑开。
 
 ### 修复
 
@@ -232,7 +232,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 ### 修复
 
 - **全主题 coding 页热力图尺寸 GitHub-style 收口**：globals.css 之前 `.coding-heatmap` 只有 `min-width: 920px` + `width: 100%`、没有 `max-width`，53 列 cell 在 Azure 1304px 内容区里被拉到 ~20px 巨型方块，远比 GitHub 真实贡献图（~11px）大。Nebula 之前自己写了一份 `min-width: 720 + max-width: 740 + gap: 3` 的覆写绕过这个问题，但其他主题没动。本次把 GitHub-style 紧凑（`min-width: 740 / max-width: 740 / gap: 3px`、`.coding-heatmap-week` 同 gap 3px）写进 globals.css，全主题共用一份；Nebula 那份覆写删掉避免漂移，仅保留绿色阶梯颜色覆写。
-- **非 Nebula 主题（Azure / Chred / Flux / Renascent / Utterlog）的友链页 / 订阅页错位**：v2.3.1 把这两个共享客户端组件 (`web/app/(blog)/feeds/FeedsClient.tsx` / `web/app/(blog)/links/LinksClient.tsx`) 重做成 toolbar + className 驱动的新布局（`feeds-toolbar` / `feeds-view-toggle` / `feed-card-*`、`links-toolbar` / `links-view-btn` / `links-group-tab`），但相关 CSS 只在 `web/themes/Nebula/styles.css` 里写了，没给其他主题留 baseline。Azure / Chred / Flux 等渲染时拿不到任何样式 → toolbar 按钮散落 + 卡片裸奔。修复：把每个客户端组件拆成 `Nebula*View`（v2.3.x 新版本）+ `Legacy*View`（v2.3.0 inline-style 版本），原 `FeedsClient` / `LinksClient` 改成 `useThemeContext()` 主题分发器，Nebula 走新版、其他主题走老版。老版纯 inline 样式不依赖任何主题 class，跨主题安全；Nebula 版的视觉特性 (toolbar / 视图切换 / 随机骰子) 完全不污染其他主题。
+- **非 Nebula 主题（Azure / Chred / Flux / Renascent / Utterlog）的友链页 / 订阅页错位**：v1.2.2 把这两个共享客户端组件 (`web/app/(blog)/feeds/FeedsClient.tsx` / `web/app/(blog)/links/LinksClient.tsx`) 重做成 toolbar + className 驱动的新布局（`feeds-toolbar` / `feeds-view-toggle` / `feed-card-*`、`links-toolbar` / `links-view-btn` / `links-group-tab`），但相关 CSS 只在 `web/themes/Nebula/styles.css` 里写了，没给其他主题留 baseline。Azure / Chred / Flux 等渲染时拿不到任何样式 → toolbar 按钮散落 + 卡片裸奔。修复：把每个客户端组件拆成 `Nebula*View`（v1.2.x 新版本）+ `Legacy*View`（v1.2.1 inline-style 版本），原 `FeedsClient` / `LinksClient` 改成 `useThemeContext()` 主题分发器，Nebula 走新版、其他主题走老版。老版纯 inline 样式不依赖任何主题 class，跨主题安全；Nebula 版的视觉特性 (toolbar / 视图切换 / 随机骰子) 完全不污染其他主题。
 
 ### 移除
 
@@ -248,8 +248,8 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - **升级流程 compose 文件双源拉取**：sidecar 之前只从 `utterlog.io/docker-compose.yml` 拉，下载失败就跳过。现在 utterlog.io 不可达时自动 fallback 到 `https://raw.githubusercontent.com/utterlog/utterlog/main/docker-compose.yml`；两源都不可达才放弃刷新（仍能继续后续的镜像拉取流程）。新封装 `try_fetch_compose()` 助手函数统一处理 HTTP/合法性校验，日志里清晰标出主源 / 兜底源命中情况。
 - **升级流程镜像拉取双源策略**：默认 `registry.utterlog.io/utterlog/utterlog-{api,web}`；若 `docker compose pull` 失败（注册中心维护、网络抖动、限流），sidecar 自动 `export UTTERLOG_IMAGE_PREFIX=ghcr.io/utterlog` 重试一次 —— GHA 的 `docker-publish.yml` workflow 把每个 release 的镜像同时推到这两个 registry，GHCR 能完整顶替 registry.utterlog.io。注意要 `export`（不只是赋值）这样后面 `docker compose up -d` 子进程才会读到同一个 prefix，避免「拉了 ghcr 的但 up 时又去找 registry.utterlog.io」的不一致。两源都失败才报 `[TASK-END]` 退出。
-- **Nebula coding 热力图视觉压缩回到 v2.3.4 紧凑感**：v2.3.5 把日期范围从「自然年 1/1~12/31」改成 rolling 365 天，年中访问从 ~20 周变成满 53 周，整张图占满 960px 内容区，视觉上比之前大得多。Nebula 加覆写：`.coding-heatmap` 的 `min-width` 920 → 720、`gap` 4px → 3px、加 `max-width: 740px` 不让它再撑满全宽；`.coding-heatmap-week` 同步把 gap 改 3px。单格回到 GitHub-style 的 ~11px，整体视觉跟 v2.3.4（部分年渲染）的紧凑感对齐。功能（rolling 365 天）保留不变。
-- **Nebula footer 整体降 10%**：v2.3.5 用 `min-height: 96px` + `padding 18/14`（总 32px）解决「无备案号站点 footer 看着像被踩扁」，但放在已经有备案号 / 多行内容的站点上偏高了。本次 `min-height` 96 → 86、`padding-top` 18 → 16、`padding-bottom` 14 → 13（总 29px）—— 三个值各降约 10%，无备案站点底线仍稳定不踩扁，有备案 / 内容多的站点不再显得头重脚也重。
+- **Nebula coding 热力图视觉压缩回到 v1.2.6 紧凑感**：v1.2.7 把日期范围从「自然年 1/1~12/31」改成 rolling 365 天，年中访问从 ~20 周变成满 53 周，整张图占满 960px 内容区，视觉上比之前大得多。Nebula 加覆写：`.coding-heatmap` 的 `min-width` 920 → 720、`gap` 4px → 3px、加 `max-width: 740px` 不让它再撑满全宽；`.coding-heatmap-week` 同步把 gap 改 3px。单格回到 GitHub-style 的 ~11px，整体视觉跟 v1.2.6（部分年渲染）的紧凑感对齐。功能（rolling 365 天）保留不变。
+- **Nebula footer 整体降 10%**：v1.2.7 用 `min-height: 96px` + `padding 18/14`（总 32px）解决「无备案号站点 footer 看着像被踩扁」，但放在已经有备案号 / 多行内容的站点上偏高了。本次 `min-height` 96 → 86、`padding-top` 18 → 16、`padding-bottom` 14 → 13（总 29px）—— 三个值各降约 10%，无备案站点底线仍稳定不踩扁，有备案 / 内容多的站点不再显得头重脚也重。
 - **Nebula 首页"最新评论者头像墙"屏蔽管理员**：`LatestCommenters.tsx` 之前用 `exclude_admin=0` 把博主自己的评论也算进来，头像墙第一个永远是博主，喧宾夺主。改成 `exclude_admin=1`（API 端按 admin email + `user_id != 1` 双重过滤），只展示访客社区氛围；`per_page` 同步从 40 提到 60 留缓冲，dedup 后仍能稳定凑齐 20 个去重头像。
 
 - **Nebula tags / categories / archive / search 等通用页 max-width 960 → 1200**：之前 960px 在 tags 页 chip 多时被迫频繁换行；archive / search / links 在大屏上左右留白偏宽。统一拉到 1200px，文章页（`.nebula-article` / `.nebula-post`）保持自己的窄栏不受影响。
@@ -263,7 +263,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - **Nebula 首页文章每页数量没跟 admin `posts_per_page` 设置走**：`web/themes/Nebula/HomePage.tsx` 顶部写死 `const PER_PAGE = 10`，server 端 `/app/(blog)/page.tsx` 已经按 admin 选项 `posts_per_page` 拉了 SSR 首屏数据并把 `perPage` 作 prop 传过来，但 Nebula 完全忽略这个 prop。后果：admin 配 6 篇/页时 SSR 首屏 6 篇 + totalPages 按 6 算，但点分类筛选 / 翻页时 AJAX `fetchPage` 用 PER_PAGE = 10 重新拉 → 数量对不上、totalPages 也错位。修复：删掉模块级常量，析构 `perPage = 10`（fallback 跟 server 一致）作 prop，`fetchPage` 和 PostCard `index={(page-1) * perPage + index + 1}` 全部改用 prop 值。
 - **Renascent 首页 PostCard 序号跨页冲突**：`(page - 1) * posts.length + index + 1` 在末页只显示 N 篇时（N < perPage），从下一页第一条会重新从前面的小数字开始，跟前页编号撞车。`posts.length` 是当前页实际数量不是固定值，根本不能当步长。改用 `perPage` 作步长，类型上 `perPage?: number` 早就声明了但一直没解构进函数体；这次解构 + 替换。
-- **Nebula 说说工具栏"说说"标题客户端导航后变深灰看不见**：`MomentsClient.tsx` 的 `<span>说说</span>` 写的是 inline `color: #1a1a1a`，Nebula CSS 用 `[style*="color:#1a1a1a"]` 属性选择器翻成白。SSR 直接进 `/moments` 时 HTML 串里就是 `#1a1a1a` 选择器命中没问题；但用户从首页客户端路由跳过去时，React 在 DOM 上重设 inline style，浏览器把它规范化成 `rgb(26, 26, 26)` —— 原选择器失配 → "说说" 仍是 #1a1a1a 深灰，跟 Nebula 暗背景撞色几乎看不见，必须强制刷新才白。修复跟 v2.3.5「moments-tag-chip / moments-month-chip / moments-year-btn 改用类钩子」同思路：`<span>说说</span>` 加 `className="moments-toolbar-title"`，Nebula 用 `[data-theme="Nebula"] .moments-toolbar-title { color: var(--nebula-white) !important; }` 强覆盖；inline-style 属性匹配保留作兜底，并补 `rgb(26, 26, 26)` / `rgb(26,26,26)` 两种规范化形态，万一旧 SSR 缓存 / 旧 client 的 HTML 没带 class 也能命中。
+- **Nebula 说说工具栏"说说"标题客户端导航后变深灰看不见**：`MomentsClient.tsx` 的 `<span>说说</span>` 写的是 inline `color: #1a1a1a`，Nebula CSS 用 `[style*="color:#1a1a1a"]` 属性选择器翻成白。SSR 直接进 `/moments` 时 HTML 串里就是 `#1a1a1a` 选择器命中没问题；但用户从首页客户端路由跳过去时，React 在 DOM 上重设 inline style，浏览器把它规范化成 `rgb(26, 26, 26)` —— 原选择器失配 → "说说" 仍是 #1a1a1a 深灰，跟 Nebula 暗背景撞色几乎看不见，必须强制刷新才白。修复跟 v1.2.7「moments-tag-chip / moments-month-chip / moments-year-btn 改用类钩子」同思路：`<span>说说</span>` 加 `className="moments-toolbar-title"`，Nebula 用 `[data-theme="Nebula"] .moments-toolbar-title { color: var(--nebula-white) !important; }` 强覆盖；inline-style 属性匹配保留作兜底，并补 `rgb(26, 26, 26)` / `rgb(26,26,26)` 两种规范化形态，万一旧 SSR 缓存 / 旧 client 的 HTML 没带 class 也能命中。
 
 ### 修复
 
@@ -317,7 +317,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **升级日志输出格式参考 1Panel**：原 `[2026-05-07T15:30:20Z] sidecar starting in /opt/...` 改成 `2026/05/07 23:30:20 升级应用 [Utterlog] 任务开始 [START]` 风格 —— 时间戳本地时区 + 中文动作 + `[对象]` + 状态/`[标记]`，每一步语义清晰。容器名（`[utterlog-pancn-api-1]`）、安装目录、镜像 tag、digest 全部动态显示在日志里，肉眼能确认探测正确。
 - **后台升级日志面板高亮**：`SystemUpdatePanel.tsx` 新增 `highlightLogLine(line)` 函数，按语义着色：时间戳 → 暗灰 / `[START]` `[TASK-END]` → 琥珀加粗 / `[xxx]` 容器名/路径/镜像 → 天蓝 / `成功` → 亮绿 / `WARN` → 黄 / `ERROR` `失败` → 红。容器外观也调整：背景 `#0f172a` → 更深的 `#0a0e1a`（终端感）+ 圆角 6px + 顶部状态徽标分割线 + max-height 280 → 360px。
 - **GFM 表格在 changelog 渲染中支持**：admin 后台 `SystemUpdatePanel.tsx` 的 `renderChangelog()` 之前不识别 `| col1 | col2 |` + `|---|---|` 表格语法，release notes 里的对比表都显示成原文 raw 字符。补上 GFM table parser → 输出 `<table class="changelog-table">`，新增 CSS（紧凑边框 + 表头浅灰底 + zebra 行）。`---` 分隔线 → `<hr/>` 也补上。utterlog-landing 的 `app/changelog/page.tsx` 同步修复。
-- **后台升级面板"更新内容"标题只显示版本号**：`{info.latest.name || info.latest.version}` 改成 `{info.latest.version}`。GitHub release name 经常是 `v2.3.3 — upgrade works on any compose project name` 这种长描述，标题里啰嗦。现在固定显示 `更新内容 — v2.3.3`。
+- **后台升级面板"更新内容"标题只显示版本号**：`{info.latest.name || info.latest.version}` 改成 `{info.latest.version}`。GitHub release name 经常是 `v1.2.5 — upgrade works on any compose project name` 这种长描述，标题里啰嗦。现在固定显示 `更新内容 — v1.2.5`。
 
 ### 修复
 
@@ -334,7 +334,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - **后台升级面板"升级未生效"误报**：`SystemUpdatePanel.tsx` 的 `verifyUpgradeApplied` 之前只看 version 字符串严格相等，dev 安装（BuildVersion='dev' 永不变）/ 生产 `:latest` 还没同步 / 用户 compose 锁定具体 tag 这些场景都会被卡 60s 然后误报 "升级未生效"。改成三层成功信号（version 等式 / commit 变化 / built_at 变化）任一命中即成功，超时 60s → 180s，错误信息显示实际拿到的 version + commit。
 - **生产 named volume 模式下 sidecar 日志看不到**：`docker-compose.prod.yml` 用 `uploads:/app/public/uploads`（命名卷），api 读卷里的 upgrade.log；sidecar 写到 `$INSTALL_DIR/uploads/upgrade.log`（宿主目录），两个完全不同的物理文件，admin 看不到 sidecar 真实输出。新增 `probeAPIUploadsMountSource()` 探测 api 容器 `/app/public/uploads` 的实际挂载源（bind 返宿主路径 / volume 返卷名），api 启动 sidecar 时把同一个源也挂载给 sidecar（`-v <source>:/api-uploads` + `API_UPLOADS_DIR=/api-uploads`），双方写读同一个文件。
 - **安装目录写死 `/opt/utterlog`**：`runUpgrade()` 之前默认 `installDir = /opt/utterlog`，1Panel 装在 `/opt/utterlog-pancn/` 或自定义路径直接报"找不到 docker-compose 文件"。新增 `probeComposeWorkingDir()` 用 `com.docker.compose.project.working_dir` label 自动探测真实路径，环境变量 / 兜底逻辑保留。
-- 停留在 v2.3.2 及更早版本的用户需在服务器上手动跑一次 `docker compose pull && docker compose up -d` 摆脱旧容器名探测 bug，后续升级恢复一键。
+- 停留在 v1.2.4 及更早版本的用户需在服务器上手动跑一次 `docker compose pull && docker compose up -d` 摆脱旧容器名探测 bug，后续升级恢复一键。
 
 ## [1.2.3] - 2026-05-07
 
@@ -409,14 +409,14 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - **统计表前缀统一为 `ul_stats_`**:`ul_analytics_daily` → `ul_stats_daily`、`ul_visitor_dates` → `ul_stats_visitor_dates`、`ul_visitor_post_dates` → `ul_stats_visitor_post_dates`。`ul_stats_global` / `ul_stats_post_daily` 已是该前缀,本次对齐;`ul_access_logs` 不变(语义为"原始日志"非"聚合统计")。InitDB 自动 ALTER TABLE RENAME(IF 老表存在 + 新表不存在),老库平滑升级。
 - **三个层面的"总访问量"统一口径**:footer `ArchiveStats` / 后台 `DashboardStats` / 后台数据统计页 `period=all` 全部走新增的 `handler.GlobalStats()` helper,直接读 `ul_stats_global` 单行 O(1)。之前 `DashboardStats` 用 `COUNT(*) FROM ul_access_logs` 会随 90 天 prune 而"变小"。
-- 前端 `PageViewTracker` 删掉 `isAdmin` gate。v2.2.0 起后端"管理员也计入访问"是用户明确决定;前端再 gate 反而让管理员的浏览只 +view_count(走 SSR `?track=1` 路径)而不写 `access_logs`,造成"明细看不到管理员、但 view_count 涨了"的不一致。前后端口径统一为「全部都计入」。
+- 前端 `PageViewTracker` 删掉 `isAdmin` gate。v1.2.0 起后端"管理员也计入访问"是用户明确决定;前端再 gate 反而让管理员的浏览只 +view_count(走 SSR `?track=1` 路径)而不写 `access_logs`,造成"明细看不到管理员、但 view_count 涨了"的不一致。前后端口径统一为「全部都计入」。
 
 ### 移除
 
-- `AccessLogger` middleware:函数体已退化为 `path filter + c.Next() + _ = path` 实际无副作用(v2.2.0 时为防与 `/track` 双计已停止写 access_log)。`main.go` 同步删 `r.Use(handler.AccessLogger())` 调用,以及只此一处用到的 `skipLogPrefix` / `assetExt` 常量。
+- `AccessLogger` middleware:函数体已退化为 `path filter + c.Next() + _ = path` 实际无副作用(v1.2.0 时为防与 `/track` 双计已停止写 access_log)。`main.go` 同步删 `r.Use(handler.AccessLogger())` 调用,以及只此一处用到的 `skipLogPrefix` / `assetExt` 常量。
 - `CleanupBotLogs` / `CleanupBotLogsPreview` handler 与对应的两条 admin 路由(`POST /admin/analytics/cleanup-bots`、`GET /admin/analytics/cleanup-bots/preview`)。这是为旧版 `AccessLogger` 双写产生的"visitor_id 空、UA 真实"行清理用的工具,middleware 不再写,这种行也不再产生,无前端调用。
 - `EnrichGeoIP` handler 与 `POST /analytics/enrich-geoip` 路由。`logAccess` 已经在写入时异步补 GeoIP,没有积压需要批量回填,亦无前端调用。
-- `InitStatsSync()` 空 hook(v2.2.0 起只剩函数声明)以及 `main.go` 里的调用。
+- `InitStatsSync()` 空 hook(v1.2.0 起只剩函数声明)以及 `main.go` 里的调用。
 - `web/next.config.js` 的 `experimental.staleTimes` 配置:Next 16.2.4 默认 `staleTimes.dynamic = 0`,显式写 0 是 no-op,删除以保持配置最小化。
 
 ## [1.2.0] - 2026-05-05
@@ -454,23 +454,23 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 - **阅读数改为 WordPress 风格的服务端同步 +1**:文章详情页 SSR 拉取数据时(`/api/v1/posts/:id?track=1`)后端在同一请求里完成 `UPDATE view_count = view_count + 1` 并返回 +1 后的值,渲染出来的 HTML 数字就是新数字。
 - **不再依赖客户端 /track 异步路径** 来统计阅读数,关 JS / 浏览器拦截 / 网络抖动也能正常计数,刷新页面就 +1 不丢。
-- **整个数据流减少一次客户端请求**:文章卡片不再走客户端 fetch 实时拉数字(v2.1.6 的 `LiveViewCount` 客户端组件删除),完全靠 SSR 同步 +1 后的值。
+- **整个数据流减少一次客户端请求**:文章卡片不再走客户端 fetch 实时拉数字(v1.1.8 的 `LiveViewCount` 客户端组件删除),完全靠 SSR 同步 +1 后的值。
 - 后端 `/track` 现在只负责访客明细 / 在线访客 / 全站 PV 统计,不再 IncrPostViews,数据流更清晰。
 
 ### 修复
 
-- 修复"点击进文章 → 阅读数 +1 → 回首页阅读数仍然是旧值"的体验问题。改造后:点击进文章时服务端就 +1,首页 SSR 直接读 DB 拿最新值;Router Cache / 浏览器缓存还可能让首页延迟刷新,但即便延迟,**数据本身是真实的**,而不是 v2.1.6 之前那种"客户端 +1 没成功 → DB 没真的改"的错位。
+- 修复"点击进文章 → 阅读数 +1 → 回首页阅读数仍然是旧值"的体验问题。改造后:点击进文章时服务端就 +1,首页 SSR 直接读 DB 拿最新值;Router Cache / 浏览器缓存还可能让首页延迟刷新,但即便延迟,**数据本身是真实的**,而不是 v1.1.8 之前那种"客户端 +1 没成功 → DB 没真的改"的错位。
 - 移除 4 个主题(Azure / Flux / Chred / Utterlog)文章页 cosmetic `+1` 显示逻辑(SSR 已经拿到 +1 之后的值,不再需要乐观补 1)。
 
 ### 移除
 
-- 删除 `web/components/blog/LiveViewCount.tsx`(v2.1.6 引入的客户端 fetch 组件,被服务端 +1 取代)。
+- 删除 `web/components/blog/LiveViewCount.tsx`(v1.1.8 引入的客户端 fetch 组件,被服务端 +1 取代)。
 
 ## [1.1.8] - 2026-05-04
 
 ### 修复
 
-- 接续 v2.1.5 的修复。v2.1.5 设的 `experimental.staleTimes.dynamic = 0` 在 Next 16.2.4 实际是默认值,等于无操作,文章卡片在首页仍可能显示旧的阅读数。改成更直接的方案:新增客户端组件 `LiveViewCount`,每次卡片 mount 都向 `/api/v1/posts/<id>` 发一次 `cache:'no-store'` 的请求并把数字替换为最新值。Azure / Flux / Chred / Utterlog 四个主题的 `PostCard.tsx` 全部接入。无论 Router Cache、bfcache 还是浏览器其它隐性缓存,数字都会被客户端兜底更新。
+- 接续 v1.1.7 的修复。v1.1.7 设的 `experimental.staleTimes.dynamic = 0` 在 Next 16.2.4 实际是默认值,等于无操作,文章卡片在首页仍可能显示旧的阅读数。改成更直接的方案:新增客户端组件 `LiveViewCount`,每次卡片 mount 都向 `/api/v1/posts/<id>` 发一次 `cache:'no-store'` 的请求并把数字替换为最新值。Azure / Flux / Chred / Utterlog 四个主题的 `PostCard.tsx` 全部接入。无论 Router Cache、bfcache 还是浏览器其它隐性缓存,数字都会被客户端兜底更新。
 
 ### 移除
 
@@ -880,7 +880,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 - 访客统计、评论归属地、GeoIP 封锁、WordPress 导入评论归属地和服务器出口 IP 识别统一使用同一套 GeoIP provider。
 - 内置页面标题统一跟随后台页面名称，补齐说说、订阅、友链、相册、音乐等页面的浏览器标题。
 - 后台纯图标操作按钮统一为正方形边框样式，图标居中显示。
-- 版本线整理为正式发布版：历史版本合并为 `1.0.0`，当前版本作为 `2.0.0` 正式发布。
+- 版本线整理为正式发布版：历史版本合并为 `1.0.0`，当前版本作为 `1.0.1` 正式发布。
 
 ### 修复
 
