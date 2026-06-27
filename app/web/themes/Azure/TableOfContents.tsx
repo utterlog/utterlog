@@ -119,8 +119,14 @@ export default function TableOfContents({ content, variant = 'desktop' }: TableO
 
   useEffect(() => {
     if (variant !== 'mobile') return;
-    document.documentElement.classList.toggle('azure-mobile-toc-open', mobileOpen);
-    return () => document.documentElement.classList.remove('azure-mobile-toc-open');
+    const root = document.documentElement;
+    const body = document.body;
+    root.classList.toggle('azure-mobile-toc-open', mobileOpen);
+    body.classList.toggle('azure-mobile-toc-open', mobileOpen);
+    return () => {
+      root.classList.remove('azure-mobile-toc-open');
+      body.classList.remove('azure-mobile-toc-open');
+    };
   }, [mobileOpen, variant]);
 
   // 滚动 20% 显示，滚到评论区消失

@@ -1340,8 +1340,8 @@
   }
   [data-theme="Azure"] .azure-mobile-toc-layer {
     position: fixed;
-    inset: 56px 0 0;
-    z-index: 49;
+    inset: 0;
+    z-index: 90;
     display: block;
     opacity: 0;
     pointer-events: none;
@@ -1355,21 +1355,24 @@
     position: absolute;
     inset: 0;
     padding: 0;
-    background: rgba(0, 0, 0, 0.18);
+    background: rgba(17, 24, 39, 0.34);
+    backdrop-filter: blur(2px);
     border: 0;
     cursor: pointer;
   }
   [data-theme="Azure"] .azure-mobile-toc-panel {
     position: absolute;
-    top: 8px;
-    right: 10px;
-    width: min(320px, calc(100vw - 20px));
-    max-height: min(520px, calc(100vh - 80px));
+    right: 0;
+    bottom: 0;
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    max-height: min(74vh, 620px);
     overflow: hidden;
     background: #fff;
-    border: 1px solid #e5e5e5;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
-    transform: translateY(-6px);
+    border-top: 1px solid #e5e5e5;
+    box-shadow: 0 -18px 44px rgba(15, 23, 42, 0.18);
+    transform: translateY(100%);
     transition: transform 0.18s ease;
   }
   [data-theme="Azure"] .azure-mobile-toc-layer.open .azure-mobile-toc-panel {
@@ -1379,8 +1382,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 44px;
-    padding: 0 10px 0 14px;
+    min-height: 50px;
+    padding: 0 12px 0 16px;
     color: #333;
     font-size: 14px;
     font-weight: 600;
@@ -1398,8 +1401,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
     padding: 0;
     color: #777;
     background: none;
@@ -1407,22 +1411,22 @@
     cursor: pointer;
   }
   [data-theme="Azure"] .azure-mobile-toc-list {
-    max-height: calc(min(520px, calc(100vh - 80px)) - 44px);
+    max-height: calc(min(74vh, 620px) - 50px - max(12px, env(safe-area-inset-bottom)));
     margin: 0;
-    padding: 6px 0;
+    padding: 8px 0 max(12px, env(safe-area-inset-bottom));
     overflow-y: auto;
+    overscroll-behavior: contain;
     list-style: none;
   }
   [data-theme="Azure"] .azure-mobile-toc-item {
     display: block;
-    padding: 9px 14px;
-    overflow: hidden;
+    padding: 10px 16px;
     color: #555;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.45;
     text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    white-space: normal;
     border-left: 3px solid transparent;
   }
   [data-theme="Azure"] .azure-mobile-toc-item.active {
@@ -1431,6 +1435,10 @@
     background: #f5f8ff;
     border-left-color: var(--color-primary);
   }
+  [data-theme="Azure"].azure-mobile-toc-open,
+  [data-theme="Azure"].azure-mobile-toc-open body,
+  body.azure-mobile-toc-open,
+  html.azure-mobile-toc-open,
   [data-theme="Azure"].azure-mobile-toc-open .blog-main {
     overflow-y: hidden !important;
   }
@@ -1504,13 +1512,13 @@
     max-height: calc(100vh - 52px);
   }
   [data-theme="Azure"] .azure-mobile-toc-layer {
-    inset: 52px 0 0;
+    inset: 0;
   }
   [data-theme="Azure"] .azure-mobile-toc-panel {
-    max-height: min(520px, calc(100vh - 76px));
+    max-height: min(78vh, 620px);
   }
   [data-theme="Azure"] .azure-mobile-toc-list {
-    max-height: calc(min(520px, calc(100vh - 76px)) - 44px);
+    max-height: calc(min(78vh, 620px) - 50px - max(12px, env(safe-area-inset-bottom)));
   }
   [data-theme="Azure"] .azure-footer {
     overflow: hidden;
