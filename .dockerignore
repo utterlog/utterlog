@@ -20,3 +20,11 @@ community
 id
 wordpress-plugin
 Comment
+
+# Allow a host-prebuilt admin SPA into the build context. The admin build
+# runs a self-serving prerender that fails under emulated (Rosetta) docker
+# builds, so when dist/client is present the admin-builder stage reuses it
+# instead of rebuilding. Native builds (CI, server) have no dist and build
+# in-container as usual.
+!app/admin/dist
+!app/admin/dist/**

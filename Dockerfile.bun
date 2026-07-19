@@ -20,7 +20,10 @@ WORKDIR /app
 COPY app/shared ./app/shared
 COPY app/admin/ ./app/admin/
 WORKDIR /app/app/admin
-RUN bun run build
+# Reuse a host-prebuilt dist when present (see .dockerignore) — the SPA
+# prerender's self-serving server fails under emulated docker builds.
+# Native builds have no prebuilt dist and build here as usual.
+RUN if [ -f dist/client/index.html ]; then echo "==> using host-prebuilt admin dist"; else bun run build; fi
 
 FROM deps AS start-builder
 WORKDIR /app
