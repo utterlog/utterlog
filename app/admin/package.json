@@ -11,6 +11,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-router": "^1.170.17",
+    "@tanstack/react-start": "^1.168.27",
     "axios": "^1.18.1",
     "clsx": "^2.1.1",
     "mapbox-gl": "^3.25.0",

@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 # Runtime responsibilities:
 #   - Bun 1.4 security/static gateway on :8080
-#   - Admin SPA served from app/admin/dist
+#   - Admin TanStack Start SPA served from app/admin/dist/client
 #   - TanStack Start SSR and Server Routes
 # ============================================================
 
@@ -57,7 +57,7 @@ COPY app/server ./app/server
 COPY app/web ./app/web
 COPY app/start ./app/start
 COPY app/shared ./app/shared
-COPY --from=admin-builder /app/app/admin/dist ./app/admin/dist
+COPY --from=admin-builder /app/app/admin/dist/client ./app/admin/dist/client
 COPY --from=start-builder /app/app/start/dist ./app/start/dist
 COPY content ./content
 

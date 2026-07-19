@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import viteReact from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { compression } from 'vite-plugin-compression2';
 import path from 'node:path';
@@ -9,19 +10,30 @@ const appVersion = JSON.parse(
   readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8'),
 ).version as string;
 
+// Admin runs as a TanStack Start app in SPA mode: no SSR (it is auth-gated
+// and noindex), the plugin prerenders a static shell that the Bun gateway
+// serves for every /admin/* path, then the client router hydrates.
 export default defineConfig({
   base: '/admin/',
   plugins: [
-    react(),
+    tanstackStart({
+      spa: {
+        enabled: true,
+        maskPath: '/admin',
+        prerender: {
+          enabled: true,
+          outputPath: '/index.html',
+        },
+      },
+    }),
+    viteReact(),
     tailwindcss(),
-    // Generate .gz alongside each asset (widely supported, small)
     compression({
       algorithm: 'gzip',
       exclude: [/\.(br|gz|zst)$/, /\.png$/, /\.jpg$/, /\.webp$/],
-      threshold: 1024, // only compress files >1KB
+      threshold: 1024,
       deleteOriginalAssets: false,
     }),
-    // Generate .br alongside each asset (better ratio, modern browsers)
     compression({
       algorithm: 'brotliCompress',
       exclude: [/\.(br|gz|zst)$/, /\.png$/, /\.jpg$/, /\.webp$/],
@@ -47,32 +59,6 @@ export default defineConfig({
       '/uploads': {
         target: process.env.UTTERLOG_API_DEV_TARGET || 'http://localhost:8080',
         changeOrigin: true,
-      },
-    },
-  },
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: false,
-    rolldownOptions: {
-      output: {
-        entryFileNames: 'assets/v138-[name]-[hash].js',
-        chunkFileNames: 'assets/v138-[name]-[hash].js',
-        assetFileNames: 'assets/v138-[name]-[hash][extname]',
-        codeSplitting: {
-          groups: [
-            {
-              name: 'framework',
-              test: /[\\/]node_modules[\\/](react|react-dom|@tanstack[\\/]react-router)[\\/]/,
-              priority: 20,
-            },
-            {
-              name: 'vendor',
-              test: /[\\/]node_modules[\\/](axios|zustand|react-hot-toast)[\\/]/,
-              priority: 15,
-            },
-          ],
-        },
       },
     },
   },

@@ -9,18 +9,25 @@ describe('admin shell performance safeguards', () => {
     expect(isAdminAssetPath('posts/edit/42')).toBe(false);
   });
 
-  test('uses router-aware lazy components for intent preloading', async () => {
-    const source = await Bun.file('app/admin/src/App.tsx').text();
-    expect(source).toContain('lazyRouteComponent');
-    expect(source).toContain("const DashboardHome = lazyRouteComponent");
-    expect(source).not.toMatch(/\blazy\(\(\) => import/);
+  test('admin is a file-based TanStack Start app so every route code-splits', async () => {
+    // The old single App.tsx imperative router is gone; Start's file-based
+    // routing gives every route its own chunk automatically.
+    expect(await Bun.file('app/admin/src/App.tsx').exists()).toBe(false);
+    expect(await Bun.file('app/admin/src/routes/__root.tsx').exists()).toBe(true);
+    const routes = new Bun.Glob('app/admin/src/routes/**/*.tsx');
+    const routeFiles = await Array.fromAsync(routes.scan());
+    // 45+ page routes + shell/layout — proves per-route splitting, not one bundle.
+    expect(routeFiles.length).toBeGreaterThan(30);
   });
 
   test('does not put remote font stylesheets on the admin render path', async () => {
     const css = await Bun.file('app/admin/src/styles/globals.css').text();
-    const html = await Bun.file('app/admin/index.html').text();
+    const root = await Bun.file('app/admin/src/routes/__root.tsx').text();
     expect(css).not.toContain('static.bluecdn.com/fonts');
-    expect(html).toContain('rel="preload" as="style"');
+    // FontAwesome must be injected client-side, never emitted as a render-blocking
+    // <link rel="stylesheet"> in the shell head.
+    expect(root).not.toMatch(/rel:\s*'stylesheet'/);
+    expect(root).toContain("document.createElement('link')");
   });
 
   test('caches remote release metadata and keeps explicit refresh support', async () => {
