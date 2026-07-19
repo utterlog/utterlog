@@ -291,9 +291,9 @@ body {
   --ctrl-pad-sm: 0 12px;
   --ctrl-pad-md: 0 18px;
   --ctrl-pad-lg: 0 24px;
-  --ctrl-radius: 0;
-  --card-radius: 0;
-  --card-radius-hero: 0;
+  --ctrl-radius: 0.375rem;
+  --card-radius: 0.5rem;
+  --card-radius-hero: 0.75rem;
 
   --settings-section-gap: 24px;
   --settings-section-title-size: 14px;
