@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { approveAdminComment, deleteAdminComment, updateAdminComment } from '../../../../../../server/src/services/comments';
+import { approveAdminComment, deleteAdminComment, updateAdminComment } from '@backend/services/comments';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function commentId(value: string) {

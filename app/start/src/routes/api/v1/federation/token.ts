@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { FederationServiceError, issueFederationToken } from '../../../../../../server/src/routes/compat';
+import { FederationServiceError, issueFederationToken } from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/federation/token')({ server: { handlers: {

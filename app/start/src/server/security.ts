@@ -1,9 +1,9 @@
-import { table } from '../../../server/src/config';
-import { exec, nowUnix, one } from '../../../server/src/db/helpers';
-import { optionValue } from '../../../server/src/db/options';
-import { lookupGeoIp, normalizeGeoProvider } from '../../../server/src/geoip';
-import type { AuthSession } from '../../../server/src/auth/session';
-import { verifyAccessToken } from '../../../server/src/auth/jwt';
+import { table } from '@backend/config';
+import { exec, nowUnix, one } from '@backend/db/helpers';
+import { optionValue } from '@backend/db/options';
+import { lookupGeoIp, normalizeGeoProvider } from '@backend/geoip';
+import type { AuthSession } from '@backend/auth/session';
+import { verifyAccessToken } from '@backend/auth/jwt';
 
 type Bucket = { count: number; resetAt: number };
 type SecuritySettings = {

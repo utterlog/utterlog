@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../../server/src/auth/session';
-import { getPostBySlug } from '../../../../../../../server/src/public-read';
+import { authenticateRequest } from '@backend/auth/session';
+import { getPostBySlug } from '@backend/public-read';
 import { apiFail, apiOk } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/posts/slug/$slug')({ server: { handlers: { GET: async ({ request, params }) => {

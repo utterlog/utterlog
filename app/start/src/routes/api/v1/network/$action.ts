@@ -14,7 +14,7 @@ import {
   unbindUtterlogId,
   unsubscribeNetworkSite,
   utterlogProfile,
-} from '../../../../../../server/src/routes/compat';
+} from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {

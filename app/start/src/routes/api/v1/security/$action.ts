@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { banIp, getSecuritySettings, listSecurityBans, SecurityServiceError, securityOverview, securityTimeline, unbanIp, updateSecuritySettings } from '../../../../../../server/src/services/security';
+import { banIp, getSecuritySettings, listSecurityBans, SecurityServiceError, securityOverview, securityTimeline, unbanIp, updateSecuritySettings } from '@backend/services/security';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {

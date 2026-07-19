@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { analyticsBreakdown, analyticsGeoIp, analyticsLogs, analyticsMap, analyticsPeriod, AnalyticsServiceError, analyticsVisitors, onlineVisitors, requestIp } from '../../../../../../server/src/services/analytics';
+import { analyticsBreakdown, analyticsGeoIp, analyticsLogs, analyticsMap, analyticsPeriod, AnalyticsServiceError, analyticsVisitors, onlineVisitors, requestIp } from '@backend/services/analytics';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/analytics/$action')({ server: { handlers: {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { disableTotp, enableTotp, setupTotp, validateTotpLogin } from '../../../../../../../server/src/services/auth-security';
+import { disableTotp, enableTotp, setupTotp, validateTotpLogin } from '@backend/services/auth-security';
 import { apiFail, apiOk, withAuthService } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/auth/totp/$action')({

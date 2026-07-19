@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listMediaRecords } from '../../../../../../server/src/services/media';
+import { listMediaRecords } from '@backend/services/media';
 import { apiPaginated, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/')({

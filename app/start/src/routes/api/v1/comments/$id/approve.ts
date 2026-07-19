@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { approveAdminComment } from '../../../../../../../server/src/services/comments';
+import { approveAdminComment } from '@backend/services/comments';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/comments/$id/approve')({

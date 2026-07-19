@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { systemUpdateCheckPayload } from '../../../../../../server/src/routes/compat';
+import { systemUpdateCheckPayload } from '@backend/routes/compat';
 import { apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/system/update-check')({ server: { handlers: {

@@ -6,7 +6,7 @@ import {
   syncPingPayload,
   syncRollbackPayload,
   syncStartPayload,
-} from '../../../../../../../server/src/routes/compat';
+} from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../../server/http';
 
 function serviceError(error: unknown) {

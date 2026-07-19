@@ -1,9 +1,9 @@
 import { createMiddleware, createStart } from '@tanstack/react-start';
-import { config } from '../../server/src/config';
-import { authenticateRequest, type AuthSession } from '../../server/src/auth/session';
-import { dbReady } from '../../server/src/db/client';
-import { installRedirect } from '../../server/src/http/install-redirect';
-import { requestIp } from '../../server/src/request-ip';
+import { config } from '@backend/config';
+import { authenticateRequest, type AuthSession } from '@backend/auth/session';
+import { dbReady } from '@backend/db/client';
+import { installRedirect } from '@backend/http/install-redirect';
+import { requestIp } from '@backend/request-ip';
 import { brandingAssetResponse } from './server/branding-assets';
 import { isVisitorPersonalizedPage } from './server/cache-policy';
 import { checkStartSecurity } from './server/security';

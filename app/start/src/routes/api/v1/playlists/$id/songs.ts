@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { addPlaylistSong, ContentRecordError, removePlaylistSong } from '../../../../../../../server/src/services/content-records';
+import { addPlaylistSong, ContentRecordError, removePlaylistSong } from '@backend/services/content-records';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 function serviceError(error: unknown) {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { llmsFullTxtResponse } from '../../../server/src/routes/content';
+import { llmsFullTxtResponse } from '@backend/routes/content';
 
 export const Route = createFileRoute('/llms-full.txt')({ server: { handlers: {
   GET: () => llmsFullTxtResponse(),

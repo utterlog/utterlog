@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../server/src/auth/session';
-import { codingPayload } from '../../../../../server/src/routes/coding';
+import { authenticateRequest } from '@backend/auth/session';
+import { codingPayload } from '@backend/routes/coding';
 import { apiOk } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/coding')({

@@ -31,7 +31,7 @@ body:
       options:
         - 前端博客（app/web/）
         - 管理后台（app/admin/）
-        - 后端 API（app/server/）
+        - 后端 API（app/start/src/backend/）
         - 主题
         - 插件
         - 部署

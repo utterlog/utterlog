@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { rebuildEmbeddings } from '../../../../../../server/src/routes/ai';
+import { rebuildEmbeddings } from '@backend/routes/ai';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/search/rebuild')({ server: { handlers: {

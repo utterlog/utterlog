@@ -6,7 +6,8 @@
   "type": "module",
   "imports": {
     "#/*": "./app/web/*",
-    "@shared/*": "./app/shared/*"
+    "@shared/*": "./app/shared/*",
+    "@backend/*": "./app/start/src/backend/*"
   },
   "workspaces": [
     "app/web",
@@ -14,11 +15,11 @@
     "app/start"
   ],
   "scripts": {
-    "dev": "bun run app/server/src/index.ts",
-    "server:dev": "bun run app/server/src/index.ts",
-    "server:check": "bunx tsc -p app/server/tsconfig.json --noEmit",
-    "test:server": "JWT_SECRET=test-secret-for-server-tests bun test app/server/test",
-    "test:integration": "UTTERLOG_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/server/test/comments-service.integration.test.ts",
+    "dev": "bun run app/start/src/backend/index.ts",
+    "server:dev": "bun run app/start/src/backend/index.ts",
+    "server:check": "cd app/start && bunx tsc -p tsconfig.json --noEmit",
+    "test:server": "JWT_SECRET=test-secret-for-server-tests bun test app/start/test",
+    "test:integration": "UTTERLOG_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/start/test/comments-service.integration.test.ts",
     "audit:api": "bun scripts/audit-api-coverage.ts",
     "build:web": "cd app/web && bun run sync:themes",
     "build:admin": "cd app/admin && bun run build",

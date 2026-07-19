@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { backupDownloadResponse, BackupServiceError } from '../../../../../../../server/src/routes/backup';
+import { backupDownloadResponse, BackupServiceError } from '@backend/routes/backup';
 import { apiFail, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/backup/download/$filename')({ server: { handlers: {

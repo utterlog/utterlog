@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../server/src/auth/session';
-import { listPosts } from '../../../../../server/src/public-read';
-import { createPost, PostServiceError } from '../../../../../server/src/services/posts';
+import { authenticateRequest } from '@backend/auth/session';
+import { listPosts } from '@backend/public-read';
+import { createPost, PostServiceError } from '@backend/services/posts';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../server/http';
 
 function positive(value: string | null, fallback: number) {

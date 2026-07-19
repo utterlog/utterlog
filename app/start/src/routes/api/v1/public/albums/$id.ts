@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { getPublicAlbum } from '../../../../../../../server/src/public-read';
+import { getPublicAlbum } from '@backend/public-read';
 import { apiFail, apiOk } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/public/albums/$id')({ server: { handlers: { GET: async ({ request, params }) => {

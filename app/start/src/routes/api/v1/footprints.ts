@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listPublicFootprints } from '../../../../../server/src/public-read';
+import { listPublicFootprints } from '@backend/public-read';
 import { apiOk } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/footprints')({ server: { handlers: { GET: async ({ request }) => {

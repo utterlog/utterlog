@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ImportSyncServiceError, syncJobStatusPayload } from '../../../../../../../../../server/src/routes/compat';
+import { ImportSyncServiceError, syncJobStatusPayload } from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/sync/$platform/job/$id/status')({ server: { handlers: {

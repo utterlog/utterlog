@@ -3,7 +3,7 @@ import {
   aiConversationPayload,
   AiServiceError,
   deleteAiConversationPayload,
-} from '../../../../../../../server/src/routes/ai';
+} from '@backend/routes/ai';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 function serviceError(error: unknown) {

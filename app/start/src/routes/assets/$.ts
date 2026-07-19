@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { runtimePaths } from '../../../../server/src/paths';
-import { fileResponse, safeJoin } from '../../../../server/src/static/response';
+import { runtimePaths } from '@backend/paths';
+import { fileResponse, safeJoin } from '@backend/static/response';
 
 async function assetResponse(request: Request, splat: string) {
   if (!splat) return new Response('Not Found', { status: 404 });

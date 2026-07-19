@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
+import { authenticateRequest } from '@backend/auth/session';
 import {
   followSocialSite,
   SocialServiceError,
@@ -7,7 +7,7 @@ import {
   socialFollowStatus,
   socialManagement,
   unfollowSocialSite,
-} from '../../../../../../server/src/routes/compat';
+} from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { finishInstallation, InstallServiceError } from '../../../../../../server/src/services/install';
+import { finishInstallation, InstallServiceError } from '@backend/services/install';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/install/finish')({ server: { handlers: {

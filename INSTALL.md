@@ -208,6 +208,6 @@ docker compose -f docker-compose.prod.yml logs caddy | grep -i 'certificate\|err
 bash scripts/dump-schema.sh     # 无 make
 make schema                     # 有 make（等价）
 
-git add app/server/assets/schema.sql
+git add app/start/assets/schema.sql
 git commit -m "schema: <描述>"
 ```

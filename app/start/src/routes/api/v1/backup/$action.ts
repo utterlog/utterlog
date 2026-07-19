@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { backupListPayload, BackupServiceError, backupStatsPayload, createBackupPayload, deleteBackupFile, importBackupFile } from '../../../../../../server/src/routes/backup';
+import { backupListPayload, BackupServiceError, backupStatsPayload, createBackupPayload, deleteBackupFile, importBackupFile } from '@backend/routes/backup';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { MusicProxyError, searchMusic } from '../../../../../../server/src/services/music-proxy';
+import { MusicProxyError, searchMusic } from '@backend/services/music-proxy';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/music/search')({ server: { handlers: {

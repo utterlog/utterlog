@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listComments } from '../../../../../../server/src/public-read';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
-import { createPublicComment } from '../../../../../../server/src/services/public-comments';
-import { requestIp } from '../../../../../../server/src/request-ip';
+import { listComments } from '@backend/public-read';
+import { authenticateRequest } from '@backend/auth/session';
+import { createPublicComment } from '@backend/services/public-comments';
+import { requestIp } from '@backend/request-ip';
 import { apiOk, apiPaginated, withPublicWrite } from '../../../../server/http';
 
 function positive(value: string | null, fallback: number) {

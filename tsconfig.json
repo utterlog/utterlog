@@ -17,7 +17,7 @@
     }
   },
   "include": [
-    "app/server/src/**/*.ts",
-    "app/server/src/**/*.tsx"
+    "app/start/src/backend/**/*.ts",
+    "app/start/src/backend/**/*.tsx"
   ]
 }

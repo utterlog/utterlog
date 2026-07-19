@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { requestIp, visitorGeo } from '../../../../../../server/src/services/analytics';
+import { requestIp, visitorGeo } from '@backend/services/analytics';
 import { apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/visitor/geo')({ server: { handlers: {

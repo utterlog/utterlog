@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================
-# Dump current database schema to app/server/assets/schema.sql
+# Dump current database schema to app/start/assets/schema.sql
 # Used to commit a fresh-install schema to the repo.
 # Run this from the project root while Docker is up.
 # ============================================================
 
 set -e
 
-SCHEMA_FILE="app/server/assets/schema.sql"
+SCHEMA_FILE="app/start/assets/schema.sql"
 
 # Read DB config from docker-compose.yml or .env
 DB_HOST="${DB_HOST:-localhost}"

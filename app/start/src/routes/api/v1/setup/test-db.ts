@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { InstallServiceError, testSetupDatabase } from '../../../../../../server/src/services/install';
+import { InstallServiceError, testSetupDatabase } from '@backend/services/install';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/setup/test-db')({ server: { handlers: {

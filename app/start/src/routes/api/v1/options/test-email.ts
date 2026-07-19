@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { OptionServiceError, sendTestEmail } from '../../../../../../server/src/services/options';
+import { OptionServiceError, sendTestEmail } from '@backend/services/options';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/options/test-email')({ server: { handlers: {

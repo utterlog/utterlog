@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { readLocale } from '../../../../../../server/src/services/i18n';
+import { readLocale } from '@backend/services/i18n';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/i18n/$locale')({ server: { handlers: {

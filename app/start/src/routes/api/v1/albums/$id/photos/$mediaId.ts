@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ContentRecordError, removeAlbumPhoto } from '../../../../../../../../server/src/services/content-records';
+import { ContentRecordError, removeAlbumPhoto } from '@backend/services/content-records';
 import { apiFail, apiOk, withAdmin } from '../../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/albums/$id/photos/$mediaId')({ server: { handlers: {

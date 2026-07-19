@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { deleteMetaRecord, getMetaRecord, saveMetaRecord } from '../../../../../../server/src/services/metas';
+import { deleteMetaRecord, getMetaRecord, saveMetaRecord } from '@backend/services/metas';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/categories/$id')({

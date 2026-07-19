@@ -5,7 +5,7 @@ on:
     branches: [main]
     tags: ['v*']
     paths:
-      - 'app/server/**'
+      - 'app/start/**'
       - 'app/admin/**'
       - 'app/web/**'
       - 'Dockerfile.bun'

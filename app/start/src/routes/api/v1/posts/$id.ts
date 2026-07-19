@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
-import { getPostById } from '../../../../../../server/src/public-read';
-import { deletePost, PostServiceError, updatePost } from '../../../../../../server/src/services/posts';
+import { authenticateRequest } from '@backend/auth/session';
+import { getPostById } from '@backend/public-read';
+import { deletePost, PostServiceError, updatePost } from '@backend/services/posts';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {

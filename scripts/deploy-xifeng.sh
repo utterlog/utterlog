@@ -154,7 +154,7 @@ preflight() {
 
   if [ "$SKIP_TESTS" -eq 0 ]; then
     log "Preflight: server tests"
-    JWT_SECRET=test-secret-for-server-tests bun test app/server/test
+    JWT_SECRET=test-secret-for-server-tests bun test app/start/test
   else
     warn "跳过 server tests（--skip-tests）"
   fi
@@ -187,7 +187,7 @@ remote_build_from_src() {
   git archive HEAD | "${SSH[@]}" "tar xf - -C ${REMOTE_PATH}/src"
   "${SSH[@]}" bash -s <<EOF
 set -euo pipefail
-test -f ${REMOTE_PATH}/src/app/server/src/backup/zip-safety.ts
+test -f ${REMOTE_PATH}/src/app/start/src/backend/backup/zip-safety.ts
 cd ${REMOTE_PATH}
 docker tag ${IMAGE_REF} ${IMAGE_NAME}:backup-\$(date +%Y%m%d%H%M%S) 2>/dev/null || true
 cd src

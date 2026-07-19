@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { MusicProxyError, proxyMusicAsset } from '../../../../../../../../../../server/src/services/music-proxy';
+import { MusicProxyError, proxyMusicAsset } from '@backend/services/music-proxy';
 import { apiFail } from '../../../../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/music/proxy/$platform/songs/$id/$asset')({ server: { handlers: {

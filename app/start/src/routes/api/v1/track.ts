@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { trackPageView } from '../../../../../server/src/services/tracking';
+import { trackPageView } from '@backend/services/tracking';
 import { apiOk } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/track')({ server: { handlers: {

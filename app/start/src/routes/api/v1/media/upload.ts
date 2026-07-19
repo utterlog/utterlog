@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { MediaServiceError, uploadMediaFile } from '../../../../../../server/src/services/media';
+import { MediaServiceError, uploadMediaFile } from '@backend/services/media';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/upload')({ server: { handlers: {

@@ -12,7 +12,7 @@
      -> PostgreSQL 数据服务
 ```
 
-浏览器 API 固定使用同源 `/api/v1`。服务端页面 loader 直接调用 `app/server` 的共享服务，不再通过内部 HTTP 请求重复读取数据。
+浏览器 API 固定使用同源 `/api/v1`。服务端页面 loader 直接调用 `app/start/src/backend` 的共享服务，不再通过内部 HTTP 请求重复读取数据。
 
 ## 目录
 

@@ -1,4 +1,4 @@
-import { archiveStatsPayload, getOptionsMap, getOwnerPublic, listMetas } from '../../../server/src/public-read';
+import { archiveStatsPayload, getOptionsMap, getOwnerPublic, listMetas } from '@backend/public-read';
 import type { MenuItem, ThemeContextData } from '@/lib/theme-context';
 import { DEFAULT_THEME, getThemeManifest, resolveBlogTheme } from '@/lib/theme';
 import { resolveSiteTimeZone } from '@/lib/timezone';

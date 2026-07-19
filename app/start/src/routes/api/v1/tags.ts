@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listMetaRecords, saveMetaRecord } from '../../../../../server/src/services/metas';
+import { listMetaRecords, saveMetaRecord } from '@backend/services/metas';
 import { apiOk, apiPaginated, withAdmin } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/tags')({

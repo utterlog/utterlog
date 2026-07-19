@@ -1,6 +1,6 @@
 import { join } from 'node:path';
-import { runtimePaths } from '../../../server/src/paths';
-import { fileResponse, safeJoin } from '../../../server/src/static/response';
+import { runtimePaths } from '@backend/paths';
+import { fileResponse, safeJoin } from '@backend/static/response';
 
 const roots = {
   static: join(runtimePaths.webAppDir, 'public', 'static'),

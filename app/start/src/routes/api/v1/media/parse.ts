@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ExternalContentServiceError, parseMediaLink } from '../../../../../../server/src/routes/compat';
+import { ExternalContentServiceError, parseMediaLink } from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/parse')({ server: { handlers: {

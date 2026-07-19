@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { acceptFederationFollow, FederationServiceError } from '../../../../../../server/src/routes/compat';
+import { acceptFederationFollow, FederationServiceError } from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/federation/follow')({ server: { handlers: {

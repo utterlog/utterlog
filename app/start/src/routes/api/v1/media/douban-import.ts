@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { doubanImportPayload, ExternalContentServiceError } from '../../../../../../server/src/routes/compat';
+import { doubanImportPayload, ExternalContentServiceError } from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/douban-import')({ server: { handlers: {

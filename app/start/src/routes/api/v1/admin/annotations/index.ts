@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listAdminAnnotations } from '../../../../../../../server/src/services/annotations';
+import { listAdminAnnotations } from '@backend/services/annotations';
 import { apiOk, apiPaginated, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/admin/annotations/')({ server: { handlers: {

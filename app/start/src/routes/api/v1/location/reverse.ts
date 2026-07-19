@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { FootprintServiceError, reverseLocation } from '../../../../../../server/src/services/footprints';
+import { FootprintServiceError, reverseLocation } from '@backend/services/footprints';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/location/reverse')({ server: { handlers: {

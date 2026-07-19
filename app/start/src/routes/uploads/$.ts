@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { config } from '../../../../server/src/config';
-import { fileResponse, safeJoin } from '../../../../server/src/static/response';
+import { config } from '@backend/config';
+import { fileResponse, safeJoin } from '@backend/static/response';
 
 async function uploadResponse(request: Request, splat: string) {
   if (!splat) return new Response('Not Found', { status: 404 });

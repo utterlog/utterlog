@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { processTelegramWebhookRequest, TelegramServiceError } from '../../../../../../server/src/routes/telegram';
+import { processTelegramWebhookRequest, TelegramServiceError } from '@backend/routes/telegram';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/telegram/webhook')({ server: { handlers: {

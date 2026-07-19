@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { join } from 'node:path';
-import { config } from '../../../server/src/config';
-import { runtimePaths } from '../../../server/src/paths';
-import { brandingExts } from '../../../server/src/media/storage';
-import { fileResponse } from '../../../server/src/static/response';
+import { config } from '@backend/config';
+import { runtimePaths } from '@backend/paths';
+import { brandingExts } from '@backend/media/storage';
+import { fileResponse } from '@backend/static/response';
 
 async function brandingResponse(request: Request, asset: 'logo' | 'dark-logo', ext: string) {
   const normalized = ext.toLowerCase();

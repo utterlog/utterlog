@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { recentMomentTags } from '../../../../../../server/src/public-read';
+import { recentMomentTags } from '@backend/public-read';
 import { apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/moments/recent-tags')({ server: { handlers: { GET: async ({ request }) => {

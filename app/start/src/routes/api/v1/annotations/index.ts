@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
-import { AnnotationServiceError, createAnnotation, listAnnotations } from '../../../../../../server/src/services/annotations';
+import { authenticateRequest } from '@backend/auth/session';
+import { AnnotationServiceError, createAnnotation, listAnnotations } from '@backend/services/annotations';
 import { apiFail, apiOk } from '../../../../server/http';
 
 function serviceError(error: unknown) {

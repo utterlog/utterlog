@@ -16,8 +16,8 @@ Utterlog is being migrated from the old `postgres + api(Go) + web(Next)` split t
 ## Important directories
 
 ```text
-app/server/             Bun + TypeScript API/gateway
-app/server/assets/schema.sql PostgreSQL bootstrap schema copied from the old API schema
+app/start/src/backend/             Bun + TypeScript API/gateway
+app/start/assets/schema.sql PostgreSQL bootstrap schema copied from the old API schema
 app/admin/              Vite/React admin source
 app/web/                Blog pages, themes, and shared React components (Bun SSR source)
 content/                Runtime themes/plugins
@@ -44,7 +44,7 @@ docker compose -f docker-compose.prod.yml config
 For the unified app:
 
 ```bash
-bun run app/server/src/index.ts
+bun run app/start/src/backend/index.ts
 ```
 
 Blog SSR + client hydration are served from the single Bun process on `PORT` (default 8080).
@@ -98,7 +98,7 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 - PG 18 (pgvector)：本博客库 `utterlog`、Hub 库 `utterlog_hub`、ID 库 `utterlog_id`
 - 表前缀 `ul_`（env `DB_PREFIX`），id-center 用 `uid_`
 - pgvector 用于语义搜索（embedding 自动生成）
-- `app/server/assets/schema.sql` 是真理之源；改 schema 后 `bash scripts/dump-schema.sh` 重新导出，commit 进库
+- `app/start/assets/schema.sql` 是真理之源；改 schema 后 `bash scripts/dump-schema.sh` 重新导出，commit 进库
 - 文章状态字段：`publish` / `draft` / `private` / `pending`（**不是** `published`）
 - 时间字段：`created_at`（草稿创建）/ `published_at`（发布）。所有公开列表/归档/搜索/排序优先用 `published_at`
 
@@ -116,7 +116,7 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 | **Utterlog** | 旗舰参考 | 默认基线 |
 | **Chred** | 备选 | — |
 
-注册位置：`app/web/lib/theme-data.ts`（页面元信息）+ `app/server/src/blog-themes.ts`（后端枚举）。
+注册位置：`app/web/lib/theme-data.ts`（页面元信息）+ `app/start/src/backend/blog-themes.ts`（后端枚举）。
 
 主题切换：admin → `/admin/themes` → 调用 TanStack Start revalidate 接口清缓存 → 立即生效。
 上传 zip：admin 解压到 `content/themes/<name>/`，激活后写 options。
@@ -231,7 +231,7 @@ gh release create vX.Y.Z --notes "..."
 
 - 根 `package.json`（主版本号；所有 workspace 共享同一版本）
 - `app/web/package.json` + `app/admin/package.json`
-- `app/server/src/system/metrics.ts` 的 `cachedAppVersion` 运行时兜底常量（**易漏，运行时版本靠它兜底**）
+- `app/start/src/backend/system/metrics.ts` 的 `cachedAppVersion` 运行时兜底常量（**易漏，运行时版本靠它兜底**）
 - `bun.lock`（`bun install` 自动重写）
 
 **版本策略**：
@@ -347,7 +347,7 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 
 ## 15. 常用文件速查
 
-### Server 路由（`app/server/src/routes/`）
+### Server 路由（`app/start/src/backend/routes/`）
 
 | 模块 | 文件 |
 |---|---|
@@ -367,23 +367,23 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 
 | 功能 | 路径 |
 |---|---|
-| Server 入口 | `app/server/src/index.ts` |
-| Server 配置 / 启动配置校验 | `app/server/src/config.ts` |
-| DB 客户端 / helpers / options | `app/server/src/db/{client,helpers,options}.ts` |
-| Auth（JWT / 中间件 / 重置） | `app/server/src/auth/{jwt,middleware,password-reset}.ts` |
-| 邮件 | `app/server/src/email.ts` + `app/server/src/email/comment-reply-unsubscribe.ts` |
-| GeoIP | `app/server/src/geoip.ts` |
-| Bot 检测 | `app/server/src/bot-detect.ts` |
-| Analytics rollup | `app/server/src/analytics/rollup.ts` |
-| Web 渲染（SSR / router / 独立渲染 / page runner / 安装门控） | `app/server/src/web/{render,render-standalone,router,page-runner,install-gate}.tsx` |
-| HTTP 工具（response / security / validation / public-url） | `app/server/src/http/{response,security,validation,public-url}.ts` |
-| Cache（revalidate / tagged） | `app/server/src/cache/{revalidate,tagged}.ts` |
-| 媒体（storage / favicon） | `app/server/src/media/{storage,favicon}.ts` |
-| Telegram | `app/server/src/telegram.ts` |
-| 天气 | `app/server/src/weather.ts` |
-| Sync worker | `app/server/src/sync/worker.ts` |
-| 系统（host / metrics） | `app/server/src/system/{host,metrics}.ts` |
-| 主题注册（后端枚举 / 旧 option 迁移） | `app/server/src/blog-themes.ts` + `app/server/src/blog-theme-options.ts` |
+| Server 入口 | `app/start/src/backend/index.ts` |
+| Server 配置 / 启动配置校验 | `app/start/src/backend/config.ts` |
+| DB 客户端 / helpers / options | `app/start/src/backend/db/{client,helpers,options}.ts` |
+| Auth（JWT / 中间件 / 重置） | `app/start/src/backend/auth/{jwt,middleware,password-reset}.ts` |
+| 邮件 | `app/start/src/backend/email.ts` + `app/start/src/backend/email/comment-reply-unsubscribe.ts` |
+| GeoIP | `app/start/src/backend/geoip.ts` |
+| Bot 检测 | `app/start/src/backend/bot-detect.ts` |
+| Analytics rollup | `app/start/src/backend/analytics/rollup.ts` |
+| Web 渲染（SSR / router / 独立渲染 / page runner / 安装门控） | `app/start/src/backend/web/{render,render-standalone,router,page-runner,install-gate}.tsx` |
+| HTTP 工具（response / security / validation / public-url） | `app/start/src/backend/http/{response,security,validation,public-url}.ts` |
+| Cache（revalidate / tagged） | `app/start/src/backend/cache/{revalidate,tagged}.ts` |
+| 媒体（storage / favicon） | `app/start/src/backend/media/{storage,favicon}.ts` |
+| Telegram | `app/start/src/backend/telegram.ts` |
+| 天气 | `app/start/src/backend/weather.ts` |
+| Sync worker | `app/start/src/backend/sync/worker.ts` |
+| 系统（host / metrics） | `app/start/src/backend/system/{host,metrics}.ts` |
+| 主题注册（后端枚举 / 旧 option 迁移） | `app/start/src/backend/blog-themes.ts` + `app/start/src/backend/blog-theme-options.ts` |
 | Admin 入口 | `app/admin/src/main.tsx` + `app/admin/src/App.tsx` |
 | Admin API 客户端 | `app/admin/src/lib/api.ts` |
 | Admin 设计 token / 全局样式 | `app/admin/src/styles/globals.css` |
@@ -396,7 +396,7 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 | Web 组件（blog 业务 / UI / icons / editor） | `app/web/components/{blog,ui,icons,editor}/` |
 | Web Lib | `app/web/lib/{api,store,theme,theme-context,theme-data,...}.ts(x)` |
 | 跨包共享 | `app/shared/{blog-theme,site-favicon,string-utils}.ts` |
-| Schema | `app/server/assets/schema.sql` |
+| Schema | `app/start/assets/schema.sql` |
 | Docker dev / prod | `Dockerfile.bun` + `docker-compose.yml` / `docker-compose.prod.yml` |
 | 部署脚本 | `scripts/deploy.sh` / `install.sh` |
 | 主题样式同步 | `app/web/scripts/sync-theme-styles.mjs` |

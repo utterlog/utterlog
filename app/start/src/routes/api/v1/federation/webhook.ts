@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { FederationServiceError, receiveFederationWebhook } from '../../../../../../server/src/routes/compat';
+import { FederationServiceError, receiveFederationWebhook } from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/federation/webhook')({ server: { handlers: {

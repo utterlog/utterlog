@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
+import { authenticateRequest } from '@backend/auth/session';
 import {
   aiGetActionPayload,
   aiPostActionPayload,
   type AiActionResult,
   AiServiceError,
   readerAiChatPayload,
-} from '../../../../../../server/src/routes/ai';
+} from '@backend/routes/ai';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
 const getActions = new Set(['conversations', 'logs', 'stats', 'batch-status']);

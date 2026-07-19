@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { MediaServiceError, testMediaConnection } from '../../../../../../server/src/services/media';
+import { MediaServiceError, testMediaConnection } from '@backend/services/media';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/test-connection')({ server: { handlers: {

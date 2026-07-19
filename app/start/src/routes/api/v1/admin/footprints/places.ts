@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listFootprintPlaces } from '../../../../../../../server/src/services/footprints';
+import { listFootprintPlaces } from '@backend/services/footprints';
 import { apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/admin/footprints/places')({ server: { handlers: {

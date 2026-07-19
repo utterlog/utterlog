@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { downloadMediaUrl, MediaServiceError } from '../../../../../../server/src/services/media';
+import { downloadMediaUrl, MediaServiceError } from '@backend/services/media';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/download-url')({ server: { handlers: {

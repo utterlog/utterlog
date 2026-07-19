@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../server/src/auth/session';
-import { readResolvedOptionMap, writeOptionMap } from '../../../../../server/src/services/options';
+import { authenticateRequest } from '@backend/auth/session';
+import { readResolvedOptionMap, writeOptionMap } from '@backend/services/options';
 import { apiOk, withAdmin } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/options')({

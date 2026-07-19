@@ -15,7 +15,8 @@
     "paths": {
       "@/*": ["./../web/*"],
       "@shared/*": ["./../shared/*"],
-      "@start/*": ["./src/*"]
+      "@start/*": ["./src/*"],
+      "@backend/*": ["./src/backend/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"]

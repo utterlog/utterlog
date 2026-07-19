@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ExtensionServiceError, setPluginState } from '../../../../../../../server/src/routes/extensions';
+import { ExtensionServiceError, setPluginState } from '@backend/routes/extensions';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/plugins/$id/$action')({ server: { handlers: {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listPasskeys } from '../../../../../../server/src/services/auth-security';
+import { listPasskeys } from '@backend/services/auth-security';
 import { apiOk, withAuthService } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/passkeys/')({

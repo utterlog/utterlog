@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { appVersion } from '../../../../../server/src/system/metrics';
+import { appVersion } from '@backend/system/metrics';
 import { apiOk } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/health')({ server: { handlers: {

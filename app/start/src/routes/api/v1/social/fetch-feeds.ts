@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { startSocialFeedFetch } from '../../../../../../server/src/routes/compat';
+import { startSocialFeedFetch } from '@backend/routes/compat';
 import { apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/social/fetch-feeds')({ server: { handlers: {

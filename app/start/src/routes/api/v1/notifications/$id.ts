@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { deleteNotification, NotificationServiceError } from '../../../../../../server/src/services/notifications';
+import { deleteNotification, NotificationServiceError } from '@backend/services/notifications';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/notifications/$id')({ server: { handlers: {

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../server/src/auth/session';
-import { asContentResource, ContentRecordError, createContentRecord, listContentRecords } from '../../../../../server/src/services/content-records';
+import { authenticateRequest } from '@backend/auth/session';
+import { asContentResource, ContentRecordError, createContentRecord, listContentRecords } from '@backend/services/content-records';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/$resource')({

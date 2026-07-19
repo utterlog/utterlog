@@ -33,7 +33,7 @@
 ## 仓库结构（开发视角）
 
 ```
-app/server/     Bun API + SSR 网关（改后端从这里开始）
+app/start/src/backend/     Bun API + SSR 网关（改后端从这里开始）
 app/admin/      Vite 管理后台 SPA（/admin）
 app/web/        博客页面、主题、组件（SSR 源）
 app/shared/     跨包共享
@@ -88,13 +88,13 @@ bun run dev          # Vite dev server :5173，/api 代理到 :8080
 
 | 目标 | 路径 |
 |------|------|
-| REST API | `app/server/src/routes/` |
-| SSR 路由/渲染 | `app/server/src/web/` |
-| 数据库 schema | `app/server/assets/schema.sql`（改完 `make schema`） |
+| REST API | `app/start/src/backend/routes/` |
+| SSR 路由/渲染 | `app/start/src/backend/web/` |
+| 数据库 schema | `app/start/assets/schema.sql`（改完 `make schema`） |
 | 后台页面 | `app/admin/src/pages/` |
 | 博客路由 | `app/start/src/routes/` |
 | 主题 | `app/web/themes/{Name}/` |
-| 主题注册 | `app/web/lib/theme-data.ts` / `app/server/src/blog-themes.ts` |
+| 主题注册 | `app/web/lib/theme-data.ts` / `app/start/src/backend/blog-themes.ts` |
 
 ## Vite 8 配置说明（Admin）
 
@@ -178,7 +178,7 @@ make deploy-xifeng-dry      # 仅 preflight，不上传
 ## 测试与类型检查
 
 ```bash
-JWT_SECRET=test-secret-for-server-tests bun test app/server/test
+JWT_SECRET=test-secret-for-server-tests bun test app/start/src/backend/test
 bun run server:check
 cd app/admin && bun run build    # 含 tsc -b
 ```

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { AnnotationServiceError, batchDeleteAnnotations } from '../../../../../../../server/src/services/annotations';
+import { AnnotationServiceError, batchDeleteAnnotations } from '@backend/services/annotations';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/admin/annotations/batch-delete')({ server: { handlers: {

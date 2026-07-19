@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { AiServiceError, mutateAiCommentPayload } from '../../../../../../../../server/src/routes/ai';
+import { AiServiceError, mutateAiCommentPayload } from '@backend/routes/ai';
 import { apiFail, apiOk, withAdmin } from '../../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/admin/ai-comments/$id/$action')({ server: { handlers: {

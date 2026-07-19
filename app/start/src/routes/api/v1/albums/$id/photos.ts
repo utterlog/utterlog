@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { addAlbumPhotos, ContentRecordError, listAlbumPhotos } from '../../../../../../../server/src/services/content-records';
+import { addAlbumPhotos, ContentRecordError, listAlbumPhotos } from '@backend/services/content-records';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../../server/http';
 
 function serviceError(error: unknown) {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { notificationEventStream, NotificationServiceError, notificationStreamUser } from '../../../../../../server/src/services/notifications';
+import { notificationEventStream, NotificationServiceError, notificationStreamUser } from '@backend/services/notifications';
 import { apiFail } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/notifications/stream')({ server: { handlers: {

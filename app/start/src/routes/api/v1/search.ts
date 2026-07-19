@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { searchPosts } from '../../../../../server/src/services/search';
+import { searchPosts } from '@backend/services/search';
 import { apiOk } from '../../../server/http';
 
 export const Route = createFileRoute('/api/v1/search')({ server: { handlers: {

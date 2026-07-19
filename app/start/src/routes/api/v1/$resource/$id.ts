@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
-import { asContentResource, ContentRecordError, deleteContentRecord, getContentRecord, updateContentRecord } from '../../../../../../server/src/services/content-records';
+import { authenticateRequest } from '@backend/auth/session';
+import { asContentResource, ContentRecordError, deleteContentRecord, getContentRecord, updateContentRecord } from '@backend/services/content-records';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(error: unknown) {

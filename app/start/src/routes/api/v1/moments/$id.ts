@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
-import { deleteMoment, getMoment, MomentServiceError, updateMoment } from '../../../../../../server/src/services/moments';
+import { authenticateRequest } from '@backend/auth/session';
+import { deleteMoment, getMoment, MomentServiceError, updateMoment } from '@backend/services/moments';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 function serviceError(err: unknown) {

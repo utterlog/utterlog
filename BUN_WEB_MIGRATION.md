@@ -25,7 +25,7 @@ Hono 只负责安全头、请求体限制、限流、CORS、安装跳转和静�
 | `app/start/src/server` | 页面 loader、文档和主题上下文 |
 | `app/web/components` | React 页面与共享组件 |
 | `app/web/themes` | 内置主题组件和主题样式 |
-| `app/server/src` | PostgreSQL、认证、业务服务和 Bun 网关 |
+| `app/start/src/backend` | PostgreSQL、认证、业务服务和 Bun 网关 |
 | `app/admin/src` | 管理后台 SPA 源码 |
 
 公开页面使用显式文件路由。唯一的 `routes/$.tsx` 仅用于后台配置的自定义文章固定链接，并在无法解析时交给 TanStack Router 的 404 页面。

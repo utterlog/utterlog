@@ -3,7 +3,7 @@ import { getRequestHeader } from '@tanstack/react-start/server';
 import type { ThemeContextData } from '@/lib/theme-context';
 import { datePartsInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
-import { codingPayload } from '../../../server/src/routes/coding';
+import { codingPayload } from '@backend/routes/coding';
 import {
   getPostBySlug,
   getOptionsMap,
@@ -15,8 +15,8 @@ import {
   loadHomePageDataDirect,
   resolvePublicPostPath,
   searchPublicPosts,
-} from '../../../server/src/public-read';
-import { requestIp } from '../../../server/src/request-ip';
+} from '@backend/public-read';
+import { requestIp } from '@backend/request-ip';
 import { loadStartThemeContextDirect } from './theme';
 
 export type PublicPageRequest =

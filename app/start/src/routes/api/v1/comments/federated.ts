@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { createFederatedComment, FederationServiceError } from '../../../../../../server/src/routes/compat';
+import { createFederatedComment, FederationServiceError } from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/comments/federated')({ server: { handlers: {

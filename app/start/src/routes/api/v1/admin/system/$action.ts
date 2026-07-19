@@ -8,7 +8,7 @@ import {
   requestSystemUpgrade,
   SystemServiceError,
   versionPayload,
-} from '../../../../../../../server/src/routes/compat';
+} from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/admin/system/$action')({ server: { handlers: {

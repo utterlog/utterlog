@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { getVisitorWeather } from '../../../../../../server/src/public-read';
-import { requestIp } from '../../../../../../server/src/request-ip';
+import { getVisitorWeather } from '@backend/public-read';
+import { requestIp } from '@backend/request-ip';
 import { apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/visitor/weather')({

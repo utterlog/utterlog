@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../../server/src/auth/session';
-import { getPostByDisplayId } from '../../../../../../../server/src/public-read';
+import { authenticateRequest } from '@backend/auth/session';
+import { getPostByDisplayId } from '@backend/public-read';
 import { apiFail, apiOk } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/posts/by-display-id/$displayId')({ server: { handlers: { GET: async ({ request, params }) => {

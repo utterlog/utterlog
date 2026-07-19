@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { join } from 'node:path';
-import { config } from '../../../../server/src/config';
-import { runtimePaths } from '../../../../server/src/paths';
-import { resolveThemeAssetPath } from '../../../../server/src/theme-assets';
-import { fileResponse, safeJoin } from '../../../../server/src/static/response';
+import { config } from '@backend/config';
+import { runtimePaths } from '@backend/paths';
+import { resolveThemeAssetPath } from '@backend/theme-assets';
+import { fileResponse, safeJoin } from '@backend/static/response';
 
 async function themeResponse(request: Request, splat: string) {
   const slash = splat.indexOf('/');

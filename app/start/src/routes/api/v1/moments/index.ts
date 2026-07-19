@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authenticateRequest } from '../../../../../../server/src/auth/session';
-import { listMoments } from '../../../../../../server/src/public-read';
-import { createMoment, MomentServiceError } from '../../../../../../server/src/services/moments';
+import { authenticateRequest } from '@backend/auth/session';
+import { listMoments } from '@backend/public-read';
+import { createMoment, MomentServiceError } from '@backend/services/moments';
 import { apiFail, apiOk, apiPaginated, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/moments/')({

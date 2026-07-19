@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { BrandingUploadError, storeBrandingUpload } from '../../../../../../server/src/services/branding';
+import { BrandingUploadError, storeBrandingUpload } from '@backend/services/branding';
 import { apiFail, apiOk, withAdmin } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/media/upload-branding')({

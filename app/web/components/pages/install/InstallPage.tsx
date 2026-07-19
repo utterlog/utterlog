@@ -228,7 +228,7 @@ export default function InstallPage() {
                   background: '#fffbeb', border: '1px solid #fde68a',
                   color: '#92400e', fontSize: '12px', lineHeight: 1.7,
                 }}>
-                  数据库尚未初始化。Bun app 会在数据库可连接时自动加载 <code style={{ background: '#fde68a', padding: '1px 5px' }}>app/server/assets/schema.sql</code>；如果长时间未就绪，请检查应用日志和数据库权限。
+                  数据库尚未初始化。Bun app 会在数据库可连接时自动加载 <code style={{ background: '#fde68a', padding: '1px 5px' }}>app/start/assets/schema.sql</code>；如果长时间未就绪，请检查应用日志和数据库权限。
                 </div>
               )}
             </>

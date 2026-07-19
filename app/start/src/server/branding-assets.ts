@@ -1,8 +1,8 @@
 import { join } from 'node:path';
-import { config } from '../../../server/src/config';
-import { brandingExts } from '../../../server/src/media/storage';
-import { runtimePaths } from '../../../server/src/paths';
-import { fileResponse } from '../../../server/src/static/response';
+import { config } from '@backend/config';
+import { brandingExts } from '@backend/media/storage';
+import { runtimePaths } from '@backend/paths';
+import { fileResponse } from '@backend/static/response';
 
 const brandingPath = /^\/(favicon|logo|dark-logo)\.([a-z0-9]+)$/i;
 

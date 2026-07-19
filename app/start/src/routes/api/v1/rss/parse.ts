@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ExternalContentServiceError, parseRssUrl } from '../../../../../../server/src/routes/compat';
+import { ExternalContentServiceError, parseRssUrl } from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/rss/parse')({ server: { handlers: {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { listPublicContent } from '../../../../../../../server/src/public-read';
+import { listPublicContent } from '@backend/public-read';
 import { apiPaginated } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/public/albums/')({ server: { handlers: { GET: async ({ request }) => {

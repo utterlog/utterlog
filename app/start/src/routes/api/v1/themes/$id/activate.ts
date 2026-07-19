@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { activateTheme, ExtensionServiceError } from '../../../../../../../server/src/routes/extensions';
+import { activateTheme, ExtensionServiceError } from '@backend/routes/extensions';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/themes/$id/activate')({ server: { handlers: {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { handleRevalidate } from '../../../../server/src/cache/revalidate';
+import { handleRevalidate } from '@backend/cache/revalidate';
 import { withAdmin } from '../../server/http';
 
 export const Route = createFileRoute('/api/revalidate')({ server: { handlers: {

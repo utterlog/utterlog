@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { AuthRequestError, requireAdminRequest } from '../../../server/src/auth/session';
-import { AuthServiceError } from '../../../server/src/services/auth';
-import { PublicWriteError } from '../../../server/src/services/public-write';
+import { AuthRequestError, requireAdminRequest } from '@backend/auth/session';
+import { AuthServiceError } from '@backend/services/auth';
+import { PublicWriteError } from '@backend/services/public-write';
 
 function meta() {
   return { request_id: randomUUID(), timestamp: new Date().toISOString() };

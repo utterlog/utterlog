@@ -3,7 +3,7 @@ import {
   createSyncSitePayload,
   ImportSyncServiceError,
   listSyncSitesPayload,
-} from '../../../../../../../../server/src/routes/compat';
+} from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../../../server/http';
 
 function serviceError(error: unknown) {

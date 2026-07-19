@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { join } from 'node:path';
-import { config } from '../../../../server/src/config';
-import { fileResponse, safeJoin } from '../../../../server/src/static/response';
+import { config } from '@backend/config';
+import { fileResponse, safeJoin } from '@backend/static/response';
 
 export function isAdminAssetPath(splat: string) {
   return Boolean(splat && /\.[a-z0-9]+(?:\.(?:br|gz))?$/i.test(splat));

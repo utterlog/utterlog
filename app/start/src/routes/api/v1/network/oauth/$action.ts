@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { NetworkServiceError, networkOauthAuthorization, networkOauthCallback } from '../../../../../../../server/src/routes/compat';
+import { NetworkServiceError, networkOauthAuthorization, networkOauthCallback } from '@backend/routes/compat';
 import { apiFail, apiOk, withAdmin } from '../../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/network/oauth/$action')({ server: { handlers: {

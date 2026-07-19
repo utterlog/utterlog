@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { FederationServiceError, identifyPassport } from '../../../../../../server/src/routes/compat';
+import { FederationServiceError, identifyPassport } from '@backend/routes/compat';
 import { apiFail, apiOk } from '../../../../server/http';
 
 export const Route = createFileRoute('/api/v1/passport/identify')({ server: { handlers: {
