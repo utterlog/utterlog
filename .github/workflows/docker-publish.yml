@@ -7,7 +7,7 @@ on:
     paths:
       - 'app/start/**'
       - 'app/admin/**'
-      - 'app/web/**'
+      
       - 'Dockerfile.bun'
       - 'docker-compose*.yml'
       - '.github/workflows/docker-publish.yml'

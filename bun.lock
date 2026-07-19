@@ -63,29 +63,10 @@
       "name": "utterlog-start",
       "version": "0.1.0",
       "dependencies": {
-        "@tanstack/react-router": "^1.170.17",
-        "@tanstack/react-start": "^1.168.27",
-        "react": "^19.2.7",
-        "react-dom": "^19.2.7",
-      },
-      "devDependencies": {
-        "@tailwindcss/vite": "^4.3.1",
-        "@types/node": "^26.0.1",
-        "@types/react": "^19.2.17",
-        "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^6.0.3",
-        "typescript": "^7.0.2",
-        "vite": "^8.1.4",
-      },
-    },
-    "app/web": {
-      "name": "utterlog-web",
-      "version": "1.3.8",
-      "dependencies": {
         "@hookform/resolvers": "^5.4.0",
         "@tanstack/react-query": "^5.101.1",
         "@tanstack/react-router": "^1.170.17",
-        "@types/prismjs": "^1.26.6",
+        "@tanstack/react-start": "^1.168.27",
         "axios": "^1.18.1",
         "framer-motion": "^12.42.0",
         "mapbox-gl": "^3.25.0",
@@ -103,12 +84,16 @@
         "zustand": "^5.0.14",
       },
       "devDependencies": {
+        "@tailwindcss/vite": "^4.3.1",
         "@types/node": "^26.0.1",
+        "@types/prismjs": "^1.26.6",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^6.0.3",
         "eslint": "^10.6.0",
         "tailwindcss": "^4.3.1",
         "typescript": "^7.0.2",
+        "vite": "^8.1.4",
       },
     },
   },
@@ -1030,8 +1015,6 @@
     "utterlog-admin": ["utterlog-admin@workspace:app/admin"],
 
     "utterlog-start": ["utterlog-start@workspace:app/start"],
-
-    "utterlog-web": ["utterlog-web@workspace:app/web"],
 
     "vfile": ["vfile@6.0.3", "", { "dependencies": { "@types/unist": "^3.0.0", "vfile-message": "^4.0.0" } }, "sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q=="],
 

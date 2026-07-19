@@ -10,7 +10,6 @@
 FROM --platform=linux/amd64 oven/bun:canary@sha256:f2c7cd1cc7909c1fd57cc4b2fba4af0b24df7eb9709810dbfdae5adf52f34fab AS deps
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml tsconfig.json ./
-COPY app/web/package.json ./app/web/package.json
 COPY app/admin/package.json ./app/admin/package.json
 COPY app/start/package.json ./app/start/package.json
 RUN bun install --frozen-lockfile
@@ -28,7 +27,6 @@ RUN if [ -f dist/client/index.html ]; then echo "==> using host-prebuilt admin d
 FROM deps AS start-builder
 WORKDIR /app
 COPY app/shared ./app/shared
-COPY app/web ./app/web
 COPY app/start ./app/start
 WORKDIR /app/app/start
 RUN bun run build
@@ -52,10 +50,8 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/app/web/node_modules ./app/web/node_modules
 COPY --from=deps /app/app/start/node_modules ./app/start/node_modules
 COPY package.json bun.lock bunfig.toml tsconfig.json ./
-COPY app/web ./app/web
 COPY app/start ./app/start
 COPY app/shared ./app/shared
 COPY --from=admin-builder /app/app/admin/dist/client ./app/admin/dist/client
@@ -63,7 +59,7 @@ COPY --from=start-builder /app/app/start/dist ./app/start/dist
 COPY content ./content
 
 RUN mkdir -p uploads content/themes content/plugins \
-  && bun app/web/scripts/sync-theme-styles.mjs
+  && bun app/start/src/web/scripts/sync-theme-styles.mjs
 
 RUN printf '%s\n' "$GIT_SHA" > /app/.deploy-revision \
   && printf '%s\n' "$GIT_BRANCH" > /app/.deploy-branch

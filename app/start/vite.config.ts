@@ -11,7 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(import.meta.dirname, '../web'),
+      '@': resolve(import.meta.dirname, 'src/web'),
       '@shared': resolve(import.meta.dirname, '../shared'),
       '@start': resolve(import.meta.dirname, 'src'),
       '@backend': resolve(import.meta.dirname, 'src/backend'),

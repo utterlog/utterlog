@@ -1532,7 +1532,7 @@
     padding: 18px 20px 20px !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: flex-start !important;
     gap: 14px !important;
   }
@@ -1541,19 +1541,28 @@
     min-width: 0 !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     gap: 8px !important;
     line-height: 1.65 !important;
+    text-align: center !important;
   }
   [data-theme="Azure"] .azure-footer-meta > * {
     max-width: 100% !important;
     min-width: 0 !important;
   }
+  [data-theme="Azure"] .azure-footer-stats {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 18px !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+  }
   [data-theme="Azure"] .azure-footer-actions {
     width: 100% !important;
     min-width: 0 !important;
     display: flex !important;
-    justify-content: flex-start !important;
+    justify-content: center !important;
     flex-wrap: wrap !important;
     flex-shrink: 1 !important;
     gap: 8px !important;
@@ -1566,10 +1575,21 @@
   }
   [data-theme="Azure"] .azure-footer-online-popover,
   [data-theme="Azure"] .azure-footer-login-popover {
-    right: auto !important;
-    left: 0 !important;
     width: min(280px, calc(100vw - 40px)) !important;
     max-width: calc(100vw - 40px) !important;
+  }
+  [data-theme="Azure"] .azure-footer-online-popover {
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+  [data-theme="Azure"] .azure-footer-login-popover {
+    position: fixed !important;
+    right: 20px !important;
+    bottom: max(20px, env(safe-area-inset-bottom)) !important;
+    left: 20px !important;
+    width: auto !important;
+    max-width: none !important;
   }
   [data-theme="Azure"] .azure-comment-form {
     box-sizing: border-box !important;

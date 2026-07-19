@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { renderToString } from 'react-dom/server';
-import AppLink, { isDocumentHref } from '../../web/components/AppLink';
+import AppLink, { isDocumentHref } from '../src/web/components/AppLink';
 
 test('admin links leave the public TanStack Router and load the admin SPA', () => {
   expect(isDocumentHref('/admin')).toBe(true);

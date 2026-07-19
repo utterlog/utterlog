@@ -16,10 +16,10 @@ type Route = {
 
 const frontendRoots = [
   'app/admin/src',
-  'app/web/components',
-  'app/web/hooks',
-  'app/web/lib',
-  'app/web/themes',
+  'app/start/src/web/components',
+  'app/start/src/web/hooks',
+  'app/start/src/web/lib',
+  'app/start/src/web/themes',
   'app/start/src',
 ];
 const routeRoots = ['app/start/src/backend/routes', 'app/start/src/backend/static'];

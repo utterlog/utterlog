@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { processGithubRepoLinks } from '../../web/components/blog/shortcodes';
+import { processGithubRepoLinks } from '../src/web/components/blog/shortcodes';
 
 describe('post block embeds', () => {
   test('isolates GitHub cards from surrounding Markdown paragraphs', () => {

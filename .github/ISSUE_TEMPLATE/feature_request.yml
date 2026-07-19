@@ -29,7 +29,7 @@ body:
       label: 涉及范围
       multiple: true
       options:
-        - 前端博客（app/web/）
+        - 前端博客（app/start/src/web/）
         - 管理后台（app/admin/）
         - 后端 API（app/start/src/backend/）
         - 主题

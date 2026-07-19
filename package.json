@@ -5,12 +5,11 @@
   "private": true,
   "type": "module",
   "imports": {
-    "#/*": "./app/web/*",
+    "#/*": "./app/start/src/web/*",
     "@shared/*": "./app/shared/*",
     "@backend/*": "./app/start/src/backend/*"
   },
   "workspaces": [
-    "app/web",
     "app/admin",
     "app/start"
   ],
@@ -21,7 +20,7 @@
     "test:server": "JWT_SECRET=test-secret-for-server-tests bun test app/start/test",
     "test:integration": "UTTERLOG_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/start/test/comments-service.integration.test.ts",
     "audit:api": "bun scripts/audit-api-coverage.ts",
-    "build:web": "cd app/web && bun run sync:themes",
+    "build:web": "cd app/start && bun run sync:themes",
     "build:admin": "cd app/admin && bun run build",
     "start:dev": "cd app/start && bun run dev",
     "start:build": "cd app/start && bun run build",

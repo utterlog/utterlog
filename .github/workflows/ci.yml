@@ -66,5 +66,5 @@ jobs:
         run: bun run audit:api
 
       - name: Sync theme styles
-        working-directory: app/web
+        working-directory: app/start
         run: bun run sync:themes

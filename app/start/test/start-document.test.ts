@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import type { ThemeContextData } from '../../web/lib/theme-context';
-import { getAvailableThemes, getThemeManifest } from '../../web/lib/theme';
+import type { ThemeContextData } from '../src/web/lib/theme-context';
+import { getAvailableThemes, getThemeManifest } from '../src/web/lib/theme';
 import { startDocumentLinks } from '../../start/src/lib/document';
 
 function context(themeName = 'Azure'): ThemeContextData {
