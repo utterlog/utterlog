@@ -57,6 +57,7 @@ logs/
 
 # Docker volumes (user data)
 pgdata/
+redisdata/
 data/
 
 # Database / WordPress dumps (not part of source)
@@ -76,6 +77,9 @@ pnpm-lock.yaml
 bun.lockb
 
 # Legacy / reference dirs (not part of source)
+/api/
+/web/
+/app/blog/
 /community/
 /v2/
 /id/
