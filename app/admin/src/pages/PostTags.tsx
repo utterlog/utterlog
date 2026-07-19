@@ -1,12 +1,15 @@
-
 import { useEffect, useState } from 'react';
 import { tagsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, DialogFooter, EmptyPanel, Input, Pagination, Modal, ConfirmDialog, LoadingState } from '@/components/ui';
 import { useForm } from 'react-hook-form';
-import { usePostsToolbar } from '@/layouts/PostsLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Plus, Search, X } from 'lucide-react';
+import {
+  Button, Input, Label, Pagination, LoadingState, EmptyState, ConfirmDialog,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/shadcn';
+import { usePostsToolbar } from '@/layouts/PostsLayout';
 import { useI18n } from '@/lib/i18n';
 
 const tagSchema = z.object({
@@ -38,13 +41,19 @@ export default function TagsPage() {
   useEffect(() => {
     setToolbar(
       <>
-        <Button className="btn-square" title={t('admin.tags.newTag', '新建标签')} onClick={openCreate}>
-          <i className="fa-regular fa-plus" style={{ fontSize: 14 }} />
+        <Button variant="outline" size="icon" title={t('admin.tags.newTag', '新建标签')} onClick={openCreate}>
+          <Plus />
         </Button>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <Input placeholder={t('admin.tags.searchPlaceholder', '搜索标签…')} value={search} onChange={(e: any) => setSearch(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && (setPage(1), fetchTags())} style={{ width: 220 }} />
-          <Button className="btn-square" title={t('common.search', '搜索')} onClick={() => { setPage(1); fetchTags(); }}>
-            <i className="fa-regular fa-magnifying-glass" style={{ fontSize: 14 }} />
+        <div className="flex items-center gap-1.5">
+          <Input
+            placeholder={t('admin.tags.searchPlaceholder', '搜索标签…')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (setPage(1), fetchTags())}
+            className="w-56"
+          />
+          <Button variant="outline" size="icon" title={t('common.search', '搜索')} onClick={() => { setPage(1); fetchTags(); }}>
+            <Search />
           </Button>
         </div>
       </>
@@ -86,37 +95,32 @@ export default function TagsPage() {
 
   return (
     <div>
-      {/* Cards */}
       {loading ? (
-        <LoadingState label={t('common.loading', '加载中…')} padding="60px 0" />
+        <LoadingState label={t('common.loading', '加载中…')} />
       ) : tags.length === 0 ? (
-        <EmptyPanel title={t('admin.tags.empty', '暂无标签')} actionText={t('admin.tags.newTag', '新建标签')} onAction={openCreate} padding="60px 0" fontSize="14px" />
+        <EmptyState
+          title={t('admin.tags.empty', '暂无标签')}
+          actionText={t('admin.tags.newTag', '新建标签')}
+          onAction={openCreate}
+        />
       ) : (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+        <div className="flex flex-wrap gap-2.5">
           {tags.map((tag: any) => (
             <div
               key={tag.id}
               onClick={() => openEdit(tag)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                padding: '8px 14px', cursor: 'pointer',
-                background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 4%, transparent)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.background = 'var(--color-bg-card)'; }}
+              className="group inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2 transition-colors hover:border-primary hover:bg-primary/5"
             >
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-main)' }}>#{tag.name}</span>
+              <span className="text-sm font-medium text-foreground">#{tag.name}</span>
               {tag.count > 0 && (
-                <span style={{ fontSize: '11px', color: 'var(--color-text-dim)', background: 'var(--color-bg-soft)', padding: '1px 6px', borderRadius: '8px' }}>{tag.count}</span>
+                <span className="rounded-full bg-muted px-1.5 text-xs text-muted-foreground">{tag.count}</span>
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); setDeleteId(tag.id); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--color-text-dim)', opacity: 0.4, transition: 'opacity 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--color-error)'; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '0.4'; e.currentTarget.style.color = 'var(--color-text-dim)'; }}
+                className="rounded p-0.5 text-muted-foreground opacity-40 transition-colors hover:text-destructive group-hover:opacity-100"
+                aria-label={t('common.delete', '删除')}
               >
-                <i className="fa-regular fa-xmark" style={{ fontSize: '11px' }} />
+                <X className="size-3.5" />
               </button>
             </div>
           ))}
@@ -124,27 +128,47 @@ export default function TagsPage() {
       )}
 
       {totalPages > 1 && (
-        <div style={{ marginTop: '16px' }}>
+        <div className="mt-4">
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
 
-      {/* Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? t('admin.tags.editTag', '编辑标签') : t('admin.tags.newTag', '新建标签')}>
-        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Input label={t('admin.common.name', '名称')} {...register('name')} error={errors.name?.message} />
-          <Input label="Slug" {...register('slug')} error={errors.slug?.message} />
-          <DialogFooter
-            onCancel={() => setIsModalOpen(false)}
-            onSubmit={handleSubmit(onSubmit)}
-            submitting={submitting}
-            submitText={editingId ? t('admin.common.save', '保存') : t('admin.common.create', '创建')}
-            cancelText={t('admin.common.cancel', '取消')}
-          />
-        </form>
-      </Modal>
+      {/* Create / edit modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingId ? t('admin.tags.editTag', '编辑标签') : t('admin.tags.newTag', '新建标签')}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.common.name', '名称')}</Label>
+              <Input {...register('name')} aria-invalid={errors.name ? true : undefined} />
+              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Slug</Label>
+              <Input {...register('slug')} aria-invalid={errors.slug ? true : undefined} />
+              {errors.slug && <p className="text-sm text-destructive">{errors.slug.message}</p>}
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+                {t('admin.common.cancel', '取消')}
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {editingId ? t('admin.common.save', '保存') : t('admin.common.create', '创建')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title={t('admin.posts.confirmDeleteTitle', '确认删除')} message={t('admin.tags.confirmDeleteMessage', '删除后无法恢复，是否确认删除此标签？')} />
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
+        onConfirm={handleDelete}
+        title={t('admin.posts.confirmDeleteTitle', '确认删除')}
+        message={t('admin.tags.confirmDeleteMessage', '删除后无法恢复，是否确认删除此标签？')}
+      />
     </div>
   );
 }
