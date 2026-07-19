@@ -288,9 +288,9 @@ UTTERLOG_DB_MODE=external curl -fsSL https://...install.sh | bash
 - 二进制：`/www/wwwroot/utterlog.com/api/utterlog-api`
 - DB：PostgreSQL 18 (Docker pgvector)；本项目不依赖 Redis
 
-**xifeng.net (43.161.221.122)** — Utterlog 单容器 Bun 部署点，Debian 13
+**xifeng.net (124.222.230.137)** — Utterlog 单容器 Bun 部署点，Debian 13
 
-- SSH：复用 `~/.ssh/gentpan.pem` 直连 `root@43.161.221.122`（host key 偶尔轮换，重新 `ssh-keyscan` 即可）
+- SSH：复用 `~/.ssh/gentpan.pem` 直连 `root@124.222.230.137`（host key 偶尔轮换，重新 `ssh-keyscan` 即可）
 - 部署目录：`/opt/utterlog-xifeng`
 - Compose：`docker-compose.bun.yml` (app) + `docker-compose.infra.yml` (postgres)，网络 `utterlog_default`
 - App 容器：`utterlog-xifeng-app`，镜像 `utterlog-app:local`（Bun 1.4 base + 源码构建，tag 是 `local` 不是 release tag，**版本比对要看源码 hash，不要只看 tag**）

@@ -158,7 +158,7 @@ build: {
 
 ## xifeng.net 部署（本地构建，不走 GHA）
 
-目标站点 **https://xifeng.net**，服务器 `43.161.221.122`。详细说明见 [deploy/xifeng/README.md](./deploy/xifeng/README.md)。
+目标站点 **https://xifeng.net**，服务器 `124.222.230.137`。详细说明见 [deploy/xifeng/README.md](./deploy/xifeng/README.md)。
 
 **三端一致**：本地 Git HEAD = 远程 `origin` = 容器 `/app/.deploy-revision`。
 

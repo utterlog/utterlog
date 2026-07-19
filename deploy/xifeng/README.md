@@ -1,7 +1,7 @@
 # xifeng.net 部署
 
 站点：**https://xifeng.net**  
-服务器：`43.161.221.122`（Debian 13，x86_64）
+服务器：`124.222.230.137`（Debian 13，x86_64）
 部署目录：`/opt/utterlog-xifeng`
 
 ## 三端一致
@@ -56,7 +56,7 @@ bash scripts/deploy-xifeng.sh --allow-dirty  # 允许未提交（破坏三端一
 
 ```bash
 export UTTERLOG_SSH_KEY=~/Desktop/gentpan.pem
-export UTTERLOG_DEPLOY_HOST=43.161.221.122
+export UTTERLOG_DEPLOY_HOST=124.222.230.137
 export UTTERLOG_DEPLOY_PATH=/opt/utterlog-xifeng
 export UTTERLOG_APP_URL=https://xifeng.net
 ```
@@ -64,7 +64,7 @@ export UTTERLOG_APP_URL=https://xifeng.net
 ## 服务器运维
 
 ```bash
-ssh -i ~/Desktop/gentpan.pem root@43.161.221.122
+ssh -i ~/Desktop/gentpan.pem root@124.222.230.137
 
 cd /opt/utterlog-xifeng
 docker ps
