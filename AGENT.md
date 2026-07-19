@@ -212,9 +212,9 @@ git push origin main
 
 # 2. 打 tag → 触发 .github/workflows/docker-publish.yml
 git tag vX.Y.Z && git push origin vX.Y.Z
-#    构建镜像推到：
-#      registry.utterlog.io/utterlog/utterlog-{api,web}:{vX.Y.Z, latest, sha-xxx}
-#      ghcr.io/utterlog/utterlog-{api,web}:...
+#    构建单个应用镜像（Bun 单容器同载网关 + admin + SSR）推到：
+#      ghcr.io/utterlog/utterlog-app:{vX.Y.Z, latest, sha-xxx}
+#      用户侧另探测 registry.utterlog.io/utterlog/utterlog-app（CF 加速），不可读回退 ghcr
 
 # 3. 创建 GitHub Release（landing changelog 数据源）
 gh release create vX.Y.Z --notes "..."
@@ -230,18 +230,18 @@ gh release create vX.Y.Z --notes "..."
 **版本号需要同步修改的位置**：
 
 - 根 `package.json`（主版本号；所有 workspace 共享同一版本）
-- `bun.lock`（workspace 锁定，`bun install` 自动重写）
-- `app/web/bun.lock` + `app/admin/bun.lock`（各自 workspace 锁）
-- `app/server/src/index.ts`（健康检查）
-- `app/server/src/routes/install.ts`（安装接口）
+- `app/web/package.json` + `app/admin/package.json`
+- `app/server/src/system/metrics.ts` 的 `cachedAppVersion` 运行时兜底常量（**易漏，运行时版本靠它兜底**）
+- `bun.lock`（`bun install` 自动重写）
 
 **版本策略**：
 
 - `1.0.0`：历史合并归档（`RELEASE_HISTORY.md`）
-- `2.0.0`：发布基线
-- `2.0.x`：同功能线修复 / 小优化；**到 `2.0.10` 为本周期上限，下一次发版必须跳到 `2.1.0`，不再继续 `2.0.11`**
-- `2.x.0`：完整新功能或主题能力
-- 破坏性大改进入下一个大版本
+- Bun 重写后版本重新从 `1.x` 编号（当前 `1.3.x`），语义化递增
+- `1.x.y` patch：同功能线修复 / 小优化
+- `1.x.0` minor：完整新功能或主题能力
+- 破坏性大改进进入下一个大版本
+- （旧 `2.0.x` 线属重写前 Go+Next.js 架构，已归档；其「`2.0.10` 封顶跳 `2.1.0`」规则不再沿用）
 
 **`CHANGELOG.md` 规则**：
 
