@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "@simplewebauthn/server": "^13.3.2",
-    "@simplewebauthn/types": "^12.0.0",
     "jose": "^6.2.3",
     "nodemailer": "^9.0.1",
     "postgres": "^3.4.9",
