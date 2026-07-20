@@ -1,66 +1,47 @@
-
 import { useEffect, useState } from 'react';
 import { videosApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Link2, Plus, Play, Pencil, Trash2 } from 'lucide-react';
 import {
-  AdminToolbar,
-  Button,
-  ConfirmDialog,
-  CoverInput,
-  DialogFooter,
-  EmptyPanel,
-  Input,
-  LoadingState,
-  Modal,
-  RowActions,
-} from '@/components/ui';
+  Button, Input, Label, Textarea, Card, LoadingState, EmptyState, ConfirmDialog,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/shadcn';
+// Shared composites still on the legacy design system — to be migrated in the
+// shared-component pass (used across Videos/Books/Games/Goods/Movies).
+import { CoverInput } from '@/components/ui';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
 
-// Generate embed URL from video URL
-function getEmbedUrl(url: string, platform?: string): string {
+function getEmbedUrl(url: string): string {
   if (!url) return '';
-  // YouTube
   const ytMatch = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  // Bilibili
   const bvMatch = url.match(/(BV[a-zA-Z0-9]+)/);
   if (bvMatch) return `https://player.bilibili.com/player.html?bvid=${bvMatch[1]}&autoplay=0`;
   const avMatch = url.match(/av(\d+)/);
   if (avMatch) return `https://player.bilibili.com/player.html?aid=${avMatch[1]}&autoplay=0`;
-  // Direct video file
   if (/\.(mp4|webm|ogg|m3u8)(\?|$)/i.test(url)) return url;
   return '';
 }
 
-function VideoPlayer({ url, embed, platform }: { url: string; embed?: string; platform?: string }) {
-  const embedUrl = embed || getEmbedUrl(url, platform);
+function VideoPlayer({ url, embed }: { url: string; embed?: string }) {
+  const embedUrl = embed || getEmbedUrl(url);
   if (!embedUrl && !url) return null;
-
-  // Direct video file
   if (/\.(mp4|webm|ogg)(\?|$)/i.test(embedUrl || url)) {
-    return (
-      <video controls style={{ width: '100%', maxHeight: '360px', background: '#000' }}>
-        <source src={embedUrl || url} />
-      </video>
-    );
+    return <video controls className="max-h-[360px] w-full bg-black"><source src={embedUrl || url} /></video>;
   }
-
-  // Iframe embed
   if (embedUrl) {
     return (
       <iframe
         src={embedUrl}
-        style={{ width: '100%', height: '360px', border: 'none', background: '#000' }}
+        className="h-[360px] w-full border-none bg-black"
         allowFullScreen
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       />
     );
   }
-
-  // Fallback: link
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', padding: '40px', textAlign: 'center', background: '#1a1a1a', color: '#fff', textDecoration: 'none' }}>
-      <i className="fa-regular fa-play" style={{ fontSize: '32px', marginBottom: '8px', display: 'block' }} />
+    <a href={url} target="_blank" rel="noopener noreferrer" className="block bg-neutral-900 p-10 text-center text-white no-underline">
+      <Play className="mx-auto mb-2 size-8" />
       点击观看
     </a>
   );
@@ -91,10 +72,7 @@ export default function VideosPage() {
 
   const onSubmit = async () => {
     if (!form.title?.trim()) { toast.error('标题不能为空'); return; }
-    // Auto-generate embed URL
-    if (form.video_url && !form.embed_url) {
-      form.embed_url = getEmbedUrl(form.video_url);
-    }
+    if (form.video_url && !form.embed_url) form.embed_url = getEmbedUrl(form.video_url);
     setSubmitting(true);
     try {
       if (editingId) { await videosApi.update(editingId, form); toast.success('更新成功'); }
@@ -113,89 +91,76 @@ export default function VideosPage() {
 
   return (
     <div>
-      <AdminToolbar
-        meta={`${items.length} 个视频`}
-        actions={
-          <>
-        <Button variant="secondary" onClick={() => setShowImport(true)}>
-          <i className="fa-light fa-link" style={{ fontSize: '13px' }} /> 链接导入
-        </Button>
-        <Button onClick={openCreate}><i className="fa-regular fa-plus" style={{ fontSize: '16px' }} />添加视频</Button>
-          </>
-        }
-      />
+      {/* Toolbar */}
+      <div className="mb-4 flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">{items.length} 个视频</span>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(true)}><Link2 /> 链接导入</Button>
+          <Button onClick={openCreate}><Plus /> 添加视频</Button>
+        </div>
+      </div>
 
       {loading ? (
         <LoadingState />
       ) : items.length === 0 ? (
-        <EmptyPanel title="暂无视频" actionText="添加视频" onAction={openCreate} />
+        <EmptyState title="暂无视频" actionText="添加视频" onAction={openCreate} />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px' }}>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-3">
           {items.map((item: any) => (
-            <div key={item.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              {/* Video player or thumbnail */}
+            <Card key={item.id} className="overflow-hidden p-0">
               {playingId === item.id ? (
-                <VideoPlayer url={item.video_url} embed={item.embed_url} platform={item.platform} />
+                <VideoPlayer url={item.video_url} embed={item.embed_url} />
               ) : (
-                <div
-                  onClick={() => setPlayingId(item.id)}
-                  style={{ position: 'relative', cursor: 'pointer', background: '#1a1a1a', height: '180px' }}
-                >
-                  {item.cover_url ? (
-                    <img src={item.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-                  ) : (
-                    <div style={{ height: '100%' }} />
-                  )}
-                  <div style={{
-                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <div style={{
-                      width: '48px', height: '48px', background: 'rgba(255,255,255,0.9)',
-                      borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <i className="fa-solid fa-play" style={{ fontSize: '18px', color: '#1a1a1a', marginLeft: '3px' }} />
+                <div onClick={() => setPlayingId(item.id)} className="relative h-[180px] cursor-pointer bg-neutral-900">
+                  {item.cover_url && <img src={item.cover_url} alt="" className="size-full object-cover opacity-80" />}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex size-12 items-center justify-center rounded-full bg-white/90">
+                      <Play className="ml-0.5 size-[18px] text-neutral-900" />
                     </div>
                   </div>
                   {item.platform && (
-                    <span style={{
-                      position: 'absolute', top: '8px', right: '8px', fontSize: '10px', padding: '2px 6px',
-                      background: 'rgba(0,0,0,0.6)', color: '#fff',
-                    }}>
+                    <span className="absolute right-2 top-2 bg-black/60 px-1.5 py-0.5 text-[10px] text-white">
                       {({ youtube: 'YouTube', bilibili: 'B站', tencent_video: '腾讯', youku: '优酷', iqiyi: '爱奇艺' } as Record<string, string>)[item.platform] || item.platform}
                     </span>
                   )}
                 </div>
               )}
-              <div style={{ padding: '12px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h3 className="text-main" style={{ fontSize: '13px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</h3>
-                  {item.comment && <p className="text-dim" style={{ fontSize: '11px', marginTop: '4px' }}>{item.comment}</p>}
+              <div className="flex items-start gap-2 p-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-sm font-semibold text-foreground">{item.title}</h3>
+                  {item.comment && <p className="mt-1 text-[11px] text-muted-foreground">{item.comment}</p>}
                 </div>
-                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                  <RowActions onEdit={() => openEdit(item)} onDelete={() => setDeleteId(item.id)} />
+                <div className="flex shrink-0 gap-1">
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(item)}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)}><Trash2 className="size-4" /></Button>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? '编辑视频' : '添加视频'}>
-        <div className="space-y-4">
-          <Input label="标题" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} />
-          <Input label="视频链接" value={form.video_url || ''} onChange={e => setForm({ ...form, video_url: e.target.value })} placeholder="YouTube/B站/直链 URL" />
-          <Input label="嵌入地址 (自动生成)" value={form.embed_url || ''} onChange={e => setForm({ ...form, embed_url: e.target.value })} placeholder="留空自动从视频链接生成" />
-          <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({ ...form, cover_url: url })} folder="videos" />
-          <Input label="平台" value={form.platform || ''} onChange={e => setForm({ ...form, platform: e.target.value })} placeholder="youtube / bilibili / ..." />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>备注</label>
-            <textarea className="input" rows={2} value={form.comment || ''} onChange={e => setForm({ ...form, comment: e.target.value })} style={{ resize: 'vertical' }} />
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingId ? '编辑视频' : '添加视频'}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5"><Label>标题</Label><Input value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+            <div className="flex flex-col gap-1.5"><Label>视频链接</Label><Input value={form.video_url || ''} onChange={e => setForm({ ...form, video_url: e.target.value })} placeholder="YouTube/B站/直链 URL" /></div>
+            <div className="flex flex-col gap-1.5"><Label>嵌入地址 (自动生成)</Label><Input value={form.embed_url || ''} onChange={e => setForm({ ...form, embed_url: e.target.value })} placeholder="留空自动从视频链接生成" /></div>
+            <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({ ...form, cover_url: url })} folder="videos" />
+            <div className="flex flex-col gap-1.5"><Label>平台</Label><Input value={form.platform || ''} onChange={e => setForm({ ...form, platform: e.target.value })} placeholder="youtube / bilibili / ..." /></div>
+            <div className="flex flex-col gap-1.5"><Label>备注</Label><Textarea rows={2} value={form.comment || ''} onChange={e => setForm({ ...form, comment: e.target.value })} /></div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>取消</Button>
+              <Button onClick={onSubmit} disabled={submitting}>{editingId ? '保存' : '添加'}</Button>
+            </DialogFooter>
           </div>
-          <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="确认删除" message="删除后无法恢复" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title="确认删除" message="删除后无法恢复" />
 
       <ImportUrlModal isOpen={showImport} onClose={() => setShowImport(false)} type="movie"
         platforms="YouTube、B站、优酷、腾讯视频、爱奇艺、直链视频"
