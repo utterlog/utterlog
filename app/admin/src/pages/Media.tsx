@@ -1,9 +1,13 @@
-
 import { useEffect, useState, useCallback } from 'react';
 import { mediaApi } from '@/lib/api';
-import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, Modal, ConfirmDialog, EmptyPanel, LoadingState } from '@/components/ui';
+import { CloudUpload, Loader2, ImageIcon, Copy, Check, Trash2, X } from 'lucide-react';
+import {
+  Button, LoadingState, EmptyState,
+  Dialog, DialogContent,
+  ConfirmDialog,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
 const categories = [
@@ -25,11 +29,8 @@ export default function MediaPage() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [category, setCategory] = useState('');
-  const [storageDriver, setStorageDriver] = useState('local');
 
-  useEffect(() => {
-    fetchFiles();
-  }, [category]);
+  useEffect(() => { fetchFiles(); }, [category]);
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -44,30 +45,18 @@ export default function MediaPage() {
   };
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
+    const list = Array.from(e.target.files || []);
+    if (list.length === 0) return;
     setUploading(true);
-    // Upload sequentially so each file's progress is surfaced via toast,
-    // and so a failure on one doesn't abort the rest. Parallel would be
-    // faster but messier for feedback + risks local disk thrash on big
-    // batches.
     let ok = 0, fail = 0;
-    for (const file of files) {
-      try {
-        await mediaApi.upload(file);
-        ok++;
-      } catch {
-        fail++;
-      }
+    for (const file of list) {
+      try { await mediaApi.upload(file); ok++; } catch { fail++; }
     }
     if (ok > 0 && fail === 0) toast.success(t('admin.media.toast.uploadSuccess', '上传成功 · {count} 个文件', { count: ok }));
     else if (ok > 0 && fail > 0) toast(t('admin.media.toast.uploadPartial', '成功 {ok} 个，失败 {fail} 个', { ok, fail }), { icon: '!' });
     else toast.error(t('admin.media.toast.uploadFailed', '上传失败'));
     fetchFiles();
     setUploading(false);
-    // Allow re-selecting the same files right after (browser won't fire
-    // change again otherwise).
     e.target.value = '';
   }, [t]);
 
@@ -92,99 +81,104 @@ export default function MediaPage() {
   };
 
   return (
-    <div className="">
-      
+    <div>
       {/* Category tabs + upload */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex flex-1 flex-wrap gap-1.5">
           {categories.map(c => (
-            <Button key={c.key} variant={category === c.key ? 'primary' : 'secondary'} onClick={() => setCategory(c.key)} style={{ flexShrink: 0, fontSize: '13px', padding: '6px 14px' }}>
+            <Button
+              key={c.key}
+              size="sm"
+              variant={category === c.key ? 'default' : 'outline'}
+              onClick={() => setCategory(c.key)}
+            >
               {t(c.labelKey, c.fallback)}
             </Button>
           ))}
         </div>
-        {/* Only show storage selector if multiple drivers configured */}
-        <label className="cursor-pointer flex-shrink-0" title={uploading ? t('admin.media.uploading', '上传中…') : t('admin.media.uploadFile', '上传文件')}>
+        <label
+          className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          title={uploading ? t('admin.media.uploading', '上传中…') : t('admin.media.uploadFile', '上传文件')}
+        >
           <input type="file" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.zip,.rar,.7z" onChange={handleUpload} className="hidden" />
-          <span className="btn-primary btn btn-square inline-flex items-center justify-center">
-            <i className={uploading ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-cloud-arrow-up'} style={{ fontSize: '14px' }} />
-          </span>
+          {uploading ? <Loader2 className="size-4 animate-spin" /> : <CloudUpload className="size-4" />}
         </label>
       </div>
 
       {loading ? (
-        <LoadingState label={t('admin.common.loading', '加载中…')} padding="80px 0" />
+        <LoadingState label={t('admin.common.loading', '加载中…')} />
       ) : files.length === 0 ? (
-        <EmptyPanel title={t('admin.media.empty', '暂无文件')} padding="80px 0" fontSize="14px" />
+        <EmptyState title={t('admin.media.empty', '暂无文件')} />
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
           {files.map((file) => (
             <div
               key={file.id}
-              className="group relative aspect-square bg-soft overflow-hidden border border-line hover:border-blue-500 transition-colors"
+              className="group relative aspect-square overflow-hidden rounded-md border border-border bg-muted transition-colors hover:border-primary"
             >
-              <div className="w-full h-full flex items-center justify-center">
+              <div className="flex size-full items-center justify-center">
                 {file.mime_type?.startsWith('image/') ? (
-                  <img src={file.url} alt={file.name} className="w-full h-full object-cover cursor-pointer" onClick={() => setPreviewUrl(file.url)} />
+                  <img src={file.url} alt={file.name} className="size-full cursor-pointer object-cover" onClick={() => setPreviewUrl(file.url)} />
                 ) : (
-                  <i className="fa-regular fa-image text-dim" style={{ fontSize: '28px' }} />
+                  <ImageIcon className="size-7 text-muted-foreground" />
                 )}
               </div>
-              {/* Hover Actions */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              {/* Hover actions */}
+              <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                   onClick={() => copyUrl(file.url, file.id)}
-                  style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: copiedId === file.id ? 'var(--color-success)' : 'var(--color-primary, #0052D9)', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: 'var(--ctrl-radius)', transition: 'background 0.15s' }}
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-md text-white transition-colors',
+                    copiedId === file.id ? 'bg-emerald-500' : 'bg-primary hover:bg-primary/90',
+                  )}
                   title={t('admin.media.copyLink', '复制链接')}
                 >
-                  {copiedId === file.id ? <i className="fa-solid fa-check" style={{ fontSize: '14px' }} /> : <i className="fa-regular fa-copy" style={{ fontSize: '14px' }} />}
+                  {copiedId === file.id ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                 </button>
                 <button
                   onClick={() => setDeleteId(file.id)}
-                  className="action-btn danger"
+                  className="flex size-8 items-center justify-center rounded-md bg-destructive text-destructive-foreground transition-colors hover:bg-destructive/90"
                   title={t('admin.common.delete', '删除')}
                 >
-                  <i className="fa-regular fa-trash" style={{ fontSize: '14px' }} />
+                  <Trash2 className="size-3.5" />
                 </button>
               </div>
 
-              {/* Source badge for resource category */}
+              {/* Source badge */}
               {file.source_type && (
-                <div className="absolute top-1 left-1">
-                  <span style={{ fontSize: '10px', padding: '1px 5px', background: 'rgba(0,0,0,0.6)', color: '#fff', borderRadius: '2px' }}>
+                <div className="absolute left-1 top-1">
+                  <span className="rounded-sm bg-black/60 px-1.5 py-px text-[10px] text-white">
                     {{ music: t('admin.content.music', '音乐'), movies: t('admin.content.movies', '电影'), books: t('admin.content.books', '图书'), games: t('admin.content.games', '游戏'), goods: t('admin.content.goods', '好物') }[file.source_type as string] || file.source_type}
                   </span>
                 </div>
               )}
 
-              {/* File Info */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                <p className="text-xs text-white truncate">{file.name}</p>
-                <p className="text-xs text-dim">{(file.size / 1024).toFixed(1)} KB</p>
+              {/* File info */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                <p className="truncate text-xs text-white">{file.name}</p>
+                <p className="text-xs text-white/60">{(file.size / 1024).toFixed(1)} KB</p>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Preview Modal */}
-      <Modal isOpen={!!previewUrl} onClose={() => setPreviewUrl(null)} size="lg">
-        <div className="relative">
+      {/* Preview modal */}
+      <Dialog open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)}>
+        <DialogContent className="max-w-3xl" showClose={false}>
           <button
             onClick={() => setPreviewUrl(null)}
-            className="absolute -top-2 -right-2 p-1 bg-soft rounded-full hover:bg-soft"
+            className="absolute -right-2 -top-2 rounded-full bg-muted p-1 hover:bg-accent"
           >
-            <i className="fa-solid fa-xmark" style={{ fontSize: '14px' }} />
+            <X className="size-3.5" />
           </button>
-          {previewUrl && (
-            <img src={previewUrl} alt="Preview" className="w-full" />
-          )}
-        </div>
-      </Modal>
+          {previewUrl && <img src={previewUrl} alt="Preview" className="w-full" />}
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
         onConfirm={handleDelete}
         title={t('admin.common.confirmDelete', '确认删除')}
         message={t('admin.media.confirmDelete', '删除后无法恢复，是否确认删除此文件？')}
