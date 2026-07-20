@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api, { mediaApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Plus, ImageIcon, Eye, EyeOff, Trash2, Check } from 'lucide-react';
 import {
   AdminToolbar,
   Button,
@@ -156,7 +157,7 @@ export default function AlbumsPage() {
         meta="管理照片相册，公开相册将在前端展示"
         actions={
           <Button className="btn-square" title="新建相册" onClick={openCreate}>
-            <i className="fa-regular fa-plus" style={{ fontSize: '14px' }} />
+            <Plus className="size-4" />
           </Button>
         }
       />
@@ -174,7 +175,7 @@ export default function AlbumsPage() {
                 {album.cover_url ? (
                   <img src={album.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <i className="fa-regular fa-image" style={{ fontSize: '32px', color: 'var(--color-text-dim)' }} />
+                  <ImageIcon className="size-8 text-muted-foreground" />
                 )}
                 <div style={{ position: 'absolute', top: '8px', right: '8px', padding: '2px 8px', fontSize: '11px', fontWeight: 600, background: album.status === 'public' ? 'var(--color-success-bg)' : 'var(--color-bg-soft)', color: album.status === 'public' ? 'var(--color-success)' : 'var(--color-text-dim)' }}>
                   {album.status === 'public' ? '公开' : '私有'}
@@ -188,7 +189,7 @@ export default function AlbumsPage() {
                   <span className="text-dim" style={{ fontSize: '12px' }}>{album.photo_count} 张照片</span>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <button onClick={() => toggleStatus(album)} className={`action-btn${album.status === 'private' ? ' warning' : ''}`} title={album.status === 'public' ? '设为私有' : '公开'}>
-                      {album.status === 'public' ? <i className="fa-regular fa-eye-slash" style={{ fontSize: '14px' }} /> : <i className="fa-regular fa-eye" style={{ fontSize: '14px' }} />}
+                      {album.status === 'public' ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                     <RowActions onEdit={() => openEdit(album)} onDelete={() => setDeleteId(album.id)} />
                   </div>
@@ -229,7 +230,7 @@ export default function AlbumsPage() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <span className="text-dim" style={{ fontSize: '13px' }}>{photos.length} 张照片</span>
-            <Button onClick={openAddPhotos}><i className="fa-regular fa-plus" style={{ fontSize: '14px' }} /> 从媒体库添加</Button>
+            <Button onClick={openAddPhotos}><Plus className="size-4" /> 从媒体库添加</Button>
           </div>
           {photos.length === 0 ? (
             <EmptyPanel title="暂无照片，从媒体库添加" padding="40px 0" fontSize="13px" />
@@ -244,7 +245,7 @@ export default function AlbumsPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     opacity: 0, transition: 'opacity 0.15s',
                   }} className="group-hover:opacity-100">
-                    <i className="fa-regular fa-trash" style={{ fontSize: '12px' }} />
+                    <Trash2 className="size-3" />
                   </button>
                 </div>
               ))}
@@ -271,7 +272,7 @@ export default function AlbumsPage() {
                       <img src={file.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       {selected && (
                         <div style={{ position: 'absolute', top: '4px', right: '4px', width: '20px', height: '20px', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>
-                          <i className="fa-solid fa-check" />
+                          <Check className="size-3" />
                         </div>
                       )}
                     </div>
