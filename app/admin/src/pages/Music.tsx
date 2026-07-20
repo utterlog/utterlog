@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { musicApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Search, Link2, Plus, Music as MusicIcon, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import {
   AdminToolbar,
   Button,
@@ -124,12 +125,12 @@ export default function MusicPage() {
         actions={
           <>
         <Button variant="secondary" onClick={() => setShowSearch(!showSearch)}>
-          <i className="fa-regular fa-magnifying-glass" style={{ fontSize: '14px' }} />{showSearch ? '关闭搜索' : '搜索添加'}
+          <Search className="size-4" />{showSearch ? '关闭搜索' : '搜索添加'}
         </Button>
         <Button variant="secondary" onClick={() => setShowImport(true)}>
-          <i className="fa-light fa-link" style={{ fontSize: '13px' }} /> 链接导入
+          <Link2 className="size-4" /> 链接导入
         </Button>
-        <Button onClick={openCreate}><i className="fa-regular fa-plus" style={{ fontSize: '16px' }} />手动添加</Button>
+        <Button onClick={openCreate}><Plus className="size-4" />手动添加</Button>
           </>
         }
       />
@@ -143,7 +144,7 @@ export default function MusicPage() {
               <option value="tencent">QQ音乐</option>
             </select>
             <div style={{ flex: 1, position: 'relative' }}>
-              <i className="fa-regular fa-magnifying-glass" style={{ fontSize: '14px', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-dim)' }} />
+              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 className="input"
                 value={keyword}
@@ -154,7 +155,7 @@ export default function MusicPage() {
               />
             </div>
             <Button className="btn-square" title="搜索" onClick={doSearch} loading={searching}>
-              <i className="fa-regular fa-magnifying-glass" style={{ fontSize: '14px' }} />
+              <Search className="size-4" />
             </Button>
           </div>
 
@@ -183,7 +184,7 @@ export default function MusicPage() {
                       <span className="text-dim" style={{ fontSize: '12px' }}>已添加</span>
                     ) : (
                       <Button size="sm" variant="secondary" onClick={() => addFromSearch(r)} loading={adding === key}>
-                        <i className="fa-regular fa-plus" style={{ fontSize: '12px' }} />添加
+                        <Plus className="size-4" />添加
                       </Button>
                     )}
                   </div>
@@ -216,7 +217,7 @@ export default function MusicPage() {
                   <img src={item.cover_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fa-regular fa-music text-dim" style={{ fontSize: '32px' }} />
+                    <MusicIcon className="size-8 text-muted-foreground" />
                   </div>
                 )}
               </div>
@@ -237,10 +238,10 @@ export default function MusicPage() {
                 </span>
                 <div style={{ display: 'flex', gap: '4px' }}>
                   <button onClick={() => toggleVisibility(item)} title={item.status === 'publish' ? '隐藏' : '显示'} className="action-btn">
-                    {item.status === 'publish' ? <i className="fa-regular fa-eye" style={{ fontSize: '14px' }} /> : <i className="fa-regular fa-eye-slash" style={{ fontSize: '14px' }} />}
+                    {item.status === 'publish' ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                   </button>
-                  <button onClick={() => openEdit(item)} className="action-btn primary" title="编辑"><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-                  <button onClick={() => setDeleteId(item.id)} className="action-btn danger" title="删除"><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
+                  <button onClick={() => openEdit(item)} className="action-btn primary" title="编辑"><Pencil className="size-4" /></button>
+                  <button onClick={() => setDeleteId(item.id)} className="action-btn danger" title="删除"><Trash2 className="size-4" /></button>
                 </div>
               </div>
             </div>

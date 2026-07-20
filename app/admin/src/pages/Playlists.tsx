@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { playlistsApi, musicApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Music, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { Button, EmptyPanel, Input, LoadingState, Modal, ConfirmDialog } from '@/components/ui';
 
 export default function PlaylistsPage() {
@@ -120,12 +121,12 @@ export default function PlaylistsPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className="fa-regular fa-music text-primary-themed" style={{ fontSize: '20px' }} />
+          <Music className="size-5 text-primary" />
           <h1 className="text-main" style={{ fontSize: '18px', fontWeight: 700 }}>歌单管理</h1>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
           <Button variant="secondary" onClick={() => setShowImport(true)}>导入歌单</Button>
-          <Button onClick={openCreate}><i className="fa-regular fa-plus" style={{ fontSize: '16px' }} />创建歌单</Button>
+          <Button onClick={openCreate}><Plus className="size-4" />创建歌单</Button>
         </div>
       </div>
 
@@ -157,8 +158,8 @@ export default function PlaylistsPage() {
                       <p className="text-dim" style={{ fontSize: '12px' }}>{p.song_count || 0} 首</p>
                     </div>
                     <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-                      <button onClick={(e) => { e.stopPropagation(); openEdit(p); }} className="action-btn primary" title="编辑"><i className="fa-regular fa-pen" style={{ fontSize: '13px' }} /></button>
-                      <button onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} className="action-btn danger" title="删除"><i className="fa-regular fa-trash" style={{ fontSize: '13px' }} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); openEdit(p); }} className="action-btn primary" title="编辑"><Pencil className="size-3.5" /></button>
+                      <button onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} className="action-btn danger" title="删除"><Trash2 className="size-3.5" /></button>
                     </div>
                   </div>
                 </div>
@@ -173,7 +174,7 @@ export default function PlaylistsPage() {
             <div className="card" style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{activePlaylist.title}</h2>
-                <Button size="sm" onClick={loadAllMusic}><i className="fa-regular fa-plus" style={{ fontSize: '14px' }} />添加歌曲</Button>
+                <Button size="sm" onClick={loadAllMusic}><Plus className="size-4" />添加歌曲</Button>
               </div>
 
               {playlistSongs.length === 0 ? (
@@ -194,7 +195,7 @@ export default function PlaylistsPage() {
                       <span className="text-dim" style={{ fontSize: '11px', flexShrink: 0 }}>
                         {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', local: '本地' }[s.platform as string] || s.platform || ''}
                       </span>
-                      <button onClick={() => removeSong(s.id)} className="action-btn danger" title="移除"><i className="fa-solid fa-xmark" style={{ fontSize: '14px' }} /></button>
+                      <button onClick={() => removeSong(s.id)} className="action-btn danger" title="移除"><X className="size-3.5" /></button>
                     </div>
                   ))}
                 </div>
@@ -268,7 +269,7 @@ export default function PlaylistsPage() {
                 {songIds.has(m.id) ? (
                   <span className="text-dim" style={{ fontSize: '11px' }}>已添加</span>
                 ) : (
-                  <Button size="sm" onClick={() => addSongToPlaylist(m.id)}><i className="fa-regular fa-plus" style={{ fontSize: '12px' }} /></Button>
+                  <Button size="sm" onClick={() => addSongToPlaylist(m.id)}><Plus className="size-4" /></Button>
                 )}
               </div>
             ))}
