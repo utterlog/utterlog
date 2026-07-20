@@ -1,8 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, ConfirmDialog, EmptyPanel, Input, LoadingState } from '@/components/ui';
+import { Plus, Globe, Trash2 } from 'lucide-react';
+import { Button, Input, Card, LoadingState, EmptyState, ConfirmDialog } from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 
 export default function FollowsPage() {
   const [data, setData] = useState<any>(null);
@@ -53,54 +54,52 @@ export default function FollowsPage() {
 
   const list = data?.[activeTab] || [];
 
-  if (loading) return <LoadingState padding="24px" />;
+  if (loading) return <LoadingState />;
 
   return (
     <div>
-
       {/* Tabs + Add button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--color-border)', flex: 1 }}>
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex flex-1 border-b border-border">
           {tabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              style={{
-                padding: '10px 20px', fontSize: '14px',
-                fontWeight: activeTab === tab.key ? 600 : 400,
-                color: activeTab === tab.key ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid var(--color-primary)' : '2px solid transparent',
-                background: 'none', cursor: 'pointer',
-              }}
+              className={cn(
+                'border-b-2 px-5 py-2.5 text-sm transition-colors',
+                activeTab === tab.key
+                  ? 'border-primary font-semibold text-primary'
+                  : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
+              )}
             >
               {tab.label} ({tab.count})
             </button>
           ))}
         </div>
-        <Button onClick={() => setShowAdd(!showAdd)}><i className="fa-regular fa-plus" style={{ fontSize: '14px' }} /> 关注站点</Button>
+        <Button onClick={() => setShowAdd(!showAdd)}><Plus /> 关注站点</Button>
       </div>
 
       {/* Add follow */}
       {showAdd && (
-        <div className="card" style={{ padding: '16px', marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <Input placeholder="输入 Utterlog 站点地址，如 https://blog.example.com" value={addUrl} onChange={e => setAddUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleFollow()} />
-          <Button onClick={handleFollow} loading={adding}>关注</Button>
+        <Card className="mb-4 flex items-center gap-2 p-4">
+          <Input
+            placeholder="输入 Utterlog 站点地址，如 https://blog.example.com"
+            value={addUrl}
+            onChange={e => setAddUrl(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleFollow()}
+          />
+          <Button onClick={handleFollow} disabled={adding}>关注</Button>
           <Button variant="secondary" onClick={() => setShowAdd(false)}>取消</Button>
-        </div>
+        </Card>
       )}
 
       {/* List */}
       {list.length === 0 ? (
-        <div className="card text-dim" style={{ padding: '48px', textAlign: 'center', fontSize: '14px' }}>
-          <EmptyPanel
-            title={activeTab === 'following' ? '还没有关注任何站点' : activeTab === 'followers' ? '还没有人关注你' : '还没有互相关注'}
-            padding={0}
-            fontSize="14px"
-          />
-        </div>
+        <EmptyState
+          title={activeTab === 'following' ? '还没有关注任何站点' : activeTab === 'followers' ? '还没有人关注你' : '还没有互相关注'}
+        />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div className="flex flex-col gap-2">
           {list.map((item: any, i: number) => {
             const info = item.site_info || {};
             const siteUrl = typeof item.source_site === 'string' ? item.source_site : '';
@@ -111,47 +110,50 @@ export default function FollowsPage() {
             const isMutual = item.mutual === true;
 
             return (
-              <div key={i} className="card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <Card key={i} className="flex items-center gap-3.5 p-4">
                 {/* Logo */}
-                <div style={{
-                  width: '48px', height: '48px', borderRadius: '1px', overflow: 'hidden',
-                  background: 'var(--color-bg-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
+                <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
                   {logo ? (
-                    <img src={logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={logo} alt="" className="size-full object-cover" />
                   ) : (
-                    <i className="fa-regular fa-globe text-dim" style={{ fontSize: '20px' }} />
+                    <Globe className="size-5 text-muted-foreground" />
                   )}
                 </div>
 
                 {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '14px' }}>{siteName}</span>
-                    {isMutual && <span style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '2px', background: 'var(--color-primary)', color: '#fff' }}>互关</span>}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold">{siteName}</span>
+                    {isMutual && <span className="rounded-sm bg-primary px-1.5 py-px text-[10px] text-primary-foreground">互关</span>}
                   </div>
-                  {siteDesc && <p className="text-dim" style={{ fontSize: '12px', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{siteDesc}</p>}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                    <a href={siteUrl} target="_blank" className="text-sub" style={{ fontSize: '12px' }}>{siteUrl}</a>
-                    {admin.nickname && <span className="text-dim" style={{ fontSize: '11px' }}>· {admin.nickname}</span>}
+                  {siteDesc && <p className="mt-0.5 truncate text-xs text-muted-foreground">{siteDesc}</p>}
+                  <div className="mt-1 flex items-center gap-2">
+                    <a href={siteUrl} target="_blank" className="text-xs text-muted-foreground hover:text-foreground">{siteUrl}</a>
+                    {admin.nickname && <span className="text-[11px] text-muted-foreground">· {admin.nickname}</span>}
                   </div>
                 </div>
 
                 {/* Actions */}
                 {activeTab === 'following' && (
-                  <button onClick={() => setUnfollowTarget(siteUrl)} className="action-btn danger" title="取消关注">
-                    <i className="fa-regular fa-trash" style={{ fontSize: '14px' }} />
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive"
+                    title="取消关注"
+                    onClick={() => setUnfollowTarget(siteUrl)}
+                  >
+                    <Trash2 />
+                  </Button>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
 
       <ConfirmDialog
-        isOpen={!!unfollowTarget}
-        onClose={() => setUnfollowTarget('')}
+        open={!!unfollowTarget}
+        onOpenChange={(o) => !o && setUnfollowTarget('')}
         onConfirm={() => handleUnfollow(unfollowTarget)}
         title="取消关注"
         message="确定取消关注？"
