@@ -19,7 +19,7 @@ Utterlog is being migrated from the old `postgres + api(Go) + web(Next)` split t
 app/start/src/backend/             Bun + TypeScript API/gateway
 app/start/assets/schema.sql PostgreSQL bootstrap schema copied from the old API schema
 app/admin/              Vite/React admin source
-app/web/                Blog pages, themes, and shared React components (Bun SSR source)
+app/start/src/web/      Blog pages, themes, and shared React components (Bun SSR source)
 content/                Runtime themes/plugins
 uploads/                Runtime media uploads
 deploy/                 Deployment examples and site installer
@@ -116,7 +116,7 @@ The independent `community/`, `id/`, and `wordpress-plugin/` projects live outsi
 | **Utterlog** | 旗舰参考 | 默认基线 |
 | **Chred** | 备选 | — |
 
-注册位置：`app/web/lib/theme-data.ts`（页面元信息）+ `app/start/src/backend/blog-themes.ts`（后端枚举）。
+注册位置：`app/start/src/web/lib/theme.ts`（前端组件映射 + theme.json 清单）+ `app/start/src/backend/blog-themes.ts`（后端枚举）。
 
 主题切换：admin → `/admin/themes` → 调用 TanStack Start revalidate 接口清缓存 → 立即生效。
 上传 zip：admin 解压到 `content/themes/<name>/`，激活后写 options。
@@ -230,7 +230,7 @@ gh release create vX.Y.Z --notes "..."
 **版本号需要同步修改的位置**：
 
 - 根 `package.json`（主版本号；所有 workspace 共享同一版本）
-- `app/web/package.json` + `app/admin/package.json`
+- `app/admin/package.json`（与根版本号保持一致；`app/start` 走独立版本号，不随主版本同步）
 - `app/start/src/backend/system/metrics.ts` 的 `cachedAppVersion` 运行时兜底常量（**易漏，运行时版本靠它兜底**）
 - `bun.lock`（`bun install` 自动重写）
 
@@ -390,16 +390,16 @@ memory 索引在 `~/.claude/projects/-Users-gentpan-projects-utterlog/memory/MEM
 | Admin 通用 UI | `app/admin/src/components/ui/*` |
 | Admin 关键页面 | `app/admin/src/pages/{DashboardHome,Comments,Posts,Settings,Plugins,Themes,Backup,MusicPlaylists,Analytics,Assistant,AiLogs,AiSettings,...}.tsx` |
 | TanStack Start 入口 | `app/start/src/` |
-| Web 页面组件 | `app/web/components/pages/` |
-| Web 主题源码 | `app/web/themes/{Utterlog,Azure,Flux,Nebula,Renascent}/` |
-| Web 设计 token / 全局样式 | `app/web/globals.css` |
-| Web 组件（blog 业务 / UI / icons / editor） | `app/web/components/{blog,ui,icons,editor}/` |
-| Web Lib | `app/web/lib/{api,store,theme,theme-context,theme-data,...}.ts(x)` |
+| Web 页面组件 | `app/start/src/web/components/pages/` |
+| Web 主题源码 | `app/start/src/web/themes/{Utterlog,Azure,Flux,Nebula,Renascent}/` |
+| Web 设计 token / 全局样式 | `app/start/src/web/styles/globals.css` |
+| Web 组件（blog 业务 / layout / pages） | `app/start/src/web/components/{blog,layout,pages}/` |
+| Web Lib | `app/start/src/web/lib/{api,store,theme,theme-context,...}.ts(x)` |
 | 跨包共享 | `app/shared/{blog-theme,site-favicon,string-utils}.ts` |
 | Schema | `app/start/assets/schema.sql` |
 | Docker dev / prod | `Dockerfile.bun` + `docker-compose.yml` / `docker-compose.prod.yml` |
 | 部署脚本 | `scripts/deploy.sh` / `install.sh` |
-| 主题样式同步 | `app/web/scripts/sync-theme-styles.mjs` |
+| 主题样式同步 | `app/start/src/web/scripts/sync-theme-styles.mjs` |
 
 ---
 

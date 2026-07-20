@@ -16,7 +16,7 @@
 | 层 | 技术 | 版本 |
 |---|---|---|
 | 运行时 | Bun | 1.4.0 canary |
-| API / 网关 | Hono | ^4.12 |
+| API / SSR 网关 | Bun 原生 HTTP + TanStack Start | — |
 | 博客 SSR | React | ^19.2.7 |
 | 管理后台 | Vite + React + TanStack Router | Vite ^8.1 / React ^19.2 |
 | 数据库 | PostgreSQL + pgvector | 18 |
@@ -27,20 +27,20 @@
 
 - **Vite 6 → 8**：Admin 构建改用 Rolldown；`rollupOptions` 已迁移为 `rolldownOptions.output.codeSplitting`
 - **@vitejs/plugin-react 4 → 6**：基于 Oxc 的 React Refresh，不再依赖 Babel
-- **Zod 3 → 4**：`app/admin`、`app/web` 与根 workspace 对齐
+- **Zod 3 → 4**：`app/admin`、`app/start` 与根 workspace 对齐
 - **nodemailer 8 → 9**：SMTP 发送 API 无改动
 
 ## 仓库结构（开发视角）
 
 ```
 app/start/src/backend/     Bun API + SSR 网关（改后端从这里开始）
-app/admin/      Vite 管理后台 SPA（/admin）
-app/web/        博客页面、主题、组件（SSR 源）
-app/shared/     跨包共享
-app/start/      TanStack Start 应用与文件路由
+app/start/src/web/         博客页面、主题、组件（SSR 源）
+app/start/src/routes/      TanStack Start 文件路由
+app/admin/                 Vite 管理后台 SPA（/admin）
+app/shared/                跨包共享
 ```
 
-Monorepo 使用 **单一根 lockfile**（`bun.lock`）。不要在 `app/admin` 或 `app/web` 下单独维护 `bun.lock`。
+Monorepo 使用 **单一根 lockfile**（`bun.lock`）。不要在 `app/admin` 或 `app/start` 下单独维护 `bun.lock`。
 
 ## 首次启动
 
@@ -93,8 +93,8 @@ bun run dev          # Vite dev server :5173，/api 代理到 :8080
 | 数据库 schema | `app/start/assets/schema.sql`（改完 `make schema`） |
 | 后台页面 | `app/admin/src/pages/` |
 | 博客路由 | `app/start/src/routes/` |
-| 主题 | `app/web/themes/{Name}/` |
-| 主题注册 | `app/web/lib/theme-data.ts` / `app/start/src/backend/blog-themes.ts` |
+| 主题 | `app/start/src/web/themes/{Name}/` |
+| 主题注册 | `app/start/src/backend/blog-themes.ts` |
 
 ## Vite 8 配置说明（Admin）
 
