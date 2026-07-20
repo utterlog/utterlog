@@ -1,33 +1,27 @@
-
 import { forwardRef, TextareaHTMLAttributes } from 'react';
+import { Textarea as ShadcnTextarea } from './shadcn/textarea';
+import { Label } from './shadcn/label';
+import { cn } from '@/lib/utils';
 
+// Adapter: legacy Textarea (label + error) now renders shadcn Textarea + Label.
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string;
   label?: string;
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ error, label, style, ...props }, ref) => {
-    return (
-      <div>
-        {label && (
-          <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>
-            {label}
-          </label>
-        )}
-        <textarea
-          ref={ref}
-          className="input focus-ring"
-          style={{
-            borderColor: error ? 'var(--color-error)' : undefined,
-            ...style,
-          }}
-          {...props}
-        />
-        {error && <p style={{ marginTop: '4px', fontSize: '13px', color: 'var(--color-error)' }}>{error}</p>}
-      </div>
-    );
-  }
+  ({ error, label, className, ...props }, ref) => (
+    <div className="flex flex-col gap-1.5">
+      {label && <Label>{label}</Label>}
+      <ShadcnTextarea
+        ref={ref}
+        aria-invalid={error ? true : undefined}
+        className={cn(error && 'border-destructive focus-visible:ring-destructive', className)}
+        {...props}
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  ),
 );
 
 Textarea.displayName = 'Textarea';

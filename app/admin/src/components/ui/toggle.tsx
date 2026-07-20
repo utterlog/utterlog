@@ -56,7 +56,7 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
               width: '40px',
               height: '22px',
               borderRadius: '11px',
-              background: isOn ? 'var(--color-primary)' : 'var(--color-border)',
+              background: isOn ? 'var(--primary)' : 'var(--input)',
               transition: 'background 0.2s',
             }}
           />

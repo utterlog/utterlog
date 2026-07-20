@@ -1,53 +1,56 @@
 import type { ReactNode } from 'react';
-import { Button } from './button';
+import { Pencil, Trash2, Star, Loader2, Plus } from 'lucide-react';
+import { Button as ShadcnButton } from './shadcn/button';
+import { Card } from './shadcn/card';
+import { cn } from '@/lib/utils';
 
-interface AdminToolbarProps {
-  meta?: ReactNode;
-  actions?: ReactNode;
-}
+// Shared admin composites, now rendered with the shadcn design system.
+// Public APIs are unchanged so every page keeps working.
+
+interface AdminToolbarProps { meta?: ReactNode; actions?: ReactNode; }
 
 export function AdminToolbar({ meta, actions }: AdminToolbarProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginRight: 'auto', minWidth: 0 }}>
-        {typeof meta === 'string' ? <span className="text-dim" style={{ fontSize: '13px' }}>{meta}</span> : meta}
+    <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mr-auto flex min-w-0 items-center gap-1">
+        {typeof meta === 'string' ? <span className="text-sm text-muted-foreground">{meta}</span> : meta}
       </div>
-      {actions && <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>{actions}</div>}
+      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
   );
 }
 
-interface MetricCardProps {
-  label: ReactNode;
-  value: ReactNode;
-  color?: string;
-}
+interface MetricCardProps { label: ReactNode; value: ReactNode; color?: string; }
 
 export function MetricCard({ label, value, color }: MetricCardProps) {
   return (
-    <div className="card" style={{ padding: '20px' }}>
-      <p className="text-dim" style={{ fontSize: '12px' }}>{label}</p>
-      <p style={{ fontSize: '24px', fontWeight: 700, marginTop: '4px', color }}>{value}</p>
-    </div>
+    <Card className="p-5">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-bold" style={color ? { color } : undefined}>{value}</p>
+    </Card>
   );
 }
 
-interface MetricGridProps {
-  children: ReactNode;
-  columns?: number;
-  compact?: boolean;
-}
+interface MetricGridProps { children: ReactNode; columns?: number; compact?: boolean; }
 
 export function MetricGrid({ children, columns = 3, compact }: MetricGridProps) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: '12px', marginBottom: compact ? '20px' : '24px' }}>
+    <div
+      className={cn('grid gap-3', compact ? 'mb-5' : 'mb-6')}
+      style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+    >
       {children}
     </div>
   );
 }
 
-export function LoadingState({ label = '加载中…', padding = '48px' }: { label?: string; padding?: string | number }) {
-  return <div className="text-dim" style={{ textAlign: 'center', padding, fontSize: '13px' }}>{label}</div>;
+export function LoadingState({ label = '加载中…' }: { label?: string; padding?: string | number }) {
+  return (
+    <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+      <Loader2 className="size-4 animate-spin" aria-hidden />
+      {label}
+    </div>
+  );
 }
 
 interface EmptyPanelProps {
@@ -58,15 +61,12 @@ interface EmptyPanelProps {
   fontSize?: string | number;
 }
 
-export function EmptyPanel({ title = '暂无内容', actionText, onAction, padding = '48px', fontSize = '15px' }: EmptyPanelProps) {
+export function EmptyPanel({ title = '暂无内容', actionText, onAction }: EmptyPanelProps) {
   return (
-    <div className="text-dim" style={{ textAlign: 'center', padding }}>
-      <p style={{ fontSize, marginBottom: actionText ? '12px' : 0 }}>{title}</p>
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+      <p className="text-sm text-muted-foreground">{title}</p>
       {actionText && onAction && (
-        <Button onClick={onAction}>
-          <i className="fa-regular fa-plus" style={{ fontSize: '16px' }} />
-          {actionText}
-        </Button>
+        <ShadcnButton variant="outline" size="sm" onClick={onAction}><Plus /> {actionText}</ShadcnButton>
       )}
     </div>
   );
@@ -81,16 +81,16 @@ interface RowActionsProps {
 
 export function RowActions({ onEdit, onDelete, editTitle = '编辑', deleteTitle = '删除' }: RowActionsProps) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+    <div className="flex justify-end gap-1">
       {onEdit && (
-        <button onClick={onEdit} className="action-btn primary" title={editTitle}>
-          <i className="fa-regular fa-pen" style={{ fontSize: '14px' }} />
-        </button>
+        <ShadcnButton variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={editTitle} onClick={onEdit}>
+          <Pencil className="size-4" />
+        </ShadcnButton>
       )}
       {onDelete && (
-        <button onClick={onDelete} className="action-btn danger" title={deleteTitle}>
-          <i className="fa-regular fa-trash" style={{ fontSize: '14px' }} />
-        </button>
+        <ShadcnButton variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={deleteTitle} onClick={onDelete}>
+          <Trash2 className="size-4" />
+        </ShadcnButton>
       )}
     </div>
   );
@@ -106,23 +106,18 @@ interface RatingStarsProps {
 export function RatingStars({ value, onChange, size = 18, gap = 4 }: RatingStarsProps) {
   const stars = [1, 2, 3, 4, 5];
   return (
-    <div style={{ display: 'flex', gap }}>
+    <div className="flex" style={{ gap }}>
       {stars.map((n) => {
+        const filled = n <= value;
         const icon = (
-          <i
-            className="fa-regular fa-star"
-            style={{ fontSize: size, color: n <= value ? 'var(--color-warning)' : 'var(--color-text-dim)' }}
+          <Star
+            style={{ width: size, height: size }}
+            className={filled ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'}
           />
         );
         if (!onChange) return <span key={n}>{icon}</span>;
         return (
-          <button
-            key={n}
-            type="button"
-            onClick={() => onChange(n)}
-            aria-label={`${n} 星`}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
-          >
+          <button key={n} type="button" onClick={() => onChange(n)} aria-label={`${n} 星`} className="cursor-pointer p-0.5">
             {icon}
           </button>
         );
@@ -141,9 +136,11 @@ interface DialogFooterProps {
 
 export function DialogFooter({ onCancel, onSubmit, submitting, submitText = '保存', cancelText = '取消' }: DialogFooterProps) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-      <Button variant="secondary" onClick={onCancel}>{cancelText}</Button>
-      <Button onClick={onSubmit} loading={submitting}>{submitText}</Button>
+    <div className="flex justify-end gap-2 pt-1">
+      <ShadcnButton variant="outline" onClick={onCancel}>{cancelText}</ShadcnButton>
+      <ShadcnButton onClick={onSubmit} disabled={submitting}>
+        {submitting && <Loader2 className="animate-spin" />}{submitText}
+      </ShadcnButton>
     </div>
   );
 }
@@ -158,35 +155,20 @@ interface MediaItemCardProps {
 
 export function MediaItemCard({ item, onEdit, onDelete, subtitle, coverHeight = 160 }: MediaItemCardProps) {
   return (
-    <div className="card" style={{ overflow: 'hidden' }}>
+    <Card className="overflow-hidden p-0">
       {item.cover_url && (
-        <div style={{ width: '100%', height: `${coverHeight}px`, backgroundColor: 'var(--color-bg-soft)', overflow: 'hidden' }}>
-          <img src={item.cover_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div className="w-full overflow-hidden bg-muted" style={{ height: coverHeight }}>
+          <img src={item.cover_url} alt={item.title} className="size-full object-cover" />
         </div>
       )}
-      <div style={{ padding: '14px' }}>
-        <h3 className="text-main" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{item.title}</h3>
-        {subtitle !== undefined ? (
-          <p className="text-sub" style={{ fontSize: '12px', marginBottom: '6px' }}>{subtitle(item)}</p>
-        ) : null}
-        {item.rating > 0 && (
-          <div style={{ marginBottom: '6px' }}>
-            <RatingStars value={item.rating} size={12} gap={2} />
-          </div>
-        )}
-        {item.comment && (
-          <p
-            className="text-dim"
-            style={{ fontSize: '12px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-          >
-            {item.comment}
-          </p>
-        )}
-        <div style={{ marginTop: '8px' }}>
-          <RowActions onEdit={() => onEdit(item)} onDelete={() => onDelete(item.id)} />
-        </div>
+      <div className="p-3.5">
+        <h3 className="mb-1 text-sm font-semibold text-foreground">{item.title}</h3>
+        {subtitle !== undefined ? <p className="mb-1.5 text-xs text-muted-foreground">{subtitle(item)}</p> : null}
+        {item.rating > 0 && <div className="mb-1.5"><RatingStars value={item.rating} size={12} gap={2} /></div>}
+        {item.comment && <p className="line-clamp-2 text-xs text-muted-foreground">{item.comment}</p>}
+        <div className="mt-2"><RowActions onEdit={() => onEdit(item)} onDelete={() => onDelete(item.id)} /></div>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -201,16 +183,9 @@ interface MediaItemGridProps {
 
 export function MediaItemGrid({ items, onEdit, onDelete, subtitle, minWidth = 240, coverHeight = 160 }: MediaItemGridProps) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, 1fr))`, gap: '12px' }}>
+    <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, 1fr))` }}>
       {items.map((item) => (
-        <MediaItemCard
-          key={item.id}
-          item={item}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          subtitle={subtitle}
-          coverHeight={coverHeight}
-        />
+        <MediaItemCard key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} subtitle={subtitle} coverHeight={coverHeight} />
       ))}
     </div>
   );
