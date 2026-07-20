@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { booksApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Link2, Plus } from 'lucide-react';
 import {
   AdminToolbar,
   Button,
@@ -64,9 +65,9 @@ export default function booksPage() {
         actions={
           <>
           <Button variant="secondary" onClick={() => setShowImport(true)}>
-            <i className="fa-light fa-link" style={{ fontSize: '13px' }} /> 链接导入
+            <Link2 className="size-4" /> 链接导入
           </Button>
-          <Button onClick={openCreate}><i className="fa-regular fa-plus" style={{ fontSize: '16px' }} />添加图书</Button>
+          <Button onClick={openCreate}><Plus className="size-4" />添加图书</Button>
           </>
         }
       />

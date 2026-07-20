@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { goodsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Plus } from 'lucide-react';
 import {
   AdminToolbar,
   Button,
@@ -58,7 +59,7 @@ export default function goodsPage() {
     <div>
       <AdminToolbar
         meta={`${items.length} 件好物`}
-        actions={<Button onClick={openCreate}><i className="fa-regular fa-plus" style={{ fontSize: '16px' }} />添加好物</Button>}
+        actions={<Button onClick={openCreate}><Plus className="size-4" />添加好物</Button>}
       />
 
       {loading ? (
