@@ -43,7 +43,7 @@ help-advanced:
 	@echo "    make dev                 开发模式 (dev Dockerfile + hot reload)"
 	@echo "    make dev-local           本地 bun server"
 	@echo "    make deploy-xifeng       xifeng.net 本地构建 + SSH 部署"
-	@echo "    make schema              导出当前 DB schema 到 app/server/assets/schema.sql"
+	@echo "    make schema              导出当前 DB schema 到 app/start/assets/schema.sql"
 	@echo ""
 
 # --- Main commands ---

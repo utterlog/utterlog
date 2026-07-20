@@ -2,7 +2,7 @@
 # Utterlog — Bun development/production-like compose
 # ------------------------------------------------------------
 # Default architecture after the migration:
-#   app (Bun gateway + TS API + admin SPA + Next renderer) + postgres
+#   app (Bun gateway + TS API + admin SPA + TanStack Start SSR) + postgres
 # ============================================================
 
 services:
