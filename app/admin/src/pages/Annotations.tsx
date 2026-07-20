@@ -1,3 +1,4 @@
+import { Anchor, Info, Globe, Trash2 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from '@/lib/router';
 import toast from 'react-hot-toast';
@@ -124,8 +125,7 @@ export default function AnnotationsPage() {
             <div className="text-main" style={{ fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {row.user_name}
               {row.utterlog_id && (
-                <i className="fa-sharp fa-light fa-globe" title="Utterlog Network"
-                  style={{ fontSize: '10px', marginLeft: '6px', color: 'var(--color-primary)' }} />
+                <Globe className="ml-1.5 size-2.5 text-primary" aria-label="Utterlog Network" />
               )}
             </div>
             {row.user_site && (
@@ -146,7 +146,7 @@ export default function AnnotationsPage() {
         <div>
           <p className="text-main" style={{ fontSize: '13px', lineHeight: 1.6, margin: 0, wordBreak: 'break-word' }}>{row.content}</p>
           <div className="text-dim" style={{ fontSize: '11px', marginTop: '4px' }}>
-            <i className="fa-regular fa-anchor" style={{ marginRight: '4px' }} />
+            <Anchor className="size-4" />
             段落 <code style={{ background: 'var(--color-bg-soft)', padding: '1px 5px', fontSize: '10px' }}>{row.block_id}</code>
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function AnnotationsPage() {
       width: '100px',
       render: (row: AdminAnnotation) => (
         <button onClick={() => setDeleteId(row.id)} title="删除" className="action-btn danger">
-          <i className="fa-regular fa-trash" />
+          <Trash2 className="size-4" />
         </button>
       ),
     },
@@ -203,7 +203,7 @@ export default function AnnotationsPage() {
           <Button variant="secondary"
             onClick={() => setBatchDeleteOpen(true)}
             style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}>
-            <i className="fa-regular fa-trash" style={{ marginRight: '6px' }} />
+            <Trash2 className="size-4" />
             删除所选 ({selectedIds.size})
           </Button>
         )}
@@ -215,7 +215,7 @@ export default function AnnotationsPage() {
         background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)',
         lineHeight: 1.6,
       }}>
-        <i className="fa-regular fa-circle-info" style={{ marginRight: '6px', color: 'var(--color-primary)' }} />
+        <Info className="size-4" />
         段落点评存储在 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: '11px' }}>ul_annotations</code> 表
         （post_id + block_id 定位到具体段落，支持 Utterlog 联盟身份和本地 admin 两种发表来源）。
         此处为只读查看和删除；点评本身不需审核，需要身份验证才能发表。

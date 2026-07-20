@@ -1,3 +1,4 @@
+import { RefreshCw, Check, Lightbulb, Plug, Trash2, ExternalLink, Upload, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { pluginsApi, type ExtensionManifest } from '@/lib/api';
@@ -86,10 +87,10 @@ export default function Plugins() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-secondary btn-square" onClick={fetchList} disabled={loading} title="刷新列表">
-            <i className="fa-regular fa-arrows-rotate" style={{ fontSize: 14 }} />
+            <RefreshCw className="size-4" />
           </button>
           <button className="btn btn-primary btn-square" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传插件 .zip'}>
-            <i className={uploading ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-upload'} style={{ fontSize: 14 }} />
+            {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
           </button>
           <input
             ref={fileInputRef}
@@ -107,7 +108,7 @@ export default function Plugins() {
         border: '1px solid var(--color-border)',
         fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-sub)',
       }}>
-        <i className="fa-regular fa-lightbulb" style={{ marginRight: 6, color: 'var(--color-primary)' }} />
+        <Lightbulb className="size-4" />
         插件包为 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>.zip</code> 格式，根目录包含 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>manifest.json</code>。上传后解压到 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>content/plugins/&lt;id&gt;/</code>，默认**不自动启用**，需手动开启。
       </div>
 
@@ -133,7 +134,7 @@ export default function Plugins() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: enabled ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'var(--color-bg-soft)',
                 }}>
-                  <i className="fa-regular fa-plug" style={{ fontSize: 16, color: enabled ? 'var(--color-primary)' : 'var(--color-text-dim)' }} />
+                  <Plug className="size-4" />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -174,7 +175,7 @@ export default function Plugins() {
                       onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; }}
                     >
-                      <i className="fa-regular fa-up-right-from-square" style={{ fontSize: 12 }} />
+                      <ExternalLink className="size-4" />
                     </a>
                   )}
 
@@ -191,7 +192,7 @@ export default function Plugins() {
                         borderColor: 'var(--color-primary)',
                       }}
                     >
-                      <i className="fa-solid fa-check" style={{ fontSize: 11 }} />
+                      <Check className="size-4" />
                       {toggling === plugin.id ? '切换中…' : '已启用'}
                     </button>
                   ) : (
@@ -217,7 +218,7 @@ export default function Plugins() {
                       onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-error)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; }}
                     >
-                      <i className="fa-regular fa-trash" style={{ fontSize: 12 }} />
+                      <Trash2 className="size-4" />
                     </button>
                   )}
                 </div>
