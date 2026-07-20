@@ -1,3 +1,4 @@
+import { Sparkles } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@/lib/router';
@@ -100,7 +101,7 @@ export default function CreatePostPage() {
                       try { const r: any = await api.post('/ai/slug', { title, content }); if (r.success && r.data?.slug) { setSlug(r.data.slug); toast.success('Slug 已生成'); } } catch { toast.error('AI 服务不可用'); }
                     }}
                   >
-                    <i className="fa-regular fa-sparkles" style={{ fontSize: 14 }} />
+                    <Sparkles className="size-4" />
                   </button>
                 </div>
               </div>

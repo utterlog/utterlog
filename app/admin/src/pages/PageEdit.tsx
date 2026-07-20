@@ -1,3 +1,4 @@
+import { Sparkles, Loader2 } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from '@/lib/router';
@@ -93,7 +94,7 @@ export default function EditPostPage() {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 100px)' }}>
-        <i className="fa-light fa-spinner-third fa-spin" style={{ fontSize: '24px', color: 'var(--color-text-dim)' }} />
+        <Loader2 className="size-4 animate-spin" />
       </div>
     );
   }
@@ -136,7 +137,7 @@ export default function EditPostPage() {
                       try { const r: any = await api.post('/ai/slug', { title, content }); if (r.success && r.data?.slug) { setSlug(r.data.slug); toast.success('Slug 已生成'); } } catch { toast.error('AI 服务不可用'); }
                     }}
                   >
-                    <i className="fa-regular fa-sparkles" style={{ fontSize: 14 }} />
+                    <Sparkles className="size-4" />
                   </button>
                 </div>
               </div>

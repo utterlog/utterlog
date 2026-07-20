@@ -1,3 +1,4 @@
+import { MailOpen, Fingerprint } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store';
 import { authApi } from '@/lib/api';
@@ -264,7 +265,7 @@ export default function Login() {
                   className="btn btn-secondary"
                   style={{ width: '100%', gap: 8 }}
                 >
-                  <i className="fa-light fa-fingerprint" style={{ fontSize: 16 }} />
+                  <Fingerprint className="size-4" />
                   {passkeyLoading ? t('admin.login.verifying', '验证中…') : t('admin.login.usePasskey', '使用通行密钥登录')}
                 </button>
               </>
@@ -333,7 +334,7 @@ export default function Login() {
             {forgotSent ? (
               <div style={{ textAlign: 'center', padding: '16px 0' }}>
                 <div style={{ fontSize: 32, marginBottom: 12 }}>
-                  <i className="fa-light fa-envelope-open-text" style={{ color: 'var(--color-primary)' }} />
+                  <MailOpen className="size-4" />
                 </div>
                 <p style={{ fontSize: 14, fontWeight: 500 }}>{t('admin.login.resetLinkSent', '重置链接已发送')}</p>
                 <p style={{ fontSize: 12, color: 'var(--color-text-dim)', marginTop: 6 }}>

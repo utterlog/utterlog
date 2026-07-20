@@ -1,3 +1,4 @@
+import { CloudUpload, Database, Settings as SettingsIcon, AlertTriangle } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import { optionsApi } from '@/lib/api';
@@ -162,12 +163,12 @@ export default function ToolsPage() {
 
           <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
             <Button onClick={createBackup} loading={creating}>
-              <i className="fa-regular fa-database" style={{ fontSize: '14px' }} /> {t('admin.tools.backup.create', '创建备份')}
+              <Database className="size-4" /> {t('admin.tools.backup.create', '创建备份')}
             </Button>
             <label style={{ cursor: 'pointer' }}>
               <input type="file" accept=".zip" onChange={handleBackupImportSelect} style={{ display: 'none' }} />
               <span className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <i className="fa-regular fa-cloud-arrow-up" style={{ fontSize: '14px' }} /> {importing ? t('admin.common.importing', '导入中…') : t('admin.tools.backup.importBackup', '导入备份')}
+                <CloudUpload className="size-4" /> {importing ? t('admin.common.importing', '导入中…') : t('admin.tools.backup.importBackup', '导入备份')}
               </span>
             </label>
           </div>
@@ -175,7 +176,7 @@ export default function ToolsPage() {
           {/* Backup Settings */}
           <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <i className="fa-regular fa-gear" style={{ fontSize: '16px', color: 'var(--color-primary)' }} />
+              <SettingsIcon className="size-4" />
               <h3 className="text-main" style={{ fontSize: '14px', fontWeight: 600 }}>{t('admin.tools.backup.settings', '备份设置')}</h3>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
@@ -209,7 +210,7 @@ export default function ToolsPage() {
             </div>
             {(backupDest === 's3' || backupDest === 'r2') && !s3Configured && (
               <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '10px' }}>
-                <i className="fa-light fa-triangle-exclamation" style={{ marginRight: '4px' }} />
+                <AlertTriangle className="size-4" />
                 {t('admin.tools.backup.configureStoragePrefix', '请先在')} <a href="/settings" style={{ color: 'var(--color-primary)', fontWeight: 500 }}>{t('admin.tools.backup.storageSettingsLink', '系统设置 > 存储')}</a> {t('admin.tools.backup.configureStorageSuffix', '中配置 {driver} 连接信息', { driver: backupDest === 'r2' ? 'R2' : 'S3' })}
               </p>
             )}
