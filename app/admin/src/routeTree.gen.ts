@@ -32,7 +32,6 @@ import { Route as AuthenticatedMediaRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedGoodsRouteImport } from './routes/_authenticated/goods'
 import { Route as AuthenticatedGamesRouteImport } from './routes/_authenticated/games'
-import { Route as AuthenticatedFormDemoRouteImport } from './routes/_authenticated/form-demo'
 import { Route as AuthenticatedFootprintsRouteImport } from './routes/_authenticated/footprints'
 import { Route as AuthenticatedFollowsRouteImport } from './routes/_authenticated/follows'
 import { Route as AuthenticatedFilmsRouteImport } from './routes/_authenticated/films'
@@ -171,11 +170,6 @@ const AuthenticatedGoodsRoute = AuthenticatedGoodsRouteImport.update({
 const AuthenticatedGamesRoute = AuthenticatedGamesRouteImport.update({
   id: '/games',
   path: '/games',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedFormDemoRoute = AuthenticatedFormDemoRouteImport.update({
-  id: '/form-demo',
-  path: '/form-demo',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFootprintsRoute = AuthenticatedFootprintsRouteImport.update({
@@ -329,7 +323,6 @@ export interface FileRoutesByFullPath {
   '/films': typeof AuthenticatedFilmsRoute
   '/follows': typeof AuthenticatedFollowsRoute
   '/footprints': typeof AuthenticatedFootprintsRoute
-  '/form-demo': typeof AuthenticatedFormDemoRoute
   '/games': typeof AuthenticatedGamesRoute
   '/goods': typeof AuthenticatedGoodsRoute
   '/links': typeof AuthenticatedLinksRoute
@@ -378,7 +371,6 @@ export interface FileRoutesByTo {
   '/films': typeof AuthenticatedFilmsRoute
   '/follows': typeof AuthenticatedFollowsRoute
   '/footprints': typeof AuthenticatedFootprintsRoute
-  '/form-demo': typeof AuthenticatedFormDemoRoute
   '/games': typeof AuthenticatedGamesRoute
   '/goods': typeof AuthenticatedGoodsRoute
   '/links': typeof AuthenticatedLinksRoute
@@ -429,7 +421,6 @@ export interface FileRoutesById {
   '/_authenticated/films': typeof AuthenticatedFilmsRoute
   '/_authenticated/follows': typeof AuthenticatedFollowsRoute
   '/_authenticated/footprints': typeof AuthenticatedFootprintsRoute
-  '/_authenticated/form-demo': typeof AuthenticatedFormDemoRoute
   '/_authenticated/games': typeof AuthenticatedGamesRoute
   '/_authenticated/goods': typeof AuthenticatedGoodsRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
@@ -482,7 +473,6 @@ export interface FileRouteTypes {
     | '/films'
     | '/follows'
     | '/footprints'
-    | '/form-demo'
     | '/games'
     | '/goods'
     | '/links'
@@ -531,7 +521,6 @@ export interface FileRouteTypes {
     | '/films'
     | '/follows'
     | '/footprints'
-    | '/form-demo'
     | '/games'
     | '/goods'
     | '/links'
@@ -581,7 +570,6 @@ export interface FileRouteTypes {
     | '/_authenticated/films'
     | '/_authenticated/follows'
     | '/_authenticated/footprints'
-    | '/_authenticated/form-demo'
     | '/_authenticated/games'
     | '/_authenticated/goods'
     | '/_authenticated/links'
@@ -788,13 +776,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGamesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/form-demo': {
-      id: '/_authenticated/form-demo'
-      path: '/form-demo'
-      fullPath: '/form-demo'
-      preLoaderRoute: typeof AuthenticatedFormDemoRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/footprints': {
       id: '/_authenticated/footprints'
       path: '/footprints'
@@ -999,7 +980,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFilmsRoute: typeof AuthenticatedFilmsRoute
   AuthenticatedFollowsRoute: typeof AuthenticatedFollowsRoute
   AuthenticatedFootprintsRoute: typeof AuthenticatedFootprintsRoute
-  AuthenticatedFormDemoRoute: typeof AuthenticatedFormDemoRoute
   AuthenticatedGamesRoute: typeof AuthenticatedGamesRoute
   AuthenticatedGoodsRoute: typeof AuthenticatedGoodsRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
@@ -1045,7 +1025,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFilmsRoute: AuthenticatedFilmsRoute,
   AuthenticatedFollowsRoute: AuthenticatedFollowsRoute,
   AuthenticatedFootprintsRoute: AuthenticatedFootprintsRoute,
-  AuthenticatedFormDemoRoute: AuthenticatedFormDemoRoute,
   AuthenticatedGamesRoute: AuthenticatedGamesRoute,
   AuthenticatedGoodsRoute: AuthenticatedGoodsRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
