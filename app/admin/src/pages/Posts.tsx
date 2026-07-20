@@ -1,3 +1,4 @@
+import { MessageSquare, Eye, EyeOff, FileText, Folder, Settings as SettingsIcon, Search, Pencil, Plus, Trash2 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from '@/lib/router';
@@ -205,7 +206,7 @@ export default function PostsPage() {
       if (!cat) return <span className="text-dim" style={{ fontSize: '11px' }}>-</span>;
       return (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--color-text-sub)' }}>
-          <i className={cat.icon || 'fa-regular fa-folder'} style={{ fontSize: '13px', color: 'var(--color-primary)', flexShrink: 0, width: '16px', textAlign: 'center' }} />
+          {cat.icon ? <i className={cat.icon} style={{ fontSize: 13, color: 'var(--primary)' }} /> : <Folder className="size-3.5 shrink-0 text-primary" />}
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat.name}</span>
         </span>
       );
@@ -236,8 +237,8 @@ export default function PostsPage() {
     }},
     { key: 'stats', title: t('admin.posts.columns.viewsComments', '浏览/评论'), width: '100px', render: (row: any) => (
       <span className="text-dim" style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}><i className="fa-regular fa-eye" style={{ fontSize: '11px' }} />{row.view_count || 0}</span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}><i className="fa-regular fa-comments" style={{ fontSize: '11px' }} />{row.comment_count || 0}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}><Eye className="size-4" />{row.view_count || 0}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}><MessageSquare className="size-4" />{row.comment_count || 0}</span>
       </span>
     )},
     { key: 'status', title: t('admin.posts.columns.status', '状态'), width: '72px', render: (row: any) => {
@@ -245,8 +246,8 @@ export default function PostsPage() {
     }},
     { key: 'actions', title: <span style={{ textAlign: 'right', display: 'block' }}>{t('admin.posts.columns.actions', '操作')}</span>, width: '190px', render: (row: any) => (
       <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
-        <button onClick={() => navigate(`/posts/edit/${row.id}`)} className="action-btn primary" title={t('admin.common.edit', '编辑')}><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-        <button onClick={() => window.open(postUrlOf(row), '_blank', 'noopener,noreferrer')} className="action-btn" title={t('admin.common.preview', '预览')}><i className="fa-regular fa-eye" style={{ fontSize: '14px' }} /></button>
+        <button onClick={() => navigate(`/posts/edit/${row.id}`)} className="action-btn primary" title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></button>
+        <button onClick={() => window.open(postUrlOf(row), '_blank', 'noopener,noreferrer')} className="action-btn" title={t('admin.common.preview', '预览')}><Eye className="size-4" /></button>
         <button
           onClick={async () => {
             const newStatus = row.status === 'draft' ? 'publish' : 'draft';
@@ -255,7 +256,7 @@ export default function PostsPage() {
           }}
           className={`action-btn${row.status === 'draft' ? ' primary' : ''}`}
           title={row.status === 'draft' ? t('admin.posts.action.publishDraft', '取消草稿（发布）') : t('admin.posts.action.moveToDrafts', '移至草稿箱')}
-        ><i className="fa-regular fa-file-lines" style={{ fontSize: '14px' }} /></button>
+        ><FileText className="size-4" /></button>
         <button
           onClick={async () => {
             const newStatus = row.status === 'private' ? 'publish' : 'private';
@@ -264,8 +265,8 @@ export default function PostsPage() {
           }}
           className={`action-btn${row.status === 'private' ? ' warning' : ''}`}
           title={row.status === 'private' ? t('admin.posts.action.publishPrivate', '取消私密（发布）') : t('admin.posts.action.setPrivate', '设为私密')}
-        ><i className="fa-regular fa-eye-slash" style={{ fontSize: '14px' }} /></button>
-        <button onClick={() => setDeleteId(row.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
+        ><EyeOff className="size-4" /></button>
+        <button onClick={() => setDeleteId(row.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></button>
       </div>
     )},
   ];
@@ -287,19 +288,19 @@ export default function PostsPage() {
           ))}
         </div>
         <Button className="btn-square" title={t('admin.posts.newPost', '新建文章')} onClick={() => navigate('/posts/create')}>
-          <i className="fa-regular fa-plus" style={{ fontSize: 14 }} />
+          <Plus className="size-4" />
         </Button>
         {/* 文章设置移到新建文章之后、搜索框之前 —— 与新建动作贴近，
             搜索区单独成组（只剩 Input + 搜索按钮）。 */}
         <Button className="btn-square" variant="secondary" title={t('admin.posts.settingsTitle', '文章设置')} onClick={openSettings}>
-          <i className="fa-regular fa-gear" style={{ fontSize: 14 }} />
+          <SettingsIcon className="size-4" />
         </Button>
 
         {/* 搜索框 */}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <Input placeholder={t('admin.posts.searchPlaceholder', '检索标题 / 摘要 / 正文')} value={search} onChange={(e: any) => setSearch(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && (setPage(1), fetchPosts())} style={{ width: 220 }} />
           <Button className="btn-square" title={t('common.search', '搜索')} onClick={() => { setPage(1); fetchPosts(); }}>
-            <i className="fa-regular fa-magnifying-glass" style={{ fontSize: 14 }} />
+            <Search className="size-4" />
           </Button>
         </div>
       </>

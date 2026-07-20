@@ -1,3 +1,4 @@
+import { Check, CloudUpload, Hash, LocateFixed, MapPin, Search, Pencil, Plus, Trash2, X } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 import { momentsApi, optionsApi, mediaApi, geoApi } from '@/lib/api';
@@ -234,7 +235,7 @@ export default function MomentsPage() {
             aria-label={t('admin.posts.columns.keywords', '关键词')}
             onClick={() => setShowTagManager(!showTagManager)}
           >
-            <i className="fa-solid fa-hashtag" style={{ fontSize: 14 }} />
+            <Hash className="size-4" />
           </Button>
           <Button
             className="btn-square"
@@ -242,7 +243,7 @@ export default function MomentsPage() {
             aria-label={t('admin.moments.publish', '发布')}
             onClick={openCreate}
           >
-            <i className="fa-solid fa-plus" style={{ fontSize: 14 }} />
+            <Plus className="size-4" />
           </Button>
         </div>
 
@@ -260,7 +261,7 @@ export default function MomentsPage() {
             aria-label={t('common.search', '搜索')}
             onClick={() => { /* 即时搜索：按钮仅作视觉锚点 */ }}
           >
-            <i className="fa-regular fa-magnifying-glass" style={{ fontSize: 14 }} />
+            <Search className="size-4" />
           </Button>
           {search && (
             <Button
@@ -270,7 +271,7 @@ export default function MomentsPage() {
               aria-label={t('admin.common.clear', '清空')}
               onClick={() => setSearch('')}
             >
-              <i className="fa-regular fa-xmark" style={{ fontSize: 14 }} />
+              <X className="size-4" />
             </Button>
           )}
         </div>
@@ -353,7 +354,7 @@ export default function MomentsPage() {
                       display: 'flex',
                     }}
                   >
-                    <i className="fa-solid fa-check" style={{ fontSize: '12px' }} />
+                    <Check className="size-4" />
                   </button>
                 </span>
               );
@@ -395,7 +396,7 @@ export default function MomentsPage() {
                   )}
                   <div className="text-dim" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', marginTop: '10px' }}>
                     <span>{formatTime(m.created_at)}</span>
-                    {m.location && <><span>&middot;</span><i className="fa-regular fa-location-dot" style={{ fontSize: '12px' }} /><span>{m.location}</span></>}
+                    {m.location && <><span>&middot;</span><MapPin className="size-4" /><span>{m.location}</span></>}
                     {m.mood && (
                       <>
                         <span>&middot;</span>
@@ -410,8 +411,8 @@ export default function MomentsPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0, marginLeft: '12px' }}>
-                  <button onClick={() => openEdit(m)} className="action-btn primary" title={t('admin.common.edit', '编辑')}><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-                  <button onClick={() => setDeleteId(m.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
+                  <button onClick={() => openEdit(m)} className="action-btn primary" title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></button>
+                  <button onClick={() => setDeleteId(m.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></button>
                 </div>
               </div>
             </div>
@@ -432,7 +433,7 @@ export default function MomentsPage() {
                   <div key={idx} style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
                     <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button onClick={() => removeFormImage(idx)} style={{ position: 'absolute', top: '2px', right: '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <i className="fa-solid fa-xmark" style={{ fontSize: '8px' }} />
+                      <X className="size-4" />
                     </button>
                   </div>
                 ))}
@@ -443,7 +444,7 @@ export default function MomentsPage() {
               title={imgUploading ? t('admin.cover.uploading', '上传中…') : t('admin.cover.uploadImage', '上传图片')}
               style={{ cursor: imgUploading ? 'wait' : 'pointer', opacity: imgUploading ? 0.6 : 1 }}
             >
-              <i className="fa-regular fa-cloud-arrow-up" style={{ fontSize: '14px' }} />
+              <CloudUpload className="size-4" />
               <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImgUpload} disabled={imgUploading} />
             </label>
           </div>
@@ -496,7 +497,7 @@ export default function MomentsPage() {
               loading={locating}
               disabled={locating}
             >
-              <i className="fa-solid fa-location-crosshairs" style={{ fontSize: 14 }} />
+              <LocateFixed className="size-4" />
             </Button>
           </div>
           <select className="input" value={form.visibility} onChange={(e) => setForm({ ...form, visibility: e.target.value })}>
