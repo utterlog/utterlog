@@ -1,12 +1,15 @@
 import { expect, test } from 'bun:test';
 import { requestIp } from '../src/backend/request-ip';
 
-test('request IP prefers the first Tencent CDN X-Forwarded-For address', () => {
+test('request IP prefers X-Real-IP over X-Forwarded-For behind a rewriting proxy', () => {
+  // FrankenPHP/Caddy overwrites X-Forwarded-For with its own peer (the CDN
+  // edge node) unless trusted_proxies is configured, so XFF cannot be trusted
+  // for the real visitor. The CDN injects the real client into a dedicated
+  // single-value header (here X-Real-IP), which passes through untouched.
   const request = new Request('https://utterlog.test', {
     headers: {
-      'x-forwarded-for': '203.0.113.42, 49.232.12.8',
-      'x-real-ip': '49.232.12.8',
-      'cf-connecting-ip': '49.232.12.8',
+      'x-forwarded-for': '118.31.144.46', // Caddy peer = CDN edge, not the visitor
+      'x-real-ip': '203.0.113.42', // CDN-injected real client
     },
   });
   expect(requestIp(request)).toBe('203.0.113.42');
