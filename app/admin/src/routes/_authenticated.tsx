@@ -44,7 +44,7 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { failed: bo
   render() {
     if (this.state.failed) {
       return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-dim)', fontSize: 14 }}>
+        <div className="text-muted-foreground" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: 14 }}>
           页面已更新，正在刷新…
         </div>
       );
@@ -110,7 +110,7 @@ function RouteFallback() {
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, height: 2,
           zIndex: 100, pointerEvents: 'none',
-          background: 'linear-gradient(90deg, transparent, var(--color-primary, #0052D9), transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--primary), transparent)',
           backgroundSize: '40% 100%',
           backgroundRepeat: 'no-repeat',
           animation: 'routeFallbackBar 1.2s linear infinite',

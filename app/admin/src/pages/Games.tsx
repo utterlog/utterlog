@@ -17,6 +17,7 @@ import {
   RatingStars,
 } from '@/components/ui';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
+import { Textarea } from '@/components/ui/shadcn';
 
 export default function GamesPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -92,12 +93,12 @@ export default function GamesPage() {
           <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({ ...form, cover_url: url })} folder="games" />
           <Input label="链接" value={form.url || ''} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="Steam/NeoDB 链接" />
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
+            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
             <RatingStars value={form.rating || 0} onChange={v => setForm({ ...form, rating: v })} />
           </div>
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
-            <textarea className="input" rows={3} value={form.comment || ''} onChange={e => setForm({ ...form, comment: e.target.value })} style={{ resize: 'vertical' }} />
+            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
+            <Textarea className="resize-y" rows={3} value={form.comment || ''} onChange={e => setForm({ ...form, comment: e.target.value })} />
           </div>
           <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
         </div>

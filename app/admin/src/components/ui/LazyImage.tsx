@@ -1,5 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -32,11 +34,10 @@ export default function LazyImage({ src, alt, spinnerSize = 28, style, className
   return (
     <div
       ref={ref}
-      className={className}
+      className={cn('bg-muted', className)}
       style={{
         position: 'relative',
         overflow: 'hidden',
-        background: 'var(--color-bg-soft, #f0f0f0)',
         ...style,
       }}
     >
@@ -47,7 +48,7 @@ export default function LazyImage({ src, alt, spinnerSize = 28, style, className
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 1,
         }}>
-          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: spinnerSize, color: 'var(--color-primary, #999)' }} aria-hidden="true" />
+          <Loader2 className="animate-spin text-primary" size={spinnerSize} aria-hidden="true" />
         </div>
       )}
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from '@/lib/router';
 import { postsApi, categoriesApi, tagsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button } from '@/components/ui';
+import { Button, Input, Textarea, Label } from '@/components/ui/shadcn';
 import api from '@/lib/api';
 
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
@@ -93,7 +93,7 @@ export default function EditPostPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 100px)' }}>
+      <div className="flex h-[calc(100vh-100px)] items-center justify-center">
         <Loader2 className="size-4 animate-spin" />
       </div>
     );
@@ -101,36 +101,39 @@ export default function EditPostPage() {
 
   return (
     <>
-      <div style={{ display: 'flex', gap: '0', height: 'calc(100vh - 80px)' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, border: '1px solid var(--color-border)', borderRight: 'none', overflow: 'hidden' }}>
+      <div className="flex h-[calc(100vh-80px)]">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden border border-r-0 border-border">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="在此输入标题…"
-            style={{ padding: '14px 20px', fontSize: '18px', fontWeight: 600, border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-main)', outline: 'none' }}
+            className="border-0 border-b border-border bg-transparent px-5 py-3.5 text-lg font-semibold text-foreground outline-none placeholder:text-muted-foreground"
           />
-          <div style={{ flex: 1, overflow: 'hidden' }}>
+          <div className="flex-1 overflow-hidden">
             <MarkdownEditor value={content} onChange={setContent} className="h-full rounded-none border-0" minHeight="100%" />
           </div>
         </div>
 
-        <div style={{ width: '280px', flexShrink: 0, overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--color-border)', background: 'var(--color-bg-card)' }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <Button onClick={handleSave} loading={submitting} style={{ flex: 1, minWidth: 0, padding: '0 8px' }}>保存</Button>
-              <Button variant="secondary" onClick={() => navigate('/pages')} style={{ flex: 1, minWidth: 0, padding: '0 8px' }}>返回</Button>
+        <div className="w-[280px] shrink-0 overflow-y-auto overflow-x-hidden border border-border bg-card">
+          <div className="border-b border-border p-4">
+            <div className="flex gap-1.5">
+              <Button onClick={handleSave} disabled={submitting} className="min-w-0 flex-1 px-2">保存</Button>
+              <Button variant="secondary" onClick={() => navigate('/pages')} className="min-w-0 flex-1 px-2">返回</Button>
             </div>
           </div>
 
-          <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '14px', color: 'var(--color-text-main)' }}>设置</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="border-b border-border p-4">
+            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">设置</h3>
+            <div className="flex flex-col gap-3.5">
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-sub)', marginBottom: '6px', fontWeight: 500 }}>别名 (Slug)</label>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'stretch' }}>
-                  <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="留空自动分配" className="input" style={{ flex: 1, fontSize: '12px' }} />
-                  <button
-                    className="btn btn-secondary btn-toolbar-square"
+                <Label className="mb-1.5 block text-xs text-muted-foreground">别名 (Slug)</Label>
+                <div className="flex items-stretch gap-1.5">
+                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="留空自动分配" className="h-9 flex-1 text-xs" />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-9 shrink-0"
                     title="AI 生成 Slug"
                     onClick={async () => {
                       if (!title) return;
@@ -138,26 +141,26 @@ export default function EditPostPage() {
                     }}
                   >
                     <Sparkles className="size-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-sub)', marginBottom: '6px', fontWeight: 500 }}>封面图 URL</label>
-                <input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder="留空自动回退为正文首图" className="input" style={{ fontSize: '12px', padding: '6px 10px' }} />
+                <Label className="mb-1.5 block text-xs text-muted-foreground">封面图 URL</Label>
+                <Input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder="留空自动回退为正文首图" className="h-9 text-xs" />
               </div>
             </div>
           </div>
 
-          <div style={{ padding: '16px' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '14px', color: 'var(--color-text-main)' }}>高级</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="p-4">
+            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">高级</h3>
+            <div className="flex flex-col gap-3.5">
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-sub)', marginBottom: '6px', fontWeight: 500 }}>摘要</label>
-                <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="留空自动截取" rows={3} className="input" style={{ fontSize: '12px', padding: '6px 10px', resize: 'vertical' }} />
+                <Label className="mb-1.5 block text-xs text-muted-foreground">摘要</Label>
+                <Textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="留空自动截取" rows={3} className="resize-y text-xs" />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', color: 'var(--color-text-main)' }}>
-                  <input type="checkbox" checked={allowComment} onChange={(e) => setAllowComment(e.target.checked)} /> 允许评论
+              <div className="flex flex-col gap-2">
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
+                  <input type="checkbox" checked={allowComment} onChange={(e) => setAllowComment(e.target.checked)} className="size-4 accent-primary" /> 允许评论
                 </label>
               </div>
             </div>

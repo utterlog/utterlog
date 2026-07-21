@@ -1,10 +1,16 @@
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Brush, ChevronDown, ChevronUp, Loader2, User, Users } from 'lucide-react';
 import api from '@/lib/api';
 import { BrowserIcon, OSIcon, DeviceIcon } from '@/lib/tech-icons';
 import VisitorMap from '@/components/dashboard/VisitorMap';
-import { Button, EmptyPanel, LoadingState, Pagination, Table } from '@/components/ui';
+import {
+  Button, Card, Input, LoadingState, Pagination, Spinner,
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
 
 
@@ -17,18 +23,22 @@ const periods = [
   { key: 'all', label: '全部' },
 ];
 
-function BarChart({ data, labelKey, valueKey, color = 'var(--color-primary)' }: { data: any[]; labelKey: string; valueKey: string; color?: string }) {
-  if (!Array.isArray(data) || !data.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
+function ChartEmpty() {
+  return <div className="py-3 text-center text-xs text-muted-foreground">暂无数据</div>;
+}
+
+function BarChart({ data, labelKey, valueKey, barClass = 'bg-primary' }: { data: any[]; labelKey: string; valueKey: string; barClass?: string }) {
+  if (!Array.isArray(data) || !data.length) return <ChartEmpty />;
   const max = Math.max(...data.map(d => Number(d[valueKey]) || 0), 1);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <div className="flex flex-col gap-1">
       {data.slice(0, 8).map((d, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-          <span className="text-dim" style={{ width: '40%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{d[labelKey] || '-'}</span>
-          <div style={{ width: '50%', height: '16px', background: 'var(--color-bg-soft)', overflow: 'hidden', flexShrink: 0 }}>
-            <div style={{ width: `${(d[valueKey] / max) * 100}%`, height: '100%', background: color, transition: 'width 0.5s' }} />
+        <div key={i} className="flex items-center gap-1.5 text-[11px]">
+          <span className="w-2/5 shrink-0 truncate text-muted-foreground">{d[labelKey] || '-'}</span>
+          <div className="h-4 w-1/2 shrink-0 overflow-hidden bg-muted">
+            <div className={cn('h-full transition-[width] duration-500', barClass)} style={{ width: `${(d[valueKey] / max) * 100}%` }} />
           </div>
-          <span style={{ width: '10%', fontSize: '10px', fontWeight: 600, textAlign: 'right', flexShrink: 0 }}>{d[valueKey]}</span>
+          <span className="w-[10%] shrink-0 text-right text-[10px] font-semibold">{d[valueKey]}</span>
         </div>
       ))}
     </div>
@@ -36,14 +46,14 @@ function BarChart({ data, labelKey, valueKey, color = 'var(--color-primary)' }: 
 }
 
 function CountryRow({ data }: { data: any[] }) {
-  if (!Array.isArray(data) || !data.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
+  if (!Array.isArray(data) || !data.length) return <ChartEmpty />;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <div className="flex flex-col gap-1">
       {data.slice(0, 10).map((d, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '4px 0' }}>
-          {d.code && <img src={`https://flagcdn.io/flags/4x3/${d.code.toLowerCase()}.svg`} alt="" style={{ width: '16px', height: '12px' }} />}
-          <span style={{ flex: 1 }}>{d.name || d.country || d.code || '-'}</span>
-          <span className="text-dim">{d.count}</span>
+        <div key={i} className="flex items-center gap-1.5 py-1 text-xs">
+          {d.code && <img src={`https://flagcdn.io/flags/4x3/${d.code.toLowerCase()}.svg`} alt="" className="h-3 w-4" />}
+          <span className="flex-1">{d.name || d.country || d.code || '-'}</span>
+          <span className="text-muted-foreground">{d.count}</span>
         </div>
       ))}
     </div>
@@ -51,17 +61,17 @@ function CountryRow({ data }: { data: any[] }) {
 }
 
 function IconStatList({ data, nameKey, valueKey, icon }: { data: any[]; nameKey: string; valueKey: string; icon: (d: any) => React.ReactNode }) {
-  if (!Array.isArray(data) || !data.length) return <EmptyPanel title="暂无数据" padding="16px" fontSize="12px" />;
+  if (!Array.isArray(data) || !data.length) return <ChartEmpty />;
   const max = Math.max(...data.map(d => Number(d[valueKey]) || 0), 1);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <div className="flex flex-col gap-1.5">
       {data.slice(0, 8).map((d, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+        <div key={i} className="flex items-center gap-2 text-xs">
           {icon(d)}
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d[nameKey] || '-'}</span>
-          <span className="text-dim" style={{ flexShrink: 0 }}>{d[valueKey]}</span>
-          <div style={{ width: '60px', height: '4px', background: 'var(--color-bg-soft)', borderRadius: '2px', flexShrink: 0 }}>
-            <div style={{ width: `${(d[valueKey] / max) * 100}%`, height: '100%', background: 'var(--color-primary)', borderRadius: '2px' }} />
+          <span className="flex-1 truncate">{d[nameKey] || '-'}</span>
+          <span className="shrink-0 text-muted-foreground">{d[valueKey]}</span>
+          <div className="h-1 w-[60px] shrink-0 overflow-hidden rounded-sm bg-muted">
+            <div className="h-full rounded-sm bg-primary" style={{ width: `${(d[valueKey] / max) * 100}%` }} />
           </div>
         </div>
       ))}
@@ -95,109 +105,88 @@ export default function AnalyticsPage() {
     return () => clearInterval(timer);
   }, []);
 
-  if (loading) return <LoadingState label="加载中…" padding="48px" />;
+  if (loading) return <LoadingState label="加载中…" />;
 
   const s = data?.summary || {};
 
   return (
     <div>
       {/* Visitor Map — full width with overlay controls */}
-      <div style={{ position: 'relative', marginBottom: '20px' }}>
+      <div className="relative mb-5">
         {/* Map header bar */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '6px' }}>
+        <div className="absolute inset-x-0 top-0 z-[1000] flex items-center justify-between px-4 py-3">
+          <div className="flex gap-1.5">
             {periods.map(p => (
-              <button key={p.key} onClick={() => setPeriod(p.key)} className={`btn ${period === p.key ? 'btn-primary' : 'btn-secondary'}`} style={{
-                fontSize: '12px', padding: '4px 12px',
-              }}>
+              <Button key={p.key} size="sm" variant={period === p.key ? 'default' : 'outline'} onClick={() => setPeriod(p.key)}>
                 {p.label}
-              </button>
+              </Button>
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          {/* Data cleanup — purge bots / duplicates / aged rows */}
-          <button
-            onClick={() => setPurgeOpen(true)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '4px 12px', fontSize: '12px', fontWeight: 500,
-              background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-              cursor: 'pointer', color: 'var(--color-text-sub)',
-            }}
-            title="清理爬虫 / 重复 / 过期访问记录"
-          >
-            <i className="fa-regular fa-broom" style={{ fontSize: '11px' }} />
-            <span>数据清理</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            {/* Data cleanup — purge bots / duplicates / aged rows */}
+            <Button variant="outline" size="sm" onClick={() => setPurgeOpen(true)} title="清理爬虫 / 重复 / 过期访问记录">
+              <Brush className="size-4" />
+              数据清理
+            </Button>
 
-          {/* Online users indicator */}
-          <div style={{ position: 'relative' }}>
-            <button onClick={() => setOnlineOpen(!onlineOpen)} style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '4px 12px', fontSize: '12px', fontWeight: 500,
-              background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-              cursor: 'pointer',
-            }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e', flexShrink: 0 }} />
-              <span style={{ color: '#c8e6ff' }}>{onlineUsers.length}</span>
-              <span>在线</span>
-              <i className={`fa-solid fa-chevron-${onlineOpen ? 'up' : 'down'}`} style={{ fontSize: '9px' }} />
-            </button>
+            {/* Online users indicator */}
+            <div className="relative">
+              <Button variant="outline" size="sm" onClick={() => setOnlineOpen(!onlineOpen)}>
+                <span className="size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_6px_#22c55e]" />
+                <span>{onlineUsers.length}</span>
+                <span>在线</span>
+                {onlineOpen ? <ChevronUp /> : <ChevronDown />}
+              </Button>
 
-            {onlineOpen && (
-              <>
-                <div onClick={() => setOnlineOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
-                <div style={{
-                  position: 'absolute', right: 0, top: '100%', marginTop: '6px', zIndex: 41,
-                  width: '320px', maxHeight: '360px', overflowY: 'auto',
-                  background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                }}>
-                  <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--color-border)', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-sub)' }}>
-                    当前在线 {onlineUsers.length} 人
-                  </div>
-                  {onlineUsers.length === 0 ? (
-                    <div style={{ padding: '24px', textAlign: 'center', fontSize: '12px', color: 'var(--color-text-dim)' }}>暂无在线访客</div>
-                  ) : (
-                    onlineUsers.map((u, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderBottom: '1px solid var(--color-divider)' }}>
-                        {u.avatar ? (
-                          <img src={u.avatar} alt="" style={{ width: '28px', height: '28px', objectFit: 'cover', clipPath: 'url(#squircle)', flexShrink: 0, background: 'var(--color-bg-soft)' }} />
-                        ) : (
-                          <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-soft)', clipPath: 'url(#squircle)', flexShrink: 0 }}>
-                            <i className="fa-light fa-user" style={{ fontSize: '12px', color: 'var(--color-text-dim)' }} />
+              {onlineOpen && (
+                <>
+                  <div onClick={() => setOnlineOpen(false)} className="fixed inset-0 z-40" />
+                  <div className="absolute right-0 top-full z-[41] mt-1.5 max-h-[360px] w-80 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
+                    <div className="border-b border-border px-3.5 py-2.5 text-xs font-semibold text-muted-foreground">
+                      当前在线 {onlineUsers.length} 人
+                    </div>
+                    {onlineUsers.length === 0 ? (
+                      <div className="px-6 py-6 text-center text-xs text-muted-foreground">暂无在线访客</div>
+                    ) : (
+                      onlineUsers.map((u, i) => (
+                        <div key={i} className="flex items-center gap-2.5 border-b border-border px-3.5 py-2">
+                          {u.avatar ? (
+                            <img src={u.avatar} alt="" className="size-7 shrink-0 bg-muted object-cover" style={{ clipPath: 'url(#squircle)' }} />
+                          ) : (
+                            <div className="flex size-7 shrink-0 items-center justify-center bg-muted" style={{ clipPath: 'url(#squircle)' }}>
+                              <User className="size-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className={cn('truncate text-xs font-medium', u.name ? 'text-primary' : 'text-muted-foreground')}>
+                              {u.name || u.ip || '匿名'}
+                            </div>
                           </div>
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '12px', fontWeight: 500, color: u.name ? 'var(--color-primary)' : 'var(--color-text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {u.name || u.ip || '匿名'}
-                          </div>
+                          {u.country_code && (
+                            <img src={`https://flagcdn.io/flags/4x3/${u.country_code.toLowerCase()}.svg`} alt="" className="h-2.5 w-3.5 shrink-0" />
+                          )}
+                          <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
                         </div>
-                        {u.country_code && (
-                          <img src={`https://flagcdn.io/flags/4x3/${u.country_code.toLowerCase()}.svg`} alt="" style={{ width: '14px', height: '10px', flexShrink: 0 }} />
-                        )}
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Summary stats overlay at bottom */}
-        <div style={{ position: 'absolute', bottom: 12, left: 12, zIndex: 1000, display: 'flex', gap: '16px', padding: '8px 16px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderRadius: '4px' }}>
+        <div className="absolute bottom-3 left-3 z-[1000] flex gap-4 rounded bg-background/70 px-4 py-2 backdrop-blur">
           {[
-            { label: '访问次数', value: Number(s.total_visits) || 0, color: 'var(--color-primary)' },
-            { label: '独立访客', value: Number(s.unique_ips) || 0, color: 'var(--color-success)' },
-            { label: '访问页面', value: Number(s.unique_pages) || 0, color: 'var(--color-warning)' },
+            { label: '访问次数', value: Number(s.total_visits) || 0, cls: 'text-primary' },
+            { label: '独立访客', value: Number(s.unique_ips) || 0, cls: 'text-emerald-600 dark:text-emerald-400' },
+            { label: '访问页面', value: Number(s.unique_pages) || 0, cls: 'text-amber-600 dark:text-amber-400' },
           ].map((card, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 700, color: card.color }}>{card.value.toLocaleString()}</span>
-              <span style={{ fontSize: '11px', color: '#666' }}>{card.label}</span>
+            <div key={i} className="flex items-baseline gap-1.5">
+              <span className={cn('text-xl font-bold', card.cls)}>{card.value.toLocaleString()}</span>
+              <span className="text-[11px] text-muted-foreground">{card.label}</span>
             </div>
           ))}
         </div>
@@ -207,35 +196,35 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Charts row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-        <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>热门页面</h3>
+      <div className="mb-5 grid grid-cols-2 gap-3">
+        <Card className="p-4">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground">热门页面</h3>
           <BarChart data={data?.top_pages || []} labelKey="path" valueKey="count" />
-        </div>
-        <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>来源</h3>
-          <BarChart data={data?.top_referers || []} labelKey="host" valueKey="count" color="#8b5cf6" />
-        </div>
+        </Card>
+        <Card className="p-4">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground">来源</h3>
+          <BarChart data={data?.top_referers || []} labelKey="host" valueKey="count" barClass="bg-violet-500" />
+        </Card>
       </div>
 
       {/* Browser / OS / Device / Country */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-        <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>浏览器</h3>
+      <div className="mb-5 grid grid-cols-4 gap-3">
+        <Card className="p-4">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground">浏览器</h3>
           <IconStatList data={data?.browsers || []} nameKey="name" valueKey="count" icon={(d) => <BrowserIcon name={d.name} size={16} />} />
-        </div>
-        <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>操作系统</h3>
+        </Card>
+        <Card className="p-4">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground">操作系统</h3>
           <IconStatList data={data?.os || []} nameKey="name" valueKey="count" icon={(d) => <OSIcon name={d.name} size={16} />} />
-        </div>
-        <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>设备</h3>
+        </Card>
+        <Card className="p-4">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground">设备</h3>
           <IconStatList data={data?.devices || []} nameKey="name" valueKey="count" icon={(d) => <DeviceIcon type={d.name} size={16} />} />
-        </div>
-        <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>国家/地区</h3>
+        </Card>
+        <Card className="p-4">
+          <h3 className="mb-3 text-[13px] font-semibold text-foreground">国家/地区</h3>
           <CountryRow data={data?.countries || []} />
-        </div>
+        </Card>
       </div>
 
       {/* Recent visitors — paginated with comment author matching */}
@@ -297,74 +286,64 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
   const fmt = (n: any) => (typeof n === 'number' || typeof n === 'string') ? Number(n).toLocaleString() : '—';
 
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        background: 'var(--color-bg-card)', width: '540px', maxWidth: '92vw',
-        border: '1px solid var(--color-border)',
-      }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 className="text-main" style={{ fontSize: '15px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <i className="fa-regular fa-broom" style={{ color: 'var(--color-primary)' }} /> 数据清理
-          </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', color: 'var(--color-text-dim)' }}>
-            <i className="fa-regular fa-xmark" />
-          </button>
-        </div>
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[calc(100vh-32px)] max-w-[540px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Brush className="size-4 text-primary" /> 数据清理
+          </DialogTitle>
+        </DialogHeader>
 
-        <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="flex flex-col gap-4">
           {loading ? (
-            <div className="text-dim" style={{ textAlign: 'center', padding: '20px', fontSize: '13px' }}>加载中…</div>
+            <div className="py-5 text-center text-[13px] text-muted-foreground">加载中…</div>
           ) : (
             <>
               {/* Current stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              <div className="grid grid-cols-3 gap-2.5">
                 <StatBox label="总记录" value={fmt(stats?.total_rows)} />
-                <StatBox label="疑似爬虫" value={fmt(stats?.bot_rows)} color="#dc2626" />
-                <StatBox label="独立访客" value={fmt(stats?.unique_visitors)} color="#16a34a" />
+                <StatBox label="疑似爬虫" value={fmt(stats?.bot_rows)} valueClass="text-destructive" />
+                <StatBox label="独立访客" value={fmt(stats?.unique_visitors)} valueClass="text-emerald-600 dark:text-emerald-400" />
               </div>
 
               {/* Options */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '14px', border: '1px solid var(--color-border)' }}>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={purgeBots} onChange={(e) => setPurgeBots(e.target.checked)} style={{ marginTop: '2px' }} />
+              <div className="flex flex-col gap-2.5 rounded-md border border-border p-3.5">
+                <label className="flex cursor-pointer items-start gap-2">
+                  <input type="checkbox" checked={purgeBots} onChange={(e) => setPurgeBots(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
                   <div>
-                    <div className="text-main" style={{ fontSize: '13px', fontWeight: 500 }}>清除爬虫记录</div>
-                    <div className="text-dim" style={{ fontSize: '11px', marginTop: '2px' }}>
+                    <div className="text-[13px] font-medium text-foreground">清除爬虫记录</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">
                       User-Agent 匹配 Googlebot / Ahrefs / curl / headless 等 70+ 种模式
                     </div>
                   </div>
                 </label>
 
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={purgeDupes} onChange={(e) => setPurgeDupes(e.target.checked)} style={{ marginTop: '2px' }} />
+                <label className="flex cursor-pointer items-start gap-2">
+                  <input type="checkbox" checked={purgeDupes} onChange={(e) => setPurgeDupes(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
                   <div>
-                    <div className="text-main" style={{ fontSize: '13px', fontWeight: 500 }}>合并 30 秒内重复访问</div>
-                    <div className="text-dim" style={{ fontSize: '11px', marginTop: '2px' }}>
+                    <div className="text-[13px] font-medium text-foreground">合并 30 秒内重复访问</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">
                       同一访客刷新同一页面算一次；保留最早的一条
                     </div>
                   </div>
                 </label>
 
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                  <input type="checkbox" checked={!!olderDays} onChange={(e) => setOlderDays(e.target.checked ? '90' : '')} style={{ marginTop: '2px' }} />
-                  <div style={{ flex: 1 }}>
-                    <div className="text-main" style={{ fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <label className="flex items-start gap-2">
+                  <input type="checkbox" checked={!!olderDays} onChange={(e) => setOlderDays(e.target.checked ? '90' : '')} className="mt-0.5 size-4 accent-primary" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
                       清除
-                      <input
+                      <Input
                         type="number"
                         min={1}
                         value={olderDays}
                         onChange={(e) => setOlderDays(e.target.value)}
                         disabled={!olderDays}
-                        className="input"
-                        style={{ width: '64px', padding: '2px 8px', fontSize: '12px', textAlign: 'center' }}
+                        className="h-7 w-16 px-2 text-center text-xs"
                       />
                       天前的历史记录
                     </div>
-                    <div className="text-dim" style={{ fontSize: '11px', marginTop: '2px' }}>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">
                       按建站时长保留近期数据，历史归档或直接丢弃
                     </div>
                   </div>
@@ -373,9 +352,9 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
 
               {/* Result */}
               {result && (
-                <div style={{ padding: '10px 12px', background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)', fontSize: '12px' }}>
-                  <div style={{ fontWeight: 600, marginBottom: '4px' }}>本次清理</div>
-                  <div className="text-sub" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
+                <div className="rounded-md border border-border bg-muted px-3 py-2.5 text-xs">
+                  <div className="mb-1 font-semibold text-foreground">本次清理</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
                     <span>爬虫：{fmt(result.bots_deleted)} 条</span>
                     <span>重复：{fmt(result.duplicates_deleted)} 条</span>
                     <span>过期：{fmt(result.aged_deleted)} 条</span>
@@ -386,23 +365,23 @@ function PurgeDialog({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        <div style={{ padding: '14px 20px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-          <Button variant="secondary" onClick={onClose} disabled={running}>关闭</Button>
-          <Button onClick={run} loading={running} disabled={loading}>
-            <i className="fa-regular fa-broom" style={{ fontSize: '12px' }} />
+        <DialogFooter className="border-t border-border pt-3.5">
+          <Button variant="outline" onClick={onClose} disabled={running}>关闭</Button>
+          <Button onClick={run} disabled={loading || running}>
+            {running ? <Loader2 className="size-4 animate-spin" /> : <Brush className="size-4" />}
             执行清理
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-function StatBox({ label, value, color }: { label: string; value: string; color?: string }) {
+function StatBox({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
   return (
-    <div style={{ padding: '10px', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-      <div style={{ fontSize: '18px', fontWeight: 700, color: color || 'var(--color-text)' }}>{value}</div>
-      <div className="text-dim" style={{ fontSize: '11px', marginTop: '2px' }}>{label}</div>
+    <div className="rounded-md border border-border p-2.5 text-center">
+      <div className={cn('text-lg font-bold text-foreground', valueClass)}>{value}</div>
+      <div className="mt-0.5 text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -444,81 +423,92 @@ function RecentVisitorsPanel() {
   };
 
   return (
-    <div className="card" style={{ overflow: 'visible' }}>
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ fontSize: '13px', fontWeight: 600 }}>
-          <i className="fa-sharp fa-light fa-users" style={{ marginRight: '6px', color: 'var(--color-primary)' }} />
+    <Card className="overflow-visible">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <h3 className="flex items-center text-[13px] font-semibold text-foreground">
+          <Users className="mr-1.5 size-3.5 text-primary" />
           最近访客
-          <span className="text-dim" style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 400 }}>最近 7 天 · 上限 1000 条</span>
+          <span className="ml-2 text-[11px] font-normal text-muted-foreground">最近 7 天 · 上限 1000 条</span>
         </h3>
-        <span className="text-dim" style={{ fontSize: '12px' }}>共 {total} 条</span>
+        <span className="text-xs text-muted-foreground">共 {total} 条</span>
       </div>
 
-      <div style={{ position: 'relative', minHeight: '486px' }}>
-        <Table
-          data={visitors.map((visitor, index) => ({ ...visitor, id: `${visitor.visitor_id || visitor.ip_masked || 'visitor'}-${visitor.created_at || index}` }))}
-          loading={loading}
-          emptyText="暂无数据"
-          columns={[
-            {
-              key: 'visitor',
-              title: '访客',
-              render: (v) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {v.author_avatar ? (
-                    <img src={v.author_avatar} alt="" style={{ width: '24px', height: '24px', objectFit: 'cover', clipPath: 'url(#squircle)', flexShrink: 0, background: 'var(--color-bg-soft)' }} />
-                  ) : (
-                    <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-soft)', clipPath: 'url(#squircle)', flexShrink: 0 }}>
-                      <i className="fa-light fa-user" style={{ fontSize: '11px', color: 'var(--color-text-dim)' }} />
+      <div className="relative min-h-[486px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>访客</TableHead>
+              <TableHead>页面</TableHead>
+              <TableHead>位置</TableHead>
+              <TableHead>浏览器 / 系统</TableHead>
+              <TableHead>时长</TableHead>
+              <TableHead>时间</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center"><Spinner /></TableCell>
+              </TableRow>
+            ) : visitors.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">暂无数据</TableCell>
+              </TableRow>
+            ) : (
+              visitors.map((v, index) => (
+                <TableRow key={`${v.visitor_id || v.ip_masked || 'visitor'}-${v.created_at || index}`}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {v.author_avatar ? (
+                        <img src={v.author_avatar} alt="" className="size-6 shrink-0 bg-muted object-cover" style={{ clipPath: 'url(#squircle)' }} />
+                      ) : (
+                        <div className="flex size-6 shrink-0 items-center justify-center bg-muted" style={{ clipPath: 'url(#squircle)' }}>
+                          <User className="size-3 text-muted-foreground" />
+                        </div>
+                      )}
+                      {v.author_name ? (
+                        <span className="text-xs font-semibold text-primary">{v.author_name}</span>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">{v.ip_masked}</span>
+                      )}
                     </div>
-                  )}
-                  {v.author_name ? (
-                    <span style={{ fontWeight: 600, fontSize: '12px', color: 'var(--color-primary)' }}>{v.author_name}</span>
-                  ) : (
-                    <span className="text-dim" style={{ fontSize: '11px' }}>{v.ip_masked}</span>
-                  )}
-                </div>
-              ),
-            },
-            {
-              key: 'path',
-              title: '页面',
-              render: (v) => <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>{v.path}</span>,
-            },
-            {
-              key: 'location',
-              title: '位置',
-              render: (v) => v.country_code ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <img src={`https://flagcdn.io/flags/4x3/${v.country_code.toLowerCase()}.svg`} alt="" style={{ width: '14px', height: '10px' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  <span className="text-dim">{v.city || v.country || '-'}</span>
-                </span>
-              ) : null,
-            },
-            {
-              key: 'client',
-              title: '浏览器 / 系统',
-              render: (v) => (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-text-dim)' }}>
-                  <BrowserIcon name={v.browser} size={14} />
-                  <span>{v.browser}</span>
-                  {v.os && <>
-                    <span style={{ opacity: 0.3 }}>/</span>
-                    <OSIcon name={v.os} size={14} />
-                    <span>{v.os}</span>
-                  </>}
-                </span>
-              ),
-            },
-            { key: 'duration', title: '时长', render: (v) => <span className="text-dim">{formatDuration(v.duration)}</span> },
-            { key: 'created_at', title: '时间', render: (v) => <span className="text-dim">{formatTime(v.created_at)}</span> },
-          ]}
-        />
+                  </TableCell>
+                  <TableCell>
+                    <span className="inline-block max-w-[150px] truncate align-middle">{v.path}</span>
+                  </TableCell>
+                  <TableCell>
+                    {v.country_code ? (
+                      <span className="flex items-center gap-1">
+                        <img src={`https://flagcdn.io/flags/4x3/${v.country_code.toLowerCase()}.svg`} alt="" className="h-2.5 w-3.5" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        <span className="text-muted-foreground">{v.city || v.country || '-'}</span>
+                      </span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <BrowserIcon name={v.browser} size={14} />
+                      <span>{v.browser}</span>
+                      {v.os && <>
+                        <span className="opacity-30">/</span>
+                        <OSIcon name={v.os} size={14} />
+                        <span>{v.os}</span>
+                      </>}
+                    </span>
+                  </TableCell>
+                  <TableCell><span className="text-muted-foreground">{formatDuration(v.duration)}</span></TableCell>
+                  <TableCell><span className="text-muted-foreground">{formatTime(v.created_at)}</span></TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {totalPages > 1 && (
-        <Pagination currentPage={page} totalPages={totalPages} total={total} onPageChange={setPage} />
+        <div className="flex justify-end border-t border-border px-4 py-2">
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </div>
       )}
-    </div>
+    </Card>
   );
 }

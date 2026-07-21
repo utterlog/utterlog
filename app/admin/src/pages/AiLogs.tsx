@@ -2,7 +2,11 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
-import { MetricCard, MetricGrid, Pagination, Table } from '@/components/ui';
+import { MetricCard, MetricGrid } from '@/components/ui';
+import {
+  Card, Pagination, Spinner,
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+} from '@/components/ui/shadcn';
 
 export default function AiLogsPage() {
   const [stats, setStats] = useState<any>(null);
@@ -40,9 +44,11 @@ export default function AiLogsPage() {
     return formatWithAdminTimeZone(new Date(ts * 1000), 'zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
+  const totalPages = Math.ceil(total / 30);
+
   return (
     <div>
-      <h1 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '20px' }}>AI 使用统计</h1>
+      <h1 className="mb-5 text-xl font-bold text-foreground">AI 使用统计</h1>
 
       {/* Stats cards */}
       {stats && (
@@ -55,56 +61,77 @@ export default function AiLogsPage() {
 
       {/* By action & model */}
       {stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-          <div className="card" style={{ padding: '16px' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '10px' }}>按功能</h3>
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          <Card className="p-4">
+            <h3 className="mb-2.5 text-[13px] font-semibold text-foreground">按功能</h3>
             {stats.by_action?.map((a: any) => (
-              <div key={a.action} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '4px 0' }}>
+              <div key={a.action} className="flex justify-between py-1 text-[13px] text-foreground">
                 <span>{a.action}</span>
-                <span className="text-dim">{a.count} 次 · {parseInt(a.tokens).toLocaleString()} tokens</span>
+                <span className="text-muted-foreground">{a.count} 次 · {parseInt(a.tokens).toLocaleString()} tokens</span>
               </div>
             ))}
-          </div>
-          <div className="card" style={{ padding: '16px' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '10px' }}>按模型</h3>
+          </Card>
+          <Card className="p-4">
+            <h3 className="mb-2.5 text-[13px] font-semibold text-foreground">按模型</h3>
             {stats.by_model?.map((m: any) => (
-              <div key={m.model} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '4px 0' }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{m.model}</span>
-                <span className="text-dim" style={{ flexShrink: 0, marginLeft: '8px' }}>{m.count} 次</span>
+              <div key={m.model} className="flex justify-between py-1 text-[13px] text-foreground">
+                <span className="flex-1 truncate">{m.model}</span>
+                <span className="ml-2 shrink-0 text-muted-foreground">{m.count} 次</span>
               </div>
             ))}
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Logs table */}
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <Table
-          data={logs}
-          loading={loading}
-          emptyText="暂无记录"
-          columns={[
-            { key: 'created_at', title: '时间', render: (log) => fmtDate(log.created_at) },
-            { key: 'action', title: '功能' },
-            { key: 'model', title: '模型', render: (log) => <span className="text-sub">{log.model}</span> },
-            { key: 'total_tokens', title: 'Tokens', render: (log) => log.total_tokens?.toLocaleString() },
-            {
-              key: 'status',
-              title: '状态',
-              render: (log) => (
-                <span style={{ color: log.status === 'success' ? '#4CAF73' : '#DC3545', fontSize: '12px' }}>
-                  {log.status === 'success' ? '成功' : '失败'}
-                </span>
-              ),
-            },
-          ]}
-        />
-      </div>
+      <Card className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>时间</TableHead>
+              <TableHead>功能</TableHead>
+              <TableHead>模型</TableHead>
+              <TableHead>Tokens</TableHead>
+              <TableHead>状态</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center">
+                  <Spinner />
+                </TableCell>
+              </TableRow>
+            ) : logs.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
+                  暂无记录
+                </TableCell>
+              </TableRow>
+            ) : (
+              logs.map((log: any) => (
+                <TableRow key={log.id}>
+                  <TableCell className="text-muted-foreground">{fmtDate(log.created_at)}</TableCell>
+                  <TableCell className="text-foreground">{log.action}</TableCell>
+                  <TableCell className="text-muted-foreground">{log.model}</TableCell>
+                  <TableCell className="text-foreground">{log.total_tokens?.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <span className={log.status === 'success' ? 'text-xs text-emerald-600 dark:text-emerald-400' : 'text-xs text-destructive'}>
+                      {log.status === 'success' ? '成功' : '失败'}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </Card>
 
       {/* Pagination */}
       {total > 30 && (
-        <div className="card" style={{ overflow: 'hidden', marginTop: '16px' }}>
-          <Pagination currentPage={page} totalPages={Math.ceil(total / 30)} total={total} onPageChange={setPage} />
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">共 {total} 条</span>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
     </div>

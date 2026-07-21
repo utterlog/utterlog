@@ -3,7 +3,17 @@ import { useEffect, useState } from 'react';
 import { linksApi, mediaApi, optionsApi } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, Input, Modal, ConfirmDialog, EmptyState, RowActions, Table } from '@/components/ui';
+import {
+  Layers, Folder, Image as ImageIcon, Eraser, RefreshCw, FolderTree, Plus, Search, X,
+  Rss, ChevronUp, ChevronDown, Pencil, Trash2, CloudUpload, Loader2,
+} from 'lucide-react';
+import {
+  Button, Input, Label, Textarea, ConfirmDialog, EmptyState, Card,
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
 import { siteFaviconUrl } from '@/lib/site-favicon';
@@ -441,65 +451,30 @@ export default function LinksPage() {
   // container — only the active tab keeps its 2px primary underline.
   const showTabs = groups.length > 2;
   const tabsAndTools = (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-        marginBottom: 16,
-        flexWrap: 'wrap',
-        rowGap: 8,
-      }}
-    >
-      {/* Left: group tabs (与 PostsLayout 子 tabs 视觉对齐：minHeight 40 / 字重 700-500 / 下划线 2px) */}
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 gap-y-2">
+      {/* Left: group tabs (与 PostsLayout 子 tabs 视觉对齐：字重 700-500 / 下划线 2px) */}
       {showTabs ? (
-        <div
-          role="tablist"
-          aria-label={t('admin.links.groups', '分类')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            overflowX: 'auto',
-            minHeight: 40,
-          }}
-        >
+        <div role="tablist" aria-label={t('admin.links.groups', '分类')} className="flex min-h-10 items-center gap-1 overflow-x-auto">
           {groups.map(g => {
             const isActive = activeGroup === g;
             const count = g === 'all' ? links.length : links.filter(l => (l.group_name || 'default') === g).length;
             const groupCfg = g === 'all' ? null : groupMap.get(g);
-            const icon = g === 'all' ? 'fa-regular fa-layer-group' : (groupCfg?.icon || 'fa-regular fa-folder');
             return (
               <button
                 key={g}
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveGroup(g)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 7,
-                  minHeight: 40,
-                  padding: '0 16px',
-                  background: 'none',
-                  borderTop: 'none',
-                  borderLeft: 'none',
-                  borderRight: 'none',
-                  // Active tab underline drawn on the button so it visually
-                  // sits flush with the row's bottom border.
-                  borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,
-                  color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                  fontSize: 14,
-                  fontWeight: isActive ? 700 : 500,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
+                className={cn(
+                  'inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border-b-2 bg-transparent px-4 text-sm',
+                  isActive ? 'border-primary font-bold text-primary' : 'border-transparent font-medium text-muted-foreground',
+                )}
               >
-                <i className={icon} style={{ fontSize: 14 }} />
+                {g === 'all'
+                  ? <Layers className="size-3.5" />
+                  : (groupCfg?.icon ? <i className={groupCfg.icon} style={{ fontSize: 14 }} /> : <Folder className="size-3.5" />)}
                 <span>{groupLabel(g)}</span>
-                <span className="text-dim" style={{ fontSize: 12, fontWeight: 400 }}>({count})</span>
+                <span className="text-xs font-normal text-muted-foreground">({count})</span>
               </button>
             );
           })}
@@ -507,49 +482,49 @@ export default function LinksPage() {
       ) : <span />}
 
       {/* Right: action buttons first, then search box (远右端 — 与 Posts 一致) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minHeight: 40 }}>
-        <Button variant="secondary" className="btn-square" onClick={refreshIcons} loading={busy === 'icon'} disabled={busy !== null} title={t('admin.links.refreshIco', '刷新 ico')}>
-          <i className="fa-regular fa-image" />
+      <div className="flex min-h-10 flex-wrap items-center gap-2">
+        <Button variant="outline" size="icon" onClick={refreshIcons} disabled={busy !== null} title={t('admin.links.refreshIco', '刷新 ico')}>
+          {busy === 'icon' ? <Loader2 className="size-4 animate-spin" /> : <ImageIcon className="size-4" />}
         </Button>
-        <Button variant="secondary" className="btn-square" onClick={() => setConfirmClearRss(true)} loading={busy === 'rss'} disabled={busy !== null} title={t('admin.links.clearRss', '清空 RSS')}>
-          <i className="fa-regular fa-eraser" />
+        <Button variant="outline" size="icon" onClick={() => setConfirmClearRss(true)} disabled={busy !== null} title={t('admin.links.clearRss', '清空 RSS')}>
+          {busy === 'rss' ? <Loader2 className="size-4 animate-spin" /> : <Eraser className="size-4" />}
         </Button>
-        <Button variant="secondary" className="btn-square" onClick={refreshFeeds} loading={refreshingFeeds} disabled={refreshingFeeds || busy !== null} title={t('admin.links.refreshFeeds', '刷新订阅')}>
-          <i className="fa-regular fa-arrows-rotate" />
+        <Button variant="outline" size="icon" onClick={refreshFeeds} disabled={refreshingFeeds || busy !== null} title={t('admin.links.refreshFeeds', '刷新订阅')}>
+          <RefreshCw className={cn('size-4', refreshingFeeds && 'animate-spin')} />
         </Button>
-        <Button variant="secondary" className="btn-square" onClick={() => setShowGroupModal(true)} title={t('admin.links.groups', '分类')}>
-          <i className="fa-regular fa-folder-tree" />
+        <Button variant="outline" size="icon" onClick={() => setShowGroupModal(true)} title={t('admin.links.groups', '分类')}>
+          <FolderTree className="size-4" />
         </Button>
-        <Button className="btn-square" onClick={openCreate} title={t('admin.common.add', '添加')}>
-          <i className="fa-regular fa-plus" style={{ fontSize: 14 }} />
+        <Button size="icon" onClick={openCreate} title={t('admin.common.add', '添加')}>
+          <Plus className="size-4" />
         </Button>
 
         {/* 搜索：input + 正方形 🔍 按钮（搜索是即时的；按钮主要做视觉锚点，
             ✕ 仅在有搜索词时出现以快速清空） */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="flex items-center gap-1.5">
           <Input
             placeholder={t('admin.links.searchPlaceholder', '检索名称 / 网址 / 描述')}
             value={search}
             onChange={(e: any) => setSearch(e.target.value)}
-            style={{ width: 220 }}
+            className="w-56"
           />
           <Button
-            className="btn-square"
+            size="icon"
             title={t('common.search', '搜索')}
             aria-label={t('common.search', '搜索')}
             onClick={() => { /* 即时搜索：按钮仅作视觉锚点 */ }}
           >
-            <i className="fa-regular fa-magnifying-glass" style={{ fontSize: 14 }} />
+            <Search className="size-4" />
           </Button>
           {search && (
             <Button
-              className="btn-square"
-              variant="secondary"
+              variant="outline"
+              size="icon"
               title={t('admin.common.clear', '清空')}
               aria-label={t('admin.common.clear', '清空')}
               onClick={() => setSearch('')}
             >
-              <i className="fa-regular fa-xmark" style={{ fontSize: 14 }} />
+              <X className="size-4" />
             </Button>
           )}
         </div>
@@ -567,23 +542,14 @@ export default function LinksPage() {
       {tabsAndTools}
 
       {showFeedProgress && (
-        <div
-          className="card"
-          style={{
-            padding: 12,
-            marginBottom: 16,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>
+        <Card className="mb-4 flex flex-col gap-2 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm font-semibold">
               {feedProgress?.running
                 ? t('admin.links.rssRefreshing', 'RSS 强制刷新中')
                 : t('admin.links.rssRefreshDone', 'RSS 刷新完成')}
             </span>
-            <span className="text-dim" style={{ fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               {t('admin.links.rssProgressCount', '{done}/{total} · 成功 {fetched} · 新增 {newItems} · 失败 {failed}', {
                 done: progressDone,
                 total: progressTotal,
@@ -593,18 +559,16 @@ export default function LinksPage() {
               })}
             </span>
           </div>
-          <div style={{ height: 6, borderRadius: 999, background: 'var(--color-bg-soft)', overflow: 'hidden' }}>
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
             <div
+              className="h-full bg-primary transition-[width] duration-200 ease-out"
               style={{
-                height: '100%',
                 width: `${feedProgress?.running && progressTotal === 0 ? 12 : progressPercent}%`,
                 minWidth: feedProgress?.running ? 12 : 0,
-                background: 'var(--color-primary)',
-                transition: 'width 220ms ease',
               }}
             />
           </div>
-          <div className="text-dim" style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', fontSize: 12 }}>
+          <div className="flex flex-wrap justify-between gap-3 text-xs text-muted-foreground">
             <span>{feedProgress?.message || t('admin.links.rssPreparing', '准备刷新订阅')}</span>
             <span>
               {t('admin.links.rssCleanupCount', '清理订阅 {subs}，清理旧缓存 {items}', {
@@ -614,274 +578,266 @@ export default function LinksPage() {
             </span>
           </div>
           {!!feedProgress?.failed && feedProgress.failed_urls && feedProgress.failed_urls.length > 0 && (
-            <div className="text-dim" style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
               {feedProgress.failed_urls.slice(0, 3).map((item, index) => (
-                <span key={`${item.feed_url}-${index}`} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span key={`${item.feed_url}-${index}`} className="truncate">
                   {item.feed_url}: {item.error}
                 </span>
               ))}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {links.length === 0 && !loading ? (
         <EmptyState title={t('admin.links.empty', '暂无友链')} description={t('admin.links.emptyDescription', '添加您的第一个友情链接')} actionText={t('admin.links.addLink', '添加友链')} onAction={openCreate} />
       ) : (
-        <div className="card" style={{ overflow: 'hidden' }}>
-          <Table
-            data={filteredLinks}
-            loading={loading}
-            tableLayout="fixed"
-            emptyText={t('admin.links.empty', '暂无友链')}
-            columns={[
-              {
-                key: 'order_num',
-                title: '#',
-                width: '44px',
-                render: (link, _col, i) => <span className="text-dim" style={{ fontSize: '12px' }}>{Number(link.order_num) > 0 ? link.order_num : (link.id || (i ?? 0) + 1)}</span>,
-              },
-              {
-                key: 'avatar',
-                title: '',
-                width: '48px',
-                render: (link) => {
+        <Card className="overflow-hidden">
+          <Table style={{ tableLayout: 'fixed' }}>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-11">#</TableHead>
+                <TableHead className="w-12"></TableHead>
+                <TableHead className="w-[190px]">{t('admin.links.columns.name', '站点名称')}</TableHead>
+                <TableHead className="w-[28%]">{t('admin.links.columns.description', '描述')}</TableHead>
+                <TableHead className="w-[22%]">{t('admin.links.columns.url', '网址')}</TableHead>
+                <TableHead className="w-[20%]">RSS</TableHead>
+                <TableHead className="w-[88px]">{t('admin.links.columns.group', '分组')}</TableHead>
+                <TableHead className="w-[84px] text-right">{t('admin.common.actions', '操作')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading && filteredLinks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-10 text-center"><Loader2 className="mx-auto size-5 animate-spin text-primary" /></TableCell>
+                </TableRow>
+              ) : filteredLinks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">{t('admin.links.empty', '暂无友链')}</TableCell>
+                </TableRow>
+              ) : filteredLinks.map((link: any, i: number) => {
                 const baseFavicon = link.logo || siteFaviconUrl(link.url);
                 const favicon = baseFavicon ? `${baseFavicon}${baseFavicon.includes('?') ? '&' : '?'}v=${iconBust}` : '';
                 return (
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--color-bg-soft)', overflow: 'hidden', position: 'relative' }}>
-                    <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: 'var(--color-text-dim)' }}>{link.name?.[0] || '?'}</span>
-                    <img src={favicon} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  </div>
+                  <TableRow key={link.id}>
+                    <TableCell><span className="text-xs text-muted-foreground">{Number(link.order_num) > 0 ? link.order_num : (link.id || i + 1)}</span></TableCell>
+                    <TableCell>
+                      <div className="relative size-7 overflow-hidden rounded-full bg-muted">
+                        <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-muted-foreground">{link.name?.[0] || '?'}</span>
+                        <img src={favicon} alt="" className="absolute inset-0 size-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      </div>
+                    </TableCell>
+                    <TableCell><span className="block truncate font-medium">{link.name}</span></TableCell>
+                    <TableCell><span className="block truncate text-xs text-muted-foreground">{link.description || '—'}</span></TableCell>
+                    <TableCell><a href={link.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-primary hover:underline">{link.url}</a></TableCell>
+                    <TableCell>
+                      {link.rss_url ? (
+                        <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+                          <Rss className="size-3 shrink-0 text-orange-500" />
+                          <a href={link.rss_url} target="_blank" rel="noopener noreferrer" className="block min-w-0 truncate text-xs text-muted-foreground hover:underline">{link.rss_url}</a>
+                        </span>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell><span className="block truncate text-xs text-muted-foreground">{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span></TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => openEdit(link)}><Pencil className="size-4" /></Button>
+                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(link.id)}><Trash2 className="size-4" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 );
-                },
-              },
-              {
-                key: 'name',
-                title: t('admin.links.columns.name', '站点名称'),
-                width: '190px',
-                render: (link) => <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{link.name}</span>,
-              },
-              {
-                key: 'description',
-                title: t('admin.links.columns.description', '描述'),
-                width: '28%',
-                render: (link) => <span className="text-dim" style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{link.description || '—'}</span>,
-              },
-              {
-                key: 'url',
-                title: t('admin.links.columns.url', '网址'),
-                width: '22%',
-                render: (link) => <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary-themed" style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>{link.url}</a>,
-              },
-              {
-                key: 'rss_url',
-                title: 'RSS',
-                width: '20%',
-                render: (link) => link.rss_url ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', maxWidth: '100%', minWidth: 0 }}>
-                    <i className="fa-solid fa-rss" style={{ fontSize: '11px', color: '#f97316', flexShrink: 0 }} />
-                    <a href={link.rss_url} target="_blank" rel="noopener noreferrer" className="text-dim" style={{ display: 'block', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>{link.rss_url}</a>
-                  </span>
-                ) : <span className="text-dim">—</span>,
-              },
-              {
-                key: 'group_name',
-                title: t('admin.links.columns.group', '分组'),
-                width: '88px',
-                render: (link) => <span className="text-dim" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px', display: 'block' }}>{groupLabel(link.group_name || DEFAULT_GROUP_KEY)}</span>,
-              },
-              {
-                key: 'actions',
-                title: <span style={{ display: 'block', textAlign: 'right' }}>{t('admin.common.actions', '操作')}</span>,
-                width: '84px',
-                render: (link) => <RowActions onEdit={() => openEdit(link)} onDelete={() => setDeleteId(link.id)} editTitle={t('admin.common.edit', '编辑')} deleteTitle={t('admin.common.delete', '删除')} />,
-              },
-            ]}
-          />
-        </div>
+              })}
+            </TableBody>
+          </Table>
+        </Card>
       )}
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? t('admin.links.editLink', '编辑友链') : t('admin.links.addLink', '添加友链')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <Input label={t('admin.links.name', '名称')} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('admin.links.namePlaceholder', '站点名称')} />
+      <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingId ? t('admin.links.editLink', '编辑友链') : t('admin.links.addLink', '添加友链')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label>{t('admin.links.name', '名称')}</Label>
+                <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('admin.links.namePlaceholder', '站点名称')} />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label>{t('admin.links.groups', '分类')}</Label>
+                <Select value={form.group_name} onValueChange={(v) => setForm({ ...form, group_name: (v as string) ?? '' })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {existingGroups.map(group => <SelectItem key={group.key} value={group.key}>{groupLabel(group.key)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.links.url', '链接')}</Label>
+              <Input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://example.com" />
+            </div>
             <div>
-              <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.links.groups', '分类')}</label>
-              <select
-                className="input focus-ring"
-                value={form.group_name}
-                onChange={e => setForm({ ...form, group_name: e.target.value })}
-              >
-                {existingGroups.map(group => <option key={group.key} value={group.key}>{groupLabel(group.key)}</option>)}
-              </select>
+              <Label className="mb-1.5 block">{t('admin.links.logo', '头像 / Logo')}</Label>
+              <div className="flex items-center gap-2">
+                {/* Preview */}
+                {(form.logo || form.url) && (
+                  <div className="size-9 shrink-0 overflow-hidden rounded-full bg-muted">
+                    <img
+                      src={form.logo || siteFaviconUrl(form.url)}
+                      alt=""
+                      className="size-full object-cover"
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  </div>
+                )}
+                <Input className="flex-1" value={form.logo} onChange={e => setForm({ ...form, logo: e.target.value })} placeholder={t('admin.links.logoPlaceholder', '留空自动获取 favicon')} />
+                <label
+                  className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent', avatarUploading ? 'cursor-wait' : 'cursor-pointer')}
+                  title={avatarUploading ? t('admin.media.uploading', '上传中…') : t('admin.links.uploadAvatar', '上传头像')}
+                >
+                  <CloudUpload className="size-4" />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
+                </label>
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground">{t('admin.links.logoHint', '不填写则自动获取站点 favicon')}</p>
             </div>
-          </div>
-
-          <Input label={t('admin.links.url', '链接')} value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://example.com" />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.links.logo', '头像 / Logo')}</label>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {/* Preview */}
-              {(form.logo || form.url) && (
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', background: 'var(--color-bg-soft)', flexShrink: 0 }}>
-                  <img
-                    src={form.logo || siteFaviconUrl(form.url)}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                </div>
-              )}
-              <input className="input focus-ring" style={{ flex: 1 }} value={form.logo} onChange={e => setForm({ ...form, logo: e.target.value })} placeholder={t('admin.links.logoPlaceholder', '留空自动获取 favicon')} />
-              <label
-                className="btn btn-secondary btn-toolbar-square"
-                title={avatarUploading ? t('admin.media.uploading', '上传中…') : t('admin.links.uploadAvatar', '上传头像')}
-                style={{ cursor: avatarUploading ? 'wait' : 'pointer' }}
-              >
-                <i className="fa-regular fa-cloud-arrow-up" style={{ fontSize: '14px' }} />
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} disabled={avatarUploading} />
-              </label>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.links.rssUrl', 'RSS 地址')}</Label>
+              <Input value={form.rss_url} onChange={e => setForm({ ...form, rss_url: e.target.value })} placeholder={t('admin.links.rssPlaceholder', 'https://example.com/feed（可选）')} />
             </div>
-            <p className="text-dim" style={{ fontSize: '11px', marginTop: '4px' }}>{t('admin.links.logoHint', '不填写则自动获取站点 favicon')}</p>
+
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.links.description', '描述')}</Label>
+              <Textarea rows={2} className="resize-y" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t('admin.links.descriptionPlaceholder', '简短介绍（可选）')} />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.common.sortOrder', '排序')}</Label>
+              <Input type="number" value={form.order_num} onChange={e => setForm({ ...form, order_num: Number(e.target.value) })} />
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('admin.common.cancel', '取消')}</Button>
+              <Button onClick={onSubmit} disabled={submitting}>
+                {submitting && <Loader2 className="size-4 animate-spin" />}
+                {editingId ? t('admin.common.save', '保存') : t('admin.common.create', '创建')}
+              </Button>
+            </DialogFooter>
           </div>
-          <Input label={t('admin.links.rssUrl', 'RSS 地址')} value={form.rss_url} onChange={e => setForm({ ...form, rss_url: e.target.value })} placeholder={t('admin.links.rssPlaceholder', 'https://example.com/feed（可选）')} />
+        </DialogContent>
+      </Dialog>
 
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.links.description', '描述')}</label>
-            <textarea rows={2} className="input focus-ring" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder={t('admin.links.descriptionPlaceholder', '简短介绍（可选）')} style={{ resize: 'vertical' }} />
-          </div>
-
-          <Input label={t('admin.common.sortOrder', '排序')} type="number" value={form.order_num} onChange={e => setForm({ ...form, order_num: Number(e.target.value) })} />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>{t('admin.common.cancel', '取消')}</Button>
-            <Button onClick={onSubmit} loading={submitting}>{editingId ? t('admin.common.save', '保存') : t('admin.common.create', '创建')}</Button>
-          </div>
-        </div>
-      </Modal>
-
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title={t('admin.common.confirmDelete', '确认删除')} message={t('admin.links.confirmDelete', '是否确认删除此友情链接？')} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title={t('admin.common.confirmDelete', '确认删除')} message={t('admin.links.confirmDelete', '是否确认删除此友情链接？')} />
 
       {/* Group Management Modal */}
-      <Modal isOpen={showGroupModal} onClose={() => { setShowGroupModal(false); setEditingGroup(null); }} title={t('admin.links.groupManagement', '分类管理')} size="xl">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Existing groups */}
-          {existingGroups.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {existingGroups.map((group, index) => {
-                const count = links.filter((l: any) => (l.group_name || DEFAULT_GROUP_KEY) === group.key).length;
-                const isEditing = editingGroup?.old === group.key;
-                return (
-                  <div key={group.key} style={{ display: 'grid', gridTemplateColumns: '84px minmax(140px, 1fr) minmax(260px, 1.5fr) 132px 64px auto', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'var(--color-bg-soft)' }}>
-                    <span style={{ display: 'inline-flex', gap: '6px' }}>
-                      <button
-                        type="button"
-                        onClick={() => moveGroup(group.key, -1)}
-                        className="action-btn"
-                        title={t('admin.common.moveUp', '上移')}
-                        disabled={index === 0}
-                        style={{ opacity: index === 0 ? 0.4 : 1, cursor: index === 0 ? 'not-allowed' : 'pointer' }}
-                      >
-                        <i className="fa-regular fa-chevron-up" style={{ fontSize: '12px' }} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveGroup(group.key, 1)}
-                        className="action-btn"
-                        title={t('admin.common.moveDown', '下移')}
-                        disabled={index === existingGroups.length - 1}
-                        style={{ opacity: index === existingGroups.length - 1 ? 0.4 : 1, cursor: index === existingGroups.length - 1 ? 'not-allowed' : 'pointer' }}
-                      >
-                        <i className="fa-regular fa-chevron-down" style={{ fontSize: '12px' }} />
-                      </button>
-                    </span>
-                    {isEditing ? (
-                      <input
-                        className="input focus-ring"
-                        value={editingGroup?.new ?? ''}
-                        onChange={e => setEditingGroup({ old: editingGroup?.old ?? group.key, new: e.target.value })}
-                        onKeyDown={e => { if (e.key === 'Enter') renameGroup(group.key, editingGroup?.new ?? ''); if (e.key === 'Escape') setEditingGroup(null); }}
-                        onBlur={() => renameGroup(group.key, editingGroup?.new ?? '')}
-                        autoFocus
-                        style={{ fontSize: '13px', padding: '4px 8px' }}
-                      />
-                    ) : (
-                      <span className="text-main" style={{ fontSize: '13px', fontWeight: 500 }}>{groupLabel(group.key)}</span>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <i className={group.icon || 'fa-regular fa-folder'} style={{ width: '18px', textAlign: 'center', fontSize: '13px', color: 'var(--color-primary)' }} />
-                      <input
-                        className="input focus-ring"
-                        value={group.icon || ''}
-                        onChange={e => setLinkGroups(prev => prev.map(item => (
-                          item.key === group.key ? { ...item, icon: e.target.value } : item
-                        )))}
-                        onBlur={e => updateGroupIcon(group.key, e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') updateGroupIcon(group.key, e.currentTarget.value);
-                          if (e.key === 'Escape') fetchLinks();
-                        }}
-                        placeholder="fa-solid fa-link"
-                        style={{ height: '30px', fontSize: '12px', padding: '0 8px' }}
-                      />
-                    </div>
-                    <select
-                      className="input focus-ring"
-                      value={group.style}
-                      onChange={e => updateGroupStyle(group.key, e.target.value as LinkGroupStyle)}
-                      style={{ height: '30px', fontSize: '12px', padding: '0 8px' }}
-                    >
-                      <option value="card">{t('admin.links.groupStyle.card', '卡片式')}</option>
-                      <option value="compact">{t('admin.links.groupStyle.compact', '图标式')}</option>
-                    </select>
-                    <span className="text-dim" style={{ fontSize: '11px', textAlign: 'right' }}>{t('admin.links.countItems', '{count} 条', { count })}</span>
-                    {!isEditing && (
-                      <span style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end' }}>
-                        <button onClick={() => setEditingGroup({ old: group.key, new: group.name })} className="action-btn primary" title={t('admin.common.edit', '编辑')}>
-                          <i className="fa-regular fa-pen" style={{ fontSize: '12px' }} />
-                        </button>
-                        {group.key !== DEFAULT_GROUP_KEY && (
-                          <button onClick={() => deleteGroup(group.key)} className="action-btn danger" title={t('admin.common.delete', '删除')}>
-                            <i className="fa-regular fa-trash" style={{ fontSize: '12px' }} />
-                          </button>
-                        )}
+      <Dialog open={showGroupModal} onOpenChange={(o) => { if (!o) { setShowGroupModal(false); setEditingGroup(null); } }}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[860px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('admin.links.groupManagement', '分类管理')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            {/* Existing groups */}
+            {existingGroups.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {existingGroups.map((group, index) => {
+                  const count = links.filter((l: any) => (l.group_name || DEFAULT_GROUP_KEY) === group.key).length;
+                  const isEditing = editingGroup?.old === group.key;
+                  return (
+                    <div key={group.key} className="grid items-center gap-2 bg-muted px-3 py-2" style={{ gridTemplateColumns: '84px minmax(140px, 1fr) minmax(260px, 1.5fr) 132px 64px auto' }}>
+                      <span className="inline-flex gap-1.5">
+                        <Button type="button" variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" title={t('admin.common.moveUp', '上移')} disabled={index === 0} onClick={() => moveGroup(group.key, -1)}>
+                          <ChevronUp className="size-3" />
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" title={t('admin.common.moveDown', '下移')} disabled={index === existingGroups.length - 1} onClick={() => moveGroup(group.key, 1)}>
+                          <ChevronDown className="size-3" />
+                        </Button>
                       </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-dim" style={{ fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>{t('admin.links.noGroups', '暂无分类')}</p>
-          )}
+                      {isEditing ? (
+                        <Input
+                          className="h-8 text-[13px]"
+                          value={editingGroup?.new ?? ''}
+                          onChange={e => setEditingGroup({ old: editingGroup?.old ?? group.key, new: e.target.value })}
+                          onKeyDown={e => { if (e.key === 'Enter') renameGroup(group.key, editingGroup?.new ?? ''); if (e.key === 'Escape') setEditingGroup(null); }}
+                          onBlur={() => renameGroup(group.key, editingGroup?.new ?? '')}
+                          autoFocus
+                        />
+                      ) : (
+                        <span className="text-[13px] font-medium text-foreground">{groupLabel(group.key)}</span>
+                      )}
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex w-[18px] shrink-0 justify-center text-primary">
+                          {group.icon ? <i className={group.icon} style={{ fontSize: 13 }} /> : <Folder className="size-3.5" />}
+                        </span>
+                        <Input
+                          className="h-8 text-xs"
+                          value={group.icon || ''}
+                          onChange={e => setLinkGroups(prev => prev.map(item => (
+                            item.key === group.key ? { ...item, icon: e.target.value } : item
+                          )))}
+                          onBlur={e => updateGroupIcon(group.key, e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') updateGroupIcon(group.key, e.currentTarget.value);
+                            if (e.key === 'Escape') fetchLinks();
+                          }}
+                          placeholder="fa-solid fa-link"
+                        />
+                      </div>
+                      <Select value={group.style} onValueChange={(v) => updateGroupStyle(group.key, (v as LinkGroupStyle))}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="card">{t('admin.links.groupStyle.card', '卡片式')}</SelectItem>
+                          <SelectItem value="compact">{t('admin.links.groupStyle.compact', '图标式')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-right text-[11px] text-muted-foreground">{t('admin.links.countItems', '{count} 条', { count })}</span>
+                      {!isEditing && (
+                        <span className="inline-flex justify-end gap-1.5">
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditingGroup({ old: group.key, new: group.name })}>
+                            <Pencil className="size-3.5" />
+                          </Button>
+                          {group.key !== DEFAULT_GROUP_KEY && (
+                            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => deleteGroup(group.key)}>
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="py-4 text-center text-[13px] text-muted-foreground">{t('admin.links.noGroups', '暂无分类')}</p>
+            )}
 
-          {/* Add new group */}
-          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                className="input focus-ring"
-                value={newGroupName}
-                onChange={e => setNewGroupName(e.target.value)}
-                placeholder={t('admin.links.newGroupPlaceholder', '输入新分类名称')}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addGroup(); } }}
-                style={{ flex: 1 }}
-              />
-              <Button variant="secondary" onClick={addGroup}>{t('admin.common.add', '添加')}</Button>
+            {/* Add new group */}
+            <div className="border-t border-border pt-3">
+              <div className="flex gap-2">
+                <Input
+                  className="flex-1"
+                  value={newGroupName}
+                  onChange={e => setNewGroupName(e.target.value)}
+                  placeholder={t('admin.links.newGroupPlaceholder', '输入新分类名称')}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addGroup(); } }}
+                />
+                <Button variant="outline" onClick={addGroup}>{t('admin.common.add', '添加')}</Button>
+              </div>
             </div>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
-        isOpen={confirmClearRss}
-        onClose={() => busy !== 'rss' && setConfirmClearRss(false)}
+        open={confirmClearRss}
+        onOpenChange={(o) => { if (!o && busy !== 'rss') setConfirmClearRss(false); }}
         onConfirm={clearRSSCache}
         title={t('admin.links.clearRss', '清空 RSS')}
         message={t('admin.links.confirm.clearRssCache', '确定清空 RSS 订阅缓存？所有已抓取的文章会被删除，下次刷新重新拉取。')}
         confirmText={t('admin.common.clear', '清空')}
-        loading={busy === 'rss'}
       />
     </div>
   );

@@ -1,8 +1,11 @@
 
 import { useState } from 'react';
+import { Upload, CloudDownload, Loader2 } from 'lucide-react';
 import { mediaApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useI18n } from '@/lib/i18n';
+import { Input, Button, buttonVariants } from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 
 interface CoverInputProps {
   value: string;
@@ -44,11 +47,14 @@ export function CoverInput({ value, onChange, folder, label, placeholder = 'http
   return (
     <div>
       {displayLabel && (
-        <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{displayLabel}</label>
+        <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">{displayLabel}</label>
       )}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
         {value && (
-          <div style={{ width: '52px', height: '52px', borderRadius: '0', overflow: 'hidden', flexShrink: 0, background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)' }}>
+          <div
+            className="border border-border bg-muted"
+            style={{ width: '52px', height: '52px', overflow: 'hidden', flexShrink: 0 }}
+          >
             <img
               src={value} alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -57,37 +63,33 @@ export function CoverInput({ value, onChange, folder, label, placeholder = 'http
           </div>
         )}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <input
-            className="input focus-ring"
+          <Input
+            className="text-[13px]"
             value={value}
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
-            style={{ fontSize: '13px' }}
           />
           <div style={{ display: 'flex', gap: '6px' }}>
-            <label
-              className="btn btn-secondary"
-              style={{ cursor: uploading ? 'wait' : 'pointer', fontSize: '12px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-            >
+            <label className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), uploading ? 'cursor-wait' : 'cursor-pointer')}>
               {uploading
-                ? <><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '11px' }} />{t('admin.cover.uploading', '上传中…')}</>
-                : <><i className="fa-regular fa-upload" style={{ fontSize: '11px' }} />{t('admin.cover.uploadImage', '上传图片')}</>
+                ? <><Loader2 className="size-3.5 animate-spin" />{t('admin.cover.uploading', '上传中…')}</>
+                : <><Upload className="size-3.5" />{t('admin.cover.uploadImage', '上传图片')}</>
               }
               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} disabled={uploading} />
             </label>
-            <button
+            <Button
               type="button"
-              className="btn btn-secondary"
-              style={{ fontSize: '12px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              variant="outline"
+              size="sm"
               onClick={handleFetch}
               disabled={fetching || !value?.startsWith('http')}
               title={t('admin.cover.syncTitle', '将当前 URL 下载并保存到配置的存储')}
             >
               {fetching
-                ? <><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '11px' }} />{t('admin.cover.syncing', '同步中…')}</>
-                : <><i className="fa-regular fa-cloud-arrow-down" style={{ fontSize: '11px' }} />{t('admin.cover.syncToStorage', '同步到存储')}</>
+                ? <><Loader2 className="size-3.5 animate-spin" />{t('admin.cover.syncing', '同步中…')}</>
+                : <><CloudDownload className="size-3.5" />{t('admin.cover.syncToStorage', '同步到存储')}</>
               }
-            </button>
+            </Button>
           </div>
         </div>
       </div>

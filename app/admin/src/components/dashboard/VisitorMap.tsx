@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { Globe } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import api, { optionsApi } from '@/lib/api';
 
@@ -212,25 +213,27 @@ export default function VisitorMap({ period }: { period: string }) {
   // 没配 Mapbox token 的占位 UI — 提示如何启用
   if (!mapboxToken) {
     return (
-      <div style={{
-        border: '1px solid var(--color-border)', marginBottom: '20px',
-        height: '480px', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: '10px',
-        background: 'var(--color-bg-soft)', color: 'var(--color-text-sub)',
-        textAlign: 'center', padding: '24px',
-      }}>
-        <i className="fa-sharp fa-light fa-earth-asia" style={{ fontSize: '32px', color: 'var(--color-text-dim)' }} />
-        <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-main)' }}>访客地图未启用</div>
+      <div
+        className="border border-border bg-muted text-muted-foreground"
+        style={{
+          marginBottom: '20px',
+          height: '480px', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: '10px',
+          textAlign: 'center', padding: '24px',
+        }}
+      >
+        <Globe size={32} className="text-muted-foreground" />
+        <div className="text-foreground" style={{ fontSize: '14px', fontWeight: 500 }}>访客地图未启用</div>
         <div style={{ fontSize: '12px', lineHeight: 1.7, maxWidth: '420px' }}>
-          在 <code style={{ background: 'var(--color-bg-card)', padding: '1px 6px', fontFamily: 'ui-monospace, monospace' }}>系统设置 → 第三方服务</code> 填写 Mapbox Token 后即可显示地图。免费 token：
-          <a href="https://account.mapbox.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--color-primary)', marginLeft: 4 }}>account.mapbox.com</a>
+          在 <code className="bg-card" style={{ padding: '1px 6px', fontFamily: 'ui-monospace, monospace' }}>系统设置 → 第三方服务</code> 填写 Mapbox Token 后即可显示地图。免费 token：
+          <a href="https://account.mapbox.com/" target="_blank" rel="noreferrer" className="text-primary" style={{ marginLeft: 4 }}>account.mapbox.com</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="analytics-visitor-map" style={{ border: '1px solid var(--color-border)', marginBottom: '20px', position: 'relative' }}>
+    <div className="analytics-visitor-map border border-border" style={{ marginBottom: '20px', position: 'relative' }}>
       <style>{`
         .analytics-visitor-map .mapboxgl-ctrl-logo { display: none !important; }
         .analytics-visitor-map .mapboxgl-canvas { touch-action: none; }

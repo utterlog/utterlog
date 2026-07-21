@@ -2,7 +2,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/lib/store';
 import toast from 'react-hot-toast';
-import { Button, ConfirmDialog, Input, SaveButton, Modal } from '@/components/ui';
+import {
+  Button, Input, Label, Textarea, Card, Badge, ConfirmDialog,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/shadcn';
+import {
+  Globe, Plus, QrCode, Eraser, X, ShieldCheck, ShieldOff,
+  TriangleAlert, Copy, KeyRound, Fingerprint, Trash2, Save, Loader2,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 import api, { authApi, optionsApi } from '@/lib/api';
 import { useForm } from 'react-hook-form';
 import { useI18n } from '@/lib/i18n';
@@ -304,263 +312,288 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start' }}>
+      <div className="grid grid-cols-2 items-start gap-4">
         {/* Left column: Profile Info + Change Password */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div className="card" style={{ padding: '24px' }}>
-          <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>{t('admin.profile.basicInfo', '基本信息')}</h2>
+        <div className="flex flex-col gap-4">
+        <Card className="p-6">
+          <h2 className="mb-4 text-[15px] font-semibold text-foreground">{t('admin.profile.basicInfo', '基本信息')}</h2>
 
           {/* Avatar */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
+          <div className="mb-5 flex items-start gap-4">
             {/* Gravatar */}
             <div
-              style={{ textAlign: 'center', cursor: 'pointer' }}
+              className="cursor-pointer text-center"
               onClick={async () => {
                 setAvatarSource('gravatar');
                 try { await optionsApi.updateMany({ avatar_source: 'gravatar' }); toast.success(t('admin.profile.toast.switchedGravatar', '已切换为 Gravatar')); } catch {}
               }}
             >
-              <div style={{
-                width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden',
-                background: 'var(--color-bg-soft)', transition: 'border-color 0.15s',
-                border: avatarSource === 'gravatar' ? '3px solid var(--color-primary)' : '2px solid var(--color-border)',
-              }}>
-                {gravatarUrl && <img src={gravatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+              <div className={cn(
+                'size-[72px] overflow-hidden rounded-full bg-muted transition-colors',
+                avatarSource === 'gravatar' ? 'border-[3px] border-primary' : 'border-2 border-border',
+              )}>
+                {gravatarUrl && <img src={gravatarUrl} alt="" className="size-full object-cover" />}
               </div>
-              <span style={{ fontSize: '10px', marginTop: '4px', display: 'block', fontWeight: avatarSource === 'gravatar' ? 600 : 400, color: avatarSource === 'gravatar' ? 'var(--color-primary)' : 'var(--color-text-dim)' }}>Gravatar</span>
+              <span className={cn('mt-1 block text-[10px]', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
             </div>
             {/* Utterlog */}
             <div
-              style={{ textAlign: 'center', cursor: utterlogBound ? 'pointer' : 'default', opacity: utterlogBound ? 1 : 0.5 }}
+              className={cn('text-center', utterlogBound ? 'cursor-pointer opacity-100' : 'cursor-default opacity-50')}
               onClick={async () => {
                 if (!utterlogBound) { toast.error(t('admin.profile.toast.bindUtterlogFirst', '请先绑定 Utterlog ID')); return; }
                 setAvatarSource('utterlog');
                 try { await optionsApi.updateMany({ avatar_source: 'utterlog' }); toast.success(t('admin.profile.toast.switchedFederatedAvatar', '已切换为联盟头像')); } catch {}
               }}
             >
-              <div style={{
-                width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden',
-                background: 'var(--color-bg-soft)', transition: 'border-color 0.15s',
-                border: avatarSource === 'utterlog' ? '3px solid var(--color-primary)' : utterlogBound ? '2px solid var(--color-border)' : '2px dashed var(--color-border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
+              <div className={cn(
+                'flex size-[72px] items-center justify-center overflow-hidden rounded-full bg-muted transition-colors',
+                avatarSource === 'utterlog' ? 'border-[3px] border-primary' : utterlogBound ? 'border-2 border-border' : 'border-2 border-dashed border-border',
+              )}>
                 {utterlogAvatar ? (
-                  <img src={utterlogAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={utterlogAvatar} alt="" className="size-full object-cover" />
                 ) : (
-                  <i className="fa-regular fa-globe" style={{ fontSize: '24px', color: 'var(--color-text-dim)' }} />
+                  <Globe className="size-6 text-muted-foreground" />
                 )}
               </div>
-              <span style={{ fontSize: '10px', marginTop: '4px', display: 'block', fontWeight: avatarSource === 'utterlog' ? 600 : 400, color: avatarSource === 'utterlog' ? 'var(--color-primary)' : 'var(--color-text-dim)' }}>{t('admin.profile.federatedAvatar', '联盟头像')}</span>
+              <span className={cn('mt-1 block text-[10px]', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>{t('admin.profile.federatedAvatar', '联盟头像')}</span>
             </div>
-            <div style={{ flex: 1, paddingTop: '8px' }}>
-              <p className="text-dim" style={{ fontSize: '11px', lineHeight: 1.8 }}>
+            <div className="flex-1 pt-2">
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
                 {t('admin.profile.avatarSourceHint', '点击头像切换前端显示来源。')}
-                {!utterlogBound && <> <a href="/utterlog" style={{ color: 'var(--color-primary)' }}>{t('admin.profile.bindUtterlogId', '绑定 Utterlog ID')}</a> {t('admin.profile.avatarBindSuffix', '后可使用联盟头像。')}</>}
+                {!utterlogBound && <> <a href="/utterlog" className="text-primary hover:underline">{t('admin.profile.bindUtterlogId', '绑定 Utterlog ID')}</a> {t('admin.profile.avatarBindSuffix', '后可使用联盟头像。')}</>}
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSaveProfile)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <Input label={t('admin.profile.username', '登录账号')} {...register('username')} />
-            <Input label={t('admin.profile.email', '邮箱')} type="email" {...register('email')} />
-            <Input label={t('admin.profile.nickname', '昵称')} {...register('nickname')} />
-            <Input label={t('admin.profile.website', '个人网站')} placeholder="https://" {...register('url')} />
-            <div>
-              <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.profile.bio', '简介')}</label>
-              <textarea rows={3} className="input focus-ring" {...register('bio')} placeholder={t('admin.profile.bioPlaceholder', '介绍一下自己…')} />
+          <form onSubmit={handleSubmit(onSaveProfile)} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.username', '登录账号')}</Label>
+              <Input {...register('username')} />
             </div>
-            <p className="text-dim" style={{ fontSize: '11px' }}>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.email', '邮箱')}</Label>
+              <Input type="email" {...register('email')} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.nickname', '昵称')}</Label>
+              <Input {...register('nickname')} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.website', '个人网站')}</Label>
+              <Input placeholder="https://" {...register('url')} />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">{t('admin.profile.bio', '简介')}</Label>
+              <Textarea rows={3} {...register('bio')} placeholder={t('admin.profile.bioPlaceholder', '介绍一下自己…')} />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
               {t('admin.profile.sensitiveChangeHint', '修改登录账号或邮箱需要验证当前密码和邮箱验证码')}
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <SaveButton type="submit" loading={saving} />
+            <div className="flex justify-end">
+              <Button type="submit" disabled={saving}>
+                {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                {t('admin.common.save', '保存')}
+              </Button>
             </div>
           </form>
-        </div>
+        </Card>
 
         {/* Change Password */}
-        <div className="card" style={{ padding: '24px' }}>
-          <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>{t('admin.profile.changePassword', '修改密码')}</h2>
-          <form onSubmit={handlePwSubmit(onChangePassword)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <Input label={t('admin.profile.currentPassword', '当前密码')} type="password" {...registerPw('current_password')} />
-            <Input label={t('admin.profile.newPassword', '新密码')} type="password" {...registerPw('new_password')} />
-            <Input label={t('admin.profile.confirmNewPassword', '确认新密码')} type="password" {...registerPw('confirm_password')} />
+        <Card className="p-6">
+          <h2 className="mb-4 text-[15px] font-semibold text-foreground">{t('admin.profile.changePassword', '修改密码')}</h2>
+          <form onSubmit={handlePwSubmit(onChangePassword)} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.currentPassword', '当前密码')}</Label>
+              <Input type="password" {...registerPw('current_password')} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.newPassword', '新密码')}</Label>
+              <Input type="password" {...registerPw('new_password')} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.confirmNewPassword', '确认新密码')}</Label>
+              <Input type="password" {...registerPw('confirm_password')} />
+            </div>
             <div>
-              <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.profile.emailCode', '邮箱验证码')}</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input className="input" style={{ flex: 1 }} placeholder={t('admin.profile.codePlaceholder', '输入验证码')} {...registerPw('verify_code')} />
-                <button type="button" onClick={handlePwSendCode} disabled={pwSendingCode || pwCountdown > 0} className="btn btn-secondary" style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+              <Label className="mb-1.5 block">{t('admin.profile.emailCode', '邮箱验证码')}</Label>
+              <div className="flex gap-2">
+                <Input className="flex-1" placeholder={t('admin.profile.codePlaceholder', '输入验证码')} {...registerPw('verify_code')} />
+                <Button type="button" variant="outline" onClick={handlePwSendCode} disabled={pwSendingCode || pwCountdown > 0} className="shrink-0 whitespace-nowrap">
                   {pwSendingCode ? t('admin.login.sending', '发送中…') : pwCountdown > 0 ? `${pwCountdown}s` : pwCodeSent ? t('admin.profile.resendCode', '重新发送') : t('admin.profile.sendCode', '发送验证码')}
-                </button>
+                </Button>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button type="submit" loading={changingPassword}>{t('admin.profile.changePassword', '修改密码')}</Button>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={changingPassword}>
+                {changingPassword && <Loader2 className="size-4 animate-spin" />}
+                {t('admin.profile.changePassword', '修改密码')}
+              </Button>
             </div>
           </form>
-        </div>
+        </Card>
         </div>{/* end left column */}
 
         {/* Right column: Social + 2FA + Passkeys */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="flex flex-col gap-4">
 
         {/* Social Links */}
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{t('admin.profile.socialLinks', '社交链接')}</h2>
-            <button type="button" onClick={() => setShowAddSocial(true)} className="btn btn-secondary" style={{ fontSize: '12px', padding: '4px 10px', height: '28px' }}>
-              <i className="fa-light fa-plus" style={{ marginRight: '4px' }} />{t('admin.common.add', '添加')}
-            </button>
+        <Card className="p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-[15px] font-semibold text-foreground">{t('admin.profile.socialLinks', '社交链接')}</h2>
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowAddSocial(true)}>
+              <Plus className="size-4" />{t('admin.common.add', '添加')}
+            </Button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="flex flex-col gap-2.5">
             {socialLinks.map((link, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <i className={link.icon || 'fa-light fa-link'} style={{ width: '20px', textAlign: 'center', fontSize: '14px', color: 'var(--color-primary)', flexShrink: 0 }} />
-                <span className="text-sub" style={{ fontSize: '12px', width: '60px', flexShrink: 0 }}>{link.name}</span>
-                <input
-                  className="input"
-                  style={{ flex: 1, fontSize: '12px', padding: '6px 10px' }}
+              <div key={idx} className="flex items-center gap-2">
+                <i className={cn(link.icon || 'fa-light fa-link', 'w-5 shrink-0 text-center text-sm text-primary')} />
+                <span className="w-[60px] shrink-0 text-xs text-muted-foreground">{link.name}</span>
+                <Input
+                  className="h-9 flex-1 text-xs"
                   placeholder={t('admin.profile.socialUrlPlaceholder', '输入 {name} 链接', { name: link.name === '微信' ? t('admin.profile.social.wechat', '微信') : link.name })}
                   value={link.url}
                   onChange={e => setSocialLinks(prev => prev.map((s, i) => i === idx ? { ...s, url: e.target.value } : s))}
                 />
                 {link.qr !== undefined || link.name === '微信' ? (
                   <>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} ref={el => { if (el) el.dataset.idx = String(idx); }} onChange={e => handleSocialQr(e, idx)} />
-                    <button type="button" onClick={() => {
+                    <input type="file" accept="image/*" className="hidden" ref={el => { if (el) el.dataset.idx = String(idx); }} onChange={e => handleSocialQr(e, idx)} />
+                    <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 text-muted-foreground" onClick={() => {
                       const inp = document.querySelector(`input[data-idx="${idx}"]`) as HTMLInputElement;
                       inp?.click();
-                    }} className="action-btn" title={t('admin.profile.uploadQr', '上传二维码')}>
-                      {link.qr ? <img src={link.qr} alt="" style={{ width: '18px', height: '18px', objectFit: 'cover' }} /> : <i className="fa-light fa-qrcode" style={{ fontSize: '12px' }} />}
-                    </button>
+                    }} title={t('admin.profile.uploadQr', '上传二维码')}>
+                      {link.qr ? <img src={link.qr} alt="" className="size-[18px] object-cover" /> : <QrCode className="size-3.5" />}
+                    </Button>
                   </>
                 ) : null}
                 {defaultSocialNames.includes(link.name) ? (
-                  <button type="button" onClick={() => setSocialLinks(prev => prev.map((s, i) => i === idx ? { ...s, url: '', qr: undefined } : s))} className="action-btn" title={t('admin.profile.clear', '清空')}>
-                    <i className="fa-light fa-eraser" style={{ fontSize: '12px' }} />
-                  </button>
+                  <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 text-muted-foreground" onClick={() => setSocialLinks(prev => prev.map((s, i) => i === idx ? { ...s, url: '', qr: undefined } : s))} title={t('admin.profile.clear', '清空')}>
+                    <Eraser className="size-3.5" />
+                  </Button>
                 ) : (
-                  <button type="button" onClick={() => setSocialLinks(prev => prev.filter((_, i) => i !== idx))} className="action-btn danger">
-                    <i className="fa-light fa-xmark" style={{ fontSize: '12px' }} />
-                  </button>
+                  <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => setSocialLinks(prev => prev.filter((_, i) => i !== idx))}>
+                    <X className="size-3.5" />
+                  </Button>
                 )}
               </div>
             ))}
           </div>
 
           {showAddSocial && (
-            <div style={{ marginTop: '12px', padding: '12px', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <input className="input" style={{ fontSize: '12px', padding: '6px 10px' }} placeholder={t('admin.profile.iconPlaceholder', '图标 (如 fa-brands fa-bilibili)')} value={newSocial.icon} onChange={e => setNewSocial(p => ({ ...p, icon: e.target.value }))} />
-                <input className="input" style={{ fontSize: '12px', padding: '6px 10px' }} placeholder={t('admin.profile.namePlaceholder', '名称 (如 B站)')} value={newSocial.name} onChange={e => setNewSocial(p => ({ ...p, name: e.target.value }))} />
+            <div className="mt-3 flex flex-col gap-2 rounded-md border border-border p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Input className="h-9 text-xs" placeholder={t('admin.profile.iconPlaceholder', '图标 (如 fa-brands fa-bilibili)')} value={newSocial.icon} onChange={e => setNewSocial(p => ({ ...p, icon: e.target.value }))} />
+                <Input className="h-9 text-xs" placeholder={t('admin.profile.namePlaceholder', '名称 (如 B站)')} value={newSocial.name} onChange={e => setNewSocial(p => ({ ...p, name: e.target.value }))} />
               </div>
-              <input className="input" style={{ fontSize: '12px', padding: '6px 10px' }} placeholder={t('admin.import.urlLabel', '链接地址')} value={newSocial.url} onChange={e => setNewSocial(p => ({ ...p, url: e.target.value }))} />
-              <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                <button type="button" onClick={() => { setShowAddSocial(false); setNewSocial({ icon: '', name: '', url: '' }); }} className="btn btn-secondary" style={{ fontSize: '12px', padding: '4px 10px', height: '28px' }}>{t('admin.common.cancel', '取消')}</button>
-                <button type="button" onClick={() => {
+              <Input className="h-9 text-xs" placeholder={t('admin.import.urlLabel', '链接地址')} value={newSocial.url} onChange={e => setNewSocial(p => ({ ...p, url: e.target.value }))} />
+              <div className="flex justify-end gap-1.5">
+                <Button type="button" variant="outline" size="sm" onClick={() => { setShowAddSocial(false); setNewSocial({ icon: '', name: '', url: '' }); }}>{t('admin.common.cancel', '取消')}</Button>
+                <Button type="button" size="sm" onClick={() => {
                   if (!newSocial.name) { toast.error(t('admin.profile.toast.enterName', '请输入名称')); return; }
                   setSocialLinks(prev => [...prev, { ...newSocial }]);
                   setNewSocial({ icon: '', name: '', url: '' });
                   setShowAddSocial(false);
-                }} className="btn btn-primary" style={{ fontSize: '12px', padding: '4px 10px', height: '28px' }}>{t('admin.common.add', '添加')}</button>
+                }}>{t('admin.common.add', '添加')}</Button>
               </div>
-              <p className="text-dim" style={{ fontSize: '11px' }}>
+              <p className="text-[11px] text-muted-foreground">
                 {t('admin.profile.commonIcons', '常用图标：fa-brands fa-bilibili, fa-brands fa-weixin, fa-brands fa-tiktok, fa-brands fa-xiaohongshu')}
               </p>
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-            <SaveButton onClick={saveSocialLinks} loading={socialSaving} />
+          <div className="mt-4 flex justify-end">
+            <Button type="button" onClick={saveSocialLinks} disabled={socialSaving}>
+              {socialSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              {t('admin.common.save', '保存')}
+            </Button>
           </div>
-        </div>
+        </Card>
 
           {/* Two-Factor Authentication */}
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <i className="fa-light fa-shield-keyhole" style={{ fontSize: '18px', color: 'var(--color-primary)' }} />
-            <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{t('admin.profile.twoFactor', '两步验证')}</h2>
+        <Card className="p-6">
+          <div className="mb-4 flex items-center gap-2.5">
+            <ShieldCheck className="size-[18px] text-primary" />
+            <h2 className="text-[15px] font-semibold text-foreground">{t('admin.profile.twoFactor', '两步验证')}</h2>
             {totpEnabled && (
-              <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
+              <Badge className="border-transparent bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                 {t('admin.profile.enabled', '已启用')}
-              </span>
+              </Badge>
             )}
           </div>
 
           {totpShowBackup ? (
             /* Show backup codes after enabling */
             <div>
-              <div style={{ padding: '16px', background: '#fffbeb', border: '1px solid #fbbf24', marginBottom: '16px' }}>
-                <p style={{ fontSize: '13px', fontWeight: 600, color: '#92400e', marginBottom: '8px' }}>
-                  <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }} />
+              <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/15 p-4">
+                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-amber-700 dark:text-amber-400">
+                  <TriangleAlert className="size-4" />
                   {t('admin.profile.saveBackupCodes', '请保存以下备用码')}
                 </p>
-                <p style={{ fontSize: '12px', color: '#92400e' }}>
+                <p className="text-xs text-amber-700 dark:text-amber-400">
                   {t('admin.profile.backupCodesHint', '备用码仅显示一次，丢失验证器时可使用备用码登录。每个备用码只能使用一次。')}
                 </p>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+              <div className="mb-4 grid grid-cols-2 gap-2">
                 {totpBackupCodes.map((code, i) => (
-                  <div key={i} style={{ padding: '8px 12px', background: 'var(--color-bg-soft)', fontFamily: 'monospace', fontSize: '14px', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'center' }}>
+                  <div key={i} className="rounded bg-muted px-3 py-2 text-center font-mono text-sm font-semibold tracking-wider text-foreground">
                     {code}
                   </div>
                 ))}
               </div>
-              <button
+              <Button
+                variant="outline"
                 onClick={() => {
                   navigator.clipboard.writeText(totpBackupCodes.join('\n'));
                   toast.success(t('admin.profile.toast.copiedClipboard', '已复制到剪贴板'));
                 }}
-                className="btn btn-secondary"
-                style={{ marginBottom: '8px', width: '100%' }}
+                className="mb-2 w-full"
               >
-                <i className="fa-light fa-copy" style={{ marginRight: '6px' }} />
+                <Copy className="size-4" />
                 {t('admin.profile.copyBackupCodes', '复制备用码')}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => { setTotpShowBackup(false); setTotpBackupCodes([]); }}
-                className="btn btn-primary"
-                style={{ width: '100%' }}
+                className="w-full"
               >
                 {t('admin.profile.backupSaved', '我已保存')}
-              </button>
+              </Button>
             </div>
           ) : totpSetupMode ? (
             /* Setup flow */
             <div>
-              <p className="text-dim" style={{ fontSize: '12px', marginBottom: '16px', lineHeight: 1.8 }}>
+              <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
                 {t('admin.profile.totpSetupHint', '使用验证器应用（如 Google Authenticator、1Password、Authy）扫描下方二维码，或手动输入密钥。')}
               </p>
 
               {/* QR Code - using Google Charts API for QR generation */}
-              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+              <div className="mb-4 text-center">
                 {totpUri && (
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpUri)}`}
                     alt="TOTP QR Code"
-                    style={{ width: '200px', height: '200px', imageRendering: 'pixelated' }}
+                    className="inline-block size-[200px] [image-rendering:pixelated]"
                   />
                 )}
               </div>
 
               {/* Manual secret */}
-              <div style={{ marginBottom: '16px' }}>
-                <label className="text-dim" style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('admin.profile.manualSecret', '手动输入密钥')}</label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <code style={{ flex: 1, padding: '8px 12px', background: 'var(--color-bg-soft)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', wordBreak: 'break-all' }}>
+              <div className="mb-4">
+                <Label className="mb-1 block text-[11px] text-muted-foreground">{t('admin.profile.manualSecret', '手动输入密钥')}</Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 break-all rounded bg-muted px-3 py-2 text-[13px] font-semibold tracking-wider text-foreground">
                     {totpSecret}
                   </code>
-                  <button onClick={() => { navigator.clipboard.writeText(totpSecret); toast.success(t('admin.profile.toast.copied', '已复制')); }} className="btn btn-ghost" style={{ flexShrink: 0, padding: '8px' }}>
-                    <i className="fa-light fa-copy" />
-                  </button>
+                  <Button variant="ghost" size="icon" className="shrink-0" onClick={() => { navigator.clipboard.writeText(totpSecret); toast.success(t('admin.profile.toast.copied', '已复制')); }}>
+                    <Copy className="size-4" />
+                  </Button>
                 </div>
               </div>
 
               {/* Verify code */}
-              <div style={{ marginBottom: '16px' }}>
-                <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.profile.confirmCode', '输入验证码确认')}</label>
-                <input
+              <div className="mb-4">
+                <Label className="mb-1.5 block">{t('admin.profile.confirmCode', '输入验证码确认')}</Label>
+                <Input
                   value={totpVerifyCode}
                   onChange={e => setTotpVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   onKeyDown={async e => {
@@ -582,15 +615,15 @@ export default function ProfilePage() {
                   type="text"
                   inputMode="numeric"
                   placeholder="000000"
-                  className="input focus-ring"
-                  style={{ fontSize: '18px', textAlign: 'center', letterSpacing: '0.2em', fontWeight: 600 }}
+                  className="text-center text-lg font-semibold tracking-[0.2em]"
                   autoFocus
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={() => setTotpSetupMode(false)} className="btn btn-secondary" style={{ flex: 1 }}>{t('admin.common.cancel', '取消')}</button>
-                <button
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setTotpSetupMode(false)}>{t('admin.common.cancel', '取消')}</Button>
+                <Button
+                  className="flex-1"
                   onClick={async () => {
                     if (totpVerifyCode.length < 6) return;
                     setTotpLoading(true);
@@ -607,32 +640,32 @@ export default function ProfilePage() {
                     setTotpLoading(false);
                   }}
                   disabled={totpLoading || totpVerifyCode.length < 6}
-                  className="btn btn-primary"
-                  style={{ flex: 1 }}
                 >
                   {totpLoading ? t('admin.login.verifying', '验证中…') : t('admin.profile.enableTwoFactor', '启用两步验证')}
-                </button>
+                </Button>
               </div>
             </div>
           ) : totpDisableMode ? (
             /* Disable flow */
             <div>
-              <p className="text-dim" style={{ fontSize: '13px', marginBottom: '16px' }}>
+              <p className="mb-4 text-[13px] text-muted-foreground">
                 {t('admin.profile.disableTotpHint', '关闭两步验证需要当前密码和验证码确认。')}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+              <div className="mb-4 flex flex-col gap-3">
                 <div>
-                  <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.profile.currentPassword', '当前密码')}</label>
-                  <input value={totpDisablePw} onChange={e => setTotpDisablePw(e.target.value)} type="password" className="input focus-ring" />
+                  <Label className="mb-1.5 block">{t('admin.profile.currentPassword', '当前密码')}</Label>
+                  <Input value={totpDisablePw} onChange={e => setTotpDisablePw(e.target.value)} type="password" />
                 </div>
                 <div>
-                  <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.profile.codeOrBackup', '验证码或备用码')}</label>
-                  <input value={totpDisableCode} onChange={e => setTotpDisableCode(e.target.value)} type="text" className="input focus-ring" placeholder="000000" />
+                  <Label className="mb-1.5 block">{t('admin.profile.codeOrBackup', '验证码或备用码')}</Label>
+                  <Input value={totpDisableCode} onChange={e => setTotpDisableCode(e.target.value)} type="text" placeholder="000000" />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={() => { setTotpDisableMode(false); setTotpDisablePw(''); setTotpDisableCode(''); }} className="btn btn-secondary" style={{ flex: 1 }}>{t('admin.common.cancel', '取消')}</button>
-                <button
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => { setTotpDisableMode(false); setTotpDisablePw(''); setTotpDisableCode(''); }}>{t('admin.common.cancel', '取消')}</Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
                   onClick={async () => {
                     if (!totpDisablePw || !totpDisableCode) return;
                     setTotpLoading(true);
@@ -649,31 +682,29 @@ export default function ProfilePage() {
                     setTotpLoading(false);
                   }}
                   disabled={totpLoading || !totpDisablePw || !totpDisableCode}
-                  className="btn btn-primary"
-                  style={{ flex: 1, background: '#ef4444' }}
                 >
                   {totpLoading ? t('admin.profile.processing', '处理中…') : t('admin.profile.disableTwoFactor', '关闭两步验证')}
-                </button>
+                </Button>
               </div>
             </div>
           ) : totpEnabled ? (
             /* Already enabled */
             <div>
-              <p className="text-dim" style={{ fontSize: '13px', lineHeight: 1.8, marginBottom: '16px' }}>
+              <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">
                 {t('admin.profile.totpEnabledDescription', '两步验证已启用，每次登录时需要输入验证器应用生成的验证码。')}
               </p>
-              <button onClick={() => setTotpDisableMode(true)} className="btn btn-secondary" style={{ color: '#ef4444', padding: '0 24px', gap: '10px' }}>
-                <i className="fa-light fa-shield-xmark" />
+              <Button variant="outline" className="gap-2.5 px-6 text-destructive hover:text-destructive" onClick={() => setTotpDisableMode(true)}>
+                <ShieldOff className="size-4" />
                 {t('admin.profile.disableTwoFactor', '关闭两步验证')}
-              </button>
+              </Button>
             </div>
           ) : (
             /* Not enabled */
             <div>
-              <p className="text-dim" style={{ fontSize: '13px', lineHeight: 1.8, marginBottom: '16px' }}>
+              <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">
                 {t('admin.profile.totpDescription', '启用两步验证后，除密码外还需要验证器应用（如 Google Authenticator）生成的验证码才能登录，大幅提升账户安全性。')}
               </p>
-              <button
+              <Button
                 onClick={async () => {
                   setTotpLoading(true);
                   try {
@@ -703,65 +734,65 @@ export default function ProfilePage() {
                   }
                 }}
                 disabled={totpLoading}
-                className="btn btn-primary"
               >
-                <i className="fa-light fa-shield-keyhole" style={{ marginRight: '6px' }} />
+                <ShieldCheck className="size-4" />
                 {totpLoading ? t('admin.profile.preparing', '准备中…') : t('admin.profile.enableTwoFactor', '启用两步验证')}
-              </button>
+              </Button>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Passkeys */}
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <i className="fa-light fa-key" style={{ fontSize: '18px', color: 'var(--color-primary)' }} />
-            <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{t('admin.profile.passkeys', '通行密钥')}</h2>
+        <Card className="p-6">
+          <div className="mb-4 flex items-center gap-2.5">
+            <KeyRound className="size-[18px] text-primary" />
+            <h2 className="text-[15px] font-semibold text-foreground">{t('admin.profile.passkeys', '通行密钥')}</h2>
             {passkeys.length > 0 && (
-              <span className="text-dim" style={{ fontSize: '12px' }}>{t('admin.profile.passkeyCount', '{count} 个', { count: passkeys.length })}</span>
+              <span className="text-xs text-muted-foreground">{t('admin.profile.passkeyCount', '{count} 个', { count: passkeys.length })}</span>
             )}
           </div>
 
-          <p className="text-dim" style={{ fontSize: '13px', lineHeight: 1.8, marginBottom: '16px' }}>
+          <p className="mb-4 text-[13px] leading-relaxed text-muted-foreground">
             {t('admin.profile.passkeyDescription', '通行密钥（Passkey）使用设备生物识别（指纹、面容）或安全密钥替代密码登录，更安全便捷。')}
           </p>
 
           {passkeys.length > 0 && (
-            <div style={{ marginBottom: '16px' }}>
+            <div className="mb-4">
               {passkeys.map((pk: any) => (
-                <div key={pk.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid var(--color-divider)' }}>
-                  <i className="fa-light fa-fingerprint" style={{ fontSize: '20px', color: 'var(--color-primary)' }} />
-                  <div style={{ flex: 1 }}>
-                    <p className="text-main" style={{ fontSize: '13px', fontWeight: 500 }}>{pk.name || t('admin.profile.unnamedPasskey', '未命名密钥')}</p>
-                    <p className="text-dim" style={{ fontSize: '11px' }}>
+                <div key={pk.id} className="flex items-center gap-3 border-b border-border py-2.5">
+                  <Fingerprint className="size-5 text-primary" />
+                  <div className="flex-1">
+                    <p className="text-[13px] font-medium text-foreground">{pk.name || t('admin.profile.unnamedPasskey', '未命名密钥')}</p>
+                    <p className="text-[11px] text-muted-foreground">
                       {t('admin.profile.passkeyCreatedAt', '添加于 {date}', { date: formatWithAdminTimeZone(new Date(pk.created_at * 1000), locale || 'zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) })}
                       {pk.last_used_at > 0 && <> · {t('admin.profile.passkeyLastUsed', '最后使用 {date}', { date: formatWithAdminTimeZone(new Date(pk.last_used_at * 1000), locale || 'zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) })}</>}
                     </p>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:text-destructive"
                     onClick={() => setDeletePasskeyId(pk.id)}
-                    className="action-btn danger"
                     title={t('admin.common.delete', '删除')}
                   >
-                    <i className="fa-light fa-trash" style={{ fontSize: '14px' }} />
-                  </button>
+                    <Trash2 className="size-4" />
+                  </Button>
                 </div>
               ))}
             </div>
           )}
 
           {passkeyNaming ? (
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
+            <div className="flex gap-2">
+              <Input
                 value={passkeyName}
                 onChange={e => setPasskeyName(e.target.value)}
                 placeholder={t('admin.profile.passkeyNamePlaceholder', '为此密钥命名（如：MacBook）')}
-                className="input focus-ring"
-                style={{ flex: 1, fontSize: '13px' }}
+                className="flex-1 text-[13px]"
                 autoFocus
                 onKeyDown={e => { if (e.key === 'Escape') { setPasskeyNaming(false); setPasskeyName(''); } }}
               />
-              <button
+              <Button
                 onClick={async () => {
                   setPasskeyLoading(true);
                   try {
@@ -816,14 +847,14 @@ export default function ProfilePage() {
                   setPasskeyLoading(false);
                 }}
                 disabled={passkeyLoading}
-                className="btn btn-primary"
               >
                 {passkeyLoading ? t('admin.profile.registering', '注册中…') : t('admin.profile.register', '注册')}
-              </button>
-              <button onClick={() => { setPasskeyNaming(false); setPasskeyName(''); }} className="btn btn-secondary">{t('admin.common.cancel', '取消')}</button>
+              </Button>
+              <Button variant="outline" onClick={() => { setPasskeyNaming(false); setPasskeyName(''); }}>{t('admin.common.cancel', '取消')}</Button>
             </div>
           ) : (
-            <button
+            <Button
+              className="gap-2.5 px-6"
               onClick={() => {
                 if (!window.PublicKeyCredential) {
                   toast.error(t('admin.profile.toast.passkeyUnsupported', '当前浏览器不支持通行密钥'));
@@ -831,55 +862,63 @@ export default function ProfilePage() {
                 }
                 setPasskeyNaming(true);
               }}
-              className="btn btn-primary"
-              style={{ padding: '0 24px', gap: '10px' }}
             >
-              <i className="fa-light fa-plus" />
+              <Plus className="size-4" />
               {t('admin.profile.addPasskey', '添加通行密钥')}
-            </button>
+            </Button>
           )}
-        </div>
+        </Card>
         </div>{/* end right column */}
       </div>{/* end main grid */}
 
 
       {/* Verification Dialog */}
-      <Modal isOpen={showVerify} onClose={() => setShowVerify(false)} title={t('admin.profile.securityVerification', '安全验证')} size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <p className="text-sub" style={{ fontSize: '13px' }}>
-            {t('admin.profile.securityVerificationHint', '修改登录账号或邮箱需要验证身份，验证码将发送到当前邮箱。')}
-          </p>
-          <Input label={t('admin.profile.currentPassword', '当前密码')} type="password" value={verifyPassword} onChange={(e: any) => setVerifyPassword(e.target.value)} />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.profile.emailCode', '邮箱验证码')}</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                value={verifyCode}
-                onChange={e => setVerifyCode(e.target.value)}
-                placeholder={t('admin.profile.sixDigitCodePlaceholder', '6 位验证码')}
-                className="input"
-                style={{ flex: 1 }}
-                maxLength={6}
-              />
-              <Button
-                variant="secondary"
-                onClick={handleSendCode}
-                disabled={sendingCode || countdown > 0}
-                style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-              >
-                {countdown > 0 ? `${countdown}s` : codeSent ? t('admin.profile.resendCode', '重新发送') : t('admin.profile.sendCode', '发送验证码')}
+      <Dialog open={showVerify} onOpenChange={(o) => !o && setShowVerify(false)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t('admin.profile.securityVerification', '安全验证')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <p className="text-[13px] text-muted-foreground">
+              {t('admin.profile.securityVerificationHint', '修改登录账号或邮箱需要验证身份，验证码将发送到当前邮箱。')}
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('admin.profile.currentPassword', '当前密码')}</Label>
+              <Input type="password" value={verifyPassword} onChange={(e: any) => setVerifyPassword(e.target.value)} />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">{t('admin.profile.emailCode', '邮箱验证码')}</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={verifyCode}
+                  onChange={e => setVerifyCode(e.target.value)}
+                  placeholder={t('admin.profile.sixDigitCodePlaceholder', '6 位验证码')}
+                  className="flex-1"
+                  maxLength={6}
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleSendCode}
+                  disabled={sendingCode || countdown > 0}
+                  className="shrink-0 whitespace-nowrap"
+                >
+                  {countdown > 0 ? `${countdown}s` : codeSent ? t('admin.profile.resendCode', '重新发送') : t('admin.profile.sendCode', '发送验证码')}
+                </Button>
+              </div>
+            </div>
+            <div className="mt-1 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowVerify(false)}>{t('admin.common.cancel', '取消')}</Button>
+              <Button onClick={handleVerifyAndSave} disabled={saving}>
+                {saving && <Loader2 className="size-4 animate-spin" />}
+                {t('admin.profile.confirmChange', '确认修改')}
               </Button>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
-            <Button variant="secondary" onClick={() => setShowVerify(false)}>{t('admin.common.cancel', '取消')}</Button>
-            <Button onClick={handleVerifyAndSave} loading={saving}>{t('admin.profile.confirmChange', '确认修改')}</Button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog
-        isOpen={deletePasskeyId !== null}
-        onClose={() => setDeletePasskeyId(null)}
+        open={deletePasskeyId !== null}
+        onOpenChange={(o) => !o && setDeletePasskeyId(null)}
         onConfirm={deletePasskey}
         title={t('admin.profile.deletePasskeyTitle', '删除通行密钥')}
         message={t('admin.profile.confirmDeletePasskey', '确定删除此通行密钥？')}

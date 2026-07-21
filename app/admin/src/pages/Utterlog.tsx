@@ -1,7 +1,11 @@
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  Network, Globe, ExternalLink, Unlink, IdCard, User, Users, GitBranch, Bot,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Button, ConfirmDialog, SaveButton } from '@/components/ui';
+import { SaveButton } from '@/components/ui';
+import { Button, buttonVariants, Card, Switch, ConfirmDialog } from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import api, { networkApi, optionsApi } from '@/lib/api';
 
 export default function UtterlogCenterPage() {
@@ -101,65 +105,73 @@ export default function UtterlogCenterPage() {
     setSavingShare(false);
   };
 
+  const quickLinks = [
+    { label: 'Utterlog ID 中心', url: 'https://id.utterlog.com', Icon: IdCard },
+    { label: 'ID 个人资料', url: 'https://id.utterlog.com/profile', Icon: User },
+    { label: 'Utterlog 社区', url: 'https://utterlog.com', Icon: Users },
+    { label: 'Utterlog 程序发布', url: 'https://utterlog.io', Icon: GitBranch },
+    { label: 'Utterlog AI 中心', url: 'https://utterlog.ai', Icon: Bot },
+  ];
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start' }}>
+    <div className="grid grid-cols-2 items-start gap-4">
       {/* Left column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="flex flex-col gap-4">
 
         {/* Network Status */}
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <i className="fa-sharp fa-light fa-network-wired" style={{ fontSize: '18px', color: 'var(--color-primary)' }} />
-              <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>网络状态</h2>
+        <Card className="p-6">
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Network className="size-[18px] text-primary" />
+              <h2 className="text-[15px] font-semibold text-foreground">网络状态</h2>
             </div>
-            <div style={{
-              padding: '4px 12px', fontSize: '12px', fontWeight: 600,
-              background: networkStatus.connected ? 'var(--color-success-bg)' : '#fef3c7',
-              color: networkStatus.connected ? 'var(--color-success)' : 'var(--color-warning)',
-            }}>
+            <div className={cn(
+              'rounded px-3 py-1 text-xs font-semibold',
+              networkStatus.connected
+                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                : 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
+            )}>
               {networkStatus.connected ? '已连接' : '连接中…'}
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          <div className="flex flex-col">
             {[
               { label: '认证中心', value: networkStatus.hub },
               { label: '站点 ID', value: networkStatus.site_id || '自动分配中…' },
               { label: '站点指纹', value: networkStatus.fingerprint || '...' },
             ].map((item, idx) => (
-              <div key={item.label} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '10px 0',
-                borderBottom: idx < 2 ? '1px solid var(--color-divider)' : 'none',
-              }}>
-                <span className="text-sub" style={{ fontSize: '13px' }}>{item.label}</span>
-                <code className="text-main" style={{ fontSize: '12px', fontFamily: 'monospace' }}>{item.value}</code>
+              <div key={item.label} className={cn(
+                'flex items-center justify-between py-2.5',
+                idx < 2 && 'border-b border-border',
+              )}>
+                <span className="text-[13px] text-muted-foreground">{item.label}</span>
+                <code className="font-mono text-xs text-foreground">{item.value}</code>
               </div>
             ))}
           </div>
 
-          <p className="text-dim" style={{ fontSize: '11px', marginTop: '14px', lineHeight: 1.8 }}>
+          <p className="mt-3.5 text-[11px] leading-relaxed text-muted-foreground">
             站点安装后自动连接 id.utterlog.com 认证中心，基于唯一指纹自动注册，无需手动配置。
           </p>
 
           {networkStatus.connected && (
-            <div style={{ marginTop: '14px' }}>
-              <button type="button" className="btn btn-secondary" style={{ fontSize: '12px', minWidth: '180px', padding: '0 28px', whiteSpace: 'nowrap' }} onClick={async () => {
+            <div className="mt-3.5">
+              <Button variant="outline" size="sm" className="min-w-[180px]" onClick={async () => {
                 try { await networkApi.pushInfo(); toast.success('站点信息已推送'); } catch { toast.error('推送失败'); }
               }}>
                 手动推送站点信息
-              </button>
+              </Button>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Content Sharing */}
-        <div className="card" style={{ padding: '24px' }}>
-          <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>内容共享</h2>
-          <p className="text-dim" style={{ fontSize: '12px', marginBottom: '20px' }}>选择哪些内容可以被其他 Utterlog 站点订阅和发现</p>
+        <Card className="p-6">
+          <h2 className="mb-1.5 text-[15px] font-semibold text-foreground">内容共享</h2>
+          <p className="mb-5 text-xs text-muted-foreground">选择哪些内容可以被其他 Utterlog 站点订阅和发现</p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="flex flex-col gap-4">
             {[
               { key: 'utterlog_share_posts', label: '共享文章', desc: '其他站点可订阅你的文章更新' },
               { key: 'utterlog_share_moments', label: '共享说说', desc: '说说和动态也参与网络共享' },
@@ -171,74 +183,67 @@ export default function UtterlogCenterPage() {
               { key: 'utterlog_share_books', label: '共享图书', desc: '分享你的阅读记录和书评' },
               { key: 'utterlog_auto_push', label: '自动推送新内容', desc: '发布内容时自动通知网络中的订阅者' },
             ].map(item => (
-              <label key={item.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={(shareSettings as any)[item.key] || false}
-                  onChange={e => setShareSettings(prev => ({ ...prev, [item.key]: e.target.checked }))}
-                  style={{ marginTop: '3px', accentColor: 'var(--color-primary)' }}
-                />
-                <div>
-                  <div className="text-main" style={{ fontSize: '13px', fontWeight: 500 }}>{item.label}</div>
-                  <div className="text-dim" style={{ fontSize: '11px', marginTop: '2px' }}>{item.desc}</div>
+              <div key={item.key} className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[13px] font-medium text-foreground">{item.label}</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">{item.desc}</div>
                 </div>
-              </label>
+                <Switch
+                  checked={(shareSettings as any)[item.key] || false}
+                  onCheckedChange={(checked) => setShareSettings(prev => ({ ...prev, [item.key]: checked }))}
+                />
+              </div>
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <div className="mt-4 flex justify-end">
             <SaveButton onClick={saveShareSettings} loading={savingShare} />
           </div>
-        </div>
+        </Card>
 
       </div>
 
       {/* Right column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="flex flex-col gap-4">
 
         {/* Utterlog ID */}
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <i className="fa-regular fa-globe" style={{ fontSize: '16px', color: 'var(--color-primary)' }} />
-            <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>Utterlog ID</h2>
+        <Card className="p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Globe className="size-4 text-primary" />
+            <h2 className="text-[15px] font-semibold text-foreground">Utterlog ID</h2>
             {utterlogBound && (
-              <span style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>已绑定</span>
+              <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">已绑定</span>
             )}
           </div>
 
           {utterlogBound ? (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px', padding: '14px', background: 'var(--color-bg-soft)' }}>
+              <div className="mb-4 flex items-center gap-3.5 rounded-md bg-muted p-3.5">
                 {utterlogAvatar ? (
-                  <img src={utterlogAvatar} alt="" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+                  <img src={utterlogAvatar} alt="" className="size-12 rounded-full object-cover" />
                 ) : (
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary)', color: '#fff', fontSize: '18px', fontWeight: 700 }}>U</div>
+                  <div className="flex size-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">U</div>
                 )}
                 <div>
-                  <p className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{utterlogId}</p>
-                  <p className="text-dim" style={{ fontSize: '12px' }}>全网通用身份</p>
+                  <p className="text-[15px] font-semibold text-foreground">{utterlogId}</p>
+                  <p className="text-xs text-muted-foreground">全网通用身份</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <a href="https://id.utterlog.com/profile" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ fontSize: '12px', padding: '6px 14px', height: '32px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <i className="fa-regular fa-arrow-up-right-from-square" style={{ fontSize: '12px' }} /> ID 中心管理
+              <div className="flex gap-2">
+                <a href="https://id.utterlog.com/profile" target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
+                  <ExternalLink className="size-3.5" /> ID 中心管理
                 </a>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  style={{ fontSize: '12px', padding: '6px 14px', height: '32px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                  onClick={() => setConfirmUnbind(true)}
-                >
-                  <i className="fa-regular fa-link-slash" style={{ fontSize: '12px' }} /> 解绑
-                </button>
+                <Button variant="destructive" size="sm" onClick={() => setConfirmUnbind(true)}>
+                  <Unlink className="size-3.5" /> 解绑
+                </Button>
               </div>
             </div>
           ) : (
             <div>
-              <p className="text-dim" style={{ fontSize: '13px', lineHeight: 1.8, marginBottom: '14px' }}>
+              <p className="mb-3.5 text-[13px] leading-relaxed text-muted-foreground">
                 绑定 Utterlog ID 后，头像和昵称在所有 Utterlog 联盟站点间共享，使用统一身份评论和互动。
               </p>
-              <button type="button" className="btn btn-primary" style={{ fontSize: '13px', width: '100%', justifyContent: 'center' }} disabled={bindingUtterlog} onClick={async () => {
+              <Button className="w-full" disabled={bindingUtterlog} onClick={async () => {
                 setBindingUtterlog(true);
                 try {
                   const r: any = await networkApi.oauthAuthorize();
@@ -258,69 +263,63 @@ export default function UtterlogCenterPage() {
                 }
                 finally { setBindingUtterlog(false); }
               }}>
-                <i className="fa-regular fa-globe" style={{ fontSize: '14px' }} /> {bindingUtterlog ? '跳转中…' : '绑定 Utterlog ID'}
-              </button>
+                <Globe className="size-4" /> {bindingUtterlog ? '跳转中…' : '绑定 Utterlog ID'}
+              </Button>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Avatar Source */}
         {utterlogBound && (
-          <div className="card" style={{ padding: '24px' }}>
-            <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>站点头像来源</h2>
-            <p className="text-dim" style={{ fontSize: '12px', marginBottom: '16px' }}>选择博客前端显示哪个头像</p>
+          <Card className="p-6">
+            <h2 className="mb-1.5 text-[15px] font-semibold text-foreground">站点头像来源</h2>
+            <p className="mb-4 text-xs text-muted-foreground">选择博客前端显示哪个头像</p>
 
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '12px' }}>
-              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={async () => { setAvatarSource('gravatar'); await optionsApi.updateMany({ avatar_source: 'gravatar' }); toast.success('已切换'); }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', overflow: 'hidden', border: avatarSource === 'gravatar' ? '3px solid var(--color-primary)' : '2px solid var(--color-border)' }}>
-                  {gravatarUrl && <img src={gravatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+            <div className="mb-3 flex gap-5">
+              <label className="flex cursor-pointer flex-col items-center gap-2" onClick={async () => { setAvatarSource('gravatar'); await optionsApi.updateMany({ avatar_source: 'gravatar' }); toast.success('已切换'); }}>
+                <div className={cn('size-14 overflow-hidden rounded-full', avatarSource === 'gravatar' ? 'border-[3px] border-primary' : 'border-2 border-border')}>
+                  {gravatarUrl && <img src={gravatarUrl} alt="" className="size-full object-cover" />}
                 </div>
-                <span className="text-dim" style={{ fontSize: '11px', fontWeight: avatarSource === 'gravatar' ? 600 : 400, color: avatarSource === 'gravatar' ? 'var(--color-primary)' : undefined }}>Gravatar</span>
+                <span className={cn('text-[11px]', avatarSource === 'gravatar' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Gravatar</span>
               </label>
-              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={async () => { setAvatarSource('utterlog'); await optionsApi.updateMany({ avatar_source: 'utterlog' }); toast.success('已切换'); }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', overflow: 'hidden', border: avatarSource === 'utterlog' ? '3px solid var(--color-primary)' : '2px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-soft)' }}>
+              <label className="flex cursor-pointer flex-col items-center gap-2" onClick={async () => { setAvatarSource('utterlog'); await optionsApi.updateMany({ avatar_source: 'utterlog' }); toast.success('已切换'); }}>
+                <div className={cn('flex size-14 items-center justify-center overflow-hidden rounded-full bg-muted', avatarSource === 'utterlog' ? 'border-[3px] border-primary' : 'border-2 border-border')}>
                   {utterlogAvatar ? (
-                    <img src={utterlogAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={utterlogAvatar} alt="" className="size-full object-cover" />
                   ) : (
-                    <span className="text-dim" style={{ fontSize: '18px', fontWeight: 700 }}>U</span>
+                    <span className="text-lg font-bold text-muted-foreground">U</span>
                   )}
                 </div>
-                <span className="text-dim" style={{ fontSize: '11px', fontWeight: avatarSource === 'utterlog' ? 600 : 400, color: avatarSource === 'utterlog' ? 'var(--color-primary)' : undefined }}>Utterlog ID</span>
+                <span className={cn('text-[11px]', avatarSource === 'utterlog' ? 'font-semibold text-primary' : 'text-muted-foreground')}>Utterlog ID</span>
               </label>
             </div>
-            <p className="text-dim" style={{ fontSize: '11px' }}>
+            <p className="text-[11px] text-muted-foreground">
               当前使用：{avatarSource === 'gravatar' ? 'Gravatar (邮箱头像)' : 'Utterlog ID (联盟头像)'}
             </p>
-          </div>
+          </Card>
         )}
 
         {/* Quick Links */}
-        <div className="card" style={{ padding: '24px' }}>
-          <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>快捷链接</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {[
-              { label: 'Utterlog ID 中心', url: 'https://id.utterlog.com', icon: 'fa-solid fa-id-card' },
-              { label: 'ID 个人资料', url: 'https://id.utterlog.com/profile', icon: 'fa-solid fa-user' },
-              { label: 'Utterlog 社区', url: 'https://utterlog.com', icon: 'fa-solid fa-users' },
-              { label: 'Utterlog 程序发布', url: 'https://utterlog.io', icon: 'fa-solid fa-code-branch' },
-              { label: 'Utterlog AI 中心', url: 'https://utterlog.ai', icon: 'fa-solid fa-robot' },
-            ].map(link => (
-              <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={{
-                display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px',
-                border: '1px solid var(--color-border)', textDecoration: 'none',
-                fontSize: '13px', color: 'var(--color-text-sub)', transition: 'border-color 0.15s',
-              }} className="hover:border-primary">
-                <i className={link.icon} style={{ width: '18px', textAlign: 'center', color: 'var(--color-primary)' }} />
-                <span style={{ flex: 1 }}>{link.label}</span>
-                <i className="fa-regular fa-arrow-up-right-from-square" style={{ fontSize: '12px', color: 'var(--color-text-dim)' }} />
-              </a>
-            ))}
+        <Card className="p-6">
+          <h2 className="mb-4 text-[15px] font-semibold text-foreground">快捷链接</h2>
+          <div className="flex flex-col gap-2.5">
+            {quickLinks.map(link => {
+              const LinkIcon = link.Icon;
+              return (
+                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2.5 text-[13px] text-muted-foreground transition-colors hover:border-primary">
+                  <LinkIcon className="size-[18px] text-primary" />
+                  <span className="flex-1">{link.label}</span>
+                  <ExternalLink className="size-3 text-muted-foreground" />
+                </a>
+              );
+            })}
           </div>
-        </div>
+        </Card>
       </div>
       <ConfirmDialog
-        isOpen={confirmUnbind}
-        onClose={() => setConfirmUnbind(false)}
+        open={confirmUnbind}
+        onOpenChange={(o) => !o && setConfirmUnbind(false)}
         onConfirm={unbindUtterlogID}
         title="解绑 Utterlog ID"
         message="确定要解绑 Utterlog ID？解绑后头像、昵称将不再跨站同步。"

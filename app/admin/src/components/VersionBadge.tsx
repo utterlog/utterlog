@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { CircleArrowUp, CircleCheck, ChevronRight } from 'lucide-react';
 import { Link } from '@/lib/router';
 import api from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 interface VersionPayload {
   current: { version: string; commit?: string };
@@ -73,24 +75,21 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
       <Link
         to="/settings#update"
         title={hasUpdate ? `有新版本：${info?.latest?.version}` : `当前版本：${current}`}
+        className="relative inline-flex items-center bg-primary font-semibold text-primary-foreground no-underline"
         style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
+          gap: 4,
           fontSize: 9, padding: '1px 5px',
-          background: hasUpdate ? 'var(--color-primary)' : 'var(--color-primary)',
-          color: '#fff', fontWeight: 600, textDecoration: 'none',
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
-          position: 'relative',
         }}
       >
         {shortVer}
         {hasUpdate && (
           <span
             aria-hidden
+            className="absolute rounded-full border-[1.5px] border-card bg-destructive"
             style={{
-              position: 'absolute', top: -4, right: -4,
-              width: 8, height: 8, borderRadius: '50%',
-              background: 'var(--color-error)',
-              border: '1.5px solid var(--color-surface, #fff)',
+              top: -4, right: -4,
+              width: 8, height: 8,
               boxShadow: '0 0 0 1px rgba(239,68,68,0.35)',
             }}
           />
@@ -103,46 +102,37 @@ export default function VersionBadge({ variant = 'compact' }: Props) {
   return (
     <Link
       to="/settings#update"
-      style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        padding: '12px 14px',
-        border: '1px solid var(--color-border)',
-        background: 'var(--color-surface, #fff)',
-        textDecoration: 'none', color: 'var(--color-text)',
-        transition: 'border-color 0.15s',
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--color-primary)')}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--color-border)')}
+      className="flex items-center border border-border bg-card text-foreground no-underline transition-colors hover:border-primary"
+      style={{ gap: 12, padding: '12px 14px' }}
     >
-      <div style={{
-        width: 36, height: 36,
-        background: hasUpdate ? '#FEE2E2' : 'var(--color-primary-soft, #E6EEFB)',
-        color: hasUpdate ? '#B91C1C' : 'var(--color-primary)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 16, flexShrink: 0,
-      }}>
-        <i className={`fa-solid ${hasUpdate ? 'fa-circle-arrow-up' : 'fa-circle-check'}`} />
+      <div
+        className={cn(
+          'flex shrink-0 items-center justify-center',
+          hasUpdate ? 'bg-destructive/15 text-destructive' : 'bg-primary/10 text-primary',
+        )}
+        style={{ width: 36, height: 36 }}
+      >
+        {hasUpdate ? <CircleArrowUp className="size-4" /> : <CircleCheck className="size-4" />}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 600 }}>
           版本与更新
           {hasUpdate && (
-            <span style={{
-              marginLeft: 8, fontSize: 10, padding: '1px 6px',
-              background: '#EF4444', color: '#fff', fontWeight: 700,
+            <span className="bg-destructive text-destructive-foreground" style={{
+              marginLeft: 8, fontSize: 10, padding: '1px 6px', fontWeight: 700,
             }}>
               有新版本
             </span>
           )}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }}>
+        <div className="text-muted-foreground" style={{ fontSize: 11, marginTop: 2 }}>
           当前 <code style={{ fontFamily: "ui-monospace,monospace" }}>{current}</code>
           {hasUpdate && info?.latest && (
-            <> · 最新 <code style={{ fontFamily: "ui-monospace,monospace", color: 'var(--color-primary)' }}>{info.latest.version}</code></>
+            <> · 最新 <code className="text-primary" style={{ fontFamily: "ui-monospace,monospace" }}>{info.latest.version}</code></>
           )}
         </div>
       </div>
-      <i className="fa-solid fa-chevron-right" style={{ fontSize: 11, color: 'var(--color-text-muted)' }} />
+      <ChevronRight className="size-3.5 text-muted-foreground" />
     </Link>
   );
 }

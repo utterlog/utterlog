@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import {
+  Loader2, RefreshCw, CloudDownload, TriangleAlert, CircleAlert, Terminal,
+  ClipboardList, History, ExternalLink, ShieldCheck, CircleCheck, CircleX,
+  ChevronDown, ChevronRight,
+} from 'lucide-react';
 import api from '@/lib/api';
-import { Modal } from '@/components/ui/modal';
+import {
+  Button, Badge,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
 
 interface VersionInfo {
@@ -460,154 +469,123 @@ export default function SystemUpdatePanel() {
   // Status color: blue when an update is available, green when up-to-date,
   // amber when we couldn't actually check (GitHub rate-limit / network /
   // missing-release) so the UI doesn't look like a false positive.
-  const statusColor = checkState === 'update' ? 'var(--color-primary)' : checkState === 'unknown' ? '#d97706' : 'var(--color-success)';
-  const statusColorDark = checkState === 'update' ? '#003DA6' : checkState === 'unknown' ? '#b45309' : '#15803d';
-  const statusColorSoft = checkState === 'update' ? 'rgba(0,82,217,0.08)' : checkState === 'unknown' ? 'rgba(217,119,6,0.10)' : 'rgba(22,163,74,0.08)';
-
-  // Primary button = main action (upgrade / "up-to-date"). Blue or green.
-  const primaryBtnStyle: React.CSSProperties = {
-    height: 40, padding: '0 20px',
-    display: 'inline-flex', alignItems: 'center', gap: 8,
-    background: statusColor, color: '#fff',
-    border: `1px solid ${statusColor}`,
-    fontSize: 14, fontWeight: 600,
-    cursor: upgrading || loading || !runtimeUpgradeSupported ? 'not-allowed' : (updateAvailable ? 'pointer' : 'default'),
-    opacity: upgrading || loading || !runtimeUpgradeSupported ? 0.6 : 1,
-    transition: 'background-color 0.15s, border-color 0.15s',
-    fontFamily: 'inherit',
-  };
-  // Secondary button = refresh check. Always outlined gray.
-  const secondaryBtnStyle: React.CSSProperties = {
-    height: 40, padding: '0 16px',
-    display: 'inline-flex', alignItems: 'center', gap: 6,
-    background: 'var(--color-surface, #fff)', color: 'var(--color-text)',
-    border: '1px solid var(--color-border)',
-    fontSize: 14,
-    cursor: loading || upgrading ? 'not-allowed' : 'pointer',
-    opacity: loading || upgrading ? 0.5 : 1,
-    transition: 'border-color 0.15s, color 0.15s',
-    fontFamily: 'inherit',
-  };
+  const stateTextClass = checkState === 'update'
+    ? 'text-primary'
+    : checkState === 'unknown'
+    ? 'text-amber-600 dark:text-amber-400'
+    : 'text-emerald-600 dark:text-emerald-400';
+  // Primary action button fill — blue (default variant) for updates,
+  // green for a healthy re-deploy, amber-tinted outline when the check
+  // itself failed.
+  const primaryFillClass = checkState === 'ok'
+    ? 'bg-emerald-600 text-white hover:bg-emerald-600/90'
+    : '';
 
   return (
     <div>
       {/* Version card */}
-      <div style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface)', padding: '20px 24px', marginBottom: 16 }}>
+      <div className="rounded-lg border border-border bg-card" style={{ padding: '20px 24px', marginBottom: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 4 }}>当前版本</div>
-            <div style={{ fontSize: 18, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: updateAvailable ? 'var(--color-text)' : statusColor }}>{cur}</div>
+            <div className="mb-1 text-xs text-muted-foreground">当前版本</div>
+            <div className={cn('font-mono text-lg font-semibold', updateAvailable ? 'text-foreground' : stateTextClass)}>{cur}</div>
             {curCommit && (
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4, fontFamily: 'ui-monospace, monospace' }}>
+              <div className="mt-1 font-mono text-[11px] text-muted-foreground">
                 提交 {curCommit.length > 7 ? curCommit.slice(0, 7) : curCommit}
               </div>
             )}
             {info?.current.built_at && (
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">
                 构建于 {info.current.built_at}
               </div>
             )}
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 4 }}>最新版本</div>
-            <div style={{ fontSize: 18, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: statusColor }}>
+            <div className="mb-1 text-xs text-muted-foreground">最新版本</div>
+            <div className={cn('font-mono text-lg font-semibold', stateTextClass)}>
               {lat}
             </div>
             {info?.latest?.commit && (
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4, fontFamily: 'ui-monospace, monospace' }}>
+              <div className="mt-1 font-mono text-[11px] text-muted-foreground">
                 提交 {info.latest.commit}
               </div>
             )}
             {info?.latest?.published_at && (
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">
                 发布于 {formatWithAdminTimeZone(new Date(info.latest.published_at), 'zh-CN', {})}
               </div>
             )}
           </div>
         </div>
 
-        <div style={{ marginTop: 18, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="mt-[18px] flex flex-wrap items-center gap-2.5">
           {checkState === 'update' ? (
-            <button
-              type="button"
+            <Button
               onClick={doUpgrade}
               disabled={upgrading || loading || !runtimeUpgradeSupported}
-              style={primaryBtnStyle}
               title={runtimeUpgradeSupported ? undefined : 'Bun 容器版需要通过部署命令更新'}
-              onMouseEnter={(e) => { if (!upgrading && !loading && runtimeUpgradeSupported) e.currentTarget.style.background = statusColorDark; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = statusColor; }}
             >
-              <i className={`fa-solid ${upgrading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-down'}`} />
+              {upgrading ? <Loader2 className="size-4 animate-spin" /> : <CloudDownload className="size-4" />}
               {upgrading ? '升级中…' : runtimeUpgradeSupported ? '一键升级到 ' + lat : '检测到新版本，需手动部署'}
-            </button>
+            </Button>
           ) : checkState === 'unknown' ? (
-            <button type="button" disabled style={primaryBtnStyle}>
-              <i className="fa-solid fa-triangle-exclamation" />
+            <Button variant="outline" disabled className="border-amber-500/40 text-amber-600 dark:text-amber-400">
+              <TriangleAlert className="size-4" />
               版本检查失败
-            </button>
+            </Button>
           ) : (
             // Up-to-date — still let the admin force a re-pull. Useful
             // when latest == current but the user suspects a botched
             // previous upgrade (network blip during compose pull, image
             // layers half-cached, etc.), or when they just want to
             // redeploy the same tag.
-            <button
-              type="button"
+            <Button
               onClick={doUpgrade}
               disabled={upgrading || loading || !runtimeUpgradeSupported}
-              style={{ ...primaryBtnStyle, cursor: upgrading || loading || !runtimeUpgradeSupported ? 'not-allowed' : 'pointer' }}
+              className={primaryFillClass}
               title="重新拉取当前版本并重启容器"
-              onMouseEnter={(e) => { if (!upgrading && !loading && runtimeUpgradeSupported) e.currentTarget.style.background = statusColorDark; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = statusColor; }}
             >
-              <i className={`fa-solid ${upgrading ? 'fa-spinner fa-spin' : 'fa-arrows-rotate'}`} />
+              {upgrading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
               {upgrading ? '重新部署中…' : runtimeUpgradeSupported ? '重新部署 ' + cur : 'Bun 容器模式'}
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
-            onClick={() => load(true)}
-            disabled={loading || upgrading}
-            style={secondaryBtnStyle}
-            onMouseEnter={(e) => { if (!loading && !upgrading) { e.currentTarget.style.borderColor = statusColor; e.currentTarget.style.color = statusColor; } }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text)'; }}
-          >
-            <i className={`fa-solid ${loading ? 'fa-spinner fa-spin' : 'fa-arrows-rotate'}`} />
+          <Button variant="outline" onClick={() => load(true)} disabled={loading || upgrading}>
+            <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
             刷新检查
-          </button>
+          </Button>
           <div style={{ flex: 1 }} />
           {info?.latest?.url && (
-            <a href={info.latest.url} target="_blank" rel="noopener" style={{ fontSize: 12, color: 'var(--color-text-dim)' }}>
-              在 GitHub 查看 <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: 10, marginLeft: 2 }} />
+            <a href={info.latest.url} target="_blank" rel="noopener" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+              在 GitHub 查看 <ExternalLink className="size-2.5" />
             </a>
           )}
         </div>
 
         {info?.error && (
-          <div style={{ marginTop: 12, padding: '8px 12px', background: 'var(--color-error-bg)', borderLeft: '3px solid #dc2626', color: 'var(--color-error-text)', fontSize: 12 }}>
-            <i className="fa-solid fa-circle-exclamation" style={{ marginRight: 6 }} />
+          <div className="mt-3 flex items-center gap-1.5 border-l-[3px] border-destructive bg-destructive/10 text-xs text-destructive" style={{ padding: '8px 12px' }}>
+            <CircleAlert className="size-3.5 shrink-0" />
             {info.error}
           </div>
         )}
         {!runtimeUpgradeSupported && (
-          <div style={{ marginTop: 12, padding: '10px 12px', background: '#f8fafc', borderLeft: '3px solid #64748b', color: '#334155', fontSize: 12, lineHeight: 1.7 }}>
-            <i className="fa-solid fa-terminal" style={{ marginRight: 6 }} />
+          <div className="mt-3 border-l-[3px] border-muted-foreground bg-muted text-xs text-foreground" style={{ padding: '10px 12px', lineHeight: 1.7 }}>
+            <Terminal className="mr-1.5 inline size-3.5" />
             当前 Bun 版不在运行时操作 Docker。更新请在部署目录执行：
-            <code style={{ marginLeft: 6, fontFamily: 'ui-monospace,monospace' }}>docker compose pull app && docker compose up -d app</code>
+            <code className="ml-1.5 font-mono">docker compose pull app && docker compose up -d app</code>
           </div>
         )}
       </div>
 
       {/* Changelog */}
       {info?.latest?.body && (
-        <div style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface)', padding: '20px 24px', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="fa-solid fa-clipboard-list" style={{ color: 'var(--color-primary)' }} />
+        <div className="rounded-lg border border-border bg-card" style={{ padding: '20px 24px', marginBottom: 16 }}>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <ClipboardList className="size-4 text-primary" />
             更新内容 — {info.latest.version}
           </h3>
           <div
-            className="changelog-body"
-            style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--color-text)' }}
+            className="changelog-body text-sm text-foreground"
+            style={{ lineHeight: 1.7 }}
             dangerouslySetInnerHTML={{ __html: renderChangelog(info.latest.body) }}
           />
         </div>
@@ -616,126 +594,124 @@ export default function SystemUpdatePanel() {
       {/* 升级日志重开按钮 —— 模态框被用户关掉后还能再打开（只要状态在）。
           升级进行中保持显示，方便用户随时观察 */}
       {upgradeStatus && (upgrading || upgradeStatus.log_tail) && !logModalOpen && (
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant={upgradeStatus.running ? 'default' : 'outline'}
           onClick={() => setLogModalOpen(true)}
-          className="btn btn-sm"
-          style={{
-            marginBottom: 16,
-            background: upgradeStatus.running ? 'var(--color-primary)' : 'var(--color-bg-soft)',
-            color: upgradeStatus.running ? '#fff' : 'var(--color-text)',
-            border: '1px solid var(--color-border)',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-          }}
+          style={{ marginBottom: 16 }}
         >
-          <i
-            className={`fa-solid ${upgradeStatus.running ? 'fa-spinner fa-spin' : upgradeStatus.success ? 'fa-circle-check' : 'fa-circle-xmark'}`}
-            style={{ color: upgradeStatus.running ? '#fff' : upgradeStatus.success ? 'var(--color-success)' : 'var(--color-error)' }}
-          />
+          {upgradeStatus.running
+            ? <Loader2 className="size-4 animate-spin" />
+            : upgradeStatus.success
+            ? <CircleCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+            : <CircleX className="size-4 text-destructive" />}
           {upgradeStatus.running ? '查看升级进度…' : upgradeStatus.success ? '查看升级日志（成功）' : '查看升级日志（失败）'}
-        </button>
+        </Button>
       )}
 
       {/* 升级日志模态框 —— 1Panel-style 终端面板 + 语义高亮 + 自动
           滚动到最新一行 + 新行 fade-in 动画。
           每行 className="upgrade-log-line" 触发 CSS 关键帧，新挂载的
-          DOM 节点（即新出现的行）自动跑一次飘入动画 */}
-      <Modal
-        isOpen={logModalOpen && !!upgradeStatus && (upgrading || !!upgradeStatus.log_tail)}
-        onClose={() => setLogModalOpen(false)}
-        title={
-          upgradeStatus?.running
-            ? '升级进行中 — 实时日志'
-            : upgradeStatus?.success
-            ? '升级完成 — 日志归档'
-            : '升级失败 — 错误日志'
-        }
-        size="xl"
-      >
-        <div style={{
-          background: '#0a0e1a',
-          color: '#cbd5e1',
-          padding: 0,
-          fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
-          fontSize: 12.5,
-          lineHeight: 1.75,
-          borderRadius: 6,
-          border: '1px solid #1e293b',
-          margin: '-20px -20px',  /* 抵消 Modal 内部 padding 让终端贴边 */
-        }}>
-          {/* 顶部状态条：spinner / 对勾 / 叉 + 文案 */}
+          DOM 节点（即新出现的行）自动跑一次飘入动画。
+          终端面板刻意保持深色（两种主题下都是暗色终端观感），
+          因此内部颜色沿用硬编码 hex，不走语义 token。 */}
+      <Dialog open={logModalOpen && !!upgradeStatus && (upgrading || !!upgradeStatus.log_tail)} onOpenChange={(o) => !o && setLogModalOpen(false)}>
+        <DialogContent className="max-w-[860px] max-h-[calc(100vh-32px)] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {upgradeStatus?.running
+                ? '升级进行中 — 实时日志'
+                : upgradeStatus?.success
+                ? '升级完成 — 日志归档'
+                : '升级失败 — 错误日志'}
+            </DialogTitle>
+          </DialogHeader>
           <div style={{
-            fontSize: 11.5,
-            color: '#94a3b8',
-            padding: '14px 20px 10px',
-            borderBottom: '1px solid #1e293b',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            fontWeight: 500,
-            letterSpacing: 0.3,
-            background: 'linear-gradient(180deg, #0f1729 0%, #0a0e1a 100%)',
+            background: '#0a0e1a',
+            color: '#cbd5e1',
+            padding: 0,
+            fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+            fontSize: 12.5,
+            lineHeight: 1.75,
+            borderRadius: 6,
+            border: '1px solid #1e293b',
+            margin: '0 -24px -24px',  /* 抵消 DialogContent 内部 padding 让终端贴边 */
           }}>
-            <i
-              className={`fa-solid ${upgradeStatus?.running ? 'fa-spinner fa-spin' : upgradeStatus?.success ? 'fa-circle-check' : 'fa-circle-xmark'}`}
-              style={{ color: upgradeStatus?.running ? '#60a5fa' : upgradeStatus?.success ? '#4ade80' : '#f87171', fontSize: 14 }}
-            />
-            <span style={{ color: '#cbd5e1' }}>
-              {upgradeStatus?.running ? '正在拉取镜像 / 重建容器…' : upgradeStatus?.success ? '完成' : '失败'}
-            </span>
-            {upgradeStatus?.started_at && (
-              <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
-                started: {formatWithAdminTimeZone(new Date(upgradeStatus.started_at), 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+            {/* 顶部状态条：spinner / 对勾 / 叉 + 文案 */}
+            <div style={{
+              fontSize: 11.5,
+              color: '#94a3b8',
+              padding: '14px 20px 10px',
+              borderBottom: '1px solid #1e293b',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontWeight: 500,
+              letterSpacing: 0.3,
+              background: 'linear-gradient(180deg, #0f1729 0%, #0a0e1a 100%)',
+            }}>
+              {upgradeStatus?.running
+                ? <Loader2 className="animate-spin" size={14} style={{ color: '#60a5fa' }} />
+                : upgradeStatus?.success
+                ? <CircleCheck size={14} style={{ color: '#4ade80' }} />
+                : <CircleX size={14} style={{ color: '#f87171' }} />}
+              <span style={{ color: '#cbd5e1' }}>
+                {upgradeStatus?.running ? '正在拉取镜像 / 重建容器…' : upgradeStatus?.success ? '完成' : '失败'}
               </span>
-            )}
-          </div>
+              {upgradeStatus?.started_at && (
+                <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
+                  started: {formatWithAdminTimeZone(new Date(upgradeStatus.started_at), 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                </span>
+              )}
+            </div>
 
-          {/* 日志正文 —— max-height 控制滚动，ref 存到 logScrollRef
-              方便 useEffect 调 scrollIntoView */}
-          <div
-            ref={logScrollRef}
-            style={{
-              maxHeight: '60vh',
-              minHeight: 280,
-              overflowY: 'auto',
-              padding: '12px 20px 16px',
-            }}
-          >
-            {(upgradeStatus?.log_tail || '').split('\n').filter(Boolean).map((line, i) => (
-              <div
-                key={i}
-                className="upgrade-log-line"
-                dangerouslySetInnerHTML={{ __html: highlightLogLine(line) }}
-              />
-            ))}
-            {!upgradeStatus?.log_tail && (
-              <div style={{ color: '#64748b' }}>
-                <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: 6 }} />
-                正在启动 sidecar 容器...
+            {/* 日志正文 —— max-height 控制滚动，ref 存到 logScrollRef
+                方便 useEffect 调 scrollIntoView */}
+            <div
+              ref={logScrollRef}
+              style={{
+                maxHeight: '60vh',
+                minHeight: 280,
+                overflowY: 'auto',
+                padding: '12px 20px 16px',
+              }}
+            >
+              {(upgradeStatus?.log_tail || '').split('\n').filter(Boolean).map((line, i) => (
+                <div
+                  key={i}
+                  className="upgrade-log-line"
+                  dangerouslySetInnerHTML={{ __html: highlightLogLine(line) }}
+                />
+              ))}
+              {!upgradeStatus?.log_tail && (
+                <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Loader2 className="animate-spin" size={13} />
+                  正在启动 sidecar 容器...
+                </div>
+              )}
+              {/* 末尾哨兵：useEffect 会让它 scrollIntoView，强制日志贴底显示 */}
+              <div ref={logEndRef} style={{ height: 1 }} />
+            </div>
+
+            {/* 底部进度条（running 时无限循环动画，完成后固定） */}
+            {upgradeStatus?.running && (
+              <div style={{
+                height: 2,
+                background: '#1e293b',
+                overflow: 'hidden',
+                position: 'relative',
+              }}>
+                <div className="upgrade-log-progress-bar" />
               </div>
             )}
-            {/* 末尾哨兵：useEffect 会让它 scrollIntoView，强制日志贴底显示 */}
-            <div ref={logEndRef} style={{ height: 1 }} />
           </div>
-
-          {/* 底部进度条（running 时无限循环动画，完成后固定） */}
-          {upgradeStatus?.running && (
-            <div style={{
-              height: 2,
-              background: '#1e293b',
-              overflow: 'hidden',
-              position: 'relative',
-            }}>
-              <div className="upgrade-log-progress-bar" />
-            </div>
-          )}
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       {/* Data preservation notice */}
-      <div style={{ border: '1px solid var(--color-border)', background: '#fefce8', padding: '14px 18px', fontSize: 12, color: '#713f12', marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <i className="fa-solid fa-shield-halved" />
+      <div className="border border-amber-500/30 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300" style={{ padding: '14px 18px', marginBottom: 24, borderRadius: 8 }}>
+        <div className="mb-1.5 flex items-center gap-1.5 font-semibold">
+          <ShieldCheck className="size-3.5" />
           升级安全保证
         </div>
         <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
@@ -747,52 +723,44 @@ export default function SystemUpdatePanel() {
       </div>
 
       {/* ================= Release history / changelog ================= */}
-      <div style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface)' }}>
-        <div style={{
-          padding: '14px 20px', borderBottom: '1px solid var(--color-border)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-        }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="fa-solid fa-clock-rotate-left" style={{ color: 'var(--color-primary)' }} />
+      <div className="rounded-lg border border-border bg-card">
+        <div className="flex items-center justify-between gap-2 border-b border-border" style={{ padding: '14px 20px' }}>
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground" style={{ margin: 0 }}>
+            <History className="size-4 text-primary" />
             更新历史
-            {releases && <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 400 }}>最近 {releases.length} 个发布</span>}
+            {releases && <span className="text-[11px] font-normal text-muted-foreground">最近 {releases.length} 个发布</span>}
           </h3>
-          <button
-            type="button"
-            className="btn"
-            style={{ fontSize: 12, padding: '4px 10px' }}
-            onClick={() => loadReleases(true)}
-          >
-            <i className="fa-solid fa-arrows-rotate" style={{ marginRight: 4 }} />
+          <Button variant="outline" size="sm" onClick={() => loadReleases(true)}>
+            <RefreshCw className="size-3.5" />
             刷新
-          </button>
+          </Button>
         </div>
 
         {releasesErr && (
-          <div style={{ padding: '10px 20px', background: 'var(--color-error-bg)', borderBottom: '1px solid #fca5a5', color: 'var(--color-error-text)', fontSize: 12 }}>
-            <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 6 }} />
+          <div className="flex flex-wrap items-center gap-1 border-b border-destructive/40 bg-destructive/10 text-xs text-destructive" style={{ padding: '10px 20px' }}>
+            <TriangleAlert className="size-3.5" />
             {releasesErr}
             {' · '}
-            <a href="https://github.com/utterlog/utterlog/releases" target="_blank" rel="noopener" style={{ color: 'inherit', textDecoration: 'underline' }}>
+            <a href="https://github.com/utterlog/utterlog/releases" target="_blank" rel="noopener" className="underline">
               在 GitHub 查看
             </a>
           </div>
         )}
 
         {releases === null ? (
-          <div style={{ padding: '40px 20px', textAlign: 'center', fontSize: 14, color: 'var(--color-text-dim)' }}>
-            <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: 6 }} />
+          <div className="flex items-center justify-center gap-1.5 text-center text-sm text-muted-foreground" style={{ padding: '40px 20px' }}>
+            <Loader2 className="size-4 animate-spin" />
             加载更新历史…
           </div>
         ) : releases.length === 0 ? (
-          <div style={{ padding: '40px 20px', textAlign: 'center', fontSize: 14, color: 'var(--color-text-dim)' }}>
+          <div className="text-center text-sm text-muted-foreground" style={{ padding: '40px 20px' }}>
             还没有发布的 tag 版本。开发阶段的改动请看{' '}
             <a
               href="https://github.com/utterlog/utterlog/commits/main"
               target="_blank" rel="noopener"
-              style={{ color: 'var(--color-primary)' }}
+              className="inline-flex items-center gap-1 text-primary"
             >
-              GitHub 提交历史 <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: 10 }} />
+              GitHub 提交历史 <ExternalLink className="size-2.5" />
             </a>
           </div>
         ) : (
@@ -801,54 +769,48 @@ export default function SystemUpdatePanel() {
               const isOpen = expanded.has(rel.id);
               const isCurrent = info?.current.version === rel.tag_name;
               return (
-                <div key={rel.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                <div key={rel.id} className="border-b border-border">
                   <button
                     type="button"
                     onClick={() => toggleExpand(rel.id)}
-                    style={{
-                      width: '100%', padding: '14px 20px',
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      textAlign: 'left', color: 'var(--color-text)',
-                    }}
+                    className="flex w-full items-center gap-3 text-left text-foreground"
+                    style={{ padding: '14px 20px' }}
                   >
-                    <i className={`fa-solid fa-chevron-${isOpen ? 'down' : 'right'}`} style={{ fontSize: 11, color: 'var(--color-text-muted)', width: 10 }} />
-                    <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 14, fontWeight: 600, color: 'var(--color-primary)' }}>
+                    {isOpen
+                      ? <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
+                      : <ChevronRight className="size-3 shrink-0 text-muted-foreground" />}
+                    <span className="font-mono text-sm font-semibold text-primary">
                       {rel.tag_name}
                     </span>
                     {isCurrent && (
-                      <span style={{ fontSize: 10, padding: '1px 6px', background: 'var(--color-success)', color: '#fff', fontWeight: 700 }}>
-                        CURRENT
-                      </span>
+                      <Badge className="border-transparent bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">CURRENT</Badge>
                     )}
                     {rel.prerelease && (
-                      <span style={{ fontSize: 10, padding: '1px 6px', background: 'var(--color-warning)', color: '#fff', fontWeight: 700 }}>
-                        PRE-RELEASE
-                      </span>
+                      <Badge className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400">PRE-RELEASE</Badge>
                     )}
                     {rel.name && rel.name !== rel.tag_name && (
-                      <span style={{ fontSize: 14, color: 'var(--color-text-dim)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span className="flex-1 truncate text-sm text-muted-foreground">
                         {rel.name}
                       </span>
                     )}
                     {!rel.name || rel.name === rel.tag_name ? <span style={{ flex: 1 }} /> : null}
-                    <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'ui-monospace,monospace', whiteSpace: 'nowrap' }}>
+                    <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
                       {fmtDate(rel.published_at)}
                     </span>
                   </button>
                   {isOpen && (
-                    <div style={{ padding: '2px 20px 18px 42px', borderTop: '1px dashed var(--color-border)' }}>
+                    <div className="border-t border-dashed border-border" style={{ padding: '2px 20px 18px 42px' }}>
                       <div
-                        className="changelog-body"
-                        style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--color-text)' }}
-                        dangerouslySetInnerHTML={{ __html: renderChangelog(rel.body) || '<p style="color:var(--color-text-muted);font-size:12px">（无更新说明）</p>' }}
+                        className="changelog-body text-sm text-foreground"
+                        style={{ lineHeight: 1.7 }}
+                        dangerouslySetInnerHTML={{ __html: renderChangelog(rel.body) || '<p class="text-xs text-muted-foreground">（无更新说明）</p>' }}
                       />
                       <a
                         href={rel.html_url}
                         target="_blank" rel="noopener"
-                        style={{ display: 'inline-block', marginTop: 10, fontSize: 11, color: 'var(--color-text-dim)' }}
+                        className="mt-2.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
                       >
-                        在 GitHub 查看完整发布 <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: 9, marginLeft: 2 }} />
+                        在 GitHub 查看完整发布 <ExternalLink className="size-2.5" />
                       </a>
                     </div>
                   )}
@@ -860,71 +822,45 @@ export default function SystemUpdatePanel() {
       </div>
 
       {/* Upgrade confirm dialog — styled modal, replaces native confirm() */}
-      <Modal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)} title={checkState === 'update' ? '确认一键升级' : '确认重新部署'} size="sm">
-        <div>
-          <div style={{
-            width: 44, height: 44, margin: '0 auto 14px',
-            background: 'var(--color-primary-soft, #E6EEFB)',
-            color: 'var(--color-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20,
-          }}>
-            <i className={`fa-solid ${checkState === 'update' ? 'fa-cloud-arrow-down' : 'fa-arrows-rotate'}`} />
-          </div>
-          <div style={{ fontSize: 14, color: 'var(--color-text)', lineHeight: 1.7, textAlign: 'center', marginBottom: 6 }}>
-            {checkState === 'update' ? (
-              <>即将升级到 <b style={{ color: 'var(--color-primary)', fontFamily: 'ui-monospace,monospace' }}>{lat}</b></>
-            ) : (
-              <>即将重新部署 <b style={{ color: 'var(--color-primary)', fontFamily: 'ui-monospace,monospace' }}>{cur}</b></>
-            )}
-          </div>
-          <div style={{ fontSize: 14, color: 'var(--color-text-dim)', lineHeight: 1.7, textAlign: 'center', marginBottom: 16 }}>
-            {checkState === 'update'
-              ? '拉取最新镜像并重建容器，约需 30-60 秒。'
-              : '重新拉取当前版本镜像并重建容器，约需 30-60 秒。'}
-            <br />
-            期间后台短暂不可访问，数据、配置、上传文件全部保留。
-          </div>
+      <Dialog open={confirmOpen} onOpenChange={(o) => !o && setConfirmOpen(false)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{checkState === 'update' ? '确认一键升级' : '确认重新部署'}</DialogTitle>
+          </DialogHeader>
+          <div>
+            <div className="mx-auto mb-3.5 flex items-center justify-center rounded-md bg-primary/10 text-primary" style={{ width: 44, height: 44 }}>
+              {checkState === 'update' ? <CloudDownload className="size-5" /> : <RefreshCw className="size-5" />}
+            </div>
+            <div className="mb-1.5 text-center text-sm text-foreground" style={{ lineHeight: 1.7 }}>
+              {checkState === 'update' ? (
+                <>即将升级到 <b className="font-mono text-primary">{lat}</b></>
+              ) : (
+                <>即将重新部署 <b className="font-mono text-primary">{cur}</b></>
+              )}
+            </div>
+            <div className="mb-4 text-center text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
+              {checkState === 'update'
+                ? '拉取最新镜像并重建容器，约需 30-60 秒。'
+                : '重新拉取当前版本镜像并重建容器，约需 30-60 秒。'}
+              <br />
+              期间后台短暂不可访问，数据、配置、上传文件全部保留。
+            </div>
 
-          <div style={{
-            background: '#fefce8', border: '1px solid #fde68a',
-            padding: '10px 14px', fontSize: 12, color: '#713f12',
-            lineHeight: 1.6, marginBottom: 18,
-          }}>
-            <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 6 }} />
-            升级过程中请勿刷新或关闭此页面。
-          </div>
+            <div className="mb-[18px] flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300" style={{ padding: '10px 14px', lineHeight: 1.6 }}>
+              <TriangleAlert className="size-3.5 shrink-0" />
+              升级过程中请勿刷新或关闭此页面。
+            </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button
-              type="button"
-              onClick={() => setConfirmOpen(false)}
-              style={{
-                height: 38, padding: '0 18px',
-                background: 'var(--color-surface, #fff)', color: 'var(--color-text)',
-                border: '1px solid var(--color-border)',
-                fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              onClick={runUpgrade}
-              style={{
-                height: 38, padding: '0 18px',
-                background: 'var(--color-primary)', color: '#fff',
-                border: '1px solid var(--color-primary)',
-                fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-              }}
-            >
-              <i className={`fa-solid ${checkState === 'update' ? 'fa-cloud-arrow-down' : 'fa-arrows-rotate'}`} />
-              {checkState === 'update' ? '确认升级' : '确认重新部署'}
-            </button>
+            <div className="flex justify-end gap-2.5">
+              <Button variant="outline" onClick={() => setConfirmOpen(false)}>取消</Button>
+              <Button onClick={runUpgrade}>
+                {checkState === 'update' ? <CloudDownload className="size-4" /> : <RefreshCw className="size-4" />}
+                {checkState === 'update' ? '确认升级' : '确认重新部署'}
+              </Button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

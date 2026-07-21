@@ -2,10 +2,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import { adminTimeZone } from '@/lib/timezone';
 
 // SVG Ring chart component
-function Ring({ percent, size = 48, stroke = 4, color = 'var(--color-primary)', label, sub }: {
+function Ring({ percent, size = 48, stroke = 4, color = 'var(--primary)', label, sub }: {
   percent: number; size?: number; stroke?: number; color?: string; label: string; sub?: string;
 }) {
   const r = (size - stroke) / 2;
@@ -15,7 +16,7 @@ function Ring({ percent, size = 48, stroke = 4, color = 'var(--color-primary)', 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--color-border)" strokeWidth={stroke} />
+        <circle className="stroke-border" cx={size/2} cy={size/2} r={r} fill="none" strokeWidth={stroke} />
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
           strokeDasharray={`${circ}`} strokeDashoffset={`${offset}`} strokeLinecap="round"
           style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
@@ -23,8 +24,8 @@ function Ring({ percent, size = 48, stroke = 4, color = 'var(--color-primary)', 
       <span style={{ fontSize: '10px', fontWeight: 600, marginTop: '-32px', position: 'relative' }}>
         {clampedPct % 1 === 0 ? clampedPct : clampedPct.toFixed(1)}%
       </span>
-      <span className="text-dim" style={{ fontSize: '9px', marginTop: '14px' }}>{label}</span>
-      {sub && <span className="text-dim" style={{ fontSize: '8px' }}>{sub}</span>}
+      <span className="text-muted-foreground" style={{ fontSize: '9px', marginTop: '14px' }}>{label}</span>
+      {sub && <span className="text-muted-foreground" style={{ fontSize: '8px' }}>{sub}</span>}
     </div>
   );
 }
@@ -68,25 +69,31 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
   const diskPct = Number(data?.disk?.percent ?? 0);
 
   return (
-    <div className="border-t border-line" style={{ flexShrink: 0 }}>
+    <div className="border-t border-border" style={{ flexShrink: 0 }}>
       <button
         onClick={() => setExpanded(!expanded)}
+        className="text-muted-foreground"
         style={{
           width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
           padding: isOpen ? '10px 12px' : '10px 0',
           justifyContent: isOpen ? 'flex-start' : 'center',
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '12px', color: 'var(--color-text-dim)', transition: 'all 0.15s',
+          fontSize: '12px', transition: 'all 0.15s',
         }}
       >
-        <span style={{
-          width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
-          background: data == null ? 'var(--color-text-dim)' : ok ? 'var(--color-success)' : 'var(--color-error)',
-          boxShadow: data == null ? 'none' : ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
-          animation: data == null ? 'none' : 'pulse-dot 2s infinite',
-        }} />
+        <span
+          className={cn(
+            'shrink-0 rounded-full',
+            data == null ? 'bg-muted-foreground' : ok ? 'bg-emerald-500' : 'bg-destructive',
+          )}
+          style={{
+            width: '8px', height: '8px',
+            boxShadow: data == null ? 'none' : ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
+            animation: data == null ? 'none' : 'pulse-dot 2s infinite',
+          }}
+        />
         {isOpen && <span>{t('admin.system.status', '系统状态')}</span>}
-        {isOpen && <span style={{ marginLeft: '4px', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-text-sub)' }}>{clock}</span>}
+        {isOpen && <span className="text-muted-foreground" style={{ marginLeft: '4px', fontFamily: 'monospace', fontSize: '11px' }}>{clock}</span>}
         {isOpen && (
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{
             marginLeft: 'auto', transition: 'transform 0.2s',
@@ -121,7 +128,7 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
                   <img src={`https://flagcdn.io/flags/4x3/${String(data.server.country_code).toLowerCase()}.svg`} alt="" style={{ width: '14px', height: '10px' }} />
                 )}
                 {data.server?.ip || '-'}
-                {data.server?.ip_source === 'local' && <span className="text-dim">({t('admin.system.localIp', '本地')})</span>}
+                {data.server?.ip_source === 'local' && <span className="text-muted-foreground">({t('admin.system.localIp', '本地')})</span>}
               </span>
             </InfoRow>
             {[
@@ -186,8 +193,8 @@ function formatDisk(value?: string | number): string {
 
 function InfoRow({ label, value, children }: { label: string; value?: string; children?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0', borderBottom: '1px solid var(--color-divider)' }}>
-      <span className="text-dim">{label}</span>
+    <div className="border-b border-border" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
+      <span className="text-muted-foreground">{label}</span>
       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         {children ?? value}
       </span>

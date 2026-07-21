@@ -17,6 +17,7 @@ import {
   RatingStars,
 } from '@/components/ui';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
+import { Textarea } from '@/components/ui/shadcn';
 
 export default function moviesPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -96,12 +97,12 @@ export default function moviesPage() {
           <Input label="豆瓣/NeoDB 链接" value={form.platform_url || ""} onChange={(e) => setForm({...form, platform_url: e.target.value})} />
           <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({...form, cover_url: url})} folder="movies" />
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
+            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
             <RatingStars value={form.rating || 0} onChange={(v) => setForm({...form, rating: v})} />
           </div>
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
-            <textarea className="input focus-ring" rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
+            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
+            <Textarea rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
           </div>
           <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
         </div>

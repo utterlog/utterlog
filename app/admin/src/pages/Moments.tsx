@@ -1,9 +1,20 @@
-import { Check, CloudUpload, Hash, LocateFixed, MapPin, Search, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Check, CloudUpload, Hash, LocateFixed, MapPin, Search, Pencil, Plus, Trash2, X, Loader2 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 import { momentsApi, optionsApi, mediaApi, geoApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, Input, Modal, ConfirmDialog, EmptyPanel, LoadingState } from '@/components/ui';
+import {
+  Button,
+  ConfirmDialog,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  EmptyState,
+  Input,
+  Label,
+  LoadingState,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Textarea,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { usePageBadge } from '@/layouts/DashboardLayout';
 
@@ -225,12 +236,12 @@ export default function MomentsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap', rowGap: 8 }}>
+      <div className="mb-5 flex flex-wrap items-center gap-3">
         {/* Left: 关键词 + 发布（正方形 icon-only） */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="flex items-center gap-1.5">
           <Button
-            className="btn-square"
-            variant={showTagManager ? 'primary' : 'secondary'}
+            variant={showTagManager ? 'default' : 'outline'}
+            size="icon"
             title={t('admin.posts.columns.keywords', '关键词')}
             aria-label={t('admin.posts.columns.keywords', '关键词')}
             onClick={() => setShowTagManager(!showTagManager)}
@@ -238,7 +249,7 @@ export default function MomentsPage() {
             <Hash className="size-4" />
           </Button>
           <Button
-            className="btn-square"
+            size="icon"
             title={t('admin.moments.publish', '发布')}
             aria-label={t('admin.moments.publish', '发布')}
             onClick={openCreate}
@@ -248,15 +259,16 @@ export default function MomentsPage() {
         </div>
 
         {/* Right: 搜索框 + 🔍 + ✕ */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="ml-auto flex items-center gap-1.5">
           <Input
             placeholder={t('admin.moments.searchPlaceholder', '检索内容 / 位置 / 关键词')}
             value={search}
             onChange={(e: any) => setSearch(e.target.value)}
-            style={{ width: 220 }}
+            className="w-56"
           />
           <Button
-            className="btn-square"
+            variant="outline"
+            size="icon"
             title={t('common.search', '搜索')}
             aria-label={t('common.search', '搜索')}
             onClick={() => { /* 即时搜索：按钮仅作视觉锚点 */ }}
@@ -265,8 +277,8 @@ export default function MomentsPage() {
           </Button>
           {search && (
             <Button
-              className="btn-square"
-              variant="secondary"
+              variant="outline"
+              size="icon"
               title={t('admin.common.clear', '清空')}
               aria-label={t('admin.common.clear', '清空')}
               onClick={() => setSearch('')}
@@ -279,24 +291,20 @@ export default function MomentsPage() {
 
       {/* Tag Manager */}
       {showTagManager && (
-        <div className="card" style={{ padding: '20px', marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '16px' }}>{t('admin.moments.tagManagerTitle', '说说关键词管理')}</h3>
-          <p className="text-dim" style={{ fontSize: '12px', marginBottom: '16px' }}>{t('admin.moments.tagManagerHint', '管理前台说说发布时可选的关键词标签，发布后显示在卡片右上角')}</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+        <div className="mb-4 rounded-lg border border-border bg-card p-5">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">{t('admin.moments.tagManagerTitle', '说说关键词管理')}</h3>
+          <p className="mb-4 text-xs text-muted-foreground">{t('admin.moments.tagManagerHint', '管理前台说说发布时可选的关键词标签，发布后显示在卡片右上角')}</p>
+          <div className="mb-4 flex flex-wrap gap-2">
             {tags.map(tag => {
               const isEditing = editingTag?.old === tag;
               const draft = isEditing ? editingTag!.draft : tag;
               return (
                 <span
                   key={tag}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '6px',
-                    padding: '5px 12px', borderRadius: '16px', fontSize: '13px',
-                    background: isEditing ? 'var(--color-bg-card)' : 'var(--color-bg-soft)',
-                    color: 'var(--color-text-sub)',
-                    border: `1px solid ${isEditing ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                    transition: 'border-color 0.12s, background 0.12s',
-                  }}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[13px] text-muted-foreground transition-colors',
+                    isEditing ? 'border-primary bg-card' : 'border-border bg-muted',
+                  )}
                 >
                   {isEditing ? (
                     <input
@@ -309,28 +317,16 @@ export default function MomentsPage() {
                       }}
                       onFocus={e => e.currentTarget.select()}
                       onBlur={() => commitTagEdit(tag, draft)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        outline: 'none',
-                        color: 'var(--color-text-main)',
-                        fontSize: '13px',
-                        padding: 0,
-                        // 让宽度跟着内容长度走（中英混排粗略按 1ch ≈ 1 字符宽估算）
-                        width: `${Math.max(2, draft.length) + 1}ch`,
-                        fontFamily: 'inherit',
-                      }}
+                      className="border-none bg-transparent p-0 text-[13px] text-foreground outline-none"
+                      // 让宽度跟着内容长度走（中英混排粗略按 1ch ≈ 1 字符宽估算）
+                      style={{ width: `${Math.max(2, draft.length) + 1}ch`, fontFamily: 'inherit' }}
                     />
                   ) : (
                     <button
                       type="button"
                       onClick={() => setEditingTag({ old: tag, draft: tag })}
                       title={t('admin.common.edit', '编辑')}
-                      style={{
-                        background: 'none', border: 'none', padding: 0,
-                        color: 'inherit', font: 'inherit',
-                        cursor: 'text',
-                      }}
+                      className="cursor-text border-none bg-transparent p-0 font-[inherit] text-inherit"
                     >
                       {tag}
                     </button>
@@ -345,14 +341,7 @@ export default function MomentsPage() {
                     }}
                     title={isEditing ? t('admin.common.confirm', '确认') : t('admin.common.edit', '编辑')}
                     aria-label={isEditing ? t('admin.common.confirm', '确认') : t('admin.common.edit', '编辑')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 0,
-                      color: isEditing ? 'var(--color-primary)' : 'var(--color-text-dim)',
-                      display: 'flex',
-                    }}
+                    className={cn('flex cursor-pointer border-none bg-transparent p-0', isEditing ? 'text-primary' : 'text-muted-foreground')}
                   >
                     <Check className="size-4" />
                   </button>
@@ -360,16 +349,15 @@ export default function MomentsPage() {
               );
             })}
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input
-              className="input focus-ring"
+          <div className="flex gap-2">
+            <Input
               placeholder={t('admin.moments.newTagPlaceholder', '输入新关键词')}
               value={newTag}
               onChange={e => setNewTag(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-              style={{ width: '180px' }}
+              className="w-[180px]"
             />
-            <Button variant="secondary" onClick={addTag}>{t('admin.common.add', '添加')}</Button>
+            <Button variant="outline" onClick={addTag}>{t('admin.common.add', '添加')}</Button>
           </div>
         </div>
       )}
@@ -377,42 +365,38 @@ export default function MomentsPage() {
       {loading ? (
         <LoadingState label={t('common.loading', '加载中…')} />
       ) : moments.length === 0 ? (
-        <EmptyPanel title={t('admin.moments.empty', '还没有说说')} actionText={t('admin.moments.first', '发第一条')} onAction={openCreate} />
+        <EmptyState title={t('admin.moments.empty', '还没有说说')} actionText={t('admin.moments.first', '发第一条')} onAction={openCreate} />
       ) : filteredMoments.length === 0 ? (
-        <EmptyPanel title={t('admin.moments.noMatch', '没有匹配 "{q}" 的说说', { q: search })} fontSize="14px" />
+        <EmptyState title={t('admin.moments.noMatch', '没有匹配 "{q}" 的说说', { q: search })} />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="flex flex-col gap-3">
           {filteredMoments.map((m) => (
-            <div key={m.id} className="card" style={{ padding: '16px 20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1 }}>
-                  <p className="text-main" style={{ fontSize: '14px', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{m.content}</p>
+            <div key={m.id} className="rounded-lg border border-border bg-card px-5 py-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{m.content}</p>
                   {parseImages(m).length > 0 && (
-                    <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
                       {parseImages(m).map((url: string, idx: number) => (
-                        <img key={idx} src={url} alt="" style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--color-border)' }} />
+                        <img key={idx} src={url} alt="" className="size-14 rounded border border-border object-cover" />
                       ))}
                     </div>
                   )}
-                  <div className="text-dim" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', marginTop: '10px' }}>
+                  <div className="mt-2.5 flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatTime(m.created_at)}</span>
                     {m.location && <><span>&middot;</span><MapPin className="size-4" /><span>{m.location}</span></>}
                     {m.mood && (
                       <>
                         <span>&middot;</span>
-                        <span style={{
-                          padding: '1px 8px', borderRadius: '8px', fontSize: '11px',
-                          background: 'var(--color-bg-soft)', color: 'var(--color-primary)',
-                          fontWeight: 500,
-                        }}>{m.mood}</span>
+                        <span className="rounded bg-muted px-2 py-px text-[11px] font-medium text-primary">{m.mood}</span>
                       </>
                     )}
                     {m.visibility !== 'public' && <><span>&middot;</span><span>{m.visibility === 'private' ? t('admin.moments.visibility.private', '仅自己') : t('admin.moments.visibility.unlisted', '不公开')}</span></>}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '4px', flexShrink: 0, marginLeft: '12px' }}>
-                  <button onClick={() => openEdit(m)} className="action-btn primary" title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></button>
-                  <button onClick={() => setDeleteId(m.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></button>
+                <div className="ml-3 flex shrink-0 gap-1">
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(m)} title={t('admin.common.edit', '编辑')}><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(m.id)} title={t('admin.common.delete', '删除')}><Trash2 className="size-4" /></Button>
                 </div>
               </div>
             </div>
@@ -420,99 +404,107 @@ export default function MomentsPage() {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? t('admin.moments.editMoment', '编辑说说') : t('admin.moments.publishMoment', '发布说说')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <textarea className="input focus-ring" rows={5} placeholder={t('admin.moments.contentPlaceholder', '说点什么…')} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} style={{ resize: 'vertical' }} />
+      <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingId ? t('admin.moments.editMoment', '编辑说说') : t('admin.moments.publishMoment', '发布说说')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <Textarea rows={5} placeholder={t('admin.moments.contentPlaceholder', '说点什么…')} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="resize-y" />
 
-          {/* Image upload */}
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '12px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.moments.imageAttachments', '图片附件')}</label>
-            {formImages.length > 0 && (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                {formImages.map((url, idx) => (
-                  <div key={idx} style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-                    <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <button onClick={() => removeFormImage(idx)} style={{ position: 'absolute', top: '2px', right: '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <X className="size-4" />
-                    </button>
-                  </div>
+            {/* Image upload */}
+            <div>
+              <Label className="mb-1.5 block">{t('admin.moments.imageAttachments', '图片附件')}</Label>
+              {formImages.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {formImages.map((url, idx) => (
+                    <div key={idx} className="relative size-16 overflow-hidden rounded border border-border">
+                      <img src={url} alt="" className="size-full object-cover" />
+                      <button onClick={() => removeFormImage(idx)} className="absolute right-0.5 top-0.5 flex size-4 items-center justify-center rounded-full bg-black/50 text-white">
+                        <X className="size-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <label
+                className={cn(
+                  'inline-flex size-10 items-center justify-center rounded-md border border-input bg-background transition-colors hover:bg-accent',
+                  imgUploading ? 'cursor-wait opacity-60' : 'cursor-pointer',
+                )}
+                title={imgUploading ? t('admin.cover.uploading', '上传中…') : t('admin.cover.uploadImage', '上传图片')}
+              >
+                {imgUploading ? <Loader2 className="size-4 animate-spin" /> : <CloudUpload className="size-4" />}
+                <input type="file" accept="image/*" multiple className="hidden" onChange={handleImgUpload} disabled={imgUploading} />
+              </label>
+            </div>
+
+            {/* Tag selector */}
+            <div>
+              <Label className="mb-1.5 block">{t('admin.posts.columns.keywords', '关键词')}</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setForm({ ...form, mood: form.mood === tag ? '' : tag })}
+                    className={cn(
+                      'rounded-md border px-3 py-1 text-xs transition-colors',
+                      form.mood === tag ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground',
+                    )}
+                  >
+                    {tag}
+                  </button>
                 ))}
+                <Input
+                  placeholder={t('admin.posts.permalinkCustom', '自定义')}
+                  value={tags.includes(form.mood) ? '' : form.mood}
+                  onChange={e => setForm({ ...form, mood: e.target.value })}
+                  className="h-8 w-20 text-xs"
+                />
               </div>
-            )}
-            <label
-              className="btn btn-secondary btn-toolbar-square"
-              title={imgUploading ? t('admin.cover.uploading', '上传中…') : t('admin.cover.uploadImage', '上传图片')}
-              style={{ cursor: imgUploading ? 'wait' : 'pointer', opacity: imgUploading ? 0.6 : 1 }}
-            >
-              <CloudUpload className="size-4" />
-              <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImgUpload} disabled={imgUploading} />
-            </label>
-          </div>
+            </div>
 
-          {/* Tag selector */}
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '12px', fontWeight: 500, marginBottom: '6px' }}>{t('admin.posts.columns.keywords', '关键词')}</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {tags.map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => setForm({ ...form, mood: form.mood === tag ? '' : tag })}
-                  style={{
-                    padding: '4px 12px', borderRadius: '0', fontSize: '12px',
-                    border: `1px solid ${form.mood === tag ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                    color: form.mood === tag ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                    background: form.mood === tag ? 'rgba(var(--color-primary-rgb,0,0,0),0.06)' : 'transparent',
-                    cursor: 'pointer', transition: 'all 0.2s',
-                  }}
-                >
-                  {tag}
-                </button>
-              ))}
-              <input
-                className="input focus-ring"
-                placeholder={t('admin.posts.permalinkCustom', '自定义')}
-                value={tags.includes(form.mood) ? '' : form.mood}
-                onChange={e => setForm({ ...form, mood: e.target.value })}
-                style={{ width: '80px', fontSize: '12px', padding: '4px 8px' }}
+            <div className="flex items-center gap-1.5">
+              <Input
+                placeholder={t('admin.moments.locationPlaceholder', '位置（可选 / 点右侧定位获取）')}
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                className="flex-1"
               />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                title={t('admin.moments.fetchLocation', '获取当前位置')}
+                aria-label={t('admin.moments.fetchLocation', '获取当前位置')}
+                onClick={fetchCurrentLocation}
+                disabled={locating}
+              >
+                {locating ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
+              </Button>
+            </div>
+            <Select value={form.visibility} onValueChange={(v) => setForm({ ...form, visibility: v as string })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">{t('admin.moments.visibility.public', '公开')}</SelectItem>
+                <SelectItem value="unlisted">{t('admin.moments.visibility.unlisted', '不公开')}</SelectItem>
+                <SelectItem value="private">{t('admin.moments.visibility.private', '仅自己')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>{t('admin.common.cancel', '取消')}</Button>
+              <Button onClick={onSubmit} disabled={submitting}>
+                {submitting && <Loader2 className="size-4 animate-spin" />}{editingId ? t('admin.common.save', '保存') : t('admin.moments.publish', '发布')}
+              </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
 
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input
-              className="input focus-ring"
-              placeholder={t('admin.moments.locationPlaceholder', '位置（可选 / 点右侧定位获取）')}
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              style={{ flex: 1 }}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              className="btn-square"
-              title={t('admin.moments.fetchLocation', '获取当前位置')}
-              aria-label={t('admin.moments.fetchLocation', '获取当前位置')}
-              onClick={fetchCurrentLocation}
-              loading={locating}
-              disabled={locating}
-            >
-              <LocateFixed className="size-4" />
-            </Button>
-          </div>
-          <select className="input" value={form.visibility} onChange={(e) => setForm({ ...form, visibility: e.target.value })}>
-            <option value="public">{t('admin.moments.visibility.public', '公开')}</option>
-            <option value="unlisted">{t('admin.moments.visibility.unlisted', '不公开')}</option>
-            <option value="private">{t('admin.moments.visibility.private', '仅自己')}</option>
-          </select>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>{t('admin.common.cancel', '取消')}</Button>
-            <Button onClick={onSubmit} loading={submitting}>{editingId ? t('admin.common.save', '保存') : t('admin.moments.publish', '发布')}</Button>
-          </div>
-        </div>
-      </Modal>
-
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title={t('admin.posts.confirmDeleteTitle', '确认删除')} message={t('admin.common.deleteIrreversible', '删除后无法恢复')} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title={t('admin.posts.confirmDeleteTitle', '确认删除')} message={t('admin.common.deleteIrreversible', '删除后无法恢复')} />
     </div>
   );
 }

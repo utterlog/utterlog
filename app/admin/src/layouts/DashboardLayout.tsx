@@ -1,4 +1,13 @@
 import { useState, useEffect, useRef, createContext, useContext, useMemo, type ReactNode } from 'react';
+import {
+  Gauge, SquarePen, Plus, Folder, Tag, MonitorPlay, FileText, FilePlus,
+  MessageCircle, MapPin, MessagesSquare, Bot, Users, Link as LinkIcon, Images,
+  GalleryVerticalEnd, Music, ListMusic, Film, Video, BookOpen, Gamepad2,
+  ShoppingBag, LineChart, ShieldCheck, Palette, Plug, Wrench, Database,
+  Settings, User, Globe, Sparkles, ScrollText, SlidersHorizontal, Pencil,
+  Clock, Ban, Trash2, UserPen, Home, ChevronUp, ChevronDown, LogOut,
+  type LucideIcon,
+} from 'lucide-react';
 import { useNavigate, useLocation } from '@/lib/router';
 import Sidebar from '@/components/layout/Sidebar';
 import NotificationBell from '@/components/layout/NotificationBell';
@@ -6,6 +15,7 @@ import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { getSiteOptions, loadSiteOptions } from '@/lib/site';
 import { setAdminTimeZone } from '@/lib/timezone';
+import { cn } from '@/lib/utils';
 
 // Page-level badge slot — pages call `setPageBadge(<span>共 58 条</span>)`
 // in useEffect, the global header renders it right after the page title.
@@ -17,51 +27,51 @@ export function usePageBadge() {
 }
 
 // Route-to-title map — displayed in header + document.title.
-// Icons reuse the sidebar FontAwesome classes for visual consistency.
-type PageMeta = { label: string; en: string; icon: string };
+// Icons reuse the sidebar lucide set for visual consistency.
+type PageMeta = { label: string; en: string; icon: LucideIcon | null };
 const pageTitleMap: Record<string, PageMeta> = {
-  '/':               { label: '仪表盘',        en: 'Dashboard',       icon: 'fa-solid fa-gauge' },
-  '/posts':          { label: '文章管理',      en: 'Posts',           icon: 'fa-solid fa-pen-to-square' },
-  '/posts/create':   { label: '新建文章',      en: 'New Post',        icon: 'fa-regular fa-plus' },
-  '/posts/categories': { label: '文章分类',    en: 'Categories',      icon: 'fa-regular fa-folder' },
-  '/posts/tags':     { label: '文章标签',      en: 'Tags',            icon: 'fa-regular fa-tag' },
+  '/':               { label: '仪表盘',        en: 'Dashboard',       icon: Gauge },
+  '/posts':          { label: '文章管理',      en: 'Posts',           icon: SquarePen },
+  '/posts/create':   { label: '新建文章',      en: 'New Post',        icon: Plus },
+  '/posts/categories': { label: '文章分类',    en: 'Categories',      icon: Folder },
+  '/posts/tags':     { label: '文章标签',      en: 'Tags',            icon: Tag },
   // v2.4.2: 影视专业模式 —— 复用 ul_posts (type='video')，独立 sidebar 入口
   // 直达 /films 路由（前端单独页面，预设 type=video 过滤）。
-  '/films':          { label: '影视管理',      en: 'Films',           icon: 'fa-regular fa-clapperboard-play' },
-  '/films/create':   { label: '新建影视',      en: 'New Film',        icon: 'fa-regular fa-plus' },
-  '/pages':          { label: '页面管理',      en: 'Pages',           icon: 'fa-regular fa-file-lines' },
-  '/pages/create':   { label: '新建页面',      en: 'New Page',        icon: 'fa-regular fa-file-plus' },
-  '/moments':        { label: '说说管理',      en: 'Moments',         icon: 'fa-solid fa-comment-dots' },
-  '/footprints':     { label: '足迹管理',      en: 'Footprints',      icon: 'fa-regular fa-map-location-dot' },
-  '/comments':       { label: '评论管理',      en: 'Comments',        icon: 'fa-regular fa-comments' },
-  '/comments/ai':    { label: 'AI 评论队列',    en: 'AI Comment Queue', icon: 'fa-regular fa-robot' },
-  '/follows':        { label: '关注管理',      en: 'Follows',         icon: 'fa-solid fa-user-group' },
-  '/links':          { label: '友链管理',      en: 'Links',           icon: 'fa-solid fa-link' },
-  '/media':          { label: '媒体库',        en: 'Media',           icon: 'fa-regular fa-images' },
-  '/albums':         { label: '相册管理',      en: 'Albums',          icon: 'fa-regular fa-rectangle-history' },
-  '/music':          { label: '音乐管理',      en: 'Music',           icon: 'fa-regular fa-music' },
-  '/music/playlists': { label: '歌单管理',     en: 'Playlists',       icon: 'fa-regular fa-list-music' },
-  '/playlists':      { label: '歌单管理',      en: 'Playlists',       icon: 'fa-regular fa-list-music' },
-  '/movies':         { label: '电影管理',      en: 'Movies',          icon: 'fa-regular fa-film' },
-  '/videos':         { label: '视频管理',      en: 'Videos',          icon: 'fa-regular fa-video' },
-  '/books':          { label: '图书管理',      en: 'Books',           icon: 'fa-regular fa-book' },
-  '/games':          { label: '游戏管理',      en: 'Games',           icon: 'fa-regular fa-gamepad' },
-  '/goods':          { label: '好物管理',      en: 'Goods',           icon: 'fa-regular fa-bag-shopping' },
-  '/analytics':      { label: '数据统计',      en: 'Analytics',       icon: 'fa-solid fa-chart-line' },
-  '/security':       { label: '安全设置',      en: 'Security',        icon: 'fa-solid fa-shield-halved' },
-  '/themes':         { label: '主题管理',      en: 'Themes',          icon: 'fa-solid fa-palette' },
-  '/plugins':        { label: '插件管理',      en: 'Plugins',         icon: 'fa-solid fa-plug' },
-  '/tools':          { label: '工具',          en: 'Tools',           icon: 'fa-solid fa-screwdriver-wrench' },
-  '/backup':         { label: '备份恢复',      en: 'Backup',          icon: 'fa-solid fa-database' },
-  '/settings':       { label: '系统设置',      en: 'Settings',        icon: 'fa-solid fa-gear' },
-  '/profile':        { label: '个人资料',      en: 'Profile',         icon: 'fa-regular fa-user' },
-  '/utterlog':       { label: 'Utterlog 网络', en: 'Network',         icon: 'fa-solid fa-globe' },
-  '/ai':             { label: 'AI 助手',       en: 'AI Assistant',    icon: 'fa-solid fa-wand-magic-sparkles' },
-  '/ai/logs':        { label: 'AI 调用日志',   en: 'AI Logs',         icon: 'fa-regular fa-list-timeline' },
-  '/ai-settings':    { label: 'AI 设置',       en: 'AI Settings',     icon: 'fa-solid fa-sliders' },
+  '/films':          { label: '影视管理',      en: 'Films',           icon: MonitorPlay },
+  '/films/create':   { label: '新建影视',      en: 'New Film',        icon: Plus },
+  '/pages':          { label: '页面管理',      en: 'Pages',           icon: FileText },
+  '/pages/create':   { label: '新建页面',      en: 'New Page',        icon: FilePlus },
+  '/moments':        { label: '说说管理',      en: 'Moments',         icon: MessageCircle },
+  '/footprints':     { label: '足迹管理',      en: 'Footprints',      icon: MapPin },
+  '/comments':       { label: '评论管理',      en: 'Comments',        icon: MessagesSquare },
+  '/comments/ai':    { label: 'AI 评论队列',    en: 'AI Comment Queue', icon: Bot },
+  '/follows':        { label: '关注管理',      en: 'Follows',         icon: Users },
+  '/links':          { label: '友链管理',      en: 'Links',           icon: LinkIcon },
+  '/media':          { label: '媒体库',        en: 'Media',           icon: Images },
+  '/albums':         { label: '相册管理',      en: 'Albums',          icon: GalleryVerticalEnd },
+  '/music':          { label: '音乐管理',      en: 'Music',           icon: Music },
+  '/music/playlists': { label: '歌单管理',     en: 'Playlists',       icon: ListMusic },
+  '/playlists':      { label: '歌单管理',      en: 'Playlists',       icon: ListMusic },
+  '/movies':         { label: '电影管理',      en: 'Movies',          icon: Film },
+  '/videos':         { label: '视频管理',      en: 'Videos',          icon: Video },
+  '/books':          { label: '图书管理',      en: 'Books',           icon: BookOpen },
+  '/games':          { label: '游戏管理',      en: 'Games',           icon: Gamepad2 },
+  '/goods':          { label: '好物管理',      en: 'Goods',           icon: ShoppingBag },
+  '/analytics':      { label: '数据统计',      en: 'Analytics',       icon: LineChart },
+  '/security':       { label: '安全设置',      en: 'Security',        icon: ShieldCheck },
+  '/themes':         { label: '主题管理',      en: 'Themes',          icon: Palette },
+  '/plugins':        { label: '插件管理',      en: 'Plugins',         icon: Plug },
+  '/tools':          { label: '工具',          en: 'Tools',           icon: Wrench },
+  '/backup':         { label: '备份恢复',      en: 'Backup',          icon: Database },
+  '/settings':       { label: '系统设置',      en: 'Settings',        icon: Settings },
+  '/profile':        { label: '个人资料',      en: 'Profile',         icon: User },
+  '/utterlog':       { label: 'Utterlog 网络', en: 'Network',         icon: Globe },
+  '/ai':             { label: 'AI 助手',       en: 'AI Assistant',    icon: Sparkles },
+  '/ai/logs':        { label: 'AI 调用日志',   en: 'AI Logs',         icon: ScrollText },
+  '/ai-settings':    { label: 'AI 设置',       en: 'AI Settings',     icon: SlidersHorizontal },
 };
 
-const EMPTY: PageMeta = { label: '', en: '', icon: '' };
+const EMPTY: PageMeta = { label: '', en: '', icon: null };
 
 function isLoopbackHost(hostname: string): boolean {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
@@ -99,17 +109,17 @@ function resolveTitle(pathname: string): PageMeta {
   // Exact match first
   if (pageTitleMap[pathname]) return pageTitleMap[pathname];
   // Dynamic segments
-  if (pathname.startsWith('/posts/edit/')) return { label: '编辑文章', en: 'Edit Post', icon: 'fa-regular fa-pen' };
-  if (pathname.startsWith('/pages/edit/')) return { label: '编辑页面', en: 'Edit Page', icon: 'fa-regular fa-pen' };
+  if (pathname.startsWith('/posts/edit/')) return { label: '编辑文章', en: 'Edit Post', icon: Pencil };
+  if (pathname.startsWith('/pages/edit/')) return { label: '编辑页面', en: 'Edit Page', icon: Pencil };
   if (pathname.startsWith('/comments/')) {
     const s = pathname.split('/')[2];
     const map: Record<string, PageMeta> = {
-      pending: { label: '待审核评论', en: 'Pending Comments', icon: 'fa-regular fa-clock' },
-      spam:    { label: '垃圾评论',   en: 'Spam',             icon: 'fa-regular fa-ban' },
-      trash:   { label: '回收站',     en: 'Trash',            icon: 'fa-regular fa-trash' },
-      mine:    { label: '我的评论',   en: 'My Comments',      icon: 'fa-regular fa-user-pen' },
+      pending: { label: '待审核评论', en: 'Pending Comments', icon: Clock },
+      spam:    { label: '垃圾评论',   en: 'Spam',             icon: Ban },
+      trash:   { label: '回收站',     en: 'Trash',            icon: Trash2 },
+      mine:    { label: '我的评论',   en: 'My Comments',      icon: UserPen },
     };
-    return map[s] || { label: '评论管理', en: 'Comments', icon: 'fa-regular fa-comments' };
+    return map[s] || { label: '评论管理', en: 'Comments', icon: MessagesSquare };
   }
   // Longest-prefix fallback
   const sorted = Object.keys(pageTitleMap).sort((a, b) => b.length - a.length);
@@ -135,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pageMeta = resolveTitle(pathname);
   const pageTitle = t(pageKey(pageMeta), pageMeta.label);
   const pageEn = locale === 'zh-CN' ? pageMeta.en : '';
-  const pageIcon = pageMeta.icon;
+  const PageIcon = pageMeta.icon;
 
   // Reset the badge slot whenever the route changes — pages that don't
   // set one shouldn't inherit the previous page's badge.
@@ -229,41 +239,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <header
-          className="bg-card"
+          className="border-b border-border bg-card"
           style={{
             height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 20px', borderBottom: '1px solid var(--color-border)', flexShrink: 0,
+            padding: '0 20px', flexShrink: 0,
           }}
         >
           {/* Left: current page icon + title (中文 + English) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            {pageIcon && (
-              <i className={pageIcon} style={{ fontSize: 14, color: 'var(--color-primary)', flexShrink: 0 }} />
-            )}
-            <h1 style={{
-              fontSize: 14, fontWeight: 600, margin: 0,
-              color: 'var(--color-text-main)',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
+            {PageIcon && <PageIcon className="size-3.5 shrink-0 text-primary" />}
+            <h1
+              className="text-foreground"
+              style={{
+                fontSize: 14, fontWeight: 600, margin: 0,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}
+            >
               {pageTitle || t('admin.common.admin', '管理后台')}
             </h1>
             {pageEn && (
-              <span style={{
-                fontSize: 12, fontWeight: 400,
-                color: 'var(--color-text-dim)',
-                letterSpacing: '0.02em',
-                flexShrink: 0,
-              }}>
+              <span
+                className="text-muted-foreground"
+                style={{
+                  fontSize: 12, fontWeight: 400,
+                  letterSpacing: '0.02em',
+                  flexShrink: 0,
+                }}
+              >
                 · {pageEn}
               </span>
             )}
             {pageBadge && (
-              <span style={{
-                fontSize: 12, fontWeight: 400,
-                color: 'var(--color-text-dim)',
-                flexShrink: 0,
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-              }}>
+              <span
+                className="text-muted-foreground"
+                style={{
+                  fontSize: 12, fontWeight: 400,
+                  flexShrink: 0,
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                }}
+              >
                 <span aria-hidden="true">·</span>
                 {pageBadge}
               </span>
@@ -277,81 +291,81 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               target="_blank"
               rel="noopener noreferrer"
               title={t('admin.header.visitSite', '访问首页')}
-              className="text-sub"
+              className="text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
               style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 width: 34, height: 34, textDecoration: 'none',
-                transition: 'background 0.15s, color 0.15s',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-bg-soft)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--color-text-sub)'; }}
             >
-              <i className="fa-regular fa-house" style={{ fontSize: 14 }} />
+              <Home className="size-3.5" />
             </a>
 
             <NotificationBell />
 
-            <div style={{ width: 1, height: 20, background: 'var(--color-border)', margin: '0 6px' }} />
+            <div className="bg-border" style={{ width: 1, height: 20, margin: '0 6px' }} />
 
             {/* User menu (dropdown) */}
             <div ref={menuRef} style={{ position: 'relative' }}>
               <button
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
+                className={cn(
+                  'text-foreground transition-colors',
+                  menuOpen ? 'bg-muted' : 'hover:bg-muted',
+                )}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px 5px 6px',
-                  fontSize: 14, background: menuOpen ? 'var(--color-bg-soft)' : 'transparent',
-                  border: 'none', cursor: 'pointer', color: 'var(--color-text-main)',
-                  transition: 'background 0.15s',
+                  fontSize: 14, border: 'none', cursor: 'pointer',
                 }}
-                onMouseEnter={(e) => { if (!menuOpen) e.currentTarget.style.background = 'var(--color-bg-soft)'; }}
-                onMouseLeave={(e) => { if (!menuOpen) e.currentTarget.style.background = 'transparent'; }}
               >
                 {user?.avatar ? (
                   <img src={user.avatar} alt="" style={{ width: 24, height: 24, objectFit: 'cover', borderRadius: '50%' }} />
                 ) : (
-                  <div style={{
-                    width: 24, height: 24, borderRadius: '50%', background: 'var(--color-bg-card)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: '1px solid var(--color-border)',
-                  }}>
-                    <i className="fa-regular fa-user" style={{ fontSize: 11, color: 'var(--color-text-dim)' }} />
+                  <div
+                    className="border border-border bg-card"
+                    style={{
+                      width: 24, height: 24, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <User className="size-[11px] text-muted-foreground" />
                   </div>
                 )}
                 <span style={{ fontWeight: 500 }}>{user?.nickname || user?.username || t('admin.user.admin', '管理员')}</span>
-                <i className={`fa-solid fa-chevron-${menuOpen ? 'up' : 'down'}`} style={{ fontSize: 9, color: 'var(--color-text-dim)', marginLeft: 2 }} />
+                {menuOpen
+                  ? <ChevronUp className="ml-0.5 size-2.5 text-muted-foreground" />
+                  : <ChevronDown className="ml-0.5 size-2.5 text-muted-foreground" />}
               </button>
 
               {menuOpen && (
                 <div
                   role="menu"
+                  className="border border-border bg-popover text-popover-foreground"
                   style={{
                     position: 'absolute', right: 0, top: 'calc(100% + 6px)',
                     minWidth: 180,
-                    background: 'var(--color-bg-card)',
-                    border: '1px solid var(--color-border)',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     zIndex: 50,
                     padding: '4px 0',
                   }}
                 >
-                  <div style={{ padding: '8px 14px 10px', borderBottom: '1px solid var(--color-divider)' }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-main)' }}>
+                  <div className="border-b border-border" style={{ padding: '8px 14px 10px' }}>
+                    <div className="text-foreground" style={{ fontSize: 14, fontWeight: 600 }}>
                       {user?.nickname || user?.username}
                     </div>
                     {user?.email && (
-                      <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }}>
+                      <div className="text-muted-foreground" style={{ fontSize: 11, marginTop: 2 }}>
                         {user.email}
                       </div>
                     )}
                   </div>
 
-                  <MenuItem icon="fa-regular fa-user" label={t('admin.user.profile', '个人资料')} onClick={() => go('/profile')} />
-                  <MenuItem icon="fa-regular fa-gear" label={t('admin.user.settings', '系统设置')} onClick={() => go('/settings')} />
+                  <MenuItem icon={User} label={t('admin.user.profile', '个人资料')} onClick={() => go('/profile')} />
+                  <MenuItem icon={Settings} label={t('admin.user.settings', '系统设置')} onClick={() => go('/settings')} />
 
-                  <div style={{ height: 1, background: 'var(--color-divider)', margin: '4px 0' }} />
+                  <div className="bg-border" style={{ height: 1, margin: '4px 0' }} />
 
-                  <MenuItem icon="fa-solid fa-right-from-bracket" label={t('admin.user.logout', '退出登录')} onClick={handleLogout} danger />
+                  <MenuItem icon={LogOut} label={t('admin.user.logout', '退出登录')} onClick={handleLogout} danger />
                 </div>
               )}
             </div>
@@ -359,7 +373,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         <main
-          className="bg-main"
+          className="bg-background"
           style={{
             flex: 1,
             minHeight: 0,
@@ -395,23 +409,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 }
 
 function MenuItem({
-  icon, label, onClick, danger,
-}: { icon: string; label: string; onClick: () => void; danger?: boolean }) {
+  icon: Icon, label, onClick, danger,
+}: { icon: LucideIcon; label: string; onClick: () => void; danger?: boolean }) {
   return (
     <button
       type="button"
       role="menuitem"
       onClick={onClick}
+      className={cn(
+        'transition-colors hover:bg-muted',
+        danger ? 'text-destructive' : 'text-foreground',
+      )}
       style={{
         display: 'flex', alignItems: 'center', gap: 10, width: '100%',
         padding: '9px 14px', fontSize: 14, border: 'none', background: 'none',
-        color: danger ? 'var(--color-error)' : 'var(--color-text-main)',
-        cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s',
+        cursor: 'pointer', textAlign: 'left',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-bg-soft)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
     >
-      <i className={icon} style={{ fontSize: 12, width: 14, textAlign: 'center', color: danger ? 'var(--color-error)' : 'var(--color-text-sub)' }} />
+      <Icon className={cn('size-3.5', danger ? 'text-destructive' : 'text-muted-foreground')} />
       <span>{label}</span>
     </button>
   );

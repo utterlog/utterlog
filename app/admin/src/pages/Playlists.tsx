@@ -2,8 +2,19 @@
 import { useEffect, useState } from 'react';
 import { playlistsApi, musicApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Music, Plus, Pencil, Trash2, X } from 'lucide-react';
-import { Button, EmptyPanel, Input, LoadingState, Modal, ConfirmDialog } from '@/components/ui';
+import { Music, Plus, Pencil, Trash2, X, Loader2 } from 'lucide-react';
+import {
+  Button,
+  ConfirmDialog,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  EmptyState,
+  Input,
+  Label,
+  LoadingState,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Textarea,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 
 export default function PlaylistsPage() {
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -117,49 +128,47 @@ export default function PlaylistsPage() {
 
   return (
     <div>
-
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="mb-5 flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Music className="size-5 text-primary" />
-          <h1 className="text-main" style={{ fontSize: '18px', fontWeight: 700 }}>歌单管理</h1>
+          <h1 className="text-lg font-semibold text-foreground">歌单管理</h1>
         </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-          <Button variant="secondary" onClick={() => setShowImport(true)}>导入歌单</Button>
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(true)}>导入歌单</Button>
           <Button onClick={openCreate}><Plus className="size-4" />创建歌单</Button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '16px' }}>
+      <div className="flex gap-4">
         {/* Left: playlist list */}
-        <div style={{ width: '300px', flexShrink: 0 }}>
+        <div className="w-[300px] shrink-0">
           {loading ? (
-            <LoadingState padding="40px" />
+            <LoadingState />
           ) : playlists.length === 0 ? (
-            <EmptyPanel title="暂无歌单" actionText="创建" onAction={openCreate} padding="40px" />
+            <EmptyState title="暂无歌单" actionText="创建" onAction={openCreate} />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="flex flex-col gap-2">
               {playlists.map((p) => (
                 <div
                   key={p.id}
                   onClick={() => openPlaylist(p)}
-                  className="card card-hover"
-                  style={{
-                    padding: '14px 16px', cursor: 'pointer',
-                    borderColor: activePlaylist?.id === p.id ? 'var(--color-primary)' : undefined,
-                  }}
+                  className={cn(
+                    'cursor-pointer rounded-lg border bg-card px-4 py-3.5 transition-colors hover:border-primary',
+                    activePlaylist?.id === p.id ? 'border-primary' : 'border-border',
+                  )}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3 className="text-main" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="mb-0.5 text-sm font-semibold text-foreground">
                         {p.title}
-                        {p.is_default && <span style={{ fontSize: '10px', marginLeft: '6px', padding: '1px 4px', borderRadius: '2px', background: 'var(--color-bg-soft)', color: 'var(--color-primary)' }}>默认</span>}
+                        {p.is_default && <span className="ml-1.5 rounded-sm bg-muted px-1 py-px text-[10px] text-primary">默认</span>}
                       </h3>
-                      <p className="text-dim" style={{ fontSize: '12px' }}>{p.song_count || 0} 首</p>
+                      <p className="text-xs text-muted-foreground">{p.song_count || 0} 首</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-                      <button onClick={(e) => { e.stopPropagation(); openEdit(p); }} className="action-btn primary" title="编辑"><Pencil className="size-3.5" /></button>
-                      <button onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} className="action-btn danger" title="删除"><Trash2 className="size-3.5" /></button>
+                    <div className="flex shrink-0 gap-0.5">
+                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={(e) => { e.stopPropagation(); openEdit(p); }} title="编辑"><Pencil className="size-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteId(p.id); }} title="删除"><Trash2 className="size-3.5" /></Button>
                     </div>
                   </div>
                 </div>
@@ -169,115 +178,151 @@ export default function PlaylistsPage() {
         </div>
 
         {/* Right: playlist songs */}
-        <div style={{ flex: 1 }}>
+        <div className="flex-1">
           {activePlaylist ? (
-            <div className="card" style={{ padding: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <h2 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{activePlaylist.title}</h2>
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="mb-3.5 flex items-center justify-between">
+                <h2 className="text-[15px] font-semibold text-foreground">{activePlaylist.title}</h2>
                 <Button size="sm" onClick={loadAllMusic}><Plus className="size-4" />添加歌曲</Button>
               </div>
 
               {playlistSongs.length === 0 ? (
-                <EmptyPanel title="歌单暂无歌曲" padding="32px" fontSize="14px" />
+                <EmptyState title="歌单暂无歌曲" />
               ) : (
                 <div>
                   {playlistSongs.map((s: any, i: number) => (
-                    <div key={s.id} style={{
-                      display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 4px',
-                      borderBottom: i < playlistSongs.length - 1 ? '1px solid var(--color-divider)' : 'none',
-                    }}>
-                      <span className="text-dim" style={{ fontSize: '12px', width: '24px', textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
-                      {s.cover_url && <img src={s.cover_url} alt="" style={{ width: '36px', height: '36px', borderRadius: '1px', objectFit: 'cover', flexShrink: 0 }} />}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p className="text-main" style={{ fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</p>
-                        <p className="text-dim" style={{ fontSize: '11px' }}>{s.artist || ''}</p>
+                    <div
+                      key={s.id}
+                      className={cn(
+                        'flex items-center gap-2.5 px-1 py-2',
+                        i < playlistSongs.length - 1 && 'border-b border-border',
+                      )}
+                    >
+                      <span className="w-6 shrink-0 text-right text-xs text-muted-foreground">{i + 1}</span>
+                      {s.cover_url && <img src={s.cover_url} alt="" className="size-9 shrink-0 rounded-sm object-cover" />}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-medium text-foreground">{s.title}</p>
+                        <p className="text-[11px] text-muted-foreground">{s.artist || ''}</p>
                       </div>
-                      <span className="text-dim" style={{ fontSize: '11px', flexShrink: 0 }}>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
                         {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', local: '本地' }[s.platform as string] || s.platform || ''}
                       </span>
-                      <button onClick={() => removeSong(s.id)} className="action-btn danger" title="移除"><X className="size-3.5" /></button>
+                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeSong(s.id)} title="移除"><X className="size-3.5" /></Button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <EmptyPanel title="选择左侧歌单查看歌曲" padding="80px" fontSize="14px" />
+            <EmptyState title="选择左侧歌单查看歌曲" />
           )}
         </div>
       </div>
 
       {/* Create/Edit modal */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingId ? '编辑歌单' : '创建歌单'} size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <Input label="歌单名称" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
-          <Input label="封面 URL" value={form.cover_url} onChange={e => setForm({ ...form, cover_url: e.target.value })} placeholder="可选" />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>描述</label>
-            <textarea className="input focus-ring" rows={2} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+      <Dialog open={showModal} onOpenChange={(o) => !o && setShowModal(false)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{editingId ? '编辑歌单' : '创建歌单'}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-1.5">
+              <Label>歌单名称</Label>
+              <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>封面 URL</Label>
+              <Input value={form.cover_url} onChange={e => setForm({ ...form, cover_url: e.target.value })} placeholder="可选" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>描述</Label>
+              <Textarea rows={2} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+            </div>
+            <label className="flex items-center gap-2 text-[13px]">
+              <input type="checkbox" checked={form.is_default} onChange={e => setForm({ ...form, is_default: e.target.checked })} className="size-4 cursor-pointer accent-primary" />
+              <span className="text-muted-foreground">设为默认歌单</span>
+            </label>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setShowModal(false)}>取消</Button>
+              <Button onClick={onSubmit} disabled={submitting}>
+                {submitting && <Loader2 className="size-4 animate-spin" />}{editingId ? '保存' : '创建'}
+              </Button>
+            </div>
           </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-            <input type="checkbox" checked={form.is_default} onChange={e => setForm({ ...form, is_default: e.target.checked })} />
-            <span className="text-sub">设为默认歌单</span>
-          </label>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>取消</Button>
-            <Button onClick={onSubmit} loading={submitting}>{editingId ? '保存' : '创建'}</Button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       {/* Import modal */}
-      <Modal isOpen={showImport} onClose={() => setShowImport(false)} title="导入外部歌单" size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>平台</label>
-            <select className="input" value={importForm.server} onChange={e => setImportForm({ ...importForm, server: e.target.value })}>
-              <option value="netease">网易云音乐</option>
-              <option value="kugou">酷狗音乐</option>
-            </select>
+      <Dialog open={showImport} onOpenChange={(o) => !o && setShowImport(false)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>导入外部歌单</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-1.5">
+              <Label>平台</Label>
+              <Select value={importForm.server} onValueChange={v => setImportForm({ ...importForm, server: v as string })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="netease">网易云音乐</SelectItem>
+                  <SelectItem value="kugou">酷狗音乐</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>歌单 ID</Label>
+              <Input value={importForm.playlist_id} onChange={e => setImportForm({ ...importForm, playlist_id: e.target.value })} placeholder="从歌单链接中获取数字 ID" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>歌单名称</Label>
+              <Input value={importForm.title} onChange={e => setImportForm({ ...importForm, title: e.target.value })} placeholder="可选，不填默认为'导入歌单'" />
+            </div>
+            <p className="text-xs text-muted-foreground">网易云歌单 ID 在链接中：music.163.com/playlist?id=<strong>数字</strong></p>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setShowImport(false)}>取消</Button>
+              <Button onClick={handleImport} disabled={importing}>
+                {importing && <Loader2 className="size-4 animate-spin" />}导入
+              </Button>
+            </div>
           </div>
-          <Input label="歌单 ID" value={importForm.playlist_id} onChange={e => setImportForm({ ...importForm, playlist_id: e.target.value })} placeholder="从歌单链接中获取数字 ID" />
-          <Input label="歌单名称" value={importForm.title} onChange={e => setImportForm({ ...importForm, title: e.target.value })} placeholder="可选，不填默认为'导入歌单'" />
-          <p className="text-dim" style={{ fontSize: '12px' }}>网易云歌单 ID 在链接中：music.163.com/playlist?id=<strong>数字</strong></p>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-            <Button variant="secondary" onClick={() => setShowImport(false)}>取消</Button>
-            <Button onClick={handleImport} loading={importing}>导入</Button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       {/* Add song picker modal */}
-      <Modal isOpen={showAddSong} onClose={() => setShowAddSong(false)} title="添加歌曲到歌单" size="md">
-        <div>
-          <Input placeholder="搜索已有歌曲…" value={searchKeyword} onChange={e => setSearchKeyword(e.target.value)} style={{ marginBottom: '12px' }} />
-          <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-            {filteredMusic.length === 0 ? (
-              <p className="text-dim" style={{ textAlign: 'center', padding: '24px', fontSize: '13px' }}>
-                {allMusic.length === 0 ? '暂无歌曲，请先在音乐管理中添加' : '无匹配结果'}
-              </p>
-            ) : filteredMusic.map((m: any) => (
-              <div key={m.id} style={{
-                display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 4px',
-                borderBottom: '1px solid var(--color-divider)',
-              }}>
-                {m.cover_url && <img src={m.cover_url} alt="" style={{ width: '32px', height: '32px', borderRadius: '1px', objectFit: 'cover' }} />}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p className="text-main" style={{ fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.title}</p>
-                  <p className="text-dim" style={{ fontSize: '11px' }}>{m.artist}</p>
+      <Dialog open={showAddSong} onOpenChange={(o) => !o && setShowAddSong(false)}>
+        <DialogContent className="max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle>添加歌曲到歌单</DialogTitle>
+          </DialogHeader>
+          <div>
+            <Input placeholder="搜索已有歌曲…" value={searchKeyword} onChange={e => setSearchKeyword(e.target.value)} className="mb-3" />
+            <div className="max-h-[400px] overflow-auto">
+              {filteredMusic.length === 0 ? (
+                <p className="py-6 text-center text-[13px] text-muted-foreground">
+                  {allMusic.length === 0 ? '暂无歌曲，请先在音乐管理中添加' : '无匹配结果'}
+                </p>
+              ) : filteredMusic.map((m: any) => (
+                <div key={m.id} className="flex items-center gap-2.5 border-b border-border px-1 py-2">
+                  {m.cover_url && <img src={m.cover_url} alt="" className="size-8 shrink-0 rounded-sm object-cover" />}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium text-foreground">{m.title}</p>
+                    <p className="text-[11px] text-muted-foreground">{m.artist}</p>
+                  </div>
+                  {songIds.has(m.id) ? (
+                    <span className="text-[11px] text-muted-foreground">已添加</span>
+                  ) : (
+                    <Button size="sm" onClick={() => addSongToPlaylist(m.id)}><Plus className="size-4" /></Button>
+                  )}
                 </div>
-                {songIds.has(m.id) ? (
-                  <span className="text-dim" style={{ fontSize: '11px' }}>已添加</span>
-                ) : (
-                  <Button size="sm" onClick={() => addSongToPlaylist(m.id)}><Plus className="size-4" /></Button>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="确认删除" message="删除歌单后歌曲不会被删除" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title="确认删除" message="删除歌单后歌曲不会被删除" />
     </div>
   );
 }

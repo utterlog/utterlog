@@ -15,6 +15,9 @@ import {
   Modal,
   RatingStars,
 } from '@/components/ui';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Textarea } from '@/components/ui/shadcn';
+
+const categoryOptions: Record<string, string> = { tech: '数码', home: '家居', fashion: '穿搭', food: '美食', other: '其他' };
 
 export default function goodsPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -84,31 +87,32 @@ export default function goodsPage() {
           </div>
           <Input label="购买链接" value={form.purchase_url || ""} onChange={(e) => setForm({...form, purchase_url: e.target.value})} />
           <div>
-            <label className="text-sub" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>分类</label>
-            <select className="input" value={form.category || "other"} onChange={(e) => setForm({...form, category: e.target.value})}>
-              <option value="tech">数码</option>
-              <option value="home">家居</option>
-              <option value="fashion">穿搭</option>
-              <option value="food">美食</option>
-              <option value="other">其他</option>
-            </select>
+            <label className="text-muted-foreground" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>分类</label>
+            <Select items={categoryOptions} value={form.category || "other"} onValueChange={(v) => setForm({...form, category: v as string})}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(categoryOptions).map(([v, label]) => (
+                  <SelectItem key={v} value={v}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
-            <label className="text-sub" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>优点</label>
-            <textarea className="input focus-ring" rows={2} value={form.pros || ""} onChange={(e) => setForm({...form, pros: e.target.value})} />
+            <label className="text-muted-foreground" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>优点</label>
+            <Textarea rows={2} value={form.pros || ""} onChange={(e) => setForm({...form, pros: e.target.value})} />
           </div>
           <div>
-            <label className="text-sub" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>缺点</label>
-            <textarea className="input focus-ring" rows={2} value={form.cons || ""} onChange={(e) => setForm({...form, cons: e.target.value})} />
+            <label className="text-muted-foreground" style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px" }}>缺点</label>
+            <Textarea rows={2} value={form.cons || ""} onChange={(e) => setForm({...form, cons: e.target.value})} />
           </div>
           <Input label="封面图片 URL" value={form.cover_url || ''} onChange={(e) => setForm({...form, cover_url: e.target.value})} placeholder="https://..." />
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
+            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
             <RatingStars value={form.rating || 0} onChange={(v) => setForm({...form, rating: v})} />
           </div>
           <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
-            <textarea className="input focus-ring" rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
+            <label className="text-muted-foreground" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
+            <Textarea rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
           </div>
           <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
         </div>

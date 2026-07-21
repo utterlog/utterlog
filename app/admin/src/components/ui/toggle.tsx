@@ -37,8 +37,8 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
     return (
       <label className="flex items-center justify-between cursor-pointer" style={{ padding: '10px 0', ...style }}>
         <div className="flex-1">
-          {label && <span className="text-sm text-sub">{label}</span>}
-          {description && <p className="text-xs text-dim" style={{ marginTop: '2px' }}>{description}</p>}
+          {label && <span className="text-sm text-muted-foreground">{label}</span>}
+          {description && <p className="text-xs text-muted-foreground" style={{ marginTop: '2px' }}>{description}</p>}
         </div>
         <div style={{ position: 'relative', flexShrink: 0, marginLeft: '12px' }}>
           <input
@@ -52,15 +52,16 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
             {...rest}
           />
           <div
+            className={isOn ? 'bg-primary' : 'bg-input'}
             style={{
               width: '40px',
               height: '22px',
               borderRadius: '11px',
-              background: isOn ? 'var(--primary)' : 'var(--input)',
               transition: 'background 0.2s',
             }}
           />
           <div
+            className="bg-background"
             style={{
               position: 'absolute',
               top: '2px',
@@ -68,7 +69,6 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
               width: '18px',
               height: '18px',
               borderRadius: '50%',
-              background: '#fff',
               boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
               transition: 'transform 0.2s',
               transform: isOn ? 'translateX(18px)' : 'translateX(0)',

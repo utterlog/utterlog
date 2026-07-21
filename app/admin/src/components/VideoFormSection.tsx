@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Button, Input } from '@/components/ui';
+import {
+  Button, Input, Textarea,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/shadcn';
+import {
+  CloudDownload, Clapperboard, ListOrdered, ChevronUp, ChevronDown,
+  Trash2, ClipboardPaste, Plus, X,
+} from 'lucide-react';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
 
 // VideoFormSection —— 影视编辑器（v2.4.2）
@@ -253,110 +260,108 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
     setBulkPasteText('');
   };
 
-  const sectionTitleStyle: React.CSSProperties = { fontSize: 14, fontWeight: 600, color: 'var(--color-text-main)', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid var(--color-border)' };
-  const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'var(--color-text-sub)', marginBottom: 4 };
+  const sectionTitleCls = 'mb-3 flex items-center justify-between border-b border-border pb-2 text-sm font-semibold text-foreground';
+  const labelCls = 'mb-1 block text-xs text-muted-foreground';
 
   return (
-    <div className="card" style={{ padding: 20, marginBottom: 16 }}>
+    <div className="mb-4 rounded-lg border border-border bg-card p-5">
       {/* ============================= 元数据 ============================= */}
-      <h3 style={sectionTitleStyle}>
-        <i className="fa-regular fa-clapperboard-play" style={{ marginRight: 6 }} />
-        影视元数据
-        <span style={{ float: 'right' }}>
-          <Button variant="secondary" size="sm" onClick={() => setImportOpen(true)}>
-            <i className="fa-regular fa-cloud-arrow-down" style={{ fontSize: 11 }} /> 链接导入（豆瓣 / NeoDB）
-          </Button>
-        </span>
+      <h3 className={sectionTitleCls}>
+        <span className="flex items-center gap-1.5"><Clapperboard className="size-4" /> 影视元数据</span>
+        <Button variant="secondary" size="sm" onClick={() => setImportOpen(true)}>
+          <CloudDownload className="size-3" /> 链接导入（豆瓣 / NeoDB）
+        </Button>
       </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+      <div className="mb-4 grid grid-cols-3 gap-3">
         <div>
-          <label style={labelStyle}>类型</label>
-          <select className="input" value={meta.video_type} onChange={e => setMeta({ ...meta, video_type: e.target.value })}>
-            <option value="tv">剧集</option>
-            <option value="movie">电影</option>
-            <option value="show">综艺</option>
-            <option value="anime">动漫</option>
-            <option value="doc">纪录片</option>
-          </select>
+          <label className={labelCls}>类型</label>
+          <Select value={meta.video_type} onValueChange={(v) => setMeta({ ...meta, video_type: v ?? 'tv' })}>
+            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tv">剧集</SelectItem>
+              <SelectItem value="movie">电影</SelectItem>
+              <SelectItem value="show">综艺</SelectItem>
+              <SelectItem value="anime">动漫</SelectItem>
+              <SelectItem value="doc">纪录片</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <div><label style={labelStyle}>地区</label><Input value={meta.region} onChange={(e: any) => setMeta({ ...meta, region: e.target.value })} placeholder="美国 / 大陆 / 韩国" /></div>
-        <div><label style={labelStyle}>年份</label><Input type="number" value={String(meta.year)} onChange={(e: any) => setMeta({ ...meta, year: e.target.value })} placeholder="2024" /></div>
-        <div><label style={labelStyle}>总集数</label><Input type="number" value={String(meta.total_episodes)} onChange={(e: any) => setMeta({ ...meta, total_episodes: e.target.value })} placeholder="22" /></div>
-        <div><label style={labelStyle}>语言</label><Input value={meta.language} onChange={(e: any) => setMeta({ ...meta, language: e.target.value })} placeholder="中文 / 英语" /></div>
-        <div><label style={labelStyle}>豆瓣评分</label><Input type="number" step="0.1" value={String(meta.douban_rating)} onChange={(e: any) => setMeta({ ...meta, douban_rating: e.target.value })} placeholder="8.5" /></div>
-        <div style={{ gridColumn: 'span 3' }}><label style={labelStyle}>导演（用逗号分隔）</label><Input value={meta.directors} onChange={(e: any) => setMeta({ ...meta, directors: e.target.value })} placeholder="导演 1, 导演 2" /></div>
-        <div style={{ gridColumn: 'span 3' }}><label style={labelStyle}>主演（用逗号分隔）</label><Input value={meta.actors} onChange={(e: any) => setMeta({ ...meta, actors: e.target.value })} placeholder="主演 1, 主演 2" /></div>
-        <div style={{ gridColumn: 'span 3' }}><label style={labelStyle}>类型标签（用逗号分隔）</label><Input value={meta.genres} onChange={(e: any) => setMeta({ ...meta, genres: e.target.value })} placeholder="剧情, 悬疑, 越狱" /></div>
-        <div style={{ gridColumn: 'span 2' }}><label style={labelStyle}>豆瓣 URL</label><Input value={meta.douban_url} onChange={(e: any) => setMeta({ ...meta, douban_url: e.target.value })} placeholder="https://movie.douban.com/..." /></div>
-        <div><label style={labelStyle}>IMDB ID</label><Input value={meta.imdb_id} onChange={(e: any) => setMeta({ ...meta, imdb_id: e.target.value })} placeholder="tt0944947" /></div>
-        <div style={{ gridColumn: 'span 3' }}>
-          <label style={labelStyle}>温馨提示（显示在影视页底部）</label>
-          <textarea className="input" rows={2} value={meta.tips} onChange={e => setMeta({ ...meta, tips: e.target.value })}
-            style={{ resize: 'vertical' }} placeholder="例如：本片仅限学习交流..." />
+        <div><label className={labelCls}>地区</label><Input value={meta.region} onChange={(e: any) => setMeta({ ...meta, region: e.target.value })} placeholder="美国 / 大陆 / 韩国" /></div>
+        <div><label className={labelCls}>年份</label><Input type="number" value={String(meta.year)} onChange={(e: any) => setMeta({ ...meta, year: e.target.value })} placeholder="2024" /></div>
+        <div><label className={labelCls}>总集数</label><Input type="number" value={String(meta.total_episodes)} onChange={(e: any) => setMeta({ ...meta, total_episodes: e.target.value })} placeholder="22" /></div>
+        <div><label className={labelCls}>语言</label><Input value={meta.language} onChange={(e: any) => setMeta({ ...meta, language: e.target.value })} placeholder="中文 / 英语" /></div>
+        <div><label className={labelCls}>豆瓣评分</label><Input type="number" step="0.1" value={String(meta.douban_rating)} onChange={(e: any) => setMeta({ ...meta, douban_rating: e.target.value })} placeholder="8.5" /></div>
+        <div className="col-span-3"><label className={labelCls}>导演（用逗号分隔）</label><Input value={meta.directors} onChange={(e: any) => setMeta({ ...meta, directors: e.target.value })} placeholder="导演 1, 导演 2" /></div>
+        <div className="col-span-3"><label className={labelCls}>主演（用逗号分隔）</label><Input value={meta.actors} onChange={(e: any) => setMeta({ ...meta, actors: e.target.value })} placeholder="主演 1, 主演 2" /></div>
+        <div className="col-span-3"><label className={labelCls}>类型标签（用逗号分隔）</label><Input value={meta.genres} onChange={(e: any) => setMeta({ ...meta, genres: e.target.value })} placeholder="剧情, 悬疑, 越狱" /></div>
+        <div className="col-span-2"><label className={labelCls}>豆瓣 URL</label><Input value={meta.douban_url} onChange={(e: any) => setMeta({ ...meta, douban_url: e.target.value })} placeholder="https://movie.douban.com/..." /></div>
+        <div><label className={labelCls}>IMDB ID</label><Input value={meta.imdb_id} onChange={(e: any) => setMeta({ ...meta, imdb_id: e.target.value })} placeholder="tt0944947" /></div>
+        <div className="col-span-3">
+          <label className={labelCls}>温馨提示（显示在影视页底部）</label>
+          <Textarea rows={2} value={meta.tips} onChange={e => setMeta({ ...meta, tips: e.target.value })}
+            className="resize-y" placeholder="例如：本片仅限学习交流..." />
         </div>
       </div>
 
       {/* ============================= 剧集列表 ============================= */}
-      <h3 style={sectionTitleStyle}>
-        <i className="fa-regular fa-list-ol" style={{ marginRight: 6 }} />
-        剧集列表（{episodes.length} 集）
-        <span style={{ float: 'right', display: 'inline-flex', gap: 8 }}>
+      <h3 className={sectionTitleCls}>
+        <span className="flex items-center gap-1.5"><ListOrdered className="size-4" /> 剧集列表（{episodes.length} 集）</span>
+        <span className="inline-flex gap-2">
           <Button variant="secondary" size="sm" onClick={() => setBulkPasteOpen(true)}>
-            <i className="fa-regular fa-paste" style={{ fontSize: 11 }} /> 批量粘贴
+            <ClipboardPaste className="size-3" /> 批量粘贴
           </Button>
           <Button size="sm" onClick={addEpisode}>
-            <i className="fa-regular fa-plus" style={{ fontSize: 11 }} /> 添加一集
+            <Plus className="size-3" /> 添加一集
           </Button>
         </span>
       </h3>
 
       {episodes.length === 0 ? (
-        <div className="text-dim" style={{ padding: '40px 0', textAlign: 'center', fontSize: 14, border: '1px dashed var(--color-border)' }}>
+        <div className="rounded-lg border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
           暂无剧集。点上方「添加一集」或「批量粘贴」开始。
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {episodes.map((ep, idx) => (
-            <div key={idx} style={{ border: '1px solid var(--color-border)', padding: 12, background: 'var(--color-bg-card)' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '60px 120px 1fr 100px 96px', gap: 8, alignItems: 'center' }}>
+            <div key={idx} className="rounded-lg border border-border bg-card p-3">
+              <div className="grid items-center gap-2" style={{ gridTemplateColumns: '60px 120px 1fr 100px 96px' }}>
                 <Input value={String(ep.episode_no)} onChange={(e: any) => updateEpisode(idx, { episode_no: parseInt(e.target.value, 10) || 0 })}
-                  placeholder="集号" style={{ fontSize: 14, fontFamily: 'var(--font-mono, monospace)', textAlign: 'center' }} />
-                <Input value={ep.title} onChange={(e: any) => updateEpisode(idx, { title: e.target.value })} placeholder="第 01 集" style={{ fontSize: 14 }} />
+                  placeholder="集号" className="text-center font-mono text-sm" />
+                <Input value={ep.title} onChange={(e: any) => updateEpisode(idx, { title: e.target.value })} placeholder="第 01 集" className="text-sm" />
                 <Input value={ep.video_url} onChange={(e: any) => updateEpisode(idx, { video_url: e.target.value })}
-                  placeholder="主线视频 URL（mp4/m3u8/YouTube/Bilibili）" style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)' }} />
+                  placeholder="主线视频 URL（mp4/m3u8/YouTube/Bilibili）" className="font-mono text-xs" />
                 <Input value={ep.platform} onChange={(e: any) => updateEpisode(idx, { platform: e.target.value })}
-                  placeholder="自动" style={{ fontSize: 11 }} />
-                <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                  <button className="btn btn-secondary btn-square btn-sm" disabled={idx === 0} onClick={() => moveEpisode(idx, -1)} title="上移">
-                    <i className="fa-regular fa-chevron-up" style={{ fontSize: 11 }} />
-                  </button>
-                  <button className="btn btn-secondary btn-square btn-sm" disabled={idx === episodes.length - 1} onClick={() => moveEpisode(idx, 1)} title="下移">
-                    <i className="fa-regular fa-chevron-down" style={{ fontSize: 11 }} />
-                  </button>
-                  <button className="btn btn-secondary btn-square btn-sm" onClick={() => deleteEpisode(idx)} title="删除"
-                    style={{ color: 'var(--color-error)' }}>
-                    <i className="fa-regular fa-trash" style={{ fontSize: 11 }} />
-                  </button>
+                  placeholder="自动" className="text-[11px]" />
+                <div className="flex justify-end gap-1">
+                  <Button variant="outline" size="icon" className="size-8" disabled={idx === 0} onClick={() => moveEpisode(idx, -1)} title="上移">
+                    <ChevronUp className="size-3" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="size-8" disabled={idx === episodes.length - 1} onClick={() => moveEpisode(idx, 1)} title="下移">
+                    <ChevronDown className="size-3" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => deleteEpisode(idx)} title="删除">
+                    <Trash2 className="size-3" />
+                  </Button>
                 </div>
               </div>
 
               {/* 备线（alt_sources）—— 折叠展开 */}
               <details style={{ marginTop: 8 }}>
-                <summary style={{ cursor: 'pointer', fontSize: 11, color: 'var(--color-text-sub)' }}>
+                <summary className="cursor-pointer text-[11px] text-muted-foreground">
                   备用线路 ({ep.alt_sources.length})
                 </summary>
-                <div style={{ marginTop: 8, paddingLeft: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div className="mt-2 flex flex-col gap-1.5 pl-3">
                   {ep.alt_sources.map((a, j) => (
-                    <div key={j} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 32px', gap: 6 }}>
-                      <Input value={a.label} onChange={(e: any) => updateAlt(idx, j, { label: e.target.value })} placeholder="备线名称" style={{ fontSize: 12 }} />
-                      <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)' }} />
-                      <button className="btn btn-secondary btn-square btn-sm" onClick={() => deleteAlt(idx, j)} title="删除" style={{ color: 'var(--color-error)' }}>
-                        <i className="fa-regular fa-xmark" style={{ fontSize: 10 }} />
-                      </button>
+                    <div key={j} className="grid gap-1.5" style={{ gridTemplateColumns: '120px 1fr 32px' }}>
+                      <Input value={a.label} onChange={(e: any) => updateAlt(idx, j, { label: e.target.value })} placeholder="备线名称" className="text-xs" />
+                      <Input value={a.url} onChange={(e: any) => updateAlt(idx, j, { url: e.target.value })} placeholder="备线 URL" className="font-mono text-[11px]" />
+                      <Button variant="outline" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => deleteAlt(idx, j)} title="删除">
+                        <X className="size-2.5" />
+                      </Button>
                     </div>
                   ))}
-                  <Button variant="secondary" size="sm" onClick={() => addAltSource(idx)} style={{ alignSelf: 'flex-start' }}>
-                    <i className="fa-regular fa-plus" style={{ fontSize: 10 }} /> 加一条备线
+                  <Button variant="secondary" size="sm" onClick={() => addAltSource(idx)} className="self-start">
+                    <Plus className="size-2.5" /> 加一条备线
                   </Button>
                 </div>
               </details>
@@ -376,20 +381,20 @@ export default function VideoFormSection({ initialMeta, initialEpisodes, onChang
 
       {/* 批量粘贴弹窗（用 details 当 modal 简化） */}
       {bulkPasteOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }} onClick={() => setBulkPasteOpen(false)}>
-          <div className="card" style={{ width: 600, padding: 20 }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>批量粘贴剧集</h3>
-            <p className="text-dim" style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.7 }}>
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40"
+          onClick={() => setBulkPasteOpen(false)}
+        >
+          <div className="w-[600px] rounded-lg border border-border bg-card p-5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-3 text-sm font-semibold text-foreground">批量粘贴剧集</h3>
+            <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">
               每行一个 URL，自动按当前最大集号 +1 递增编号。<br/>
               或写「编号 | 标题 | URL」三段（用 <code>|</code> 分隔）精确指定每集。
             </p>
-            <textarea className="input" rows={12} value={bulkPasteText} onChange={e => setBulkPasteText(e.target.value)}
+            <Textarea rows={12} value={bulkPasteText} onChange={e => setBulkPasteText(e.target.value)}
               placeholder={`https://...e01.mp4\nhttps://...e02.mp4\n或\n1 | 第 01 集 序章 | https://...e01.mp4\n2 | 第 02 集 决战 | https://...e02.mp4`}
-              style={{ width: '100%', fontFamily: 'var(--font-mono, monospace)', fontSize: 12, resize: 'vertical' }} />
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+              className="w-full resize-y font-mono text-xs" />
+            <div className="mt-3 flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setBulkPasteOpen(false)}>取消</Button>
               <Button onClick={applyBulkPaste}>追加 {bulkPasteText.split(/\r?\n/).filter(Boolean).length} 集</Button>
             </div>

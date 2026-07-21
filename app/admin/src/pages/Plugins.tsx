@@ -2,7 +2,10 @@ import { RefreshCw, Check, Lightbulb, Plug, Trash2, ExternalLink, Upload, Loader
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { pluginsApi, type ExtensionManifest } from '@/lib/api';
-import { ConfirmDialog, EmptyPanel, LoadingState } from '@/components/ui';
+import {
+  Button, Badge, Card, ConfirmDialog, EmptyState, LoadingState,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 
 export default function Plugins() {
   const [plugins, setPlugins] = useState<ExtensionManifest[]>([]);
@@ -81,156 +84,140 @@ export default function Plugins() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div className="text-sub" style={{ fontSize: 14 }}>
-          共 {plugins.length} 个插件 · 启用中 <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{active.length}</span>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          共 {plugins.length} 个插件 · 启用中 <span className="font-semibold text-primary">{active.length}</span>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-secondary btn-square" onClick={fetchList} disabled={loading} title="刷新列表">
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" onClick={fetchList} disabled={loading} title="刷新列表">
             <RefreshCw className="size-4" />
-          </button>
-          <button className="btn btn-primary btn-square" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传插件 .zip'}>
+          </Button>
+          <Button size="icon" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传插件 .zip'}>
             {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-          </button>
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
             accept=".zip"
-            style={{ display: 'none' }}
+            className="hidden"
             onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
           />
         </div>
       </div>
 
-      <div style={{
-        padding: '12px 16px', marginBottom: 20,
-        background: 'var(--color-bg-soft)',
-        border: '1px solid var(--color-border)',
-        fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-sub)',
-      }}>
-        <Lightbulb className="size-4" />
-        插件包为 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>.zip</code> 格式，根目录包含 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>manifest.json</code>。上传后解压到 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>content/plugins/&lt;id&gt;/</code>，默认**不自动启用**，需手动开启。
+      <div className="mb-5 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+        <Lightbulb className="mt-0.5 size-4 shrink-0" />
+        <p className="m-0">
+          插件包为 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">manifest.json</code>。上传后解压到 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">content/plugins/&lt;id&gt;/</code>，默认**不自动启用**，需手动开启。
+        </p>
       </div>
 
       {loading ? (
-        <LoadingState padding={60} />
+        <LoadingState />
       ) : plugins.length === 0 ? (
-        <EmptyPanel title="暂无插件，点「上传插件」安装第一个" actionText="上传插件" onAction={() => fileInputRef.current?.click()} padding={60} fontSize={13} />
+        <EmptyState
+          title="暂无插件，点「上传插件」安装第一个"
+          actionText="上传插件"
+          onAction={() => fileInputRef.current?.click()}
+          icon={<Plug />}
+        />
       ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <Card className="overflow-hidden p-0">
           {plugins.map((plugin, idx) => {
             const enabled = plugin.enabled;
             return (
               <div
                 key={plugin.id}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px',
-                  borderBottom: idx < plugins.length - 1 ? '1px solid var(--color-divider)' : 'none',
-                  background: enabled ? 'color-mix(in srgb, var(--color-primary) 3%, transparent)' : 'transparent',
-                }}
+                className={cn(
+                  'flex items-center gap-3.5 px-[18px] py-3.5',
+                  idx < plugins.length - 1 && 'border-b border-border',
+                  enabled && 'bg-primary/5',
+                )}
               >
-                <div style={{
-                  width: 40, height: 40, flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: enabled ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'var(--color-bg-soft)',
-                }}>
+                <div className={cn(
+                  'flex size-10 shrink-0 items-center justify-center rounded-md',
+                  enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
+                )}>
                   <Plug className="size-4" />
                 </div>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 2 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--color-text-main)' }}>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-0.5 flex items-baseline gap-2">
+                    <h3 className="m-0 text-sm font-semibold text-foreground">
                       {plugin.name}
                     </h3>
-                    <span className="text-dim" style={{ fontSize: 11 }}>v{plugin.version}</span>
+                    <span className="text-[11px] text-muted-foreground">v{plugin.version}</span>
                     {plugin.author && (
-                      <span className="text-dim" style={{ fontSize: 11 }}>· {plugin.author}</span>
+                      <span className="text-[11px] text-muted-foreground">· {plugin.author}</span>
                     )}
                     {plugin.builtin && (
-                      <span style={{
-                        fontSize: 10, padding: '1px 6px',
-                        background: 'var(--color-bg-soft)', color: 'var(--color-text-sub)',
-                      }}>内置</span>
+                      <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-normal">内置</Badge>
                     )}
                   </div>
                   {plugin.description && (
-                    <p className="text-sub" style={{ fontSize: 12, margin: 0, lineHeight: 1.5 }}>
+                    <p className="m-0 text-xs leading-normal text-muted-foreground">
                       {plugin.description}
                     </p>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <div className="flex shrink-0 items-center gap-2">
                   {plugin.homepage && (
                     <a
                       href={plugin.homepage}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-dim"
+                      className="flex size-[30px] items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-primary"
                       title="插件主页"
-                      style={{
-                        width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        textDecoration: 'none', transition: 'color 0.15s',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; }}
                     >
                       <ExternalLink className="size-4" />
                     </a>
                   )}
 
                   {enabled ? (
-                    <button
-                      className="btn btn-sm"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-w-[84px] border-primary bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
                       disabled={toggling === plugin.id}
                       onClick={() => handleToggle(plugin.id, true)}
                       title="点击禁用"
-                      style={{
-                        minWidth: 84,
-                        background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                        color: 'var(--color-primary)',
-                        borderColor: 'var(--color-primary)',
-                      }}
                     >
                       <Check className="size-4" />
                       {toggling === plugin.id ? '切换中…' : '已启用'}
-                    </button>
+                    </Button>
                   ) : (
-                    <button
-                      className="btn btn-primary btn-sm"
+                    <Button
+                      size="sm"
+                      className="min-w-[84px]"
                       disabled={toggling === plugin.id}
                       onClick={() => handleToggle(plugin.id, false)}
-                      style={{ minWidth: 84 }}
                     >
                       {toggling === plugin.id ? '切换中…' : '启用'}
-                    </button>
+                    </Button>
                   )}
 
                   {!plugin.builtin && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-[30px] text-muted-foreground hover:text-destructive"
                       onClick={() => setDeleteId(plugin.id)}
                       title="删除"
-                      style={{
-                        width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        color: 'var(--color-text-dim)', transition: 'color 0.15s',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-error)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; }}
                     >
                       <Trash2 className="size-4" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
             );
           })}
-        </div>
+        </Card>
       )}
 
       <ConfirmDialog
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
         onConfirm={() => deleteId && handleDelete(deleteId)}
         title="确认删除插件？"
         message={`将永久删除插件「${plugins.find((p) => p.id === deleteId)?.name || ''}」，不可撤销。`}

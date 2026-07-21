@@ -1,23 +1,44 @@
-
+import * as React from 'react';
 import { useEffect, useState } from 'react';
+import {
+  PieChart, Ban, History, SlidersHorizontal, Lock, ShieldHalf, Globe,
+} from 'lucide-react';
 import api, { optionsApi } from '@/lib/api';
-import { Badge, Button, Input, MetricCard, MetricGrid, Table } from '@/components/ui';
-import { FormSectionC, FormRowInputC, FormRowSelectC, FormRowToggleC } from '@/components/form/FormC';
+import { MetricCard, MetricGrid } from '@/components/ui';
+import {
+  Badge, Button, Input, Label, Switch, Card, CardHeader, CardTitle, CardDescription, CardContent,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useI18n } from '@/lib/i18n';
 import { formatWithAdminTimeZone } from '@/lib/timezone';
 
 const tabs = [
-  { id: '概览',     label: '概览',     key: 'admin.security.tabs.overview', icon: 'fa-regular fa-chart-pie' },
-  { id: '封禁管理', label: '封禁管理', key: 'admin.security.tabs.bans', icon: 'fa-regular fa-ban' },
-  { id: '安全事件', label: '安全事件', key: 'admin.security.tabs.events', icon: 'fa-regular fa-clock-rotate-left' },
-  { id: '防御设置', label: '防御设置', key: 'admin.security.tabs.settings', icon: 'fa-regular fa-sliders' },
+  { id: '概览',     label: '概览',     key: 'admin.security.tabs.overview', Icon: PieChart },
+  { id: '封禁管理', label: '封禁管理', key: 'admin.security.tabs.bans', Icon: Ban },
+  { id: '安全事件', label: '安全事件', key: 'admin.security.tabs.events', Icon: History },
+  { id: '防御设置', label: '防御设置', key: 'admin.security.tabs.settings', Icon: SlidersHorizontal },
 ];
 
 const toPositiveNumber = (value: string, fallback: number) => {
   const next = Number.parseInt(value, 10);
   return Number.isFinite(next) && next > 0 ? next : fallback;
 };
+
+// Settings row —— 左侧 label + hint，右侧控件。替代旧 FormRow*C。
+function SettingRow({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-border py-3.5 last:border-0">
+      <div className="min-w-0">
+        <div className="text-sm font-medium text-foreground">{label}</div>
+        {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  );
+}
 
 export default function SecurityPage() {
   const { t } = useI18n();
@@ -91,24 +112,26 @@ export default function SecurityPage() {
     <div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid var(--color-border)', marginBottom: '28px' }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '10px 18px', fontSize: '13px', fontWeight: activeTab === tab.id ? 600 : 400,
-              color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-sub)',
-              borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-              background: 'none', cursor: 'pointer', transition: 'all 0.15s',
-              whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px',
-            }}
-          >
-            <i className={tab.icon} style={{ fontSize: '13px' }} />
-            {t(tab.key, tab.label)}
-          </button>
-        ))}
+      <div className="mb-7 flex gap-1 border-b border-border">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const TabIcon = tab.Icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-[18px] py-2.5 text-[13px] transition-colors',
+                isActive
+                  ? 'border-primary font-semibold text-primary'
+                  : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <TabIcon className="size-3.5" />
+              {t(tab.key, tab.label)}
+            </button>
+          );
+        })}
       </div>
 
       {/* 概览 */}
@@ -119,27 +142,27 @@ export default function SecurityPage() {
             <MetricCard label={t('admin.security.overview.events24h', '24h 安全事件')} value={overview.events_24h} color="#f59e0b" />
             <MetricCard label={t('admin.security.overview.totalEvents', '安全事件')} value={overview.total_events} color="#8b5cf6" />
           </MetricGrid>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div className="card" style={{ padding: '16px' }}>
-              <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>{t('admin.security.overview.defenseStatus', '防御状态')}</h3>
-              <div style={{ fontSize: '13px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-4">
+              <h3 className="mb-2 text-[13px] font-semibold text-foreground">{t('admin.security.overview.defenseStatus', '防御状态')}</h3>
+              <div className="text-[13px]">
+                <div className="flex justify-between py-1.5">
                   <span>{t('admin.security.settings.ccDefense', 'CC 防御')}</span>
-                  <span style={{ color: overview.cc_enabled ? 'var(--color-success)' : 'var(--color-error)' }}>{overview.cc_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
+                  <span className={overview.cc_enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>{overview.cc_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                <div className="flex justify-between py-1.5">
                   <span>{t('admin.security.settings.geoBlock', 'GeoIP 封锁')}</span>
-                  <span style={{ color: overview.geo_enabled ? 'var(--color-success)' : 'var(--color-error)' }}>{overview.geo_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
+                  <span className={overview.geo_enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>{overview.geo_enabled ? t('admin.common.onDot', '● 开启') : t('admin.common.offDot', '● 关闭')}</span>
                 </div>
               </div>
-            </div>
-            <div className="card" style={{ padding: '16px' }}>
-              <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>{t('admin.security.overview.stats', '统计')}</h3>
-              <div style={{ fontSize: '13px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}><span>{t('admin.security.overview.totalBans', '累计封禁')}</span><span>{overview.total_bans}</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}><span>{t('admin.security.overview.totalEvents', '安全事件')}</span><span>{overview.total_events}</span></div>
+            </Card>
+            <Card className="p-4">
+              <h3 className="mb-2 text-[13px] font-semibold text-foreground">{t('admin.security.overview.stats', '统计')}</h3>
+              <div className="text-[13px]">
+                <div className="flex justify-between py-1.5"><span>{t('admin.security.overview.totalBans', '累计封禁')}</span><span>{overview.total_bans}</span></div>
+                <div className="flex justify-between py-1.5"><span>{t('admin.security.overview.totalEvents', '安全事件')}</span><span>{overview.total_events}</span></div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       )}
@@ -147,169 +170,199 @@ export default function SecurityPage() {
       {/* 封禁管理 */}
       {activeTab === '封禁管理' && (
         <div>
-          <div className="card" style={{ padding: '16px', marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-            <div style={{ flex: 1 }}><label className="text-xs text-sub block mb-1">{t('admin.security.bans.ipAddress', 'IP 地址')}</label><Input value={banIP} onChange={e => setBanIP(e.target.value)} placeholder="192.168.1.1" /></div>
-            <div style={{ flex: 1 }}><label className="text-xs text-sub block mb-1">{t('admin.security.bans.reason', '原因')}</label><Input value={banReason} onChange={e => setBanReason(e.target.value)} placeholder={t('admin.common.optional', '可选')} /></div>
-            <div style={{ width: '100px' }}><label className="text-xs text-sub block mb-1">{t('admin.security.bans.durationMinutes', '时长(分)')}</label><Input value={banDuration} onChange={e => setBanDuration(e.target.value)} placeholder="60" /></div>
+          <Card className="mb-4 flex items-end gap-2 p-4">
+            <div className="flex-1"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.ipAddress', 'IP 地址')}</Label><Input value={banIP} onChange={e => setBanIP(e.target.value)} placeholder="192.168.1.1" /></div>
+            <div className="flex-1"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.reason', '原因')}</Label><Input value={banReason} onChange={e => setBanReason(e.target.value)} placeholder={t('admin.common.optional', '可选')} /></div>
+            <div className="w-[100px]"><Label className="mb-1 block text-xs text-muted-foreground">{t('admin.security.bans.durationMinutes', '时长(分)')}</Label><Input value={banDuration} onChange={e => setBanDuration(e.target.value)} placeholder="60" /></div>
             <Button onClick={handleBan}>{t('admin.security.bans.ban', '封禁')}</Button>
-          </div>
+          </Card>
 
-          <div className="card" style={{ overflow: 'hidden' }}>
-            <Table
-              data={bans.map((ban, index) => ({ ...ban, id: ban.ip || index }))}
-              emptyText={t('admin.security.bans.empty', '暂无封禁')}
-              columns={[
-                { key: 'ip', title: 'IP', render: (b) => <span style={{ fontWeight: 500 }}>{typeof b.ip === 'string' ? b.ip : ''}</span> },
-                { key: 'reason', title: t('admin.security.bans.reason', '原因'), render: (b) => <span className="text-dim">{typeof b.reason === 'string' ? b.reason : ''}</span> },
-                {
-                  key: 'ban_type',
-                  title: t('admin.security.bans.type', '类型'),
-                  render: (b) => (
-                    <Badge variant={b.ban_type === 'auto' ? 'warning' : 'error'}>
-                      {b.ban_type === 'auto' ? t('admin.security.bans.auto', '自动') : t('admin.security.bans.manual', '手动')}
-                    </Badge>
-                  ),
-                },
-                { key: 'duration', title: t('admin.security.bans.duration', '时长'), render: (b) => <span className="text-dim">{b.duration ? t('admin.security.bans.minutes', '{count}分', { count: b.duration }) : t('admin.security.bans.permanent', '永久')}</span> },
-                { key: 'expires_at', title: t('admin.security.bans.expires', '过期'), render: (b) => <span className="text-dim">{b.expires_at ? fmtTime(b.expires_at) : t('admin.security.bans.permanent', '永久')}</span> },
-                {
-                  key: 'actions',
-                  title: t('admin.common.actions', '操作'),
-                  render: (b) => <button onClick={() => handleUnban(b.ip)} className="text-primary-themed" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>{t('admin.security.bans.unban', '解封')}</button>,
-                },
-              ]}
-            />
-          </div>
+          <Card className="overflow-hidden p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>IP</TableHead>
+                  <TableHead>{t('admin.security.bans.reason', '原因')}</TableHead>
+                  <TableHead>{t('admin.security.bans.type', '类型')}</TableHead>
+                  <TableHead>{t('admin.security.bans.duration', '时长')}</TableHead>
+                  <TableHead>{t('admin.security.bans.expires', '过期')}</TableHead>
+                  <TableHead>{t('admin.common.actions', '操作')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bans.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">{t('admin.security.bans.empty', '暂无封禁')}</TableCell>
+                  </TableRow>
+                ) : (
+                  bans.map((b: any, index: number) => (
+                    <TableRow key={b.ip || index}>
+                      <TableCell className="font-medium">{typeof b.ip === 'string' ? b.ip : ''}</TableCell>
+                      <TableCell className="text-muted-foreground">{typeof b.reason === 'string' ? b.reason : ''}</TableCell>
+                      <TableCell>
+                        <Badge className={cn('border-transparent', b.ban_type === 'auto' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-destructive/15 text-destructive')}>
+                          {b.ban_type === 'auto' ? t('admin.security.bans.auto', '自动') : t('admin.security.bans.manual', '手动')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{b.duration ? t('admin.security.bans.minutes', '{count}分', { count: b.duration }) : t('admin.security.bans.permanent', '永久')}</TableCell>
+                      <TableCell className="text-muted-foreground">{b.expires_at ? fmtTime(b.expires_at) : t('admin.security.bans.permanent', '永久')}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary" onClick={() => handleUnban(b.ip)}>{t('admin.security.bans.unban', '解封')}</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Card>
         </div>
       )}
 
       {/* 安全事件 */}
       {activeTab === '安全事件' && (
-        <div className="card" style={{ overflow: 'hidden' }}>
-          <Table
-            data={timeline.map((event, index) => ({ ...event, id: `${event.created_at || ''}-${event.ip || ''}-${index}` }))}
-            emptyText={t('admin.security.events.empty', '暂无事件')}
-            columns={[
-              { key: 'created_at', title: t('admin.common.time', '时间'), render: (e) => <span className="text-dim">{fmtTime(e.created_at)}</span> },
-              { key: 'ip', title: 'IP', render: (e) => <span style={{ fontWeight: 500 }}>{typeof e.ip === 'string' ? e.ip : ''}</span> },
-              { key: 'event_type', title: t('admin.security.events.event', '事件'), render: (e) => <Badge>{typeof e.event_type === 'string' ? e.event_type : ''}</Badge> },
-              {
-                key: 'detail',
-                title: t('admin.security.events.detail', '详情'),
-                render: (e) => (
-                  <span className="text-dim" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
-                    {typeof e.detail === 'string' ? e.detail : ''}
-                  </span>
-                ),
-              },
-            ]}
-          />
-        </div>
+        <Card className="overflow-hidden p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('admin.common.time', '时间')}</TableHead>
+                <TableHead>IP</TableHead>
+                <TableHead>{t('admin.security.events.event', '事件')}</TableHead>
+                <TableHead>{t('admin.security.events.detail', '详情')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {timeline.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">{t('admin.security.events.empty', '暂无事件')}</TableCell>
+                </TableRow>
+              ) : (
+                timeline.map((e: any, index: number) => (
+                  <TableRow key={`${e.created_at || ''}-${e.ip || ''}-${index}`}>
+                    <TableCell className="text-muted-foreground">{fmtTime(e.created_at)}</TableCell>
+                    <TableCell className="font-medium">{typeof e.ip === 'string' ? e.ip : ''}</TableCell>
+                    <TableCell><Badge variant="secondary">{typeof e.event_type === 'string' ? e.event_type : ''}</Badge></TableCell>
+                    <TableCell>
+                      <span className="inline-block max-w-[200px] truncate text-muted-foreground">
+                        {typeof e.detail === 'string' ? e.detail : ''}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </Card>
       )}
 
       {/* 防御设置 */}
       {activeTab === '防御设置' && (
-        <div style={{ maxWidth: 980 }}>
-          <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.7, margin: '0 16px 22px' }}>
+        <div className="max-w-[980px]">
+          <p className="mx-4 mb-[22px] text-xs leading-relaxed text-muted-foreground">
             {t('admin.security.settings.personalBlogHint', '个人博客建议保持默认：CC 防御和地域封锁默认关闭，只有被刷、临时私密访问或需要限制地区访问时再开启。')}
           </p>
 
-          <FormSectionC
-            title={t('admin.security.access.section', '访问控制')}
-            icon="fa-regular fa-lock"
-            description={t('admin.security.access.description', '控制前台访问和基础 API 访问频率，适合私密博客或临时限流。')}
-          >
-            <FormRowToggleC
-              label={t('admin.security.access.requireLogin', '需要登录才能访问前台')}
-              hint={t('admin.security.access.requireLoginHint', '开启后，未登录访客不能直接访问前台页面。')}
-              checked={accessOpts.require_login}
-              onChange={(checked) => setAccessOpts({ ...accessOpts, require_login: checked })}
-            />
-            <FormRowInputC
-              label={t('admin.security.access.apiRateLimit', 'API 限流')}
-              hint={t('admin.security.access.apiRateLimitHint', '次/分钟，超出返回 429。')}
-              type="number"
-              value={String(accessOpts.rate_limit)}
-              onChange={(value) => setAccessOpts({ ...accessOpts, rate_limit: toPositiveNumber(value, 60) })}
-              last
-            />
-          </FormSectionC>
+          <Card className="mb-4">
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="flex items-center gap-2 text-sm"><Lock className="size-4 text-muted-foreground" />{t('admin.security.access.section', '访问控制')}</CardTitle>
+              <CardDescription className="text-xs">{t('admin.security.access.description', '控制前台访问和基础 API 访问频率，适合私密博客或临时限流。')}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-2">
+              <SettingRow
+                label={t('admin.security.access.requireLogin', '需要登录才能访问前台')}
+                hint={t('admin.security.access.requireLoginHint', '开启后，未登录访客不能直接访问前台页面。')}
+              >
+                <Switch checked={accessOpts.require_login} onCheckedChange={(checked) => setAccessOpts({ ...accessOpts, require_login: checked })} />
+              </SettingRow>
+              <SettingRow
+                label={t('admin.security.access.apiRateLimit', 'API 限流')}
+                hint={t('admin.security.access.apiRateLimitHint', '次/分钟，超出返回 429。')}
+              >
+                <Input type="number" className="w-[120px]" value={String(accessOpts.rate_limit)} onChange={(e) => setAccessOpts({ ...accessOpts, rate_limit: toPositiveNumber(e.target.value, 60) })} />
+              </SettingRow>
+            </CardContent>
+          </Card>
 
-          <FormSectionC
-            title={t('admin.security.settings.ccTitle', 'CC 防御（频率限制）')}
-            icon="fa-regular fa-shield-halved"
-            description={t('admin.security.settings.ccDescription', '用于拦截短时间高频访问。个人博客默认关闭即可，被刷时再启用。')}
-          >
-            <FormRowToggleC
-              label={t('admin.security.settings.enableCc', '启用 CC 防御')}
-              hint={t('admin.security.settings.enableCcHint', '开启后会按下面阈值拦截同一 IP 的高频请求。')}
-              checked={settings.cc_enabled ?? false}
-              onChange={(checked) => setSettings({ ...settings, cc_enabled: checked })}
-            />
-            <FormRowInputC
-              label={t('admin.security.settings.ccLimit5s', '5 秒内最大请求')}
-              hint={t('admin.security.settings.ccLimit5sHint', '用于拦截瞬时高频刷新。')}
-              type="number"
-              value={String(settings.cc_limit_5s ?? 30)}
-              onChange={(value) => setSettings({ ...settings, cc_limit_5s: toPositiveNumber(value, 30) })}
-            />
-            <FormRowInputC
-              label={t('admin.security.settings.ccLimit60s', '60 秒内最大请求')}
-              hint={t('admin.security.settings.ccLimit60sHint', '用于拦截持续高频请求。')}
-              type="number"
-              value={String(settings.cc_limit_60s ?? 120)}
-              onChange={(value) => setSettings({ ...settings, cc_limit_60s: toPositiveNumber(value, 120) })}
-              last
-            />
-          </FormSectionC>
+          <Card className="mb-4">
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="flex items-center gap-2 text-sm"><ShieldHalf className="size-4 text-muted-foreground" />{t('admin.security.settings.ccTitle', 'CC 防御（频率限制）')}</CardTitle>
+              <CardDescription className="text-xs">{t('admin.security.settings.ccDescription', '用于拦截短时间高频访问。个人博客默认关闭即可，被刷时再启用。')}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-2">
+              <SettingRow
+                label={t('admin.security.settings.enableCc', '启用 CC 防御')}
+                hint={t('admin.security.settings.enableCcHint', '开启后会按下面阈值拦截同一 IP 的高频请求。')}
+              >
+                <Switch checked={settings.cc_enabled ?? false} onCheckedChange={(checked) => setSettings({ ...settings, cc_enabled: checked })} />
+              </SettingRow>
+              <SettingRow
+                label={t('admin.security.settings.ccLimit5s', '5 秒内最大请求')}
+                hint={t('admin.security.settings.ccLimit5sHint', '用于拦截瞬时高频刷新。')}
+              >
+                <Input type="number" className="w-[120px]" value={String(settings.cc_limit_5s ?? 30)} onChange={(e) => setSettings({ ...settings, cc_limit_5s: toPositiveNumber(e.target.value, 30) })} />
+              </SettingRow>
+              <SettingRow
+                label={t('admin.security.settings.ccLimit60s', '60 秒内最大请求')}
+                hint={t('admin.security.settings.ccLimit60sHint', '用于拦截持续高频请求。')}
+              >
+                <Input type="number" className="w-[120px]" value={String(settings.cc_limit_60s ?? 120)} onChange={(e) => setSettings({ ...settings, cc_limit_60s: toPositiveNumber(e.target.value, 120) })} />
+              </SettingRow>
+            </CardContent>
+          </Card>
 
-          <FormSectionC
-            title={t('admin.security.settings.geoTitle', 'GeoIP 地域封锁')}
-            icon="fa-regular fa-globe"
-            description={t('admin.security.settings.geoDescription', 'GeoIP 数据源会用于统计和归属地。地域封锁属于高级功能，开启前建议优先使用黑名单模式。')}
-          >
-            <FormRowSelectC
-              label={t('admin.security.settings.geoProvider', 'GeoIP 数据源')}
-              hint={t('admin.security.settings.geoProviderHint', '用于访客统计、评论归属地、GeoIP 封锁和服务器出口 IP 识别。')}
-              value={settings.ip_geo_provider || 'ipx'}
-              onChange={(value) => setSettings({ ...settings, ip_geo_provider: value })}
-              options={[
-                { value: 'ipx', label: t('admin.security.settings.geoProviderIpx', '国际默认源（国外更准确）') },
-                { value: 'cnip', label: t('admin.security.settings.geoProviderCnip', '国内备用源（国内更准确）') },
-              ]}
-              controlWidth="100%"
-            />
-            <FormRowToggleC
-              label={t('admin.security.settings.enableGeo', '启用地域封锁')}
-              hint={t('admin.security.settings.enableGeoHint', '只影响访问拦截，不影响 GeoIP 数据源用于统计。')}
-              checked={settings.geo_enabled ?? false}
-              onChange={(checked) => setSettings({ ...settings, geo_enabled: checked })}
-            />
-            <FormRowSelectC
-              label={t('admin.security.settings.geoMode', '模式')}
-              hint={t('admin.security.settings.geoModeHint', '个人博客通常建议使用黑名单，只封锁明确不希望访问的国家或地区。')}
-              value={settings.geo_mode || 'whitelist'}
-              onChange={(value) => setSettings({ ...settings, geo_mode: value })}
-              options={[
-                { value: 'whitelist', label: t('admin.security.settings.geoWhitelist', '白名单（只允许列表中的国家）') },
-                { value: 'blacklist', label: t('admin.security.settings.geoBlacklist', '黑名单（封锁列表中的国家）') },
-              ]}
-              controlWidth="100%"
-            />
-            <FormRowInputC
-              label={t('admin.security.settings.countryCodes', '国家代码')}
-              hint={t('admin.security.settings.countryCodesHint', '逗号分隔，如 CN,HK,TW。')}
-              value={(settings.geo_countries || []).join(',')}
-              onChange={(value) => setSettings({
-                ...settings,
-                geo_countries: value.split(',').map((s: string) => s.trim().toUpperCase()).filter(Boolean),
-              })}
-              last
-            />
-          </FormSectionC>
+          <Card className="mb-4">
+            <CardHeader className="p-4 pb-0">
+              <CardTitle className="flex items-center gap-2 text-sm"><Globe className="size-4 text-muted-foreground" />{t('admin.security.settings.geoTitle', 'GeoIP 地域封锁')}</CardTitle>
+              <CardDescription className="text-xs">{t('admin.security.settings.geoDescription', 'GeoIP 数据源会用于统计和归属地。地域封锁属于高级功能，开启前建议优先使用黑名单模式。')}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-2">
+              <SettingRow
+                label={t('admin.security.settings.geoProvider', 'GeoIP 数据源')}
+                hint={t('admin.security.settings.geoProviderHint', '用于访客统计、评论归属地、GeoIP 封锁和服务器出口 IP 识别。')}
+              >
+                <Select value={settings.ip_geo_provider || 'ipx'} onValueChange={(v) => setSettings({ ...settings, ip_geo_provider: v })}>
+                  <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ipx">{t('admin.security.settings.geoProviderIpx', '国际默认源（国外更准确）')}</SelectItem>
+                    <SelectItem value="cnip">{t('admin.security.settings.geoProviderCnip', '国内备用源（国内更准确）')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SettingRow>
+              <SettingRow
+                label={t('admin.security.settings.enableGeo', '启用地域封锁')}
+                hint={t('admin.security.settings.enableGeoHint', '只影响访问拦截，不影响 GeoIP 数据源用于统计。')}
+              >
+                <Switch checked={settings.geo_enabled ?? false} onCheckedChange={(checked) => setSettings({ ...settings, geo_enabled: checked })} />
+              </SettingRow>
+              <SettingRow
+                label={t('admin.security.settings.geoMode', '模式')}
+                hint={t('admin.security.settings.geoModeHint', '个人博客通常建议使用黑名单，只封锁明确不希望访问的国家或地区。')}
+              >
+                <Select value={settings.geo_mode || 'whitelist'} onValueChange={(v) => setSettings({ ...settings, geo_mode: v })}>
+                  <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="whitelist">{t('admin.security.settings.geoWhitelist', '白名单（只允许列表中的国家）')}</SelectItem>
+                    <SelectItem value="blacklist">{t('admin.security.settings.geoBlacklist', '黑名单（封锁列表中的国家）')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SettingRow>
+              <SettingRow
+                label={t('admin.security.settings.countryCodes', '国家代码')}
+                hint={t('admin.security.settings.countryCodesHint', '逗号分隔，如 CN,HK,TW。')}
+              >
+                <Input
+                  className="w-[240px]"
+                  value={(settings.geo_countries || []).join(',')}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    geo_countries: e.target.value.split(',').map((s: string) => s.trim().toUpperCase()).filter(Boolean),
+                  })}
+                />
+              </SettingRow>
+            </CardContent>
+          </Card>
 
-          <div style={{ paddingTop: '24px', borderTop: '1px solid var(--color-border)', marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={saveSettings} loading={saving}>
+          <div className="mt-2 flex justify-end border-t border-border pt-6">
+            <Button onClick={saveSettings} disabled={saving}>
               {t('admin.security.settings.saveCcGeo', '保存设置')}
             </Button>
           </div>

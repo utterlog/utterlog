@@ -144,7 +144,7 @@ export default function CategoriesPage() {
   const renderIcon = (icon: string, size = 18) => {
     if (!icon) return <Folder className="text-muted-foreground" style={{ width: size, height: size }} />;
     if (icon.startsWith('fa-') || icon.startsWith('fa ')) {
-      return <i className={icon} style={{ fontSize: size, color: 'var(--primary)' }} />;
+      return <i className={`${icon} text-primary`} style={{ fontSize: size }} />;
     }
     if (icon.startsWith('<svg')) {
       return <span style={{ width: size, height: size, display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: icon.replace(/<svg/, `<svg width="${size}" height="${size}"`) }} />;
@@ -152,7 +152,7 @@ export default function CategoriesPage() {
     if (icon.startsWith('http') || icon.startsWith('/')) {
       return <img src={icon} alt="" style={{ width: size, height: size, objectFit: 'contain' }} />;
     }
-    return <i className={`fa-sharp fa-light fa-${icon}`} style={{ fontSize: size, color: 'var(--primary)' }} />;
+    return <i className={`fa-sharp fa-light fa-${icon} text-primary`} style={{ fontSize: size }} />;
   };
 
   return (

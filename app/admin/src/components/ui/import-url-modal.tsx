@@ -47,7 +47,7 @@ export function ImportUrlModal({ isOpen, onClose, onImport, type, platforms }: I
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('admin.import.title', '链接导入')}>
       <div className="space-y-4">
-        <p className="text-xs text-dim">
+        <p className="text-xs text-muted-foreground">
           {t('admin.import.description', '粘贴链接自动解析，支持 {platforms}', { platforms: platforms || defaultPlatforms[type] || t('admin.import.platforms.all', '各大平台') })}
         </p>
         <Input

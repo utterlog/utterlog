@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { optionsApi, postsApi, categoriesApi, themesApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, EmptyPanel, LoadingState } from '@/components/ui';
+import {
+  ChevronUp, ChevronDown, Trash2, Lock, LayoutGrid, ListTree, CornerDownRight, Folder, Loader2,
+} from 'lucide-react';
+import { Button, Card, Input, EmptyState, LoadingState } from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
 interface MenuItem {
@@ -250,147 +254,132 @@ export default function MenusPage() {
   };
 
   if (loading) {
-    return <LoadingState label={t('common.loading', '加载中…')} padding="40px" />;
+    return <LoadingState label={t('common.loading', '加载中…')} />;
   }
 
   const items = menus[activePos] || [];
   const posDef = positions.find(p => p.key === activePos);
   const isFixedHeroSidebar = usesFixedHeroSidebar(activeTheme) && activePos === 'sidebar';
-  const menuTextButtonStyle = { padding: '0 26px', minWidth: 'auto' };
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-        <span className="text-dim" style={{ fontSize: '13px' }}>
+      <div className="mb-4 flex items-center gap-3">
+        <span className="text-[13px] text-muted-foreground">
           {t('admin.menus.themePositionSummary', '当前主题 {theme} 声明了 {count} 个菜单位置', { theme: activeTheme || '—', count: positions.length })}
         </span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-          <Button variant="secondary" onClick={resetToDefault} style={menuTextButtonStyle}>
-            <span>{t('admin.menus.resetDefault', '重置默认')}</span>
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" className="px-6" onClick={resetToDefault}>
+            {t('admin.menus.resetDefault', '重置默认')}
           </Button>
-          <Button onClick={onSave} loading={saving}>
+          <Button onClick={onSave} disabled={saving}>
+            {saving && <Loader2 className="size-4 animate-spin" />}
             {t('admin.common.save', '保存')}
           </Button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid var(--color-border)', marginBottom: '20px' }}>
+      <div className="mb-5 flex gap-1 border-b border-border">
         {positions.map(p => (
           <button
             key={p.key}
             onClick={() => setActivePos(p.key)}
-            style={{
-              padding: '10px 18px', fontSize: '13px',
-              fontWeight: activePos === p.key ? 600 : 400,
-              color: activePos === p.key ? 'var(--color-primary)' : 'var(--color-text-sub)',
-              borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-              borderBottom: activePos === p.key ? '2px solid var(--color-primary)' : '2px solid transparent',
-              background: 'none', cursor: 'pointer',
-            }}
+            className={cn(
+              'cursor-pointer border-b-2 bg-transparent px-[18px] py-2.5 text-[13px]',
+              activePos === p.key
+                ? 'border-primary font-semibold text-primary'
+                : 'border-transparent text-muted-foreground',
+            )}
           >
             {t(`admin.menus.position.${p.key}`, p.label)}
           </button>
         ))}
       </div>
 
-      <p className="text-dim" style={{ fontSize: '12px', marginBottom: '16px' }}>{posDef ? t(`admin.menus.positionHint.${posDef.key}`, posDef.hint) : ''}</p>
+      <p className="mb-4 text-xs text-muted-foreground">{posDef ? t(`admin.menus.positionHint.${posDef.key}`, posDef.hint) : ''}</p>
 
-      <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <Card className="flex flex-col gap-2 p-4">
         {isFixedHeroSidebar && (
-          <div style={{ border: '1px solid var(--color-border)', padding: '12px', background: 'var(--color-bg-soft)' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', opacity: 0.35 }}>
-                <button disabled style={{ padding: '2px 6px', fontSize: '10px', background: 'none', border: '1px solid var(--color-border)', cursor: 'not-allowed' }}>
-                  <i className="fa-solid fa-chevron-up" />
-                </button>
-                <button disabled style={{ padding: '2px 6px', fontSize: '10px', background: 'none', border: '1px solid var(--color-border)', cursor: 'not-allowed' }}>
-                  <i className="fa-solid fa-chevron-down" />
-                </button>
+          <div className="border border-border bg-muted p-3">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-0.5 opacity-35">
+                <Button type="button" variant="outline" size="icon" className="size-6" disabled><ChevronUp className="size-3" /></Button>
+                <Button type="button" variant="outline" size="icon" className="size-6" disabled><ChevronDown className="size-3" /></Button>
               </div>
-              <div style={{ flex: '0 0 200px', display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 36, padding: '0 12px', color: 'var(--color-text-main)', fontSize: 14, border: '1px solid var(--color-border)', background: 'var(--color-bg-card)' }}>
-                <i className="fa-sharp fa-light fa-grid-2" style={{ color: 'var(--color-primary)' }} />
+              <div className="inline-flex min-h-9 w-[200px] shrink-0 items-center gap-2 border border-border bg-card px-3 text-sm text-foreground">
+                <LayoutGrid className="size-4 text-primary" />
                 {t('admin.menus.all', '全部')}
               </div>
-              <div className="text-dim" style={{ flex: 1, fontSize: '12px' }}>
+              <div className="flex-1 text-xs text-muted-foreground">
                 {t('admin.menus.fixedAllHint', '固定分类 tab，前台始终显示，不写入菜单配置。')}
               </div>
-              <button disabled title={t('admin.menus.fixedCannotDelete', '固定项不可删除')}
-                style={{ padding: '6px 10px', fontSize: '12px', background: 'none', border: '1px solid var(--color-border)', cursor: 'not-allowed', color: 'var(--color-text-dim)', opacity: 0.55 }}>
-                <i className="fa-regular fa-lock" style={{ fontSize: '12px' }} />
-              </button>
+              <Button type="button" variant="outline" size="icon" className="size-8" disabled title={t('admin.menus.fixedCannotDelete', '固定项不可删除')}>
+                <Lock className="size-3" />
+              </Button>
             </div>
           </div>
         )}
 
         {items.length === 0 ? (
-          <EmptyPanel
+          <EmptyState
             title={isFixedHeroSidebar ? t('admin.menus.emptyFixedSidebar', '暂无自定义侧栏项；未添加时前台使用默认分类列表。') : t('admin.menus.empty', '暂无菜单项，点击下方"添加菜单项"开始')}
-            padding="32px"
-            fontSize="13px"
           />
         ) : items.map((item, idx) => (
-          <div key={idx} style={{ border: '1px solid var(--color-border)', padding: '12px' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <button onClick={() => moveItem(idx, -1)} disabled={idx === 0}
-                  style={{ padding: '2px 6px', fontSize: '10px', background: 'none', border: '1px solid var(--color-border)', cursor: idx === 0 ? 'not-allowed' : 'pointer', opacity: idx === 0 ? 0.3 : 1 }}>
-                  <i className="fa-solid fa-chevron-up" />
-                </button>
-                <button onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
-                  style={{ padding: '2px 6px', fontSize: '10px', background: 'none', border: '1px solid var(--color-border)', cursor: idx === items.length - 1 ? 'not-allowed' : 'pointer', opacity: idx === items.length - 1 ? 0.3 : 1 }}>
-                  <i className="fa-solid fa-chevron-down" />
-                </button>
+          <div key={idx} className="border border-border p-3">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-0.5">
+                <Button type="button" variant="outline" size="icon" className="size-6" onClick={() => moveItem(idx, -1)} disabled={idx === 0}>
+                  <ChevronUp className="size-3" />
+                </Button>
+                <Button type="button" variant="outline" size="icon" className="size-6" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}>
+                  <ChevronDown className="size-3" />
+                </Button>
               </div>
-              <input
-                className="input"
-                style={{ flex: '0 0 200px', fontSize: '13px' }}
+              <Input
+                className="w-[200px] shrink-0 text-[13px]"
                 value={item.label}
                 onChange={e => updateItem(idx, 'label', e.target.value)}
                 placeholder={t('admin.menus.itemLabelPlaceholder', '菜单文本')}
               />
-              <input
-                className="input"
-                style={{ flex: 1, fontSize: '13px' }}
+              <Input
+                className="flex-1 text-[13px]"
                 value={item.href}
                 onChange={e => updateItem(idx, 'href', e.target.value)}
                 placeholder={t('admin.menus.itemHrefPlaceholder', '/path 或 https://...')}
               />
               {!isFixedHeroSidebar && (
                 <>
-                  <button onClick={() => setPickerOpen({ target: idx })} title={t('admin.menus.addChildFromExisting', '从已有页面添加子菜单')} className="action-btn">
-                    <i className="fa-regular fa-list-tree" style={{ fontSize: '12px' }} />
-                  </button>
-                  <button onClick={() => addChild(idx)} title={t('admin.menus.addBlankChild', '添加空白子菜单')} className="action-btn">
-                    <i className="fa-regular fa-diagram-subtask" style={{ fontSize: '12px' }} />
-                  </button>
+                  <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => setPickerOpen({ target: idx })} title={t('admin.menus.addChildFromExisting', '从已有页面添加子菜单')}>
+                    <ListTree className="size-4" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => addChild(idx)} title={t('admin.menus.addBlankChild', '添加空白子菜单')}>
+                    <CornerDownRight className="size-4" />
+                  </Button>
                 </>
               )}
-              <button onClick={() => removeItem(idx)} title={t('admin.common.delete', '删除')} className="action-btn danger">
-                <i className="fa-regular fa-trash" style={{ fontSize: '12px' }} />
-              </button>
+              <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeItem(idx)} title={t('admin.common.delete', '删除')}>
+                <Trash2 className="size-4" />
+              </Button>
             </div>
 
             {!isFixedHeroSidebar && !!item.children?.length && (
-              <div style={{ marginTop: '10px', marginLeft: '40px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div className="ml-10 mt-2.5 flex flex-col gap-1.5">
                 {item.children.map((child, cIdx) => (
-                  <div key={cIdx} style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      className="input"
-                      style={{ flex: '0 0 180px', fontSize: '12px' }}
+                  <div key={cIdx} className="flex gap-2">
+                    <Input
+                      className="w-[180px] shrink-0 text-xs"
                       value={child.label}
                       onChange={e => updateChild(idx, cIdx, 'label', e.target.value)}
                       placeholder={t('admin.menus.childLabelPlaceholder', '子菜单文本')}
                     />
-                    <input
-                      className="input"
-                      style={{ flex: 1, fontSize: '12px' }}
+                    <Input
+                      className="flex-1 text-xs"
                       value={child.href}
                       onChange={e => updateChild(idx, cIdx, 'href', e.target.value)}
                       placeholder="/path"
                     />
-                    <button onClick={() => removeChild(idx, cIdx)} className="action-btn danger" title={t('admin.common.delete', '删除')}>
-                      <i className="fa-regular fa-trash" style={{ fontSize: '11px' }} />
-                    </button>
+                    <Button type="button" variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => removeChild(idx, cIdx)} title={t('admin.common.delete', '删除')}>
+                      <Trash2 className="size-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -398,55 +387,46 @@ export default function MenusPage() {
           </div>
         ))}
 
-        <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start', position: 'relative' }}>
-          <Button variant="secondary" onClick={addItem} style={menuTextButtonStyle}>
-            <span>{t('admin.menus.addItem', '添加菜单项')}</span>
+        <div className="relative flex gap-2 self-start">
+          <Button variant="outline" className="px-6" onClick={addItem}>
+            {t('admin.menus.addItem', '添加菜单项')}
           </Button>
-          <Button variant="secondary" onClick={() => setPickerOpen({ target: 'root' })} style={menuTextButtonStyle}>
-            <span>{t('admin.menus.addFromExisting', '从已有页面添加')}</span>
+          <Button variant="outline" className="px-6" onClick={() => setPickerOpen({ target: 'root' })}>
+            {t('admin.menus.addFromExisting', '从已有页面添加')}
           </Button>
 
           {pickerOpen && (
             <div
               ref={pickerRef}
-              style={{
-                position: 'absolute', top: '100%', left: 0, marginTop: '6px',
-                width: '320px', maxHeight: 'min(620px, 70vh)', overflowY: 'auto',
-                background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.08)', zIndex: 10,
-              }}
+              className="absolute left-0 top-full z-10 mt-1.5 max-h-[min(620px,70vh)] w-80 overflow-y-auto border border-border bg-popover shadow-lg"
             >
-              <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: '1px solid var(--color-border)' }}>
+              <div className="border-b border-border px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                 {t('admin.menus.builtinPages', '内置页面')}
               </div>
               {BUILTIN_PAGES.map(p => (
                 <button
                   key={p.href}
                   onClick={() => addPick({ label: t(`admin.menus.builtin.${p.key}`, p.label), href: p.href, type: 'page' })}
-                  style={{ display: 'flex', width: '100%', padding: '8px 12px', fontSize: '13px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'space-between' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-soft)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                  className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-[13px] hover:bg-muted"
                 >
-                  <span className="text-main">{t(`admin.menus.builtin.${p.key}`, p.label)}</span>
-                  <code style={{ fontSize: '11px', color: 'var(--color-text-dim)' }}>{p.href}</code>
+                  <span className="text-foreground">{t(`admin.menus.builtin.${p.key}`, p.label)}</span>
+                  <code className="text-[11px] text-muted-foreground">{p.href}</code>
                 </button>
               ))}
 
               {customPages.length > 0 && (
                 <>
-                  <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+                  <div className="border-y border-border px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                     {t('admin.menus.customPages', '自定义页面')}
                   </div>
                   {customPages.map(p => (
                     <button
                       key={p.id}
                       onClick={() => addPick({ label: p.title, href: `/${p.slug}`, type: 'page' })}
-                      style={{ display: 'flex', width: '100%', padding: '8px 12px', fontSize: '13px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'space-between' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-soft)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                      className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-[13px] hover:bg-muted"
                     >
-                      <span className="text-main">{p.title}</span>
-                      <code style={{ fontSize: '11px', color: 'var(--color-text-dim)' }}>/{p.slug}</code>
+                      <span className="text-foreground">{p.title}</span>
+                      <code className="text-[11px] text-muted-foreground">/{p.slug}</code>
                     </button>
                   ))}
                 </>
@@ -454,23 +434,21 @@ export default function MenusPage() {
 
               {categories.length > 0 && (
                 <>
-                  <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+                  <div className="border-y border-border px-3 py-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                     {t('common.categories', '分类')}
                   </div>
                   {categories.map(c => (
                     <button
                       key={c.id}
                       onClick={() => addPick({ label: c.name, href: `/categories/${c.slug}`, type: 'category', category_id: c.id, slug: c.slug, icon: c.icon, count: c.count })}
-                      style={{ display: 'flex', width: '100%', padding: '8px 12px', fontSize: '13px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', alignItems: 'center', justifyContent: 'space-between' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-soft)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                      className="flex w-full cursor-pointer items-center justify-between bg-transparent px-3 py-2 text-left text-[13px] hover:bg-muted"
                     >
-                      <span className="text-main" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                        <i className={c.icon || 'fa-sharp fa-light fa-folder'} style={{ fontSize: 14, color: 'var(--color-text-dim)' }} />
+                      <span className="inline-flex items-center gap-2 text-foreground">
+                        {c.icon ? <i className={c.icon} style={{ fontSize: 14 }} /> : <Folder className="size-3.5 text-muted-foreground" />}
                         {c.name}
-                        <span className="text-dim" style={{ fontSize: 11 }}>({c.count || 0})</span>
+                        <span className="text-[11px] text-muted-foreground">({c.count || 0})</span>
                       </span>
-                      <code style={{ fontSize: '11px', color: 'var(--color-text-dim)' }}>/categories/{c.slug}</code>
+                      <code className="text-[11px] text-muted-foreground">/categories/{c.slug}</code>
                     </button>
                   ))}
                 </>
@@ -478,7 +456,7 @@ export default function MenusPage() {
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

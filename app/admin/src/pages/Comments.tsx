@@ -4,8 +4,14 @@ import { useNavigate } from '@/lib/router';
 import { commentsApi } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button, SaveButton, Table, Pagination, ConfirmDialog, Modal } from '@/components/ui';
-import { formatDate } from '@/lib/utils';
+import { Globe, Star, Pencil, MessageSquare, Ban, Trash2, Check, Search, Save } from 'lucide-react';
+import {
+  Button, Input, Label, Textarea, Card, Spinner, Pagination, ConfirmDialog,
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/shadcn';
+import { cn, formatDate } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
 
@@ -53,27 +59,18 @@ function MshotCard({ url, children }: { url: string; children: React.ReactNode }
     >
       {children}
       {show && (
-        <div style={{
-          position: 'fixed', left: pos.x, top: pos.y, transform: 'translateY(-100%)',
-          zIndex: 99999, width: '300px', borderRadius: '1px',
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
-          overflow: 'hidden',
-        }}>
-          <div style={{ position: 'relative', width: '100%', height: '170px', background: '#f5f5f5' }}>
+        <div
+          className="w-[300px] overflow-hidden rounded-md border border-border bg-popover shadow-lg"
+          style={{ position: 'fixed', left: pos.x, top: pos.y, transform: 'translateY(-100%)', zIndex: 99999 }}
+        >
+          <div className="bg-muted" style={{ position: 'relative', width: '100%', height: '170px' }}>
             <img src={mshotUrl} alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }} />
           </div>
-          <div style={{
-            padding: '8px 12px', fontSize: '11px', color: '#888',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            borderTop: '1px solid rgba(0,0,0,0.04)',
-          }}>
-            <i className="fa-regular fa-globe" style={{ fontSize: '10px', marginRight: '4px', opacity: 0.5 }} />
-            {url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+          <div className="flex items-center gap-1 border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
+            <Globe className="size-2.5 shrink-0 opacity-50" />
+            <span className="truncate">{url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
           </div>
         </div>
       )}
@@ -84,8 +81,7 @@ function MshotCard({ url, children }: { url: string; children: React.ReactNode }
 function AuthorLink({ name, url }: { name: string; url: string }) {
   return (
     <MshotCard url={url}>
-      <a href={url} target="_blank" rel="noopener noreferrer"
-        style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-primary)', textDecoration: 'none' }}>
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-[13px] font-semibold text-primary no-underline">
         {name}
       </a>
     </MshotCard>
@@ -112,19 +108,14 @@ function ParentPopover({ parent, children }: { parent: any; children: React.Reac
     >
       {children}
       {show && (
-        <div style={{
-          position: 'fixed', left: pos.x, top: pos.y, transform: 'translateY(-100%)',
-          zIndex: 99999, width: '280px', borderRadius: '1px',
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
-          overflow: 'hidden',
-        }}>
-          <div style={{ padding: '10px 12px', fontSize: '13px', color: 'var(--color-text-main)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <div
+          className="w-[280px] overflow-hidden rounded-md border border-border bg-popover shadow-lg"
+          style={{ position: 'fixed', left: pos.x, top: pos.y, transform: 'translateY(-100%)', zIndex: 99999 }}
+        >
+          <div className="px-3 py-2.5 text-[13px] leading-relaxed text-foreground" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
             {parent.content}
           </div>
-          <div style={{ padding: '4px 12px 8px', fontSize: '11px', color: '#999', borderTop: '1px solid rgba(0,0,0,0.04)', display: 'flex', justifyContent: 'space-between' }}>
+          <div className="flex justify-between border-t border-border px-3 pb-2 pt-1 text-[11px] text-muted-foreground">
             <span>{parent.author}</span>
             {parent.created_at > 0 && <span>{formatDate(parent.created_at)}</span>}
           </div>
@@ -154,23 +145,23 @@ function CommentCell({ row }: { row: any }) {
     <div>
       <p
         ref={textRef}
-        className="text-main"
+        className="whitespace-pre-wrap break-words text-[13px] text-foreground"
         style={{
-          fontSize: '13px', lineHeight, wordBreak: 'break-word', whiteSpace: 'pre-wrap',
+          lineHeight,
           overflow: expanded ? 'visible' : 'hidden',
           maxHeight: expanded ? 'none' : maxHeight,
         }}
       >
         {parent && (
           <ParentPopover parent={parent}>
-            <span style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 500 }}>@{parent.author}</span>
+            <span className="cursor-pointer font-medium text-primary">@{parent.author}</span>
           </ParentPopover>
         )}{parent ? ' ' : ''}{content}
       </p>
       {(overflows || expanded) && (
         <button
           onClick={() => setExpanded(!expanded)}
-          style={{ fontSize: '11px', color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0 0' }}
+          className="mt-0.5 text-[11px] text-primary hover:underline"
         >
           {expanded ? t('admin.common.collapse', '收起') : t('admin.common.expand', '展开')}
         </button>
@@ -363,155 +354,25 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
     { key: 'annotations', label: t('admin.comments.status.annotations', '段落点评'), count: 0 },
   ];
 
-  const columns = [
-    {
-      key: 'author',
-      title: <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}><input type="checkbox" checked={comments.length > 0 && selectedIds.size === comments.length} onChange={toggleSelectAll} style={{ accentColor: 'var(--color-primary)', cursor: 'pointer' }} /><span>{t('admin.comments.columns.author', '作者')}</span>{selectedIds.size > 0 && <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: 500 }}>{t('admin.common.selectedCount', '已选 {count}', { count: selectedIds.size })}</span>}</label>,
-      width: '220px',
-      render: (row: any) => (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <input type="checkbox" checked={selectedIds.has(row.id)} onChange={() => toggleSelect(row.id)}
-            style={{ accentColor: 'var(--color-primary)', cursor: 'pointer', marginTop: '10px', flexShrink: 0 }} />
-          <img
-            src={row.avatar_url || defaultAvatar}
-            alt=""
-            style={{ width: '32px', height: '32px', objectFit: 'cover', flexShrink: 0, marginTop: '2px', background: 'var(--color-bg-soft)', clipPath: 'url(#squircle)' }}
-            onError={e => { (e.target as HTMLImageElement).src = defaultAvatar; }}
-          />
-          <div style={{ fontSize: '12px', lineHeight: 1.6, minWidth: 0, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-              {row.url ? (
-                <AuthorLink name={row.author} url={row.url} />
-              ) : (
-                <span style={{ fontWeight: 600, fontSize: '13px' }} className="text-main">{row.author}</span>
-              )}
-              {row.geo?.country_code && (
-                <img src={`https://flagcdn.io/flags/1x1/${row.geo.country_code.toLowerCase()}.svg`} alt="" title={row.geo ? [row.geo.country, row.geo.province, row.geo.city].filter(Boolean).join(' · ') : ''} style={{ width: '14px', height: '14px', objectFit: 'cover', borderRadius: '50%' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              )}
-              {row.ip && <span className="text-dim" style={{ fontSize: '11px' }}>{formatIP(row.ip)}</span>}
-            </div>
-            {row.email && (
-              <div className="text-dim" style={{ fontSize: '11px' }}>{row.email}</div>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'content',
-      title: t('admin.comments.columns.comment', '评论'),
-      width: '300px',
-      render: (row: any) => <CommentCell row={row} />,
-    },
-    {
-      key: 'post',
-      title: t('admin.comments.columns.replyTo', '回复至'),
-      width: '180px',
-      render: (row: any) => (
-        <div style={{ fontSize: '12px' }}>
-          {row.post_slug ? (
-            <a href={commentPostUrl(row)} target="_blank" rel="noopener noreferrer" className="text-primary-themed" style={{ fontWeight: 500, fontSize: '13px', textDecoration: 'none' }}>
-              {row.post_title || '-'}
-              {row.post_comment_count > 0 && <sup style={{ fontSize: '10px', color: 'var(--color-text-dim)', fontWeight: 400, marginLeft: '1px' }}>{row.post_comment_count}</sup>}
-            </a>
-          ) : (
-            <span className="text-main" style={{ fontWeight: 500, fontSize: '13px' }}>
-              {row.post_title || '-'}
-              {row.post_comment_count > 0 && <sup style={{ fontSize: '10px', color: 'var(--color-text-dim)', fontWeight: 400, marginLeft: '1px' }}>{row.post_comment_count}</sup>}
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'created_at',
-      title: t('admin.comments.columns.submittedAt', '提交于'),
-      width: '120px',
-      render: (row: any) => (
-        <span className="text-dim" style={{ fontSize: '12px' }}>{formatDate(row.created_at)}</span>
-      ),
-    },
-    {
-      key: 'actions',
-      title: t('admin.common.actions', '操作'),
-      width: '140px',
-      render: (row: any) => (
-        <div style={{ display: 'flex', gap: '4px', fontSize: '12px' }}>
-          {/* Approved: featured + edit + reply + spam + delete */}
-          {row.status === 'approved' && (
-            <>
-              <button onClick={() => toggleFeatured(row.id, row.featured)} className={`action-btn${row.featured ? ' warning' : ''}`} title={row.featured ? t('admin.comments.unfeature', '取消精选') : t('admin.comments.feature', '设为精选')}>
-                <i className={row.featured ? 'fa-solid fa-star' : 'fa-regular fa-star'} style={{ fontSize: '14px' }} />
-              </button>
-              <button onClick={() => setEditComment({ ...row })} className="action-btn primary" title={t('admin.common.edit', '编辑')}><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-              <button onClick={() => { setReplyId(row.id); setReplyContent(''); }} className="action-btn primary" title={t('admin.comments.reply', '回复')}><i className="fa-regular fa-comments" style={{ fontSize: '14px' }} /></button>
-              <button onClick={() => handleStatusChange(row.id, 'spam')} className="action-btn warning" title={t('admin.comments.markSpam', '标记垃圾')}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-              </button>
-              <button onClick={() => setDeleteId(row.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
-            </>
-          )}
-          {/* Pending: approve + edit + spam + delete */}
-          {row.status === 'pending' && (
-            <>
-              <button onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.approved', '已通过')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }} className="action-btn success" title={t('admin.comments.approve', '通过')}>
-                <i className="fa-solid fa-check" style={{ fontSize: '14px' }} />
-              </button>
-              <button onClick={() => setEditComment({ ...row })} className="action-btn primary" title={t('admin.common.edit', '编辑')}><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-              <button onClick={() => { handleStatusChange(row.id, 'spam'); fetchCounts(); }} className="action-btn warning" title={t('admin.comments.moveToSpam', '垃圾箱')}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-              </button>
-              <button onClick={() => setDeleteId(row.id)} className="action-btn danger" title={t('admin.common.delete', '删除')}><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
-            </>
-          )}
-          {/* Spam: approve + edit + delete */}
-          {row.status === 'spam' && (
-            <>
-              <button onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }} className="action-btn success" title={t('admin.comments.restoreApproved', '恢复通过')}>
-                <i className="fa-solid fa-check" style={{ fontSize: '14px' }} />
-              </button>
-              <button onClick={() => setEditComment({ ...row })} className="action-btn primary" title={t('admin.common.edit', '编辑')}><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-              <button onClick={() => setDeleteId(row.id)} className="action-btn danger" title={t('admin.comments.permanentDelete', '永久删除')}><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
-            </>
-          )}
-          {/* Trash: restore + edit + delete */}
-          {row.status === 'trash' && (
-            <>
-              <button onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }} className="action-btn success" title={t('admin.comments.restore', '恢复')}>
-                <i className="fa-solid fa-check" style={{ fontSize: '14px' }} />
-              </button>
-              <button onClick={() => setEditComment({ ...row })} className="action-btn primary" title={t('admin.common.edit', '编辑')}><i className="fa-regular fa-pen" style={{ fontSize: '14px' }} /></button>
-              <button onClick={() => setDeleteId(row.id)} className="action-btn danger" title={t('admin.comments.permanentDelete', '永久删除')}><i className="fa-regular fa-trash" style={{ fontSize: '14px' }} /></button>
-            </>
-          )}
-        </div>
-      ),
-    },
-  ];
-
   return (
     <div>
-      {/* Single row: 6 status tabs (natural width) + contextual
-          actions + search. The search bar flex-grows to push itself
-          to the far right and fill leftover space. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+      {/* Single row: 6 status tabs + contextual actions + search.
+          The search bar sits at the far right (ml-auto) filling the rest. */}
+      <div className="mb-4 flex items-center gap-1.5">
         {statusTabs.map(s => (
           <Button
             key={s.key}
-            variant={status === s.key ? 'primary' : 'secondary'}
+            size="sm"
+            variant={status === s.key ? 'default' : 'outline'}
             onClick={() => { setSearch(''); setSelectedIds(new Set()); setStatus(s.key); setPage(1); navigate(s.key ? `/comments/${s.key}` : '/comments'); }}
-            style={{ position: 'relative' }}
+            className="relative"
           >
             {s.label}
             {s.count > 0 && (
-              <span style={{
-                position: 'absolute', top: '-6px', right: '-6px',
-                background: s.key === 'spam' ? 'var(--color-warning)' : 'var(--color-error)',
-                color: '#fff', fontSize: '10px', fontWeight: 700,
-                minWidth: '18px', height: '18px', borderRadius: '9px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '0 5px',
-              }}>
+              <span className={cn(
+                'absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white',
+                s.key === 'spam' ? 'bg-amber-500' : 'bg-destructive',
+              )}>
                 {s.count > 99 ? '99+' : s.count}
               </span>
             )}
@@ -519,134 +380,282 @@ export default function CommentsPage({ initialStatus }: { initialStatus?: string
         ))}
 
         {status === 'trash' && comments.length > 0 && (
-          <Button variant="danger" onClick={() => setEmptyTrash(true)}>
-            <i className="fa-regular fa-trash" style={{ fontSize: '12px' }} /> {t('admin.common.clear', '清空')}
+          <Button size="sm" variant="destructive" onClick={() => setEmptyTrash(true)}>
+            <Trash2 className="size-3.5" /> {t('admin.common.clear', '清空')}
           </Button>
         )}
         {selectedIds.size > 0 && (
           <>
-            <Button variant="secondary" onClick={() => batchAction('approve')}>
-              <i className="fa-solid fa-check" style={{ fontSize: '12px' }} /> {t('admin.comments.approve', '通过')}
+            <Button size="sm" variant="outline" onClick={() => batchAction('approve')}>
+              <Check className="size-3.5" /> {t('admin.comments.approve', '通过')}
             </Button>
-            <Button variant="secondary" onClick={() => batchAction('spam')}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> {t('admin.comments.spam', '垃圾')}
+            <Button size="sm" variant="outline" onClick={() => batchAction('spam')}>
+              <Ban className="size-3.5" /> {t('admin.comments.spam', '垃圾')}
             </Button>
-            <Button variant="danger" onClick={() => setBatchDeleteConfirm(true)}>
-              <i className="fa-regular fa-trash" style={{ fontSize: '12px' }} /> {t('admin.common.delete', '删除')}
+            <Button size="sm" variant="destructive" onClick={() => setBatchDeleteConfirm(true)}>
+              <Trash2 className="size-3.5" /> {t('admin.common.delete', '删除')}
             </Button>
           </>
         )}
 
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && (setPage(1), fetchComments())}
-          placeholder={t('admin.comments.searchPlaceholder', '搜索评论内容 / 昵称 / 邮箱')}
-          className="input"
-          style={{ width: '220px', marginLeft: 'auto', fontSize: '13px' }}
-        />
-        <Button className="btn-square" title={t('admin.common.search', '搜索')} onClick={() => { setPage(1); fetchComments(); }}>
-          <i className="fa-regular fa-magnifying-glass" style={{ fontSize: '14px' }} />
-        </Button>
-      </div>
-
-      <div className="card">
-        <Table
-          columns={columns}
-          data={comments}
-          loading={loading}
-          rowStyle={(row) => row.is_admin ? { background: 'color-mix(in srgb, var(--color-primary) 5%, transparent)' } : undefined}
-        />
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 16px', borderTop: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="text-dim" style={{ fontSize: '12px' }}>{t('admin.common.totalItems', '共 {count} 条', { count: total })}</span>
-            <select
-              value={perPage}
-              onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
-              style={{
-                padding: '3px 6px', fontSize: '12px', border: '1px solid var(--color-border)',
-                background: 'var(--color-bg-card)', color: 'var(--color-text-sub)',
-                borderRadius: '2px', cursor: 'pointer',
-              }}
-            >
-              <option value={20}>{t('admin.common.perPage', '{count} 条/页', { count: 20 })}</option>
-              <option value={50}>{t('admin.common.perPage', '{count} 条/页', { count: 50 })}</option>
-              <option value={100}>{t('admin.common.perPage', '{count} 条/页', { count: 100 })}</option>
-            </select>
-          </div>
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        <div className="ml-auto flex items-center gap-1.5">
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && (setPage(1), fetchComments())}
+            placeholder={t('admin.comments.searchPlaceholder', '搜索评论内容 / 昵称 / 邮箱')}
+            className="w-56"
+          />
+          <Button variant="outline" size="icon" title={t('admin.common.search', '搜索')} onClick={() => { setPage(1); fetchComments(); }}>
+            <Search />
+          </Button>
         </div>
       </div>
 
+      <Card className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[220px]">
+                <label className="flex cursor-pointer items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={comments.length > 0 && selectedIds.size === comments.length}
+                    onChange={toggleSelectAll}
+                    className="size-4 cursor-pointer accent-primary"
+                  />
+                  <span>{t('admin.comments.columns.author', '作者')}</span>
+                  {selectedIds.size > 0 && (
+                    <span className="text-[11px] font-medium text-primary">{t('admin.common.selectedCount', '已选 {count}', { count: selectedIds.size })}</span>
+                  )}
+                </label>
+              </TableHead>
+              <TableHead className="w-[300px]">{t('admin.comments.columns.comment', '评论')}</TableHead>
+              <TableHead className="w-[180px]">{t('admin.comments.columns.replyTo', '回复至')}</TableHead>
+              <TableHead className="w-[120px]">{t('admin.comments.columns.submittedAt', '提交于')}</TableHead>
+              <TableHead className="w-[140px]">{t('admin.common.actions', '操作')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center">
+                  <Spinner />
+                </TableCell>
+              </TableRow>
+            ) : comments.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
+                  {t('admin.common.noData', '暂无数据')}
+                </TableCell>
+              </TableRow>
+            ) : (
+              comments.map((row: any) => (
+                <TableRow key={row.id} className={cn(row.is_admin && 'bg-primary/5')}>
+                  {/* Author */}
+                  <TableCell className="align-top">
+                    <div className="flex items-start gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(row.id)}
+                        onChange={() => toggleSelect(row.id)}
+                        className="mt-2.5 size-4 shrink-0 cursor-pointer accent-primary"
+                      />
+                      <img
+                        src={row.avatar_url || defaultAvatar}
+                        alt=""
+                        className="mt-0.5 size-8 shrink-0 bg-muted object-cover"
+                        style={{ clipPath: 'url(#squircle)' }}
+                        onError={e => { (e.target as HTMLImageElement).src = defaultAvatar; }}
+                      />
+                      <div className="min-w-0 overflow-hidden text-xs leading-relaxed">
+                        <div className="flex flex-wrap items-center gap-1">
+                          {row.url ? (
+                            <AuthorLink name={row.author} url={row.url} />
+                          ) : (
+                            <span className="text-[13px] font-semibold text-foreground">{row.author}</span>
+                          )}
+                          {row.geo?.country_code && (
+                            <img src={`https://flagcdn.io/flags/1x1/${row.geo.country_code.toLowerCase()}.svg`} alt="" title={row.geo ? [row.geo.country, row.geo.province, row.geo.city].filter(Boolean).join(' · ') : ''} style={{ width: '14px', height: '14px', objectFit: 'cover', borderRadius: '50%' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          )}
+                          {row.ip && <span className="text-[11px] text-muted-foreground">{formatIP(row.ip)}</span>}
+                        </div>
+                        {row.email && (
+                          <div className="text-[11px] text-muted-foreground">{row.email}</div>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  {/* Comment content */}
+                  <TableCell className="align-top">
+                    <CommentCell row={row} />
+                  </TableCell>
+
+                  {/* Reply to (post) */}
+                  <TableCell className="align-top">
+                    <div className="text-xs">
+                      {row.post_slug ? (
+                        <a href={commentPostUrl(row)} target="_blank" rel="noopener noreferrer" className="text-[13px] font-medium text-primary no-underline">
+                          {row.post_title || '-'}
+                          {row.post_comment_count > 0 && <sup className="ml-px text-[10px] font-normal text-muted-foreground">{row.post_comment_count}</sup>}
+                        </a>
+                      ) : (
+                        <span className="text-[13px] font-medium text-foreground">
+                          {row.post_title || '-'}
+                          {row.post_comment_count > 0 && <sup className="ml-px text-[10px] font-normal text-muted-foreground">{row.post_comment_count}</sup>}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  {/* Submitted at */}
+                  <TableCell className="align-top">
+                    <span className="text-xs text-muted-foreground">{formatDate(row.created_at)}</span>
+                  </TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="align-top">
+                    <div className="flex gap-1">
+                      {/* Approved: featured + edit + reply + spam + delete */}
+                      {row.status === 'approved' && (
+                        <>
+                          <Button variant="ghost" size="icon" className={cn('size-8', row.featured ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400')} title={row.featured ? t('admin.comments.unfeature', '取消精选') : t('admin.comments.feature', '设为精选')} onClick={() => toggleFeatured(row.id, row.featured)}>
+                            <Star className={cn('size-4', row.featured && 'fill-current')} />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.comments.reply', '回复')} onClick={() => { setReplyId(row.id); setReplyContent(''); }}><MessageSquare className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400" title={t('admin.comments.markSpam', '标记垃圾')} onClick={() => handleStatusChange(row.id, 'spam')}><Ban className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                        </>
+                      )}
+                      {/* Pending: approve + edit + spam + delete */}
+                      {row.status === 'pending' && (
+                        <>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.approve', '通过')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.approved', '已通过')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400" title={t('admin.comments.moveToSpam', '垃圾箱')} onClick={() => { handleStatusChange(row.id, 'spam'); fetchCounts(); }}><Ban className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                        </>
+                      )}
+                      {/* Spam: approve + edit + delete */}
+                      {row.status === 'spam' && (
+                        <>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.restoreApproved', '恢复通过')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                        </>
+                      )}
+                      {/* Trash: restore + edit + delete */}
+                      {row.status === 'trash' && (
+                        <>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400" title={t('admin.comments.restore', '恢复')} onClick={async () => { try { await commentsApi.approve(row.id); removeFromList(row.id); fetchCounts(); toast.success(t('admin.comments.toast.restored', '已恢复')); } catch { toast.error(t('admin.common.operationFailed', '操作失败')); } }}><Check className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" title={t('admin.common.edit', '编辑')} onClick={() => setEditComment({ ...row })}><Pencil className="size-4" /></Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.comments.permanentDelete', '永久删除')} onClick={() => setDeleteId(row.id)}><Trash2 className="size-4" /></Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+
+        <div className="flex items-center justify-between border-t border-border px-4 py-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{t('admin.common.totalItems', '共 {count} 条', { count: total })}</span>
+            <Select value={perPage} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
+              <SelectTrigger className="h-8 w-[110px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={20}>{t('admin.common.perPage', '{count} 条/页', { count: 20 })}</SelectItem>
+                <SelectItem value={50}>{t('admin.common.perPage', '{count} 条/页', { count: 50 })}</SelectItem>
+                <SelectItem value={100}>{t('admin.common.perPage', '{count} 条/页', { count: 100 })}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </div>
+      </Card>
+
       <ConfirmDialog
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
         onConfirm={handleDelete}
         title={comments.find(c => c.id === deleteId)?.status === 'trash' ? t('admin.comments.permanentDelete', '永久删除') : t('admin.comments.moveToTrash', '移至回收站')}
         message={comments.find(c => c.id === deleteId)?.status === 'trash' ? t('admin.comments.confirmPermanentDelete', '此操作不可恢复，确认永久删除？') : t('admin.comments.confirmMoveToTrash', '评论将移至回收站，可在回收站中恢复或彻底删除。')}
       />
 
       <ConfirmDialog
-        isOpen={batchDeleteConfirm}
-        onClose={() => setBatchDeleteConfirm(false)}
+        open={batchDeleteConfirm}
+        onOpenChange={(o) => !o && setBatchDeleteConfirm(false)}
         onConfirm={() => { setBatchDeleteConfirm(false); batchAction('delete'); }}
         title={status === 'trash' ? t('admin.comments.batchPermanentDelete', '批量永久删除') : t('admin.comments.batchMoveToTrash', '批量移至回收站')}
         message={status === 'trash' ? t('admin.comments.confirmBatchPermanentDelete', '确认永久删除选中的 {count} 条评论？此操作不可恢复。', { count: selectedIds.size }) : t('admin.comments.confirmBatchMoveToTrash', '确认将选中的 {count} 条评论移至回收站？', { count: selectedIds.size })}
       />
 
-      <Modal isOpen={!!replyId} onClose={() => setReplyId(null)} title={t('admin.comments.replyComment', '回复评论')} size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            rows={4}
-            placeholder={t('admin.comments.replyPlaceholder', '输入回复内容…')}
-            className="input"
-            style={{ resize: 'vertical' }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <Button variant="secondary" onClick={() => setReplyId(null)}>{t('admin.common.cancel', '取消')}</Button>
-            <Button onClick={handleReply} disabled={replying}>{replying ? t('admin.comments.replying', '回复中…') : t('admin.comments.reply', '回复')}</Button>
+      <Dialog open={!!replyId} onOpenChange={(o) => !o && setReplyId(null)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{t('admin.comments.replyComment', '回复评论')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              rows={4}
+              placeholder={t('admin.comments.replyPlaceholder', '输入回复内容…')}
+              className="resize-y"
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReplyId(null)}>{t('admin.common.cancel', '取消')}</Button>
+              <Button onClick={handleReply} disabled={replying}>{replying ? t('admin.comments.replying', '回复中…') : t('admin.comments.reply', '回复')}</Button>
+            </DialogFooter>
           </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      {/* Edit Modal */}
-      <Modal isOpen={!!editComment} onClose={() => setEditComment(null)} title={t('admin.comments.editComment', '编辑评论')} size="sm">
-        {editComment && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div>
-                <label className="text-dim" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>{t('admin.comments.nickname', '昵称')}</label>
-                <input value={editComment.author || ''} onChange={e => setEditComment({ ...editComment, author: e.target.value })} className="input" style={{ width: '100%' }} />
+      {/* Edit dialog */}
+      <Dialog open={!!editComment} onOpenChange={(o) => !o && setEditComment(null)}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{t('admin.comments.editComment', '编辑评论')}</DialogTitle>
+          </DialogHeader>
+          {editComment && (
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <Label className="mb-1 block">{t('admin.comments.nickname', '昵称')}</Label>
+                  <Input value={editComment.author || ''} onChange={e => setEditComment({ ...editComment, author: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="mb-1 block">{t('admin.comments.email', '邮箱')}</Label>
+                  <Input value={editComment.email || ''} onChange={e => setEditComment({ ...editComment, email: e.target.value })} />
+                </div>
               </div>
               <div>
-                <label className="text-dim" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>{t('admin.comments.email', '邮箱')}</label>
-                <input value={editComment.email || ''} onChange={e => setEditComment({ ...editComment, email: e.target.value })} className="input" style={{ width: '100%' }} />
+                <Label className="mb-1 block">{t('admin.comments.website', '网址')}</Label>
+                <Input value={editComment.url || ''} onChange={e => setEditComment({ ...editComment, url: e.target.value })} />
               </div>
+              <div>
+                <Label className="mb-1 block">{t('admin.comments.content', '评论内容')}</Label>
+                <Textarea value={editComment.content || ''} onChange={e => setEditComment({ ...editComment, content: e.target.value })} rows={5} className="resize-y" />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setEditComment(null)}>{t('admin.common.cancel', '取消')}</Button>
+                <Button onClick={handleEditSave}><Save className="size-4" />{t('admin.common.save', '保存')}</Button>
+              </DialogFooter>
             </div>
-            <div>
-              <label className="text-dim" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>{t('admin.comments.website', '网址')}</label>
-              <input value={editComment.url || ''} onChange={e => setEditComment({ ...editComment, url: e.target.value })} className="input" style={{ width: '100%' }} />
-            </div>
-            <div>
-              <label className="text-dim" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>{t('admin.comments.content', '评论内容')}</label>
-              <textarea value={editComment.content || ''} onChange={e => setEditComment({ ...editComment, content: e.target.value })} className="input" rows={5} style={{ width: '100%', resize: 'vertical' }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <Button variant="secondary" onClick={() => setEditComment(null)}>{t('admin.common.cancel', '取消')}</Button>
-              <SaveButton onClick={handleEditSave} />
-            </div>
-          </div>
-        )}
-      </Modal>
-
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Empty trash confirm */}
       <ConfirmDialog
-        isOpen={emptyTrash}
-        onClose={() => setEmptyTrash(false)}
+        open={emptyTrash}
+        onOpenChange={(o) => !o && setEmptyTrash(false)}
         onConfirm={handleEmptyTrash}
         title={t('admin.comments.emptyTrash', '清空回收站')}
         message={t('admin.comments.confirmEmptyTrash', '将永久删除回收站中的所有评论，此操作无法撤销。确认清空？')}

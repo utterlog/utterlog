@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
 import api, { optionsApi } from '@/lib/api';
-import { Button, ConfirmDialog, LoadingState, Modal, SaveButton } from '@/components/ui';
+import { ConfirmDialog, LoadingState, Modal, SaveButton } from '@/components/ui';
+import { Button, Input, Textarea } from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
+import {
+  LayoutGrid, User, Sparkles, Music, History, FileCode,
+  RotateCcw, Plus, ChevronUp, ChevronDown, Trash2,
+  type LucideIcon,
+} from 'lucide-react';
 
 type AboutProfile = {
   name: string;
@@ -80,13 +87,13 @@ const defaultConfig: AboutConfig = {
   ],
 };
 
-const tabs: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'template', label: '模板', icon: 'fa-regular fa-layer-group' },
-  { key: 'profile', label: '基础资料', icon: 'fa-regular fa-user' },
-  { key: 'hobbies', label: '兴趣爱好', icon: 'fa-regular fa-stars' },
-  { key: 'music', label: '音乐', icon: 'fa-regular fa-music' },
-  { key: 'updates', label: '站点记录', icon: 'fa-regular fa-timeline-arrow' },
-  { key: 'custom', label: 'Markdown 内容', icon: 'fa-brands fa-markdown' },
+const tabs: { key: TabKey; label: string; icon: LucideIcon }[] = [
+  { key: 'template', label: '模板', icon: LayoutGrid },
+  { key: 'profile', label: '基础资料', icon: User },
+  { key: 'hobbies', label: '兴趣爱好', icon: Sparkles },
+  { key: 'music', label: '音乐', icon: Music },
+  { key: 'updates', label: '站点记录', icon: History },
+  { key: 'custom', label: 'Markdown 内容', icon: FileCode },
 ];
 
 const fieldRow: CSSProperties = {
@@ -97,21 +104,7 @@ const fieldRow: CSSProperties = {
   minHeight: 48,
 };
 
-const fieldLabel: CSSProperties = {
-  color: 'var(--color-text-sub)',
-  fontSize: 14,
-  fontWeight: 600,
-};
-
-const squareButtonStyle: CSSProperties = {
-  width: 34,
-  minWidth: 34,
-  height: 34,
-  padding: 0,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
+const fieldLabelCls = 'text-sm font-semibold text-muted-foreground';
 
 const aboutActionButtonStyle: CSSProperties = {
   minWidth: 210,
@@ -262,19 +255,17 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
         ['focus', '正在关注', '例如 AI、设计系统、旅行'],
       ] as [keyof AboutProfile, string, string][]).map(([key, label, placeholder]) => (
         <div style={fieldRow} key={key}>
-          <label style={fieldLabel}>{label}</label>
+          <label className={fieldLabelCls}>{label}</label>
           {key === 'bio' ? (
-            <textarea
-              className="input"
+            <Textarea
               value={config.profile[key]}
               onChange={e => updateProfile(key, e.target.value)}
               placeholder={placeholder}
               rows={3}
-              style={{ resize: 'vertical' }}
+              className="resize-y"
             />
           ) : (
-            <input
-              className="input"
+            <Input
               value={config.profile[key]}
               onChange={e => updateProfile(key, e.target.value)}
               placeholder={placeholder}
@@ -294,9 +285,9 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
       onRemove={(index) => removeArrayItem('hobbies', index)}
       render={(item, index) => (
         <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(0, 1fr)', gap: 8 }}>
-          <input className="input" value={item.icon} onChange={e => updateArrayItem('hobbies', index, { icon: e.target.value })} placeholder="fa-regular fa-star" />
-          <input className="input" value={item.title} onChange={e => updateArrayItem('hobbies', index, { title: e.target.value })} placeholder="爱好名称" />
-          <textarea className="input" value={item.description} onChange={e => updateArrayItem('hobbies', index, { description: e.target.value })} placeholder="一句话说明" rows={2} style={{ gridColumn: '1 / -1', resize: 'vertical' }} />
+          <Input value={item.icon} onChange={e => updateArrayItem('hobbies', index, { icon: e.target.value })} placeholder="fa-regular fa-star" />
+          <Input value={item.title} onChange={e => updateArrayItem('hobbies', index, { title: e.target.value })} placeholder="爱好名称" />
+          <Textarea value={item.description} onChange={e => updateArrayItem('hobbies', index, { description: e.target.value })} placeholder="一句话说明" rows={2} className="resize-y" style={{ gridColumn: '1 / -1' }} />
         </div>
       )}
     />
@@ -311,10 +302,10 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
       onRemove={(index) => removeArrayItem('music', index)}
       render={(item, index) => (
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8 }}>
-          <input className="input" value={item.title} onChange={e => updateArrayItem('music', index, { title: e.target.value })} placeholder="歌名 / 歌单名" />
-          <input className="input" value={item.artist} onChange={e => updateArrayItem('music', index, { artist: e.target.value })} placeholder="歌手 / 来源" />
-          <input className="input" value={item.note} onChange={e => updateArrayItem('music', index, { note: e.target.value })} placeholder="备注" />
-          <input className="input" value={item.url} onChange={e => updateArrayItem('music', index, { url: e.target.value })} placeholder="链接，可选" />
+          <Input value={item.title} onChange={e => updateArrayItem('music', index, { title: e.target.value })} placeholder="歌名 / 歌单名" />
+          <Input value={item.artist} onChange={e => updateArrayItem('music', index, { artist: e.target.value })} placeholder="歌手 / 来源" />
+          <Input value={item.note} onChange={e => updateArrayItem('music', index, { note: e.target.value })} placeholder="备注" />
+          <Input value={item.url} onChange={e => updateArrayItem('music', index, { url: e.target.value })} placeholder="链接，可选" />
         </div>
       )}
     />
@@ -329,10 +320,10 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
       onRemove={(index) => removeArrayItem('updates', index)}
       render={(item, index) => (
         <div style={{ display: 'grid', gridTemplateColumns: '150px 110px minmax(0, 1fr)', gap: 8 }}>
-          <input className="input" value={item.date} onChange={e => updateArrayItem('updates', index, { date: e.target.value })} placeholder="2026-04-29" />
-          <input className="input" value={item.type} onChange={e => updateArrayItem('updates', index, { type: e.target.value })} placeholder="更新" />
-          <input className="input" value={item.title} onChange={e => updateArrayItem('updates', index, { title: e.target.value })} placeholder="标题" />
-          <textarea className="input" value={item.description} onChange={e => updateArrayItem('updates', index, { description: e.target.value })} placeholder="记录说明" rows={2} style={{ gridColumn: '1 / -1', resize: 'vertical' }} />
+          <Input value={item.date} onChange={e => updateArrayItem('updates', index, { date: e.target.value })} placeholder="2026-04-29" />
+          <Input value={item.type} onChange={e => updateArrayItem('updates', index, { type: e.target.value })} placeholder="更新" />
+          <Input value={item.title} onChange={e => updateArrayItem('updates', index, { title: e.target.value })} placeholder="标题" />
+          <Textarea value={item.description} onChange={e => updateArrayItem('updates', index, { description: e.target.value })} placeholder="记录说明" rows={2} className="resize-y" style={{ gridColumn: '1 / -1' }} />
         </div>
       )}
     />
@@ -347,66 +338,58 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
             <button
               type="button"
               onClick={() => setConfig(prev => ({ ...prev, mode: 'template' }))}
-              style={{
-                minHeight: 92,
-                padding: 16,
-                textAlign: 'left',
-                background: config.mode === 'template' ? 'rgba(0, 82, 217, 0.06)' : 'var(--color-bg-card)',
-                border: '1px solid',
-                borderColor: config.mode === 'template' ? 'rgba(0, 82, 217, 0.35)' : 'var(--color-border)',
-                cursor: 'pointer',
-              }}
+              className={cn(
+                'cursor-pointer rounded-lg border p-4 text-left',
+                config.mode === 'template' ? 'border-primary bg-primary/5' : 'border-border bg-card',
+              )}
+              style={{ minHeight: 92 }}
             >
-              <div className="text-main" style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
-                <i className="fa-regular fa-layer-group" style={{ color: 'var(--color-primary)' }} /> 默认模板
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <LayoutGrid className="size-4 text-primary" /> 默认模板
               </div>
-              <p className="text-dim" style={{ margin: '8px 0 0', fontSize: 12, lineHeight: 1.6 }}>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                 使用结构化表单生成个人主页，适合不想写 Markdown 的用户。
               </p>
             </button>
             <button
               type="button"
               onClick={() => setConfig(prev => ({ ...prev, mode: 'markdown' }))}
-              style={{
-                minHeight: 92,
-                padding: 16,
-                textAlign: 'left',
-                background: config.mode === 'markdown' ? 'rgba(0, 82, 217, 0.06)' : 'var(--color-bg-card)',
-                border: '1px solid',
-                borderColor: config.mode === 'markdown' ? 'rgba(0, 82, 217, 0.35)' : 'var(--color-border)',
-                cursor: 'pointer',
-              }}
+              className={cn(
+                'cursor-pointer rounded-lg border p-4 text-left',
+                config.mode === 'markdown' ? 'border-primary bg-primary/5' : 'border-border bg-card',
+              )}
+              style={{ minHeight: 92 }}
             >
-              <div className="text-main" style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
-                <i className="fa-brands fa-markdown" style={{ color: 'var(--color-primary)' }} /> 自定义 Markdown
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <FileCode className="size-4 text-primary" /> 自定义 Markdown
               </div>
-              <p className="text-dim" style={{ margin: '8px 0 0', fontSize: 12, lineHeight: 1.6 }}>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                 单独写 Markdown 正文，前台只渲染 Markdown 内容，不显示默认资料模板。
               </p>
             </button>
           </div>
-          <div style={{ border: '1px solid var(--color-border)', padding: 18, background: 'var(--color-bg-soft)' }}>
+          <div className="rounded-lg border border-border bg-muted p-[18px]">
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 52, height: 52, border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', background: 'var(--color-bg-card)' }}>
-                <i className="fa-regular fa-user" style={{ fontSize: 20 }} />
+              <div className="flex size-[52px] items-center justify-center rounded-md border border-border bg-card text-primary">
+                <User className="size-5" />
               </div>
               <div>
-                <div className="text-main" style={{ fontSize: 16, fontWeight: 700 }}>个人主页模板</div>
-                <div className="text-dim" style={{ fontSize: 12, marginTop: 4 }}>
+                <div className="text-base font-bold text-foreground">个人主页模板</div>
+                <div className="mt-1 text-xs text-muted-foreground">
                   包含个人名片、信息网格、兴趣爱好、音乐和站点更新记录。当前预览名称：{previewName}
                 </div>
               </div>
             </div>
           </div>
-          <p className="text-dim" style={{ margin: 0, fontSize: 14, lineHeight: 1.8 }}>
+          <p className="m-0 text-sm leading-loose text-muted-foreground">
             这个版本先提供一个稳定模板。后续可以继续增加“极简名片”“时间线主页”“摄影作品集”等模板，数据结构保持不变。
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button variant="secondary" onClick={() => setConfirmResetTemplate(true)} style={aboutActionButtonStyle}>
-              <i className="fa-regular fa-rotate-left" style={{ fontSize: 14 }} /> 载入默认模板
+              <RotateCcw className="size-3.5" /> 载入默认模板
             </Button>
             <Button variant="secondary" onClick={() => setTab('custom')} style={aboutActionButtonStyle}>
-              <i className="fa-brands fa-markdown" style={{ fontSize: 14 }} /> 编辑 Markdown
+              <FileCode className="size-3.5" /> 编辑 Markdown
             </Button>
           </div>
         </div>
@@ -418,23 +401,22 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
     if (tab === 'updates') return renderUpdates();
     return (
       <div>
-        <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px' }}>
+        <p className="mb-2.5 mt-0 text-xs leading-relaxed text-muted-foreground">
           这里是独立的 Markdown 内容。需要在「模板」里选择「自定义 Markdown」后，前台才会用这段内容作为关于页正文。
         </p>
         {config.mode !== 'markdown' && (
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 10 }}>
             <Button size="sm" variant="secondary" onClick={() => setConfig(prev => ({ ...prev, mode: 'markdown' }))}>
-              <i className="fa-brands fa-markdown" style={{ fontSize: 12 }} /> 切换为自定义 Markdown
+              <FileCode className="size-3" /> 切换为自定义 Markdown
             </Button>
           </div>
         )}
-        <textarea
-          className="input"
+        <Textarea
           value={markdownContent}
           onChange={e => setMarkdownContent(e.target.value)}
           placeholder={"## 关于我\n\n写一段自定义 Markdown 介绍…\n\n> 支持引用、列表、表格、链接和图片。"}
           rows={12}
-          style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 14, resize: 'vertical' }}
+          className="resize-y font-mono text-sm"
         />
       </div>
     );
@@ -450,41 +432,36 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
         minHeight: 0,
         overflow: 'hidden',
       }}>
-        <div style={{ borderRight: '1px solid var(--color-border)', paddingRight: 14, minHeight: 0, overflowY: 'auto' }}>
+        <div className="border-r border-border" style={{ paddingRight: 14, minHeight: 0, overflowY: 'auto' }}>
           <div style={{ display: 'grid', gap: 6 }}>
-            {tabs.map(item => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setTab(item.key)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  width: '100%',
-                  minHeight: 38,
-                  padding: '0 12px',
-                  color: tab === item.key ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                  fontSize: 14,
-                  fontWeight: tab === item.key ? 700 : 500,
-                  textAlign: 'left',
-                  background: tab === item.key ? 'rgba(0, 82, 217, 0.06)' : 'transparent',
-                  border: '1px solid',
-                  borderColor: tab === item.key ? 'rgba(0, 82, 217, 0.25)' : 'transparent',
-                  cursor: 'pointer',
-                }}
-              >
-                <i className={item.icon} style={{ width: 16, textAlign: 'center' }} />
-                {item.label}
-              </button>
-            ))}
+            {tabs.map(item => {
+              const TabIcon = item.icon;
+              const active = tab === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setTab(item.key)}
+                  className={cn(
+                    'flex w-full cursor-pointer items-center gap-2 rounded-md border px-3 text-left text-sm',
+                    active
+                      ? 'border-primary/30 bg-primary/5 font-bold text-primary'
+                      : 'border-transparent font-medium text-muted-foreground',
+                  )}
+                  style={{ minHeight: 38 }}
+                >
+                  <TabIcon className="size-4 shrink-0" />
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
         </div>
         <div style={{ minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
             {renderBody()}
           </div>
-          <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 18, marginTop: 18, borderTop: '1px solid var(--color-border)' }}>
+          <div className="border-t border-border" style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 18, marginTop: 18 }}>
             <Button variant="secondary" onClick={onClose} disabled={saving}>取消</Button>
             <SaveButton onClick={handleSave} loading={saving} />
           </div>
@@ -520,26 +497,26 @@ function EditableList<T>({
   return (
     <div style={{ display: 'grid', gap: 10 }}>
       {items.map((item, index) => (
-        <div key={index} style={{ border: '1px solid var(--color-border)', padding: 12 }}>
+        <div key={index} className="rounded-lg border border-border p-3">
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 10, alignItems: 'start' }}>
             <div>{render(item, index)}</div>
             <div style={{ display: 'flex', gap: 4 }}>
-              <button className="btn btn-secondary" style={squareButtonStyle} onClick={() => onMove(index, -1)} disabled={index === 0} title="上移">
-                <i className="fa-regular fa-chevron-up" />
-              </button>
-              <button className="btn btn-secondary" style={squareButtonStyle} onClick={() => onMove(index, 1)} disabled={index === items.length - 1} title="下移">
-                <i className="fa-regular fa-chevron-down" />
-              </button>
-              <button className="btn btn-secondary" style={{ ...squareButtonStyle, color: 'var(--color-error)' }} onClick={() => onRemove(index)} title="删除">
-                <i className="fa-regular fa-trash" />
-              </button>
+              <Button variant="outline" size="icon" onClick={() => onMove(index, -1)} disabled={index === 0} title="上移">
+                <ChevronUp className="size-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => onMove(index, 1)} disabled={index === items.length - 1} title="下移">
+                <ChevronDown className="size-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="text-destructive hover:text-destructive" onClick={() => onRemove(index)} title="删除">
+                <Trash2 className="size-4" />
+              </Button>
             </div>
           </div>
         </div>
       ))}
       <div>
         <Button variant="secondary" onClick={onAdd}>
-          <i className="fa-regular fa-plus" style={{ fontSize: 14 }} /> {addLabel}
+          <Plus className="size-3.5" /> {addLabel}
         </Button>
       </div>
     </div>

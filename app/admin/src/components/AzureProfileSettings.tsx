@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import toast from 'react-hot-toast';
+import { User, Upload, Loader2 } from 'lucide-react';
 import { mediaApi, optionsApi } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
-import { LoadingState } from '@/components/ui';
+import { Button, Input, Textarea, LoadingState } from '@/components/ui/shadcn';
 
 type AzureProfileForm = {
   azure_sidebar_profile_enabled: string;
@@ -36,18 +37,15 @@ const defaultForm: AzureProfileForm = {
   azure_sidebar_weather_default_longitude: '69.2401',
 };
 
-const rowStyle = {
-  display: 'grid',
+// 每行的固定网格布局（label 列 + 值列）。颜色 / 边框走语义 utility class，
+// 只把布局尺寸留在内联 style。
+const rowGridStyle = {
   gridTemplateColumns: '180px minmax(0, 1fr)',
   minHeight: 58,
-  borderBottom: '1px solid var(--color-border)',
 } as const;
 
 const labelStyle = {
   padding: '18px 16px 12px 0',
-  color: 'var(--color-text-sub)',
-  fontSize: 14,
-  fontWeight: 600,
 } as const;
 
 const valueStyle = {
@@ -128,29 +126,30 @@ export default function AzureProfileSettings() {
     }
   };
 
-  if (loading) return <LoadingState padding="20px 0" />;
+  if (loading) return <LoadingState />;
 
   return (
     <div>
-      <div className="card" style={{ padding: 20, marginTop: 24 }}>
+      <div className="mt-6 rounded-lg border border-border bg-card" style={{ padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>
           <div>
-            <h3 className="text-main" style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>主题侧边栏资料卡</h3>
-            <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.7, margin: '8px 0 0' }}>
+            <h3 className="text-sm font-semibold text-foreground" style={{ margin: 0 }}>主题侧边栏资料卡</h3>
+            <p className="text-xs text-muted-foreground" style={{ lineHeight: 1.7, margin: '8px 0 0' }}>
               留空时自动使用博主资料；访客填写过评论表单后，前台会读取同一份缓存显示欢迎回来。
             </p>
           </div>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? '保存中…' : '保存'}
-          </button>
+          </Button>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>显示资料卡</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>显示资料卡</div>
           <div style={{ ...valueStyle, display: 'flex', alignItems: 'center' }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
+            <label className="text-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               <input
                 type="checkbox"
+                className="accent-primary"
                 checked={form.azure_sidebar_profile_enabled !== 'false'}
                 onChange={(e) => update('azure_sidebar_profile_enabled', e.target.checked ? 'true' : 'false')}
               />
@@ -159,39 +158,40 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>头像</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>头像</div>
           <div style={{ ...valueStyle, display: 'grid', gridTemplateColumns: '64px minmax(0, 1fr) auto', gap: 10, alignItems: 'center' }}>
-            <div style={{
-              width: 54, height: 54, border: '1px solid var(--color-border)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'var(--color-bg-soft)', overflow: 'hidden',
-            }}>
+            <div
+              className="border border-border bg-muted"
+              style={{
+                width: 54, height: 54,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
               {form.azure_sidebar_profile_avatar ? (
                 <img src={form.azure_sidebar_profile_avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <i className="fa-regular fa-user" style={{ color: 'var(--color-text-dim)' }} />
+                <User className="size-4 text-muted-foreground" />
               )}
             </div>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_profile_avatar}
               onChange={(e) => update('azure_sidebar_profile_avatar', e.target.value)}
               placeholder="留空使用博主头像，也可以填写图片 URL"
             />
-            <button className="btn btn-secondary" onClick={() => fileRef.current?.click()} disabled={uploading}>
-              <i className={uploading ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-upload'} style={{ fontSize: 14 }} />
+            <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
+              {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
               {uploading ? '上传中' : '上传'}
-            </button>
+            </Button>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display: 'none' }} />
           </div>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>名称</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>名称</div>
           <div style={valueStyle}>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_profile_name}
               onChange={(e) => update('azure_sidebar_profile_name', e.target.value)}
               placeholder="留空使用博主昵称 / 站点标题"
@@ -199,11 +199,10 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>心情 Emoji</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>心情 Emoji</div>
           <div style={valueStyle}>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_profile_mood}
               onChange={(e) => update('azure_sidebar_profile_mood', e.target.value)}
               placeholder="例如 😄，留空不显示"
@@ -212,11 +211,10 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>欢迎语</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>欢迎语</div>
           <div style={valueStyle}>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_profile_welcome}
               onChange={(e) => update('azure_sidebar_profile_welcome', e.target.value)}
               placeholder="无评论缓存时显示，例如 欢迎来到这里"
@@ -224,11 +222,10 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>短描述</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>短描述</div>
           <div style={valueStyle}>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_profile_tagline}
               onChange={(e) => update('azure_sidebar_profile_tagline', e.target.value)}
               placeholder="显示在名称下方，留空使用站点副标题 / 描述"
@@ -236,11 +233,10 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={{ ...rowStyle, borderBottom: 0 }}>
-          <div style={labelStyle}>悬浮简介</div>
+        <div className="grid" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>悬浮简介</div>
           <div style={valueStyle}>
-            <textarea
-              className="input"
+            <Textarea
               value={form.azure_sidebar_profile_bio}
               onChange={(e) => update('azure_sidebar_profile_bio', e.target.value)}
               placeholder="鼠标悬浮资料卡时显示；留空使用博主简介 / 站点描述"
@@ -251,25 +247,26 @@ export default function AzureProfileSettings() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 20, marginTop: 18 }}>
+      <div className="rounded-lg border border-border bg-card" style={{ padding: 20, marginTop: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>
           <div>
-            <h3 className="text-main" style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>主题侧边栏访客天气</h3>
-            <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.7, margin: '8px 0 0' }}>
+            <h3 className="text-sm font-semibold text-foreground" style={{ margin: 0 }}>主题侧边栏访客天气</h3>
+            <p className="text-xs text-muted-foreground" style={{ lineHeight: 1.7, margin: '8px 0 0' }}>
               显示在原社交链接条位置。优先按访客 IP 获取城市天气，失败时显示默认城市天气。
             </p>
           </div>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? '保存中…' : '保存'}
-          </button>
+          </Button>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>显示天气条</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>显示天气条</div>
           <div style={{ ...valueStyle, display: 'flex', alignItems: 'center' }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
+            <label className="text-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               <input
                 type="checkbox"
+                className="accent-primary"
                 checked={form.azure_sidebar_weather_enabled !== 'false'}
                 onChange={(e) => update('azure_sidebar_weather_enabled', e.target.checked ? 'true' : 'false')}
               />
@@ -278,23 +275,20 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={rowStyle}>
-          <div style={labelStyle}>默认城市</div>
+        <div className="grid border-b border-border" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>默认城市</div>
           <div style={{ ...valueStyle, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) 120px', gap: 10 }}>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_weather_default_city}
               onChange={(e) => update('azure_sidebar_weather_default_city', e.target.value)}
               placeholder="塔什干"
             />
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_weather_default_country}
               onChange={(e) => update('azure_sidebar_weather_default_country', e.target.value)}
               placeholder="乌兹别克斯坦"
             />
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_weather_default_country_code}
               onChange={(e) => update('azure_sidebar_weather_default_country_code', e.target.value.toUpperCase())}
               placeholder="UZ"
@@ -303,17 +297,15 @@ export default function AzureProfileSettings() {
           </div>
         </div>
 
-        <div style={{ ...rowStyle, borderBottom: 0 }}>
-          <div style={labelStyle}>默认坐标</div>
+        <div className="grid" style={rowGridStyle}>
+          <div className="text-sm font-semibold text-muted-foreground" style={labelStyle}>默认坐标</div>
           <div style={{ ...valueStyle, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10 }}>
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_weather_default_latitude}
               onChange={(e) => update('azure_sidebar_weather_default_latitude', e.target.value)}
               placeholder="41.2995"
             />
-            <input
-              className="input"
+            <Input
               value={form.azure_sidebar_weather_default_longitude}
               onChange={(e) => update('azure_sidebar_weather_default_longitude', e.target.value)}
               placeholder="69.2401"

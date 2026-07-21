@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
+import { FileText, Folder, Tag, type LucideIcon } from 'lucide-react';
 import { NavLink, Outlet, useLocation } from '@/lib/router';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 const ToolbarContext = createContext<{ setToolbar: (node: ReactNode) => void }>({ setToolbar: () => {} });
 
@@ -8,10 +10,10 @@ export function usePostsToolbar() {
   return useContext(ToolbarContext);
 }
 
-const tabs = [
-  { to: '/posts', label: '全部文章', key: 'admin.posts.tabs.all', icon: 'fa-regular fa-file-lines', end: true },
-  { to: '/posts/categories', label: '分类', key: 'admin.nav.categories', icon: 'fa-regular fa-folder' },
-  { to: '/posts/tags', label: '标签', key: 'admin.nav.tags', icon: 'fa-regular fa-tag' },
+const tabs: { to: string; label: string; key: string; icon: LucideIcon; end?: boolean }[] = [
+  { to: '/posts', label: '全部文章', key: 'admin.posts.tabs.all', icon: FileText, end: true },
+  { to: '/posts/categories', label: '分类', key: 'admin.nav.categories', icon: Folder },
+  { to: '/posts/tags', label: '标签', key: 'admin.nav.tags', icon: Tag },
 ];
 
 // 文章 / 分类 / 标签属于同一个文章模块：左侧只保留「文章」
@@ -52,31 +54,32 @@ export default function PostsLayout() {
               minHeight: 40,
             }}
           >
-            {tabs.map(tab => (
-              <NavLink
-                key={tab.to}
-                to={tab.to}
-                end={tab.end}
-                role="tab"
-                style={({ isActive }) => ({
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 7,
-                  minHeight: 40,
-                  padding: '0 16px',
-                  color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                  fontSize: 14,
-                  fontWeight: isActive ? 700 : 500,
-                  textDecoration: 'none',
-                  borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,
-                  whiteSpace: 'nowrap',
-                })}
-              >
-                <i className={tab.icon} style={{ fontSize: 14 }} />
-                <span>{t(tab.key, tab.label)}</span>
-              </NavLink>
-            ))}
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <NavLink
+                  key={tab.to}
+                  to={tab.to}
+                  end={tab.end}
+                  role="tab"
+                  className="no-underline"
+                >
+                  {({ isActive }) => (
+                    <span
+                      className={cn(
+                        'inline-flex min-h-10 items-center justify-center gap-[7px] whitespace-nowrap border-b-2 px-4 text-sm',
+                        isActive
+                          ? 'border-primary font-bold text-primary'
+                          : 'border-transparent font-medium text-muted-foreground',
+                      )}
+                    >
+                      <Icon className="size-3.5" />
+                      <span>{t(tab.key, tab.label)}</span>
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })}
           </div>
           {toolbar && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minHeight: 40 }}>

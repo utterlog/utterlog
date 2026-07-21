@@ -1,9 +1,17 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation, useSearchParams } from '@/lib/router';
-import { postsApi, categoriesApi, tagsApi, mediaApi, optionsApi } from '@/lib/api';
+import { postsApi, categoriesApi, mediaApi, optionsApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Button } from '@/components/ui';
+import {
+  Button, Input, Textarea, Label, Switch,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/shadcn';
+import {
+  Sparkles, Loader2, CloudUpload, X, PenLine,
+  WandSparkles, UserRound, Smile, Shrink, Expand, AlignLeft, Search, Code, ListTree,
+} from 'lucide-react';
 import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { firstMarkdownH1, resolveMarkdownTitle } from '@/lib/markdown';
@@ -183,31 +191,23 @@ export default function CreatePostPage() {
     finally { setCoverUploading(false); e.target.value = ''; }
   };
 
-  const labelStyle: React.CSSProperties = { display: 'block', fontSize: '12px', color: 'var(--color-text-sub)', marginBottom: '6px', fontWeight: 500 };
-  const sectionStyle: React.CSSProperties = { padding: '16px', borderBottom: '1px solid var(--color-border)' };
-
   return (
     <>
       {/* Main layout */}
-      <div style={{ display: 'flex', gap: '0', height: 'calc(100vh - 80px)' }}>
+      <div className="flex h-[calc(100vh-80px)] gap-0">
         {/* Editor area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, border: '1px solid var(--color-border)', borderRight: 'none', overflow: 'hidden' }}>
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden border border-r-0 border-border">
           {/* Title */}
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('admin.postEditor.titlePlaceholder', '在此输入标题…')}
-            style={{
-              padding: '14px 20px', fontSize: '18px', fontWeight: 600,
-              border: 'none', borderBottom: '1px solid var(--color-border)',
-              background: 'transparent', color: 'var(--color-text-main)',
-              outline: 'none',
-            }}
+            className="border-0 border-b border-border bg-transparent px-5 py-3.5 text-lg font-semibold text-foreground outline-none placeholder:text-muted-foreground"
           />
-          <input ref={mdFileRef} type="file" accept=".md,.markdown,.txt" style={{ display: 'none' }} onChange={handleMdUpload} />
+          <input ref={mdFileRef} type="file" accept=".md,.markdown,.txt" className="hidden" onChange={handleMdUpload} />
           {/* Editor —— 影视模式上方先渲染元数据 + 剧集，下方留 Markdown 编辑器写简介 */}
           {postType === 'video' ? (
-            <div style={{ flex: 1, overflow: 'auto', padding: 16, background: 'var(--color-bg-soft)' }}>
+            <div className="flex-1 overflow-auto bg-muted p-4">
               <VideoFormSection
                 onChange={setVideoData}
                 onImportedExtras={(ex) => {
@@ -216,11 +216,11 @@ export default function CreatePostPage() {
                   if (ex.summary && !excerpt) setExcerpt(ex.summary);
                 }}
               />
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-main)', margin: '4px 0 8px' }}>
-                <i className="fa-regular fa-pen-line" style={{ marginRight: 6 }} />
+              <div className="mb-2 mt-1 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                <PenLine className="size-3.5" />
                 影视简介 / 剧情（Markdown）
               </div>
-              <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
+              <div className="border border-border bg-card">
                 <MarkdownEditor
                   value={content}
                   onChange={setContent}
@@ -230,7 +230,7 @@ export default function CreatePostPage() {
               </div>
             </div>
           ) : (
-            <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div className="flex-1 overflow-hidden">
               <MarkdownEditor
                 value={content}
                 onChange={(val) => {
@@ -264,61 +264,60 @@ export default function CreatePostPage() {
         </div>
 
         {/* Right sidebar */}
-        <div style={{
-          width: '280px', flexShrink: 0, overflowY: 'auto', overflowX: 'hidden',
-          border: '1px solid var(--color-border)', background: 'var(--color-bg-card)',
-        }}>
+        <div className="w-[280px] shrink-0 overflow-x-hidden overflow-y-auto border border-border bg-card">
           {/* Publish */}
-          <div style={sectionStyle}>
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-              <Button onClick={() => handleSave('publish')} loading={submitting} style={{ flex: 1, minWidth: 0, padding: '0 8px' }}>
+          <div className="border-b border-border p-4">
+            <div className="mb-2 flex gap-1.5">
+              <Button className="min-w-0 flex-1 px-2" disabled={submitting} onClick={() => handleSave('publish')}>
                 {t('admin.postEditor.publish', '发布')}
               </Button>
-              <Button variant="secondary" onClick={() => handleSave('draft')} loading={submitting} style={{ flex: 1, minWidth: 0, padding: '0 8px' }}>
+              <Button variant="outline" className="min-w-0 flex-1 px-2" disabled={submitting} onClick={() => handleSave('draft')}>
                 {t('admin.common.save', '保存')}
               </Button>
-              <Button variant="secondary" onClick={() => navigate(backTarget)} style={{ flex: 1, minWidth: 0, padding: '0 8px' }}>
+              <Button variant="outline" className="min-w-0 flex-1 px-2" onClick={() => navigate(backTarget)}>
                 {t('admin.common.back', '返回')}
               </Button>
             </div>
-            {aiFlags.polish && <button onClick={() => setShowAiModal(true)} style={{
-              width: '100%', padding: '7px', fontSize: '12px', fontWeight: 500,
-              background: 'none', border: '1px solid var(--color-primary)', color: 'var(--color-primary)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-              transition: 'all 0.15s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--color-primary)'; }}
-            >
-              <i className="fa-regular fa-sparkles" style={{ fontSize: '13px' }} /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
-            </button>}
+            {aiFlags.polish && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full gap-1.5 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                onClick={() => setShowAiModal(true)}
+              >
+                <Sparkles className="size-3.5" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
+              </Button>
+            )}
           </div>
 
           {/* Settings */}
-          <div style={sectionStyle}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '14px', color: 'var(--color-text-main)' }}>{t('admin.postEditor.settings', '设置')}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="border-b border-border p-4">
+            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">{t('admin.postEditor.settings', '设置')}</h3>
+            <div className="flex flex-col gap-3.5">
               {/* Cover */}
               <div>
-                <label style={labelStyle}>{t('admin.postEditor.coverUrl', '自定义封面图 URL')}</label>
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.coverUrl', '自定义封面图 URL')}</Label>
                 {coverUrl && (
-                  <div style={{ marginBottom: '6px', position: 'relative' }}>
-                    <img src={coverUrl} alt="" style={{ width: '100%', height: '80px', objectFit: 'cover', border: '1px solid var(--color-border)' }} />
-                    <button onClick={() => setCoverUrl('')} style={{
-                      position: 'absolute', top: '4px', right: '4px', width: '18px', height: '18px',
-                      background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', cursor: 'pointer',
-                      fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>×</button>
+                  <div className="relative mb-1.5">
+                    <img src={coverUrl} alt="" className="h-20 w-full border border-border object-cover" />
+                    <button
+                      onClick={() => setCoverUrl('')}
+                      className="absolute right-1 top-1 flex size-[18px] items-center justify-center rounded bg-black/50 text-white"
+                    >
+                      <X className="size-3" />
+                    </button>
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'stretch' }}>
-                  <input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder={t('admin.postEditor.coverPlaceholder', '留空自动回退为正文首图')} className="input" style={{ flex: 1, fontSize: '12px' }} />
+                <div className="flex items-stretch gap-1.5">
+                  <Input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder={t('admin.postEditor.coverPlaceholder', '留空自动回退为正文首图')} className="h-9 flex-1 text-xs" />
                   {aiFlags.image && (
-                    <button
-                      className="btn btn-secondary btn-toolbar-square"
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-9 shrink-0"
                       title={t('admin.postEditor.aiGenerateCover', 'AI 生成封面')}
                       disabled={coverAiLoading}
-                      style={{ opacity: coverAiLoading ? 0.5 : 1 }}
                       onClick={async () => {
                         if (!title) { toast.error(t('admin.postEditor.toast.fillTitleFirst', '请先填写标题')); return; }
                         setCoverAiLoading(true);
@@ -339,35 +338,40 @@ export default function CreatePostPage() {
                       }}
                     >
                       {coverAiLoading
-                        ? <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: 14 }} />
-                        : <i className="fa-regular fa-sparkles" style={{ fontSize: 14 }} />}
-                    </button>
+                        ? <Loader2 className="size-3.5 animate-spin" />
+                        : <Sparkles className="size-3.5" />}
+                    </Button>
                   )}
-                  <button
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-9 shrink-0"
                     onClick={() => coverFileRef.current?.click()}
-                    className="btn btn-secondary btn-toolbar-square"
                     title={coverUploading ? t('admin.media.uploading', '上传中…') : t('admin.postEditor.uploadCover', '上传封面')}
                   >
                     {coverUploading
-                      ? <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: 14 }} />
-                      : <i className="fa-regular fa-cloud-arrow-up" style={{ fontSize: 14 }} />}
-                  </button>
-                  <input ref={coverFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleCoverUpload} />
+                      ? <Loader2 className="size-3.5 animate-spin" />
+                      : <CloudUpload className="size-3.5" />}
+                  </Button>
+                  <input ref={coverFileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
                 </div>
-                <p style={{ fontSize: '10px', color: 'var(--color-text-dim)', marginTop: '4px', lineHeight: 1.5 }}>
+                <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
                   {t('admin.postEditor.coverHint', '如果这里有值，封面优先使用它；为空时自动回退到正文首图。')}
                 </p>
               </div>
 
               {/* Slug */}
               <div>
-                <label style={labelStyle}>{t('admin.postEditor.slug', '别名 (Slug)')}</label>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={t('admin.postEditor.slugPlaceholder', '留空自动分配唯一数字')} className="input" style={{ flex: 1, fontSize: '12px', padding: '6px 10px' }} />
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.slug', '别名 (Slug)')}</Label>
+                <div className="flex gap-1.5">
+                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={t('admin.postEditor.slugPlaceholder', '留空自动分配唯一数字')} className="h-9 flex-1 text-xs" />
                   {aiFlags.slug && (
-                  <button
-                    className="btn btn-secondary"
-                    style={{ fontSize: '11px', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: '3px' }}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 shrink-0 gap-1 px-2 text-[11px]"
                     disabled={slugLoading}
                     onClick={async () => {
                       if (!title) return;
@@ -379,29 +383,37 @@ export default function CreatePostPage() {
                       setSlugLoading(false);
                     }}
                   >
-                    {slugLoading ? <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '11px' }} /> : <i className="fa-regular fa-sparkles" style={{ fontSize: '11px' }} />} AI
-                  </button>
+                    {slugLoading ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />} AI
+                  </Button>
                   )}
                 </div>
               </div>
 
               {/* Category */}
               <div>
-                <label style={labelStyle}>{t('admin.postEditor.category', '分类')}</label>
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : '')} className="input" style={{ fontSize: '12px', padding: '6px 10px' }}>
-                  <option value="">{t('admin.postEditor.uncategorized', '未分类')}</option>
-                  {categories.map((cat) => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
-                </select>
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.category', '分类')}</Label>
+                <Select value={String(categoryId)} onValueChange={(v) => setCategoryId(v ? Number(v) : '')}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('admin.postEditor.uncategorized', '未分类')}</SelectItem>
+                    {categories.map((cat) => (<SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Tags */}
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '12px', color: 'var(--color-text-sub)', fontWeight: 500 }}>{t('admin.postEditor.tagsComma', '标签 (逗号分隔)')}</label>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <Label className="text-xs font-medium text-muted-foreground">{t('admin.postEditor.tagsComma', '标签 (逗号分隔)')}</Label>
                   {aiFlags.keywords && (
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     disabled={tagsLoading}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '11px', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '3px', opacity: tagsLoading ? 0.5 : 1 }}
+                    className="h-auto gap-1 p-0 text-[11px] text-primary hover:bg-transparent hover:text-primary/80"
                     onClick={async () => {
                       if (!title && !content) { toast.error(t('admin.postEditor.toast.fillTitleOrContentFirst', '请先填写标题或内容')); return; }
                       setTagsLoading(true);
@@ -416,17 +428,17 @@ export default function CreatePostPage() {
                       setTagsLoading(false);
                     }}
                   >
-                    {tagsLoading ? <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '10px' }} /> : <i className="fa-regular fa-sparkles" style={{ fontSize: '10px' }} />} {t('admin.postEditor.aiExtract', 'AI 提取')}
-                  </button>
+                    {tagsLoading ? <Loader2 className="size-2.5 animate-spin" /> : <Sparkles className="size-2.5" />} {t('admin.postEditor.aiExtract', 'AI 提取')}
+                  </Button>
                   )}
                 </div>
-                <input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder={t('admin.postEditor.tagsPlaceholder', 'Tag1, Tag2（默认提取 3 个关键词）')} className="input" style={{ fontSize: '12px', padding: '6px 10px' }} />
+                <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder={t('admin.postEditor.tagsPlaceholder', 'Tag1, Tag2（默认提取 3 个关键词）')} className="h-9 text-xs" />
               </div>
 
               {/* Publish time */}
               <div>
-                <label style={labelStyle}>{t('admin.postEditor.publishTime', '发布时间')}</label>
-                <input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="input" style={{ fontSize: '12px', padding: '6px 10px' }} />
+                <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t('admin.postEditor.publishTime', '发布时间')}</Label>
+                <Input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="h-9 text-xs" />
               </div>
 
               <FootprintEditor
@@ -441,17 +453,20 @@ export default function CreatePostPage() {
           </div>
 
           {/* Advanced */}
-          <div style={sectionStyle}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '14px', color: 'var(--color-text-main)' }}>{t('admin.postEditor.advanced', '高级')}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="border-b border-border p-4">
+            <h3 className="mb-3.5 text-[13px] font-semibold text-foreground">{t('admin.postEditor.advanced', '高级')}</h3>
+            <div className="flex flex-col gap-3.5">
               {/* Excerpt */}
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '12px', color: 'var(--color-text-sub)', fontWeight: 500 }}>{t('admin.postEditor.excerpt', '摘要')}</label>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <Label className="text-xs font-medium text-muted-foreground">{t('admin.postEditor.excerpt', '摘要')}</Label>
                   {aiFlags.summary && (
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     disabled={excerptLoading}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '11px', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '3px', opacity: excerptLoading ? 0.5 : 1 }}
+                    className="h-auto gap-1 p-0 text-[11px] text-primary hover:bg-transparent hover:text-primary/80"
                     onClick={async () => {
                       if (!content) { toast.error(t('admin.postEditor.toast.fillContentFirst', '请先填写内容')); return; }
                       setExcerptLoading(true);
@@ -462,29 +477,33 @@ export default function CreatePostPage() {
                       setExcerptLoading(false);
                     }}
                   >
-                    {excerptLoading ? <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '10px' }} /> : <i className="fa-regular fa-sparkles" style={{ fontSize: '10px' }} />} {t('admin.postEditor.aiGenerate', 'AI 生成')}
-                  </button>
+                    {excerptLoading ? <Loader2 className="size-2.5 animate-spin" /> : <Sparkles className="size-2.5" />} {t('admin.postEditor.aiGenerate', 'AI 生成')}
+                  </Button>
                   )}
                 </div>
-                <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder={t('admin.postEditor.excerptPlaceholder', '留空自动截取')} rows={3} className="input" style={{ fontSize: '12px', padding: '6px 10px', resize: 'vertical' }} />
+                <Textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder={t('admin.postEditor.excerptPlaceholder', '留空自动截取')} rows={3} className="resize-y text-xs" />
               </div>
 
-              {/* Checkboxes */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', color: 'var(--color-text-main)' }}>
-                  <input type="checkbox" checked={allowComment} onChange={(e) => setAllowComment(e.target.checked)} /> {t('admin.postEditor.allowComments', '允许评论')}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', color: 'var(--color-text-main)' }}>
-                  <input type="checkbox" checked={allowRss} onChange={(e) => setAllowRss(e.target.checked)} /> {t('admin.postEditor.allowRss', '允许本文出现在 RSS 聚合')}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', color: 'var(--color-text-main)' }}>
-                  <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} /> {t('admin.postEditor.pinned', '置顶文章')}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', color: 'var(--color-text-main)' }}>
-                  <input type="checkbox" checked={status === 'private'} onChange={(e) => setStatus(e.target.checked ? 'private' : 'publish')} /> {t('admin.postEditor.privatePost', '私密文章')}
-                </label>
+              {/* Toggles */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allowComment" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.allowComments', '允许评论')}</Label>
+                  <Switch id="allowComment" checked={allowComment} onCheckedChange={setAllowComment} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="allowRss" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.allowRss', '允许本文出现在 RSS 聚合')}</Label>
+                  <Switch id="allowRss" checked={allowRss} onCheckedChange={setAllowRss} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pinned" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.pinned', '置顶文章')}</Label>
+                  <Switch id="pinned" checked={pinned} onCheckedChange={setPinned} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="privatePost" className="cursor-pointer text-xs font-normal text-foreground">{t('admin.postEditor.privatePost', '私密文章')}</Label>
+                  <Switch id="privatePost" checked={status === 'private'} onCheckedChange={(v) => setStatus(v ? 'private' : 'publish')} />
+                </div>
                 {status === 'private' && (
-                  <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('admin.postEditor.passwordPlaceholder', '输入访问密码')} className="input" style={{ fontSize: '12px', padding: '6px 10px', marginLeft: '24px', width: 'calc(100% - 24px)', boxSizing: 'border-box' }} />
+                  <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('admin.postEditor.passwordPlaceholder', '输入访问密码')} className="h-9 text-xs" />
                 )}
               </div>
             </div>
@@ -493,106 +512,86 @@ export default function CreatePostPage() {
       </div>
 
       {/* Content Insert Modal */}
-      {insertType && (
-        <>
-          <div onClick={() => setInsertType(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 50 }} />
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            zIndex: 51, width: '500px', maxWidth: '90vw', maxHeight: '70vh',
-            background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column',
-          }}>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: 600 }}>
-                {t('admin.postEditor.insertType', '插入{type}', { type: insertType })}
-              </h3>
-              <button onClick={() => setInsertType(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: 'var(--color-text-dim)' }}>×</button>
-            </div>
-            <div style={{ flex: 1, overflow: 'auto', padding: '12px 20px' }}>
-              {insertLoading && <p style={{ textAlign: 'center', color: 'var(--color-text-dim)', padding: '20px 0', fontSize: '13px' }}>{t('admin.common.loading', '加载中…')}</p>}
-              {!insertLoading && insertItems.length === 0 && (
-                <p style={{ textAlign: 'center', color: 'var(--color-text-dim)', padding: '20px 0', fontSize: '13px' }}>
-                  {t('admin.postEditor.noInsertData', '暂无{type}数据，请先在对应页面添加', { type: insertType })}
-                </p>
-              )}
-              {insertItems.map((item: any) => (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    let md = '';
-                    if (insertType === '音乐') {
-                      md = '\n[music platform="' + (item.platform || 'netease') + '" id="' + (item.platform_id || item.id || '') + '" title="' + (item.title || '') + '" artist="' + (item.artist || '') + '" cover="' + (item.cover_url || '') + '"][/music]\n';
-                    } else if (insertType === '图书') {
-                      md = '\n> **' + (item.title || '') + '**' + (item.author ? ' - ' + item.author : '') + (item.rating ? ' ' + item.rating + '/5' : '') + (item.comment ? '\n> ' + item.comment : '') + '\n';
-                    } else if (insertType === '电影') {
-                      md = '\n> **' + (item.title || '') + '**' + (item.rating ? ' ' + item.rating + '/5' : '') + (item.comment ? '\n> ' + item.comment : '') + '\n';
-                    } else if (insertType === '说说') {
-                      md = '\n[moment id="' + item.id + '"][/moment]\n';
-                    }
-                    if (md) {
-                      setContent(content + md);
-                    }
-                    setInsertType(null);
-                    toast.success(t('admin.postEditor.toast.insertedType', '已插入{type}', { type: insertType }));
-                  }}
-                  style={{
-                    padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px',
-                    borderBottom: '1px solid var(--color-border)', transition: 'background 0.1s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-soft)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-                >
-                  {(item.cover_url || item.image) && (
-                    <img src={item.cover_url || item.image} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', flexShrink: 0 }} />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.title || item.content?.slice(0, 50)}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--color-text-dim)', marginTop: '2px' }}>
-                      {item.artist || item.author || item.platform || ''}
-                      {item.rating ? ` · ${t('admin.postEditor.ratingValue', '{rating}分', { rating: item.rating })}` : ''}
-                    </div>
+      <Dialog open={!!insertType} onOpenChange={(o) => !o && setInsertType(null)}>
+        <DialogContent className="flex max-h-[70vh] w-[500px] max-w-[90vw] flex-col gap-0 p-0">
+          <DialogHeader className="border-b border-border px-5 py-3.5">
+            <DialogTitle className="text-sm">
+              {t('admin.postEditor.insertType', '插入{type}', { type: insertType ?? '' })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto px-5 py-3">
+            {insertLoading && <p className="py-5 text-center text-[13px] text-muted-foreground">{t('admin.common.loading', '加载中…')}</p>}
+            {!insertLoading && insertItems.length === 0 && (
+              <p className="py-5 text-center text-[13px] text-muted-foreground">
+                {t('admin.postEditor.noInsertData', '暂无{type}数据，请先在对应页面添加', { type: insertType ?? '' })}
+              </p>
+            )}
+            {insertItems.map((item: any) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  let md = '';
+                  if (insertType === '音乐') {
+                    md = '\n[music platform="' + (item.platform || 'netease') + '" id="' + (item.platform_id || item.id || '') + '" title="' + (item.title || '') + '" artist="' + (item.artist || '') + '" cover="' + (item.cover_url || '') + '"][/music]\n';
+                  } else if (insertType === '图书') {
+                    md = '\n> **' + (item.title || '') + '**' + (item.author ? ' - ' + item.author : '') + (item.rating ? ' ' + item.rating + '/5' : '') + (item.comment ? '\n> ' + item.comment : '') + '\n';
+                  } else if (insertType === '电影') {
+                    md = '\n> **' + (item.title || '') + '**' + (item.rating ? ' ' + item.rating + '/5' : '') + (item.comment ? '\n> ' + item.comment : '') + '\n';
+                  } else if (insertType === '说说') {
+                    md = '\n[moment id="' + item.id + '"][/moment]\n';
+                  }
+                  if (md) {
+                    setContent(content + md);
+                  }
+                  setInsertType(null);
+                  toast.success(t('admin.postEditor.toast.insertedType', '已插入{type}', { type: insertType ?? '' }));
+                }}
+                className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2.5 transition-colors hover:bg-muted"
+              >
+                {(item.cover_url || item.image) && (
+                  <img src={item.cover_url || item.image} alt="" className="size-10 shrink-0 object-cover" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium">
+                    {item.title || item.content?.slice(0, 50)}
                   </div>
-                  <span style={{ fontSize: '11px', color: 'var(--color-primary)', flexShrink: 0 }}>{t('admin.postEditor.insert', '插入')}</span>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    {item.artist || item.author || item.platform || ''}
+                    {item.rating ? ` · ${t('admin.postEditor.ratingValue', '{rating}分', { rating: item.rating })}` : ''}
+                  </div>
                 </div>
-              ))}
-            </div>
+                <span className="shrink-0 text-[11px] text-primary">{t('admin.postEditor.insert', '插入')}</span>
+              </div>
+            ))}
           </div>
-        </>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* AI Processing Modal */}
-      {showAiModal && (
-        <>
-          <div onClick={() => { if (!aiProcessing) setShowAiModal(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 50 }} />
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            zIndex: 51, width: '560px', maxWidth: '90vw', maxHeight: '80vh',
-            background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column',
-          }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <i className="fa-regular fa-sparkles" style={{ fontSize: '16px' }} /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
-              </h3>
-              <button onClick={() => setShowAiModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: 'var(--color-text-dim)' }}>×</button>
-            </div>
+      <Dialog open={showAiModal} onOpenChange={(o) => { if (!o && !aiProcessing) setShowAiModal(false); }}>
+        <DialogContent className="flex max-h-[80vh] w-[560px] max-w-[90vw] flex-col gap-0 p-0">
+          <DialogHeader className="border-b border-border px-5 py-4">
+            <DialogTitle className="flex items-center gap-1.5 text-[15px]">
+              <Sparkles className="size-4" /> {t('admin.postEditor.aiProcessArticle', 'AI 处理文章')}
+            </DialogTitle>
+          </DialogHeader>
 
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)' }}>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-dim)', marginBottom: '12px' }}>{t('admin.postEditor.aiProcessHint', '选择 AI 处理方式，处理完成后可预览并插入到编辑器')}</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                {[
-                  { key: 'polish', label: t('admin.postEditor.aiAction.polish', '润色优化'), icon: 'fa-light fa-wand-magic-sparkles', prompt: 'Proofread and lightly polish this Markdown article. Preserve facts, meaning, tone, language, code blocks, links, images, front matter, technical terms, and version numbers. Fix only clear grammar, spelling, punctuation, spacing, and structure issues. Do not add or remove information. Output only the complete Markdown:' },
-                  { key: 'formal', label: t('admin.postEditor.aiAction.formal', '正式风格'), icon: 'fa-light fa-user-tie', prompt: 'Rewrite this article in a clear, professional tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
-                  { key: 'casual', label: t('admin.postEditor.aiAction.casual', '轻松风格'), icon: 'fa-light fa-face-smile', prompt: 'Rewrite this article in a natural, friendly, conversational tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
-                  { key: 'concise', label: t('admin.postEditor.aiAction.concise', '精简压缩'), icon: 'fa-light fa-compress', prompt: 'Shorten this article while preserving its core facts, conclusions, necessary context, links, images, code blocks, and the original language. Remove repetition, not essential information. Output only the complete Markdown:' },
-                  { key: 'expand', label: t('admin.postEditor.aiAction.expand', '扩展丰富'), icon: 'fa-light fa-expand', prompt: 'Expand this article only where useful by clarifying existing ideas and adding practical detail without inventing facts. Preserve the original language and all existing links, images, code blocks, and technical terms. Output only the complete Markdown:' },
-                  { key: 'format', label: t('admin.postEditor.aiAction.format', '智能排版'), icon: 'fa-light fa-align-left', prompt: `Reformat this article for readability in Markdown without changing its meaning or removing information. Add a clear H2/H3 hierarchy only where the structure is implied, use lists for parallel items, tables for genuine comparisons, and blockquotes for existing quotations. Preserve front matter, links, images, code blocks, HTML, technical terms, and the original language. Output only the complete Markdown:` },
-                  { key: 'seo', label: t('admin.postEditor.aiAction.seo', 'SEO 优化'), icon: 'fa-light fa-magnifying-glass', prompt: 'Improve this article for SEO without inventing facts or changing its meaning. Clarify heading hierarchy, make key terms natural, improve the opening context, and suggest image alt text only when appropriate. Preserve the original language, links, images, code blocks, and technical terms. Output only the complete Markdown:' },
-                  { key: 'html2md', label: 'HTML→MD', icon: 'fa-light fa-code', prompt: 'Convert this HTML content to clean Markdown. Preserve every piece of content, heading hierarchy, links, images, tables, code blocks, and meaningful attributes. Remove presentation-only markup. Output only the Markdown:' },
-                  { key: 'toc', label: t('admin.postEditor.aiAction.toc', '生成目录'), icon: 'fa-light fa-list-tree', prompt: 'Create a concise Markdown table of contents from the article headings, then return the complete article with a consistent heading hierarchy. Preserve all original content, links, images, code blocks, technical terms, and language. Output the TOC first and nothing else:' },
-                ].map(item => (
+          <div className="border-b border-border px-5 py-4">
+            <p className="mb-3 text-xs text-muted-foreground">{t('admin.postEditor.aiProcessHint', '选择 AI 处理方式，处理完成后可预览并插入到编辑器')}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { key: 'polish', label: t('admin.postEditor.aiAction.polish', '润色优化'), icon: WandSparkles, prompt: 'Proofread and lightly polish this Markdown article. Preserve facts, meaning, tone, language, code blocks, links, images, front matter, technical terms, and version numbers. Fix only clear grammar, spelling, punctuation, spacing, and structure issues. Do not add or remove information. Output only the complete Markdown:' },
+                { key: 'formal', label: t('admin.postEditor.aiAction.formal', '正式风格'), icon: UserRound, prompt: 'Rewrite this article in a clear, professional tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
+                { key: 'casual', label: t('admin.postEditor.aiAction.casual', '轻松风格'), icon: Smile, prompt: 'Rewrite this article in a natural, friendly, conversational tone. Preserve all facts, meaning, structure, links, images, code blocks, technical terms, and the original language. Do not invent information. Output only the complete Markdown:' },
+                { key: 'concise', label: t('admin.postEditor.aiAction.concise', '精简压缩'), icon: Shrink, prompt: 'Shorten this article while preserving its core facts, conclusions, necessary context, links, images, code blocks, and the original language. Remove repetition, not essential information. Output only the complete Markdown:' },
+                { key: 'expand', label: t('admin.postEditor.aiAction.expand', '扩展丰富'), icon: Expand, prompt: 'Expand this article only where useful by clarifying existing ideas and adding practical detail without inventing facts. Preserve the original language and all existing links, images, code blocks, and technical terms. Output only the complete Markdown:' },
+                { key: 'format', label: t('admin.postEditor.aiAction.format', '智能排版'), icon: AlignLeft, prompt: `Reformat this article for readability in Markdown without changing its meaning or removing information. Add a clear H2/H3 hierarchy only where the structure is implied, use lists for parallel items, tables for genuine comparisons, and blockquotes for existing quotations. Preserve front matter, links, images, code blocks, HTML, technical terms, and the original language. Output only the complete Markdown:` },
+                { key: 'seo', label: t('admin.postEditor.aiAction.seo', 'SEO 优化'), icon: Search, prompt: 'Improve this article for SEO without inventing facts or changing its meaning. Clarify heading hierarchy, make key terms natural, improve the opening context, and suggest image alt text only when appropriate. Preserve the original language, links, images, code blocks, and technical terms. Output only the complete Markdown:' },
+                { key: 'html2md', label: 'HTML→MD', icon: Code, prompt: 'Convert this HTML content to clean Markdown. Preserve every piece of content, heading hierarchy, links, images, tables, code blocks, and meaningful attributes. Remove presentation-only markup. Output only the Markdown:' },
+                { key: 'toc', label: t('admin.postEditor.aiAction.toc', '生成目录'), icon: ListTree, prompt: 'Create a concise Markdown table of contents from the article headings, then return the complete article with a consistent heading hierarchy. Preserve all original content, links, images, code blocks, technical terms, and language. Output the TOC first and nothing else:' },
+              ].map(item => {
+                const Icon = item.icon;
+                return (
                   <button
                     key={item.key}
                     disabled={aiProcessing}
@@ -611,78 +610,64 @@ export default function CreatePostPage() {
                       } catch { toast.error(t('admin.postEditor.toast.aiUnavailable', 'AI 服务不可用')); }
                       setAiProcessing(false);
                     }}
-                    style={{
-                      padding: '10px 8px', fontSize: '12px', fontWeight: 500,
-                      background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)',
-                      cursor: aiProcessing ? 'wait' : 'pointer', color: 'var(--color-text-main)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-                      transition: 'all 0.15s', opacity: aiProcessing ? 0.5 : 1,
-                    }}
-                    onMouseEnter={e => { if (!aiProcessing) e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                    className="flex flex-col items-center gap-1 rounded-md border border-border bg-muted p-2.5 text-xs font-medium text-foreground transition-colors hover:border-primary disabled:cursor-wait disabled:opacity-50"
                   >
-                    <i className={item.icon} style={{ fontSize: '18px' }} />
+                    <Icon className="size-[18px]" />
                     {item.label}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Result */}
-            <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px', minHeight: '150px' }}>
-              {aiProcessing && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '40px 0', color: 'var(--color-text-dim)', fontSize: '13px' }}>
-                  <i className="fa-solid fa-spinner fa-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}
-                </div>
-              )}
-              {aiResult && !aiProcessing && (
-                <pre style={{
-                  fontSize: '12px', lineHeight: 1.7, fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                  color: 'var(--color-text-main)', margin: 0,
-                  maxHeight: '300px', overflow: 'auto',
-                  padding: '12px', background: 'var(--color-bg-soft)',
-                }}>
-                  {aiResult}
-                </pre>
-              )}
-              {!aiResult && !aiProcessing && (
-                <p style={{ textAlign: 'center', color: 'var(--color-text-dim)', fontSize: '13px', padding: '40px 0' }}>
-                  {t('admin.postEditor.aiEmptyHint', '选择上方处理方式，AI 将处理你的文章内容')}
-                </p>
-              )}
-            </div>
-
-            {/* Actions */}
-            {aiResult && !aiProcessing && (
-              <div style={{ padding: '12px 20px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <Button variant="secondary" onClick={() => {
-                  navigator.clipboard.writeText(aiResult);
-                  toast.success(t('admin.postEditor.toast.copied', '已复制到剪贴板'));
-                }}>
-                  {t('admin.common.copy', '复制')}
-                </Button>
-                <Button variant="secondary" onClick={() => {
-                  setContent(content + '\n\n' + aiResult);
-                  setShowAiModal(false);
-                  setAiResult('');
-                  toast.success(t('admin.postEditor.toast.appended', '已追加到内容末尾'));
-                }}>
-                  {t('admin.postEditor.append', '追加')}
-                </Button>
-                <Button onClick={() => {
-                  setContent(aiResult);
-                  setShowAiModal(false);
-                  setAiResult('');
-                  toast.success(t('admin.postEditor.toast.replaced', '已替换内容'));
-                }}>
-                  {t('admin.postEditor.replaceContent', '替换内容')}
-                </Button>
+          {/* Result */}
+          <div className="min-h-[150px] flex-1 overflow-auto px-5 py-4">
+            {aiProcessing && (
+              <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" /> {t('admin.postEditor.aiProcessing', 'AI 处理中…')}
               </div>
             )}
+            {aiResult && !aiProcessing && (
+              <pre className="m-0 max-h-[300px] overflow-auto whitespace-pre-wrap break-words bg-muted p-3 font-mono text-xs leading-[1.7] text-foreground">
+                {aiResult}
+              </pre>
+            )}
+            {!aiResult && !aiProcessing && (
+              <p className="py-10 text-center text-[13px] text-muted-foreground">
+                {t('admin.postEditor.aiEmptyHint', '选择上方处理方式，AI 将处理你的文章内容')}
+              </p>
+            )}
           </div>
-        </>
-      )}
+
+          {/* Actions */}
+          {aiResult && !aiProcessing && (
+            <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
+              <Button variant="outline" onClick={() => {
+                navigator.clipboard.writeText(aiResult);
+                toast.success(t('admin.postEditor.toast.copied', '已复制到剪贴板'));
+              }}>
+                {t('admin.common.copy', '复制')}
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setContent(content + '\n\n' + aiResult);
+                setShowAiModal(false);
+                setAiResult('');
+                toast.success(t('admin.postEditor.toast.appended', '已追加到内容末尾'));
+              }}>
+                {t('admin.postEditor.append', '追加')}
+              </Button>
+              <Button onClick={() => {
+                setContent(aiResult);
+                setShowAiModal(false);
+                setAiResult('');
+                toast.success(t('admin.postEditor.toast.replaced', '已替换内容'));
+              }}>
+                {t('admin.postEditor.replaceContent', '替换内容')}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

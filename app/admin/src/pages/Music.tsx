@@ -2,20 +2,21 @@
 import { useEffect, useState } from 'react';
 import { musicApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Search, Link2, Plus, Music as MusicIcon, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { Search, Link2, Plus, Music as MusicIcon, Eye, EyeOff, Pencil, Trash2, Loader2 } from 'lucide-react';
 import {
-  AdminToolbar,
   Button,
   ConfirmDialog,
-  CoverInput,
-  DialogFooter,
-  EmptyPanel,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  EmptyState,
   Input,
+  Label,
   LoadingState,
-  Modal,
-  RatingStars,
-} from '@/components/ui';
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Textarea,
+} from '@/components/ui/shadcn';
+import { CoverInput, RatingStars } from '@/components/ui';
 import { ImportUrlModal } from '@/components/ui/import-url-modal';
+import { cn } from '@/lib/utils';
 
 function musicProxy(platform: string, id: string, asset: 'cover' | 'stream') {
   return `/api/v1/music/proxy/${encodeURIComponent(platform)}/songs/${encodeURIComponent(id)}/${asset}`;
@@ -120,71 +121,70 @@ export default function MusicPage() {
 
   return (
     <div>
-      <AdminToolbar
-        meta={`${items.length} 首歌曲`}
-        actions={
-          <>
-        <Button variant="secondary" onClick={() => setShowSearch(!showSearch)}>
-          <Search className="size-4" />{showSearch ? '关闭搜索' : '搜索添加'}
-        </Button>
-        <Button variant="secondary" onClick={() => setShowImport(true)}>
-          <Link2 className="size-4" /> 链接导入
-        </Button>
-        <Button onClick={openCreate}><Plus className="size-4" />手动添加</Button>
-          </>
-        }
-      />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <span className="mr-auto text-sm text-muted-foreground">{items.length} 首歌曲</span>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setShowSearch(!showSearch)}>
+            <Search className="size-4" />{showSearch ? '关闭搜索' : '搜索添加'}
+          </Button>
+          <Button variant="outline" onClick={() => setShowImport(true)}>
+            <Link2 className="size-4" /> 链接导入
+          </Button>
+          <Button onClick={openCreate}><Plus className="size-4" />手动添加</Button>
+        </div>
+      </div>
 
       {/* Search panel */}
       {showSearch && (
-        <div className="card" style={{ padding: '16px', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-            <select className="input" value={searchPlatform} onChange={e => setSearchPlatform(e.target.value)} style={{ width: '100px', flexShrink: 0, fontSize: '12px' }}>
-              <option value="netease">网易云</option>
-              <option value="tencent">QQ音乐</option>
-            </select>
-            <div style={{ flex: 1, position: 'relative' }}>
+        <div className="mb-4 rounded-lg border border-border bg-card p-4">
+          <div className="mb-3 flex gap-2">
+            <Select value={searchPlatform} onValueChange={(v) => setSearchPlatform((v as string) || 'netease')}>
+              <SelectTrigger className="w-[100px] shrink-0 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="netease">网易云</SelectItem>
+                <SelectItem value="tencent">QQ音乐</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                className="input"
+              <Input
                 value={keyword}
                 onChange={e => setKeyword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && doSearch()}
                 placeholder="搜索歌曲名或歌手…"
-                style={{ paddingLeft: '32px' }}
+                className="pl-8"
               />
             </div>
-            <Button className="btn-square" title="搜索" onClick={doSearch} loading={searching}>
-              <Search className="size-4" />
+            <Button size="icon" title="搜索" onClick={doSearch} disabled={searching}>
+              {searching ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
             </Button>
           </div>
 
           {searchResults.length > 0 && (
-            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
+            <div className="max-h-[300px] overflow-auto">
               {searchResults.slice(0, 20).map((r: any, i: number) => {
                 const key = String(r.id);
                 const exists = items.some((it: any) => it.platform_id === key);
                 return (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '8px',
-                    borderBottom: '1px solid var(--color-divider)',
-                  }}>
+                  <div key={i} className="flex items-center gap-2.5 border-b border-border p-2">
                     {r.cover && (
-                      <img src={r.cover} alt="" style={{ width: '36px', height: '36px', objectFit: 'cover', flexShrink: 0 }} />
+                      <img src={r.cover} alt="" className="size-9 shrink-0 object-cover" />
                     )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>{r.name || r.title}</p>
-                      <p className="text-dim" style={{ fontSize: '11px', margin: '2px 0 0' }}>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium text-foreground">{r.name || r.title}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
                         {r.artist || (r.artists || []).join(', ')}
                         {r.album && <span> · {r.album}</span>}
-                        <span style={{ marginLeft: '6px', padding: '0 4px', fontSize: '10px', background: 'var(--color-bg-soft)', borderRadius: '2px' }}>{r._src}</span>
+                        <span className="ml-1.5 rounded-sm bg-muted px-1 text-[10px]">{r._src}</span>
                       </p>
                     </div>
                     {exists ? (
-                      <span className="text-dim" style={{ fontSize: '12px' }}>已添加</span>
+                      <span className="text-xs text-muted-foreground">已添加</span>
                     ) : (
-                      <Button size="sm" variant="secondary" onClick={() => addFromSearch(r)} loading={adding === key}>
-                        <Plus className="size-4" />添加
+                      <Button size="sm" variant="outline" onClick={() => addFromSearch(r)} disabled={adding === key}>
+                        {adding === key ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}添加
                       </Button>
                     )}
                   </div>
@@ -193,7 +193,7 @@ export default function MusicPage() {
             </div>
           )}
           {searchResults.length === 0 && keyword && !searching && (
-            <p className="text-dim" style={{ textAlign: 'center', fontSize: '13px', padding: '16px 0' }}>无搜索结果</p>
+            <p className="py-4 text-center text-[13px] text-muted-foreground">无搜索结果</p>
           )}
         </div>
       )}
@@ -202,46 +202,48 @@ export default function MusicPage() {
       {loading ? (
         <LoadingState />
       ) : items.length === 0 ? (
-        <EmptyPanel title="暂无内容" actionText="搜索添加" onAction={() => setShowSearch(true)} />
+        <EmptyState title="暂无内容" actionText="搜索添加" onAction={() => setShowSearch(true)} />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
           {items.map((item) => (
-            <div key={item.id} className="card" style={{
-              overflow: 'hidden', display: 'flex', flexDirection: 'column',
-              opacity: item.status === 'draft' ? 0.5 : 1,
-              transition: 'opacity 0.2s',
-            }}>
+            <div
+              key={item.id}
+              className={cn(
+                'flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-opacity',
+                item.status === 'draft' && 'opacity-50',
+              )}
+            >
               {/* Cover */}
-              <div style={{ width: '100%', height: '200px', backgroundColor: 'var(--color-bg-soft)', overflow: 'hidden', flexShrink: 0 }}>
+              <div className="h-[200px] w-full shrink-0 overflow-hidden bg-muted">
                 {item.cover_url ? (
-                  <img src={item.cover_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={item.cover_url} alt={item.title} className="size-full object-cover" />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="flex size-full items-center justify-center">
                     <MusicIcon className="size-8 text-muted-foreground" />
                   </div>
                 )}
               </div>
               {/* Info */}
-              <div style={{ padding: '12px', flex: 1 }}>
-                <h3 className="text-main" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</h3>
-                <p className="text-sub" style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.artist || ''}</p>
+              <div className="flex-1 p-3">
+                <h3 className="mb-0.5 truncate text-sm font-semibold text-foreground">{item.title}</h3>
+                <p className="truncate text-xs text-muted-foreground">{item.artist || ''}</p>
                 {item.rating > 0 && (
-                  <div style={{ marginTop: '6px' }}>
+                  <div className="mt-1.5">
                     <RatingStars value={item.rating} size={12} gap={2} />
                   </div>
                 )}
               </div>
               {/* Footer */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid var(--color-divider)', flexShrink: 0 }}>
-                <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '3px', background: 'var(--color-bg-soft)', color: 'var(--color-text-dim)' }}>
+              <div className="flex shrink-0 items-center justify-between border-t border-border px-3 py-2">
+                <span className="rounded-sm bg-muted px-1.5 py-px text-[11px] text-muted-foreground">
                   {{ netease: '网易云', tencent: 'QQ', kugou: '酷狗', kuwo: '酷我', baidu: '百度', local: '本地' }[item.platform as string] || item.platform || '本地'}
                 </span>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <button onClick={() => toggleVisibility(item)} title={item.status === 'publish' ? '隐藏' : '显示'} className="action-btn">
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => toggleVisibility(item)} title={item.status === 'publish' ? '隐藏' : '显示'}>
                     {item.status === 'publish' ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                  </button>
-                  <button onClick={() => openEdit(item)} className="action-btn primary" title="编辑"><Pencil className="size-4" /></button>
-                  <button onClick={() => setDeleteId(item.id)} className="action-btn danger" title="删除"><Trash2 className="size-4" /></button>
+                  </Button>
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(item)} title="编辑"><Pencil className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(item.id)} title="删除"><Trash2 className="size-4" /></Button>
                 </div>
               </div>
             </div>
@@ -249,44 +251,79 @@ export default function MusicPage() {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? '编辑' : '添加音乐'} size="md">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <Input label="标题" value={form.title || ''} onChange={(e) => setForm({...form, title: e.target.value})} />
-          <Input label="艺术家" value={form.artist || ""} onChange={(e) => setForm({...form, artist: e.target.value})} />
-          <Input label="专辑" value={form.album || ""} onChange={(e) => setForm({...form, album: e.target.value})} />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>来源平台</label>
-            <select className="input" value={form.platform || 'netease'} onChange={(e) => setForm({...form, platform: e.target.value})}>
-              <option value="netease">网易云音乐</option>
-              <option value="tencent">QQ音乐</option>
-              <option value="kugou">酷狗音乐</option>
-              <option value="kuwo">酷我音乐</option>
-              <option value="local">本地</option>
-            </select>
+      <Dialog open={isModalOpen} onOpenChange={(o) => !o && setIsModalOpen(false)}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[520px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingId ? '编辑' : '添加音乐'}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-1.5">
+              <Label>标题</Label>
+              <Input value={form.title || ''} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>艺术家</Label>
+              <Input value={form.artist || ''} onChange={(e) => setForm({ ...form, artist: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>专辑</Label>
+              <Input value={form.album || ''} onChange={(e) => setForm({ ...form, album: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>来源平台</Label>
+              <Select value={form.platform || 'netease'} onValueChange={(v) => setForm({ ...form, platform: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="netease">网易云音乐</SelectItem>
+                  <SelectItem value="tencent">QQ音乐</SelectItem>
+                  <SelectItem value="kugou">酷狗音乐</SelectItem>
+                  <SelectItem value="kuwo">酷我音乐</SelectItem>
+                  <SelectItem value="local">本地</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>平台歌曲 ID</Label>
+              <Input value={form.platform_id || ''} onChange={(e) => setForm({ ...form, platform_id: e.target.value })} placeholder="可选，用于获取歌词和封面" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>播放链接</Label>
+              <Input value={form.play_url || ''} onChange={(e) => setForm({ ...form, play_url: e.target.value })} placeholder="直接音频链接（可选）" />
+            </div>
+            <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({ ...form, cover_url: url })} folder="music" />
+            <div className="flex flex-col gap-1.5">
+              <Label>状态</Label>
+              <Select value={form.status || 'publish'} onValueChange={(v) => setForm({ ...form, status: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="publish">显示</SelectItem>
+                  <SelectItem value="draft">隐藏</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>评分</Label>
+              <RatingStars value={form.rating || 0} onChange={(v) => setForm({ ...form, rating: v })} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>评价</Label>
+              <Textarea rows={3} value={form.comment || ''} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>取消</Button>
+              <Button onClick={onSubmit} disabled={submitting}>
+                {submitting && <Loader2 className="size-4 animate-spin" />}{editingId ? '保存' : '添加'}
+              </Button>
+            </div>
           </div>
-          <Input label="平台歌曲 ID" value={form.platform_id || ""} onChange={(e) => setForm({...form, platform_id: e.target.value})} placeholder="可选，用于获取歌词和封面" />
-          <Input label="播放链接" value={form.play_url || ""} onChange={(e) => setForm({...form, play_url: e.target.value})} placeholder="直接音频链接（可选）" />
-          <CoverInput label="封面图片" value={form.cover_url || ''} onChange={(url) => setForm({...form, cover_url: url})} folder="music" />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>状态</label>
-            <select className="input" value={form.status || 'publish'} onChange={(e) => setForm({...form, status: e.target.value})}>
-              <option value="publish">显示</option>
-              <option value="draft">隐藏</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评分</label>
-            <RatingStars value={form.rating || 0} onChange={(v) => setForm({...form, rating: v})} />
-          </div>
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>评价</label>
-            <textarea className="input focus-ring" rows={3} value={form.comment || ''} onChange={(e) => setForm({...form, comment: e.target.value})} />
-          </div>
-          <DialogFooter onCancel={() => setIsModalOpen(false)} onSubmit={onSubmit} submitting={submitting} submitText={editingId ? '保存' : '添加'} />
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="确认删除" message="删除后无法恢复" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title="确认删除" message="删除后无法恢复" />
 
       <ImportUrlModal isOpen={showImport} onClose={() => setShowImport(false)} type="music" onImport={(data) => {
         setForm({

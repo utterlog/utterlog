@@ -1,66 +1,75 @@
 import { useState } from 'react';
+import {
+  Gauge, SquarePen, FileText, MessageCircle, MapPin, Clapperboard, Music,
+  MonitorPlay, Film, Video, BookOpen, Gamepad2, ShoppingBag, Users,
+  MessagesSquare, Bot, Link as LinkIcon, Images, GalleryVerticalEnd,
+  LineChart, ShieldCheck, Palette, Plug, Wrench, Settings, Sparkles,
+  SlidersHorizontal, ChevronDown, ChevronRight, ChevronLeft,
+  type LucideIcon,
+} from 'lucide-react';
 import { NavLink } from '@/lib/router';
 import SystemStatusPanel from './SystemStatusPanel';
 import VersionBadge from '@/components/VersionBadge';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
 interface MenuItem {
   to: string;
-  icon: string;
+  icon: LucideIcon;
   label: string;
   key?: string;
   sub?: string;
-  children?: { to: string; icon: string; label: string }[];
+  children?: { to: string; icon: LucideIcon; label: string }[];
 }
 
 const menuItems: MenuItem[] = [
-  { to: '/', icon: 'fa-solid fa-gauge', label: '概览', sub: 'Dashboard' },
-  { to: '/posts', icon: 'fa-solid fa-pen-to-square', label: '文章', sub: 'Posts' },
-  { to: '/pages', icon: 'fa-regular fa-file-lines', label: '页面', sub: 'Pages' },
-  { to: '/moments', icon: 'fa-solid fa-comment-dots', label: '说说', sub: 'Moments' },
-  { to: '/footprints', icon: 'fa-regular fa-map-location-dot', label: '足迹', sub: 'Footprints' },
+  { to: '/', icon: Gauge, label: '概览', sub: 'Dashboard' },
+  { to: '/posts', icon: SquarePen, label: '文章', sub: 'Posts' },
+  { to: '/pages', icon: FileText, label: '页面', sub: 'Pages' },
+  { to: '/moments', icon: MessageCircle, label: '说说', sub: 'Moments' },
+  { to: '/footprints', icon: MapPin, label: '足迹', sub: 'Footprints' },
   {
-    to: '/music', icon: 'fa-solid fa-clapperboard', label: '娱乐', key: 'admin.nav.entertainment', sub: 'Entertainment',
+    to: '/music', icon: Clapperboard, label: '娱乐', key: 'admin.nav.entertainment', sub: 'Entertainment',
     children: [
-      { to: '/music', label: '音乐', icon: 'fa-regular fa-music' },
+      { to: '/music', label: '音乐', icon: Music },
       // 「影视」是带集数的专业影视作品（type=post.video，独立模板 + 海报
       // + 多线路播放器 + 集数网格）。与下面「电影」（ul_movies 观影评分
       // 日记）和「视频」（ul_videos 单视频库）三者并存、语义不同。
-      { to: '/films', label: '影视', icon: 'fa-regular fa-clapperboard-play' },
-      { to: '/movies', label: '电影', icon: 'fa-regular fa-film' },
-      { to: '/videos', label: '视频', icon: 'fa-regular fa-video' },
-      { to: '/books', label: '图书', icon: 'fa-regular fa-book' },
-      { to: '/games', label: '游戏', icon: 'fa-regular fa-gamepad' },
-      { to: '/goods', label: '好物', icon: 'fa-regular fa-bag-shopping' },
+      { to: '/films', label: '影视', icon: MonitorPlay },
+      { to: '/movies', label: '电影', icon: Film },
+      { to: '/videos', label: '视频', icon: Video },
+      { to: '/books', label: '图书', icon: BookOpen },
+      { to: '/games', label: '游戏', icon: Gamepad2 },
+      { to: '/goods', label: '好物', icon: ShoppingBag },
     ],
   },
-  { to: '/follows', icon: 'fa-solid fa-user-group', label: '关注', sub: 'Follows' },
+  { to: '/follows', icon: Users, label: '关注', sub: 'Follows' },
   {
-    to: '/comments', icon: 'fa-regular fa-comments', label: '评论', sub: 'Comments',
+    to: '/comments', icon: MessagesSquare, label: '评论', sub: 'Comments',
     children: [
-      { to: '/comments', label: '全部评论', icon: 'fa-regular fa-comments' },
-      { to: '/comments/ai', label: 'AI 队列', icon: 'fa-regular fa-robot' },
+      { to: '/comments', label: '全部评论', icon: MessagesSquare },
+      { to: '/comments/ai', label: 'AI 队列', icon: Bot },
     ],
   },
-  { to: '/links', icon: 'fa-solid fa-link', label: '友链', sub: 'Links' },
+  { to: '/links', icon: LinkIcon, label: '友链', sub: 'Links' },
   {
-    to: '/media', icon: 'fa-regular fa-images', label: '媒体', sub: 'Media',
+    to: '/media', icon: Images, label: '媒体', sub: 'Media',
     children: [
-      { to: '/media', label: '媒体库', icon: 'fa-regular fa-images' },
-      { to: '/albums', label: '相册', icon: 'fa-regular fa-rectangle-history' },
+      { to: '/media', label: '媒体库', icon: Images },
+      { to: '/albums', label: '相册', icon: GalleryVerticalEnd },
     ],
   },
-  { to: '/analytics', icon: 'fa-solid fa-chart-line', label: '统计', sub: 'Analytics' },
-  { to: '/security', icon: 'fa-solid fa-shield-halved', label: '安全', sub: 'Security' },
-  { to: '/themes', icon: 'fa-solid fa-palette', label: '主题', sub: 'Themes' },
-  { to: '/plugins', icon: 'fa-solid fa-plug', label: '插件', sub: 'Plugins' },
-  { to: '/tools', icon: 'fa-solid fa-screwdriver-wrench', label: '工具', sub: 'Tools' },
-  { to: '/settings', icon: 'fa-solid fa-gear', label: '设置', sub: 'Settings' },
+  { to: '/analytics', icon: LineChart, label: '统计', sub: 'Analytics' },
+  { to: '/security', icon: ShieldCheck, label: '安全', sub: 'Security' },
+  { to: '/themes', icon: Palette, label: '主题', sub: 'Themes' },
+  { to: '/plugins', icon: Plug, label: '插件', sub: 'Plugins' },
+  { to: '/tools', icon: Wrench, label: '工具', sub: 'Tools' },
+  { to: '/settings', icon: Settings, label: '设置', sub: 'Settings' },
 ];
 
 const aiMenuItems: MenuItem[] = [
-  { to: '/ai', icon: 'fa-solid fa-wand-magic-sparkles', label: 'AI 助手', sub: 'Assistant' },
-  { to: '/ai-settings', icon: 'fa-solid fa-sliders', label: 'AI 设置', sub: 'AI Settings' },
+  { to: '/ai', icon: Sparkles, label: 'AI 助手', sub: 'Assistant' },
+  { to: '/ai-settings', icon: SlidersHorizontal, label: 'AI 设置', sub: 'AI Settings' },
 ];
 
 const navKeys: Record<string, string> = {
@@ -114,48 +123,46 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
     const hasChildren = !!item.children?.length;
     const expanded = expandedMenus.includes(item.to);
     const label = t(item.key || navKeys[item.to] || '', item.label);
+    const Icon = item.icon;
 
     if (hasChildren && !collapsed) {
       return (
         <div key={item.to}>
           <button
             onClick={() => toggleExpand(item.to)}
-            style={{
-              // Match the NavLink padding below so rows with an expand
-              // chevron render at the same height as plain rows.
-              display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-              height: 40, padding: '0 14px', fontSize: 14, background: 'none', border: 'none',
-              borderLeft: '2px solid transparent',
-              color: 'var(--color-text-sub)', cursor: 'pointer',
-            }}
+            // Match the NavLink padding below so rows with an expand
+            // chevron render at the same height as plain rows.
+            className="flex h-10 w-full items-center gap-2.5 border-l-2 border-transparent bg-transparent px-3.5 text-sm text-muted-foreground"
           >
-            <i className={item.icon} style={{ fontSize: 14, width: 16, textAlign: 'center', flexShrink: 0 }} />
-            <span style={{ flex: 1, textAlign: 'left', display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+            <Icon className="size-4 shrink-0" />
+            <span className="flex flex-1 items-baseline gap-1.5 text-left">
               <span>{label}</span>
               {item.sub && (
-                <span style={{ fontSize: 10, color: 'var(--color-text-dim)', fontWeight: 400, letterSpacing: '0.02em' }}>
+                <span className="text-[10px] font-normal tracking-[0.02em] text-muted-foreground">
                   {item.sub}
                 </span>
               )}
             </span>
-            <i className={`fa-solid fa-chevron-${expanded ? 'down' : 'right'}`} style={{ fontSize: 10 }} />
+            {expanded ? <ChevronDown className="size-2.5" /> : <ChevronRight className="size-2.5" />}
           </button>
-          {expanded && item.children!.map((child) => (
-            <NavLink
-              key={child.to}
-              to={child.to}
-              style={({ isActive }) => ({
-                display: 'flex', alignItems: 'center', gap: 10,
-                height: 38, padding: '0 14px 0 40px', fontSize: 12,
-                color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-                background: isActive ? 'var(--color-bg-soft)' : 'transparent',
-                textDecoration: 'none',
-              })}
-            >
-              <i className={child.icon} style={{ fontSize: 12, width: 14, textAlign: 'center' }} />
-              <span>{t(navKeys[child.to] || '', child.label)}</span>
-            </NavLink>
-          ))}
+          {expanded && item.children!.map((child) => {
+            const ChildIcon = child.icon;
+            return (
+              <NavLink key={child.to} to={child.to} className="block no-underline">
+                {({ isActive }) => (
+                  <span
+                    className={cn(
+                      'flex h-[38px] items-center gap-2.5 pl-10 pr-3.5 text-xs',
+                      isActive ? 'bg-muted text-primary' : 'text-muted-foreground',
+                    )}
+                  >
+                    <ChildIcon className="size-3.5 shrink-0" />
+                    <span>{t(navKeys[child.to] || '', child.label)}</span>
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
         </div>
       );
     }
@@ -165,24 +172,26 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         key={item.to}
         to={item.to}
         end={item.to === '/'}
-        style={({ isActive }) => ({
-          display: 'flex', alignItems: 'center', gap: 10,
-          height: 40, padding: '0 14px', fontSize: 14,
-          color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-          background: isActive ? 'var(--color-bg-soft)' : 'transparent',
-          borderLeft: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
-          textDecoration: 'none',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-        })}
+        className="block no-underline"
         title={collapsed ? label : undefined}
       >
-        <i className={item.icon} style={{ fontSize: 14, width: 16, textAlign: 'center', flexShrink: 0 }} />
-        {!collapsed && (
-          <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
-            <span>{label}</span>
-            {item.sub && (
-              <span style={{ fontSize: 10, color: 'var(--color-text-dim)', fontWeight: 400, letterSpacing: '0.02em' }}>
-                {item.sub}
+        {({ isActive }) => (
+          <span
+            className={cn(
+              'flex h-10 items-center gap-2.5 border-l-2 px-3.5 text-sm',
+              isActive ? 'border-primary bg-muted text-primary' : 'border-transparent text-muted-foreground',
+              collapsed ? 'justify-center' : 'justify-start',
+            )}
+          >
+            <Icon className="size-4 shrink-0" />
+            {!collapsed && (
+              <span className="inline-flex items-baseline gap-1.5">
+                <span>{label}</span>
+                {item.sub && (
+                  <span className="text-[10px] font-normal tracking-[0.02em] text-muted-foreground">
+                    {item.sub}
+                  </span>
+                )}
               </span>
             )}
           </span>
@@ -193,23 +202,21 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
 
   return (
     <aside
-      className="bg-card"
+      className="flex shrink-0 flex-col border-r border-border bg-card"
       style={{
         width: collapsed ? 56 : 224,
-        borderRight: '1px solid var(--color-border)',
         transition: 'width 0.2s',
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
       }}
     >
-      <div style={{
-        height: 56, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 8,
-        borderBottom: '1px solid var(--color-border)', position: 'relative',
-        justifyContent: collapsed ? 'center' : 'flex-start',
-      }}>
+      <div
+        className="relative flex items-center gap-2 border-b border-border"
+        style={{
+          height: 56, padding: '0 12px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+        }}
+      >
         <svg width="28" height="28" viewBox="0 0 24 24">
-          <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--color-primary)" />
+          <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" className="fill-primary" />
           <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
         </svg>
         {!collapsed && (
@@ -220,15 +227,13 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         )}
         <button
           onClick={onToggle}
+          className="absolute z-10 flex items-center justify-center rounded-full border border-border bg-card text-muted-foreground"
           style={{
-            position: 'absolute', right: -12, top: '50%', transform: 'translateY(-50%)',
-            width: 24, height: 24, borderRadius: '50%', border: '1px solid var(--color-border)',
-            background: 'var(--color-bg-card)', cursor: 'pointer', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', fontSize: 10, zIndex: 10,
-            color: 'var(--color-text-dim)',
+            right: -12, top: '50%', transform: 'translateY(-50%)',
+            width: 24, height: 24, cursor: 'pointer',
           }}
         >
-          <i className={collapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left'} />
+          {collapsed ? <ChevronRight className="size-2.5" /> : <ChevronLeft className="size-2.5" />}
         </button>
       </div>
 
@@ -236,48 +241,43 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
         {menuItems.map(renderMenuItem)}
 
         {!collapsed && (
-          <div style={{
-            margin: '12px 12px 6px', fontSize: 10, fontWeight: 600,
-            color: 'var(--color-text-dim)', textTransform: 'uppercase', letterSpacing: 0.5,
-          }}>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.5px] text-muted-foreground" style={{ margin: '12px 12px 6px' }}>
             AI
           </div>
         )}
         {aiMenuItems.map(renderMenuItem)}
 
         {/* Utterlog Network */}
-        <div style={{ margin: '6px 0', borderTop: '1px solid var(--color-border)' }} />
+        <div className="border-t border-border" style={{ margin: '6px 0' }} />
         {!collapsed && (
-          <p className="text-dim" style={{ fontSize: 11, padding: '4px 12px', fontWeight: 600, letterSpacing: 0.5 }}>
+          <p className="font-semibold tracking-[0.5px] text-muted-foreground" style={{ fontSize: 11, padding: '4px 12px' }}>
             Utterlog
           </p>
         )}
         <NavLink
           to="/utterlog"
-          style={({ isActive }) => ({
-            display: 'flex', alignItems: 'center', gap: 10,
-            height: 40, padding: '0 12px', fontSize: 14,
-            color: isActive ? 'var(--color-primary)' : 'var(--color-text-sub)',
-            background: isActive ? 'var(--color-bg-soft)' : 'transparent',
-            borderLeft: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
-            textDecoration: 'none',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-          })}
+          className="block no-underline"
           title={collapsed ? t('admin.nav.utterlogCenter', 'Utterlog 中心') : undefined}
         >
           {({ isActive }) => (
-            <>
+            <span
+              className={cn(
+                'flex h-10 items-center gap-2.5 border-l-2 px-3 text-sm',
+                isActive ? 'border-primary bg-muted text-primary' : 'border-transparent text-muted-foreground',
+                collapsed ? 'justify-center' : 'justify-start',
+              )}
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill={isActive ? 'var(--color-primary)' : 'var(--color-text-dim)'} />
+                <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" className={isActive ? 'fill-primary' : 'fill-muted-foreground'} />
                 <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
               </svg>
               {!collapsed && (
-                <span style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span className="flex items-baseline gap-1.5">
                   {t('admin.nav.utterlogCenter', 'Utterlog 中心')}
-                  <span style={{ fontSize: 10, color: 'var(--color-text-dim)', fontWeight: 400 }}>Network</span>
+                  <span className="text-[10px] font-normal text-muted-foreground">Network</span>
                 </span>
               )}
-            </>
+            </span>
           )}
         </NavLink>
       </nav>

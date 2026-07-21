@@ -4,8 +4,18 @@ import { useNavigate, Link } from '@/lib/router';
 import { postsApi, optionsApi } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { AdminToolbar, Badge, Button, SaveButton, ConfirmDialog, Modal, RowActions, Table, Toggle } from '@/components/ui';
-import { formatDate } from '@/lib/utils';
+import {
+  User, CodeXml, MessageSquare, Archive, Music, Film, Clapperboard,
+  BookOpen, ShoppingBag, Rss, Link as LinkIcon, Images, MapPin,
+  FileText, Plus, RefreshCw, CircleCheck, CircleAlert, Pencil, Trash2,
+  Save, Loader2, type LucideIcon,
+} from 'lucide-react';
+import {
+  Badge, Button, ConfirmDialog, Card, Switch, Spinner, Label, Textarea,
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import AboutPageEditor from '@/components/AboutPageEditor';
 
@@ -13,20 +23,20 @@ import AboutPageEditor from '@/components/AboutPageEditor';
 // stored in that option. Pages without contentKey are pure list views
 // and only expose the enable/disable toggle.
 const builtinPages = [
-  { key: 'page_about', label: '关于', slug: '/about', icon: 'fa-regular fa-user', contentKey: 'page_about_content' as const },
-  { key: 'page_coding', label: 'Coding', slug: '/coding', icon: 'fa-brands fa-github', settingsKey: 'coding' as const },
-  { key: 'page_moments', label: '说说', slug: '/moments', icon: 'fa-regular fa-comment-dots' },
-  { key: 'page_archives', label: '归档', slug: '/archives', icon: 'fa-regular fa-box-archive' },
-  { key: 'page_music', label: '音乐', slug: '/music', icon: 'fa-regular fa-music' },
-  { key: 'page_movies', label: '电影', slug: '/movies', icon: 'fa-regular fa-film' },
-  { key: 'page_films', label: '影视', slug: '/films', icon: 'fa-regular fa-clapperboard-play' },
-  { key: 'page_books', label: '图书', slug: '/books', icon: 'fa-regular fa-book' },
-  { key: 'page_goods', label: '好物', slug: '/goods', icon: 'fa-regular fa-bag-shopping' },
-  { key: 'page_feeds', label: '订阅', slug: '/feeds', icon: 'fa-regular fa-rss' },
-  { key: 'page_links', label: '友链', slug: '/links', icon: 'fa-regular fa-link' },
-  { key: 'page_albums', label: '相册', slug: '/albums', icon: 'fa-regular fa-images' },
-  { key: 'page_footprints', label: '足迹', slug: '/footprints', icon: 'fa-regular fa-map-location-dot' },
-] satisfies { key: string; label: string; slug: string; icon: string; contentKey?: string; settingsKey?: 'coding'; optionKey?: string; strictTrue?: boolean }[];
+  { key: 'page_about', label: '关于', slug: '/about', icon: User, contentKey: 'page_about_content' as const },
+  { key: 'page_coding', label: 'Coding', slug: '/coding', icon: CodeXml, settingsKey: 'coding' as const },
+  { key: 'page_moments', label: '说说', slug: '/moments', icon: MessageSquare },
+  { key: 'page_archives', label: '归档', slug: '/archives', icon: Archive },
+  { key: 'page_music', label: '音乐', slug: '/music', icon: Music },
+  { key: 'page_movies', label: '电影', slug: '/movies', icon: Film },
+  { key: 'page_films', label: '影视', slug: '/films', icon: Clapperboard },
+  { key: 'page_books', label: '图书', slug: '/books', icon: BookOpen },
+  { key: 'page_goods', label: '好物', slug: '/goods', icon: ShoppingBag },
+  { key: 'page_feeds', label: '订阅', slug: '/feeds', icon: Rss },
+  { key: 'page_links', label: '友链', slug: '/links', icon: LinkIcon },
+  { key: 'page_albums', label: '相册', slug: '/albums', icon: Images },
+  { key: 'page_footprints', label: '足迹', slug: '/footprints', icon: MapPin },
+] satisfies { key: string; label: string; slug: string; icon: LucideIcon; contentKey?: string; settingsKey?: 'coding'; optionKey?: string; strictTrue?: boolean }[];
 
 const builtinPageOptions: Record<string, { optionKey: string; strictTrue?: boolean }> = {
   page_footprints: { optionKey: 'footprint_enabled', strictTrue: true },
@@ -302,243 +312,215 @@ export default function PagesPage() {
     <div>
 
       {/* Header */}
-      <AdminToolbar
-        meta={t('admin.pages.totalPages', '{count} 个页面', { count: builtinPages.length + pages.length })}
-        actions={
-          <Button className="btn-square" title={t('admin.pages.newPage', '新建页面')} onClick={() => navigate('/pages/create')}>
-            <i className="fa-regular fa-plus" style={{ fontSize: '14px' }} />
-          </Button>
-        }
-      />
-
-      {/* All pages in one table */}
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <Table
-          data={tableRows}
-          loading={loading}
-          rowStyle={(row) => ({ opacity: row.enabled ? 1 : 0.5 })}
-          columns={[
-            {
-              key: 'page',
-              title: t('admin.pages.columns.page', '页面'),
-              render: (row) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500 }}>
-                  <i
-                    className={row.kind === 'builtin' ? row.page.icon : 'fa-regular fa-file-lines'}
-                    style={{ fontSize: '14px', color: row.kind === 'builtin' ? 'var(--color-primary)' : 'var(--color-text-dim)', width: '16px', textAlign: 'center' }}
-                  />
-                  {row.kind === 'builtin' ? t(`admin.pages.builtin.${row.page.key}`, row.page.label) : row.page.title}
-                </div>
-              ),
-            },
-            {
-              key: 'path',
-              title: t('admin.pages.columns.path', '路径'),
-              width: '120px',
-              render: (row) => <span className="text-dim" style={{ fontSize: '12px' }}>{row.kind === 'builtin' ? row.page.slug : `/${row.page.slug}`}</span>,
-            },
-            {
-              key: 'type',
-              title: t('admin.pages.columns.type', '类型'),
-              width: '70px',
-              render: (row) => <Badge>{row.kind === 'builtin' ? t('admin.pages.type.system', '系统') : t('admin.pages.type.custom', '自定义')}</Badge>,
-            },
-            {
-              key: 'enabled',
-              title: t('admin.pages.columns.enabled', '启用'),
-              width: '70px',
-              render: (row) => (
-                <Toggle
-                  checked={row.enabled}
-                  onChange={() => row.kind === 'builtin' ? toggleBuiltin(row.page.key) : toggleStatus(row.page)}
-                  style={{ padding: 0, justifyContent: 'flex-start' }}
-                />
-              ),
-            },
-            {
-              key: 'actions',
-              title: <span style={{ display: 'block', textAlign: 'right' }}>{t('admin.posts.columns.actions', '操作')}</span>,
-              width: '90px',
-              render: (row) => {
-                if (row.kind === 'builtin') {
-                  if (!row.page.contentKey && !row.page.settingsKey) return null;
-                  return (
-                    <RowActions
-                      onEdit={() => row.page.settingsKey === 'coding' ? openCodingSettings() : openContentEditor(row.page.contentKey)}
-                      editTitle={row.page.settingsKey === 'coding' ? '配置 Coding' : row.page.key === 'page_about' ? '编辑关于页' : t('admin.pages.editContent', '编辑内容')}
-                    />
-                  );
-                }
-                return (
-                  <RowActions
-                    onEdit={() => navigate(`/pages/edit/${row.page.id}`)}
-                    onDelete={() => setDeleteId(row.page.id)}
-                  />
-                );
-              },
-            },
-          ]}
-        />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <span className="mr-auto text-sm text-muted-foreground">
+          {t('admin.pages.totalPages', '{count} 个页面', { count: builtinPages.length + pages.length })}
+        </span>
+        <Button size="icon" title={t('admin.pages.newPage', '新建页面')} onClick={() => navigate('/pages/create')}>
+          <Plus />
+        </Button>
       </div>
 
-      <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title={t('admin.posts.confirmDeleteTitle', '确认删除')} message={t('admin.common.deleteIrreversible', '删除后无法恢复')} />
+      {/* All pages in one table */}
+      <Card className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('admin.pages.columns.page', '页面')}</TableHead>
+              <TableHead className="w-[120px]">{t('admin.pages.columns.path', '路径')}</TableHead>
+              <TableHead className="w-[70px]">{t('admin.pages.columns.type', '类型')}</TableHead>
+              <TableHead className="w-[70px]">{t('admin.pages.columns.enabled', '启用')}</TableHead>
+              <TableHead className="w-[90px] text-right">{t('admin.posts.columns.actions', '操作')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-10 text-center"><Spinner /></TableCell>
+              </TableRow>
+            ) : tableRows.map((row) => {
+              const Icon = row.kind === 'builtin' ? row.page.icon : FileText;
+              return (
+                <TableRow key={row.id} className={cn(!row.enabled && 'opacity-50')}>
+                  <TableCell>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Icon className={cn('size-4 shrink-0', row.kind === 'builtin' ? 'text-primary' : 'text-muted-foreground')} />
+                      {row.kind === 'builtin' ? t(`admin.pages.builtin.${row.page.key}`, row.page.label) : row.page.title}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs text-muted-foreground">{row.kind === 'builtin' ? row.page.slug : `/${row.page.slug}`}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge>{row.kind === 'builtin' ? t('admin.pages.type.system', '系统') : t('admin.pages.type.custom', '自定义')}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Switch checked={row.enabled} onCheckedChange={() => row.kind === 'builtin' ? toggleBuiltin(row.page.key) : toggleStatus(row.page)} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      {row.kind === 'builtin' ? (
+                        (row.page.contentKey || row.page.settingsKey) ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-muted-foreground hover:text-foreground"
+                            title={row.page.settingsKey === 'coding' ? '配置 Coding' : row.page.key === 'page_about' ? '编辑关于页' : t('admin.pages.editContent', '编辑内容')}
+                            onClick={() => row.page.settingsKey === 'coding' ? openCodingSettings() : openContentEditor(row.page.contentKey!)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                        ) : null
+                      ) : (
+                        <>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" title={t('admin.common.edit', '编辑')} onClick={() => navigate(`/pages/edit/${row.page.id}`)}>
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.common.delete', '删除')} onClick={() => setDeleteId(row.page.id)}>
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Card>
+
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} title={t('admin.posts.confirmDeleteTitle', '确认删除')} message={t('admin.common.deleteIrreversible', '删除后无法恢复')} />
 
       <AboutPageEditor open={aboutEditorOpen} onClose={() => setAboutEditorOpen(false)} />
 
-      <Modal isOpen={codingEditorOpen} onClose={() => setCodingEditorOpen(false)} title="配置 Coding 页面" size="xl">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>
-              GitHub 用户、组织或仓库地址（可多个）
-            </label>
+      <Dialog open={codingEditorOpen} onOpenChange={(o) => !o && setCodingEditorOpen(false)}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[860px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>配置 Coding 页面</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
             <div>
-              <textarea
-                className="input"
+              <Label className="mb-2 block text-[13px] font-semibold">
+                GitHub 用户、组织或仓库地址（可多个）
+              </Label>
+              <Textarea
                 value={codingGitHubURL}
                 onChange={e => setCodingGitHubURL(e.target.value)}
                 placeholder={'https://github.com/username\nhttps://github.com/org\nhttps://github.com/org/repo'}
-                style={{ width: '100%', minHeight: '88px', resize: 'vertical', lineHeight: 1.6 }}
+                className="min-h-[88px] w-full resize-y leading-relaxed"
               />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <Button variant="secondary" onClick={() => loadCodingRepos(true)} loading={loadingCodingRepos}>
-                <i className="fa-regular fa-rotate" />保存并刷新项目
-              </Button>
-            </div>
-            <p className="text-dim" style={{ marginTop: '8px', fontSize: '12px', lineHeight: 1.7 }}>
-              支持一行一个地址，也支持用逗号或分号分隔。填写仓库 URL 时，会自动读取它的 owner/组织并把该仓库加入前台展示筛选。留空时自动读取「个人资料 → 社交链接」里的 GitHub 地址。当前自动识别：
-              <code style={{ marginLeft: '6px', color: 'var(--color-text-sub)', whiteSpace: 'pre-wrap' }}>
-                {codingDetectedURL || '未识别'}
-              </code>
-              。点击右侧「保存并刷新项目」会先保存当前地址，再读取公开仓库。组织项目需要填写组织地址或仓库 URL；只填个人账号不会自动展开所有组织项目，避免混入无关仓库。
-            </p>
-            <div
-              className="text-dim"
-              style={{
-                marginTop: '10px', padding: '10px 12px',
-                background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)',
-                fontSize: '12px', lineHeight: 1.7, display: 'flex',
-                alignItems: 'center', gap: '8px',
-              }}
-            >
-              <i
-                className={`fa-regular ${codingTokenConfigured ? 'fa-circle-check' : 'fa-circle-exclamation'}`}
-                style={{ color: codingTokenConfigured ? 'var(--color-success, #16a34a)' : 'var(--color-warning, #f59e0b)' }}
-              />
-              <span>
-                GitHub Token {codingTokenConfigured ? '已配置' : '未配置'}（全站统一，在「
-                <Link to="/admin/settings?tab=services" style={{ color: 'var(--color-primary)' }}>设置 → 第三方服务 → GitHub</Link>
-                」填写；留空只能用 60 次/小时的匿名 API，容易冷拉超时）
-              </span>
-            </div>
-          </div>
-
-          <div style={{ padding: '12px', border: '1px solid var(--color-border)', background: 'var(--color-bg-soft)' }}>
-            <div className="text-main" style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>展示项目</div>
-            <div className="text-dim" style={{ fontSize: '12px', lineHeight: 1.7 }}>
-              后台只读取这些用户和组织的公开项目。填写用户地址时，会同时读取该用户所属组织的公开项目；Token 只用于识别登录账号的组织列表、贡献统计或提升 GitHub API 速率，不会读取私有仓库。前台只展示勾选项目或上方仓库 URL 指定的项目；未选择时默认显示最近更新的 6 个项目。每个项目最多显示 5 条最近动作。
-            </div>
-          </div>
-
-          {codingRepoError && (
-            <div style={{ padding: '10px 12px', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', fontSize: '12px' }}>
-              {codingRepoError}
-            </div>
-          )}
-
-          <div style={{ border: '1px solid var(--color-border)', maxHeight: '360px', overflow: 'auto' }}>
-            {loadingCodingRepos ? (
-              <div className="text-dim" style={{ padding: '24px', textAlign: 'center', fontSize: '13px' }}>正在读取项目…</div>
-            ) : codingRepos.length === 0 ? (
-              <div className="text-dim" style={{ padding: '24px', textAlign: 'center', fontSize: '13px' }}>暂无可用项目。</div>
-            ) : codingRepos.map(repo => {
-              const fullName = String(repo.full_name || repo.name || '').trim();
-              const autoSelected = codingSourceSelectedRepos.includes(fullName.toLowerCase());
-              const checked = codingSelectedRepos.includes(fullName) || autoSelected;
-              return (
-                <label
-                  key={fullName}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '24px minmax(0, 1fr) auto',
-                    gap: '10px',
-                    alignItems: 'center',
-                    padding: '12px 14px',
-                    borderBottom: '1px solid var(--color-border)',
-                    cursor: autoSelected ? 'default' : 'pointer',
-                  }}
-                >
-                  <input type="checkbox" checked={checked} disabled={autoSelected} onChange={() => toggleCodingRepo(fullName)} />
-                  <span style={{ minWidth: 0 }}>
-                    <span className="text-main" style={{ display: 'block', fontSize: '13px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {repo.name || fullName}
-                    </span>
-                    <span className="text-dim" style={{ display: 'block', marginTop: '3px', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {repo.description || fullName}
-                    </span>
-                  </span>
-                  <span className="text-dim" style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '12px' }}>
-                    {autoSelected && <span style={{ color: 'var(--color-primary)' }}>上方地址</span>}
-                    {repo.language && <span>{repo.language}</span>}
-                    <span>★ {repo.stars || 0}</span>
-                    <span>⑂ {repo.forks || 0}</span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', alignItems: 'center' }}>
-            <span className="text-dim" style={{ fontSize: '12px' }}>已选择 {codingEffectiveSelectedCount} 个项目</span>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <Button variant="secondary" onClick={() => setCodingEditorOpen(false)} disabled={savingCoding}>{t('admin.common.cancel', '取消')}</Button>
-              <SaveButton onClick={saveCodingSettings} loading={savingCoding} />
-            </div>
-          </div>
-        </div>
-      </Modal>
-
-      {editingKey && (
-        <div
-          onClick={() => setEditingKey(null)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'var(--color-bg-card)', width: '720px', maxWidth: '90vw',
-              maxHeight: '80vh', display: 'flex', flexDirection: 'column',
-              border: '1px solid var(--color-border)',
-            }}
-          >
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 className="text-main" style={{ fontSize: '15px', fontWeight: 600 }}>{t('admin.pages.editingContentTitle', '编辑内容 — {key}', { key: editingKey })}</h3>
-              <button onClick={() => setEditingKey(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>
-                <i className="fa-regular fa-xmark" />
-              </button>
-            </div>
-            <div style={{ padding: '20px', flex: 1, overflow: 'auto' }}>
-              <p className="text-dim" style={{ fontSize: '12px', marginBottom: '8px' }}>
-                {t('admin.pages.contentHint', '支持 HTML 片段。留空则恢复默认示例内容。')}
+              <div className="mt-2.5 flex justify-end">
+                <Button variant="outline" onClick={() => loadCodingRepos(true)} disabled={loadingCodingRepos}>
+                  <RefreshCw className={cn('size-4', loadingCodingRepos && 'animate-spin')} />保存并刷新项目
+                </Button>
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                支持一行一个地址，也支持用逗号或分号分隔。填写仓库 URL 时，会自动读取它的 owner/组织并把该仓库加入前台展示筛选。留空时自动读取「个人资料 → 社交链接」里的 GitHub 地址。当前自动识别：
+                <code className="ml-1.5 whitespace-pre-wrap text-muted-foreground">
+                  {codingDetectedURL || '未识别'}
+                </code>
+                。点击右侧「保存并刷新项目」会先保存当前地址，再读取公开仓库。组织项目需要填写组织地址或仓库 URL；只填个人账号不会自动展开所有组织项目，避免混入无关仓库。
               </p>
-              <textarea
-                className="input"
-                style={{ width: '100%', minHeight: '360px', fontFamily: 'monospace', fontSize: '13px' }}
-                value={editingContent}
-                onChange={e => setEditingContent(e.target.value)}
-                placeholder={t('admin.pages.contentPlaceholder', '<p>欢迎来到我的博客…</p>')}
-              />
+              <div className="mt-2.5 flex items-center gap-2 border border-border bg-muted px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
+                {codingTokenConfigured
+                  ? <CircleCheck className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  : <CircleAlert className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />}
+                <span>
+                  GitHub Token {codingTokenConfigured ? '已配置' : '未配置'}（全站统一，在「
+                  <Link to="/admin/settings?tab=services" className="text-primary">设置 → 第三方服务 → GitHub</Link>
+                  」填写；留空只能用 60 次/小时的匿名 API，容易冷拉超时）
+                </span>
+              </div>
             </div>
-            <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <Button variant="secondary" onClick={() => setEditingKey(null)} disabled={savingContent}>{t('admin.common.cancel', '取消')}</Button>
-              <SaveButton onClick={saveBuiltinContent} loading={savingContent} />
+
+            <div className="border border-border bg-muted p-3">
+              <div className="mb-1 text-[13px] font-semibold text-foreground">展示项目</div>
+              <div className="text-xs leading-relaxed text-muted-foreground">
+                后台只读取这些用户和组织的公开项目。填写用户地址时，会同时读取该用户所属组织的公开项目；Token 只用于识别登录账号的组织列表、贡献统计或提升 GitHub API 速率，不会读取私有仓库。前台只展示勾选项目或上方仓库 URL 指定的项目；未选择时默认显示最近更新的 6 个项目。每个项目最多显示 5 条最近动作。
+              </div>
+            </div>
+
+            {codingRepoError && (
+              <div className="border border-destructive px-3 py-2.5 text-xs text-destructive">
+                {codingRepoError}
+              </div>
+            )}
+
+            <div className="max-h-[360px] overflow-auto border border-border">
+              {loadingCodingRepos ? (
+                <div className="p-6 text-center text-[13px] text-muted-foreground">正在读取项目…</div>
+              ) : codingRepos.length === 0 ? (
+                <div className="p-6 text-center text-[13px] text-muted-foreground">暂无可用项目。</div>
+              ) : codingRepos.map(repo => {
+                const fullName = String(repo.full_name || repo.name || '').trim();
+                const autoSelected = codingSourceSelectedRepos.includes(fullName.toLowerCase());
+                const checked = codingSelectedRepos.includes(fullName) || autoSelected;
+                return (
+                  <label
+                    key={fullName}
+                    className={cn('grid items-center gap-2.5 border-b border-border px-3.5 py-3', autoSelected ? 'cursor-default' : 'cursor-pointer')}
+                    style={{ gridTemplateColumns: '24px minmax(0, 1fr) auto' }}
+                  >
+                    <input type="checkbox" checked={checked} disabled={autoSelected} onChange={() => toggleCodingRepo(fullName)} className="size-4 accent-primary" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-semibold text-foreground">
+                        {repo.name || fullName}
+                      </span>
+                      <span className="mt-1 block truncate text-xs text-muted-foreground">
+                        {repo.description || fullName}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {autoSelected && <span className="text-primary">上方地址</span>}
+                      {repo.language && <span>{repo.language}</span>}
+                      <span>★ {repo.stars || 0}</span>
+                      <span>⑂ {repo.forks || 0}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">已选择 {codingEffectiveSelectedCount} 个项目</span>
+              <DialogFooter className="mt-0">
+                <Button variant="outline" onClick={() => setCodingEditorOpen(false)} disabled={savingCoding}>{t('admin.common.cancel', '取消')}</Button>
+                <Button onClick={saveCodingSettings} disabled={savingCoding}>
+                  {savingCoding ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                  {t('admin.common.save', '保存')}
+                </Button>
+              </DialogFooter>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
+        <DialogContent className="max-h-[calc(100vh-32px)] w-[720px] max-w-[90vw] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('admin.pages.editingContentTitle', '编辑内容 — {key}', { key: editingKey ?? '' })}</DialogTitle>
+          </DialogHeader>
+          <div>
+            <p className="mb-2 text-xs text-muted-foreground">
+              {t('admin.pages.contentHint', '支持 HTML 片段。留空则恢复默认示例内容。')}
+            </p>
+            <Textarea
+              className="min-h-[360px] w-full font-mono text-[13px]"
+              value={editingContent}
+              onChange={e => setEditingContent(e.target.value)}
+              placeholder={t('admin.pages.contentPlaceholder', '<p>欢迎来到我的博客…</p>')}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingKey(null)} disabled={savingContent}>{t('admin.common.cancel', '取消')}</Button>
+            <Button onClick={saveBuiltinContent} disabled={savingContent}>
+              {savingContent ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              {t('admin.common.save', '保存')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

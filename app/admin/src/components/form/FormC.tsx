@@ -13,6 +13,7 @@
  */
 
 import { type ReactNode } from 'react';
+import { ChevronRight, Pencil } from 'lucide-react';
 import { Toggle } from '@/components/ui';
 
 export function FormSectionC({
@@ -53,11 +54,11 @@ export function FormSectionC({
           )}
         </div>
       )}
-      <div className="card settings-card">
+      <div className="settings-card rounded-lg border border-border bg-card">
         {children}
       </div>
       {footerHint && (
-        <p className="text-dim" style={{ fontSize: 11, margin: '8px 16px 0', lineHeight: 1.6 }}>
+        <p className="mx-4 mt-2 text-[11px] leading-relaxed text-muted-foreground">
           {footerHint}
         </p>
       )}
@@ -100,14 +101,14 @@ export function FormRowC({
 
       <div className="settings-display-side">
         {value != null && (
-          <span className="text-sub" style={{ fontSize: 14 }}>{value}</span>
+          <span className="text-sm text-muted-foreground">{value}</span>
         )}
         {children}
         {action === 'chevron' && (
-          <i className="fa-solid fa-chevron-right" style={{ fontSize: 10, color: 'var(--color-text-dim)' }} />
+          <ChevronRight className="size-2.5 text-muted-foreground" />
         )}
         {action === 'edit' && (
-          <i className="fa-regular fa-pen" style={{ fontSize: 11, color: 'var(--color-text-dim)' }} />
+          <Pencil className="size-3 text-muted-foreground" />
         )}
       </div>
     </div>
@@ -125,7 +126,7 @@ export function FormRowC({
 // 不适合用 FormRow* 组件的特殊场景）也能引用同一份 token，避免
 // 漂移。改这几个常量 = 全表单视觉一致变化。
 export const FORM_LABEL_WIDTH = '32%';
-export const FORM_ROW_BORDER = '1px solid var(--color-divider)';
+export const FORM_ROW_BORDER = '1px solid var(--border)';
 export const FORM_ROW_MIN_HEIGHT = 56;
 export const FORM_LABEL_PADDING = '10px 14px';
 export const FORM_VALUE_PADDING = '10px 14px';
@@ -308,7 +309,7 @@ export function FormRowRangeC({
     <div className={`settings-row${last ? ' is-last' : ''}`}>
       <div className="settings-row-label-cell">
         <div className="settings-field-label">
-          {label} <span className="text-dim" style={{ fontSize: 12 }}>({value})</span>
+          {label} <span className="text-xs text-muted-foreground">({value})</span>
         </div>
         {hint && <div className="settings-field-hint">{hint}</div>}
       </div>
@@ -357,7 +358,8 @@ export function FormRowRadioC({
               type="radio"
               value={opt.value}
               {...register}
-              style={{ accentColor: 'var(--color-primary)', cursor: 'pointer', margin: 0 }}
+              className="accent-primary"
+              style={{ cursor: 'pointer', margin: 0 }}
             />
             <span>{opt.label}</span>
           </label>

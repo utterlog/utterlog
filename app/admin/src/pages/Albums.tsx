@@ -2,18 +2,19 @@
 import { useState, useEffect } from 'react';
 import api, { mediaApi } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Plus, ImageIcon, Eye, EyeOff, Trash2, Check } from 'lucide-react';
+import { Plus, ImageIcon, Eye, EyeOff, Trash2, Check, Pencil, Loader2 } from 'lucide-react';
 import {
-  AdminToolbar,
   Button,
   ConfirmDialog,
-  DialogFooter,
-  EmptyPanel,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  EmptyState,
   Input,
+  Label,
   LoadingState,
-  Modal,
-  RowActions,
-} from '@/components/ui';
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Textarea,
+} from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 
 interface Album {
   id: number;
@@ -35,7 +36,7 @@ export default function AlbumsPage() {
   const [form, setForm] = useState({ title: '', slug: '', description: '', status: 'private' });
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [, setDeleting] = useState(false);
 
   // Photo management
   const [manageAlbum, setManageAlbum] = useState<Album | null>(null);
@@ -153,45 +154,53 @@ export default function AlbumsPage() {
 
   return (
     <div>
-      <AdminToolbar
-        meta="管理照片相册，公开相册将在前端展示"
-        actions={
-          <Button className="btn-square" title="新建相册" onClick={openCreate}>
-            <Plus className="size-4" />
-          </Button>
-        }
-      />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <span className="mr-auto text-sm text-muted-foreground">管理照片相册，公开相册将在前端展示</span>
+        <Button size="icon" title="新建相册" onClick={openCreate}>
+          <Plus />
+        </Button>
+      </div>
 
       {loading ? (
         <LoadingState />
       ) : albums.length === 0 ? (
-        <EmptyPanel title="暂无相册" actionText="创建第一个相册" onAction={openCreate} />
+        <EmptyState title="暂无相册" actionText="创建第一个相册" onAction={openCreate} />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {albums.map(album => (
-            <div key={album.id} className="card" style={{ overflow: 'hidden' }}>
+            <div key={album.id} className="overflow-hidden rounded-lg border border-border bg-card">
               {/* Cover */}
-              <div style={{ height: '160px', background: 'var(--color-bg-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }} onClick={() => openManage(album)}>
+              <div className="relative flex h-40 cursor-pointer items-center justify-center bg-muted" onClick={() => openManage(album)}>
                 {album.cover_url ? (
-                  <img src={album.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={album.cover_url} alt="" className="size-full object-cover" />
                 ) : (
                   <ImageIcon className="size-8 text-muted-foreground" />
                 )}
-                <div style={{ position: 'absolute', top: '8px', right: '8px', padding: '2px 8px', fontSize: '11px', fontWeight: 600, background: album.status === 'public' ? 'var(--color-success-bg)' : 'var(--color-bg-soft)', color: album.status === 'public' ? 'var(--color-success)' : 'var(--color-text-dim)' }}>
+                <div className={cn(
+                  'absolute right-2 top-2 rounded-sm px-2 py-0.5 text-[11px] font-semibold',
+                  album.status === 'public' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-muted text-muted-foreground',
+                )}>
                   {album.status === 'public' ? '公开' : '私有'}
                 </div>
               </div>
               {/* Info */}
-              <div style={{ padding: '14px' }}>
-                <h3 className="text-main" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{album.title}</h3>
-                {album.description && <p className="text-dim" style={{ fontSize: '12px', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{album.description}</p>}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="text-dim" style={{ fontSize: '12px' }}>{album.photo_count} 张照片</span>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <button onClick={() => toggleStatus(album)} className={`action-btn${album.status === 'private' ? ' warning' : ''}`} title={album.status === 'public' ? '设为私有' : '公开'}>
+              <div className="p-3.5">
+                <h3 className="mb-1 text-sm font-semibold text-foreground">{album.title}</h3>
+                {album.description && <p className="mb-2 truncate text-xs text-muted-foreground">{album.description}</p>}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{album.photo_count} 张照片</span>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn('size-8', album.status === 'private' ? 'text-amber-600 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400' : 'text-muted-foreground hover:text-foreground')}
+                      onClick={() => toggleStatus(album)}
+                      title={album.status === 'public' ? '设为私有' : '公开'}
+                    >
                       {album.status === 'public' ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </button>
-                    <RowActions onEdit={() => openEdit(album)} onDelete={() => setDeleteId(album.id)} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(album)} title="编辑"><Pencil className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(album.id)} title="删除"><Trash2 className="size-4" /></Button>
                   </div>
                 </div>
               </div>
@@ -201,100 +210,127 @@ export default function AlbumsPage() {
       )}
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={showCreate || !!editAlbum} onClose={() => { setShowCreate(false); setEditAlbum(null); }} title={editAlbum ? '编辑相册' : '新建相册'} size="sm">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <Input label="标题" value={form.title} onChange={(e: any) => setForm(p => ({ ...p, title: e.target.value }))} />
-          <Input label="别名 (URL)" value={form.slug} onChange={(e: any) => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="自动生成" />
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>描述</label>
-            <textarea className="input" rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="相册描述…" />
+      <Dialog open={showCreate || !!editAlbum} onOpenChange={(o) => { if (!o) { setShowCreate(false); setEditAlbum(null); } }}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{editAlbum ? '编辑相册' : '新建相册'}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-1.5">
+              <Label>标题</Label>
+              <Input value={form.title} onChange={(e: any) => setForm(p => ({ ...p, title: e.target.value }))} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>别名 (URL)</Label>
+              <Input value={form.slug} onChange={(e: any) => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="自动生成" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>描述</Label>
+              <Textarea rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="相册描述…" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>可见性</Label>
+              <Select value={form.status} onValueChange={v => setForm(p => ({ ...p, status: v as string }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="private">私有</SelectItem>
+                  <SelectItem value="public">公开</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => { setShowCreate(false); setEditAlbum(null); }}>取消</Button>
+              <Button onClick={editAlbum ? handleUpdate : handleCreate} disabled={saving}>
+                {saving && <Loader2 className="size-4 animate-spin" />}{editAlbum ? '更新' : '创建'}
+              </Button>
+            </div>
           </div>
-          <div>
-            <label className="text-sub" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>可见性</label>
-            <select className="input" value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))}>
-              <option value="private">私有</option>
-              <option value="public">公开</option>
-            </select>
-          </div>
-          <DialogFooter
-            onCancel={() => { setShowCreate(false); setEditAlbum(null); }}
-            onSubmit={editAlbum ? handleUpdate : handleCreate}
-            submitting={saving}
-            submitText={editAlbum ? '更新' : '创建'}
-          />
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       {/* Photo Management Modal */}
-      <Modal isOpen={!!manageAlbum} onClose={() => { setManageAlbum(null); setPhotos([]); }} title={manageAlbum ? `${manageAlbum.title} — 照片管理` : ''} size="lg">
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <span className="text-dim" style={{ fontSize: '13px' }}>{photos.length} 张照片</span>
-            <Button onClick={openAddPhotos}><Plus className="size-4" /> 从媒体库添加</Button>
-          </div>
-          {photos.length === 0 ? (
-            <EmptyPanel title="暂无照片，从媒体库添加" padding="40px 0" fontSize="13px" />
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
-              {photos.map((photo: any) => (
-                <div key={photo.id} className="group" style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: 'var(--color-bg-soft)' }}>
-                  <img src={photo.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <button onClick={() => removePhoto(photo.id)} style={{
-                    position: 'absolute', top: '4px', right: '4px', width: '24px', height: '24px',
-                    background: 'var(--color-error)', color: '#fff', border: 'none', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: 0, transition: 'opacity 0.15s',
-                  }} className="group-hover:opacity-100">
-                    <Trash2 className="size-3" />
-                  </button>
-                </div>
-              ))}
+      <Dialog open={!!manageAlbum} onOpenChange={(o) => { if (!o) { setManageAlbum(null); setPhotos([]); } }}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[680px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{manageAlbum ? `${manageAlbum.title} — 照片管理` : ''}</DialogTitle>
+          </DialogHeader>
+          <div>
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-[13px] text-muted-foreground">{photos.length} 张照片</span>
+              <Button onClick={openAddPhotos}><Plus className="size-4" /> 从媒体库添加</Button>
             </div>
-          )}
-        </div>
-      </Modal>
+            {photos.length === 0 ? (
+              <EmptyState title="暂无照片，从媒体库添加" />
+            ) : (
+              <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
+                {photos.map((photo: any) => (
+                  <div key={photo.id} className="group relative aspect-square overflow-hidden bg-muted">
+                    <img src={photo.url} alt="" className="size-full object-cover" />
+                    <button
+                      onClick={() => removePhoto(photo.id)}
+                      className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-sm bg-destructive text-destructive-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <Trash2 className="size-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Photos from Media Library Modal */}
-      <Modal isOpen={showAddPhotos} onClose={() => setShowAddPhotos(false)} title="从媒体库选择照片" size="lg">
-        <div>
-          {mediaList.length === 0 ? (
-            <EmptyPanel title="媒体库中暂无可用图片" padding="40px 0" fontSize="13px" />
-          ) : (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px', marginBottom: '16px', maxHeight: '400px', overflowY: 'auto' }}>
-                {mediaList.map((file: any) => {
-                  const selected = selectedMedia.includes(file.id);
-                  return (
-                    <div key={file.id} onClick={() => setSelectedMedia(prev => selected ? prev.filter(id => id !== file.id) : [...prev, file.id])} style={{
-                      position: 'relative', aspectRatio: '1', overflow: 'hidden', cursor: 'pointer',
-                      border: selected ? '3px solid var(--color-primary)' : '2px solid var(--color-border)',
-                    }}>
-                      <img src={file.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      {selected && (
-                        <div style={{ position: 'absolute', top: '4px', right: '4px', width: '20px', height: '20px', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>
-                          <Check className="size-3" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <Button variant="secondary" onClick={() => setShowAddPhotos(false)}>取消</Button>
-                <Button onClick={addSelectedPhotos} disabled={selectedMedia.length === 0}>
-                  添加 {selectedMedia.length > 0 ? `(${selectedMedia.length})` : ''}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </Modal>
+      <Dialog open={showAddPhotos} onOpenChange={(o) => !o && setShowAddPhotos(false)}>
+        <DialogContent className="max-h-[calc(100vh-32px)] max-w-[680px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>从媒体库选择照片</DialogTitle>
+          </DialogHeader>
+          <div>
+            {mediaList.length === 0 ? (
+              <EmptyState title="媒体库中暂无可用图片" />
+            ) : (
+              <>
+                <div className="mb-4 grid max-h-[400px] gap-2 overflow-y-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}>
+                  {mediaList.map((file: any) => {
+                    const selected = selectedMedia.includes(file.id);
+                    return (
+                      <div
+                        key={file.id}
+                        onClick={() => setSelectedMedia(prev => selected ? prev.filter(id => id !== file.id) : [...prev, file.id])}
+                        className={cn(
+                          'relative aspect-square cursor-pointer overflow-hidden',
+                          selected ? 'ring-2 ring-primary' : 'border border-border',
+                        )}
+                      >
+                        <img src={file.url} alt="" className="size-full object-cover" />
+                        {selected && (
+                          <div className="absolute right-1 top-1 flex size-5 items-center justify-center bg-primary text-primary-foreground">
+                            <Check className="size-3" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowAddPhotos(false)}>取消</Button>
+                  <Button onClick={addSelectedPhotos} disabled={selectedMedia.length === 0}>
+                    添加 {selectedMedia.length > 0 ? `(${selectedMedia.length})` : ''}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
         onConfirm={handleDelete}
-        loading={deleting}
         title="确认删除"
         message="删除后无法恢复，照片不会被删除，只是取消关联。"
       />

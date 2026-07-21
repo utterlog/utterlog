@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
 import { optionsApi, mediaApi } from '@/lib/api';
+import { Button, Input } from '@/components/ui/shadcn';
 import { LoadingState } from '@/components/ui';
+import { CircleHelp, Plus, Upload, ChevronUp, ChevronDown, Trash2, Loader2 } from 'lucide-react';
 
 interface FooterIcon {
   icon: string;   // FA class | inline SVG | image URL
@@ -13,17 +15,6 @@ interface FooterIcon {
 const DEFAULT_OPTION_KEY = 'theme_footer_icons';
 
 const defaultEmptyRow: FooterIcon = { icon: 'fa-light fa-link', label: '按钮', href: '' };
-const actionButtonStyle = {
-  width: 28,
-  minWidth: 28,
-  height: 28,
-  padding: 0,
-  flex: '0 0 28px',
-  fontSize: 12,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
 
 interface FooterIconsEditorProps {
   optionKey?: string;
@@ -122,23 +113,24 @@ export default function FooterIconsEditor({
   };
 
   const renderPreview = (icon: string) => {
-    if (!icon) return <i className="fa-regular fa-circle-question" style={{ color: 'var(--color-text-dim)' }} />;
+    if (!icon) return <CircleHelp className="size-4 text-muted-foreground" />;
     if (icon.trim().startsWith('<svg')) return <span style={{ width: 16, height: 16, display: 'inline-flex' }} dangerouslySetInnerHTML={{ __html: icon }} />;
     if (icon.startsWith('http') || icon.startsWith('/uploads/')) return <img src={icon} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />;
+    // 用户在数据里存的可能是 FontAwesome 类名字符串，保留原样渲染
     return <i className={icon} style={{ fontSize: 14 }} />;
   };
 
   if (loading) return <LoadingState padding="20px 0" />;
 
   return (
-    <div className="card" style={{ padding: 20, marginTop: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <h3 className="text-main" style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>{title}</h3>
-        <button className="btn btn-secondary btn-square" onClick={addRow} title="添加">
-          <i className="fa-regular fa-plus" style={{ fontSize: 12 }} />
-        </button>
+    <div className="mt-6 rounded-lg border border-border bg-card p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="m-0 text-sm font-semibold text-foreground">{title}</h3>
+        <Button variant="outline" size="icon" className="size-8" onClick={addRow} title="添加">
+          <Plus className="size-3.5" />
+        </Button>
       </div>
-      <p className="text-dim" style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>
+      <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
         {description || (
           <>
             显示在博客页脚右侧的额外图标按钮；固定 RSS 按钮由主题始终显示，不在这里删除。图标支持 FontAwesome 类名（如 <code>fa-light fa-link</code>）、
@@ -148,78 +140,65 @@ export default function FooterIconsEditor({
       </p>
 
       {items.length === 0 ? (
-        <div className="text-dim" style={{ textAlign: 'center', padding: '32px 0', fontSize: 14, border: '1px dashed var(--color-border)' }}>
+        <div className="rounded-lg border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
           {emptyText}
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="flex flex-col gap-2">
           {items.map((row, i) => (
-            <div key={i} style={{
-              border: '1px solid var(--color-border)', padding: 12,
-              display: 'grid',
-              gridTemplateColumns: '32px 1fr 120px 1fr 120px auto',
-              gap: 8, alignItems: 'center',
-            }}>
+            <div
+              key={i}
+              className="grid items-center gap-2 rounded-lg border border-border p-3"
+              style={{ gridTemplateColumns: '32px 1fr 120px 1fr 120px auto' }}
+            >
               {/* Preview */}
-              <div style={{
-                width: 28, height: 28, border: '1px solid var(--color-border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'var(--color-bg)', color: 'var(--color-text-sub)',
-              }}>
+              <div className="flex size-7 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
                 {renderPreview(row.icon)}
               </div>
               {/* Icon source */}
-              <input
-                className="input"
+              <Input
                 value={row.icon}
                 onChange={e => updateRow(i, { icon: e.target.value })}
                 placeholder="fa-light fa-link / <svg…/> / https://…"
-                style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)' }}
+                className="font-mono text-xs"
               />
               {/* Label */}
-              <input
-                className="input"
+              <Input
                 value={row.label}
                 onChange={e => updateRow(i, { label: e.target.value })}
                 placeholder="标题"
-                style={{ fontSize: 14 }}
+                className="text-sm"
               />
               {/* Href */}
-              <input
-                className="input"
+              <Input
                 value={row.href || ''}
                 onChange={e => updateRow(i, { href: e.target.value })}
                 placeholder="/feed 或 https://..."
-                style={{ fontSize: 12 }}
+                className="text-xs"
               />
               {/* Copy text */}
-              <input
-                className="input"
+              <Input
                 value={row.copy || ''}
                 onChange={e => updateRow(i, { copy: e.target.value })}
                 placeholder="复制文本（可选）"
-                style={{ fontSize: 12 }}
+                className="text-xs"
                 title="填写后点击图标会复制这段文本到剪贴板，优先于链接"
               />
-              {/* Actions — 统一 28×28 正方形，与预览框同尺寸 */}
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button className="btn btn-secondary" onClick={() => handleUploadClick(i)}
-                  disabled={uploadingIdx === i} title="上传图片作为图标"
-                  style={actionButtonStyle}>
-                  <i className={uploadingIdx === i ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-upload'} />
-                </button>
-                <button className="btn btn-secondary" onClick={() => moveRow(i, -1)} disabled={i === 0} title="上移"
-                  style={actionButtonStyle}>
-                  <i className="fa-regular fa-chevron-up" />
-                </button>
-                <button className="btn btn-secondary" onClick={() => moveRow(i, 1)} disabled={i === items.length - 1} title="下移"
-                  style={actionButtonStyle}>
-                  <i className="fa-regular fa-chevron-down" />
-                </button>
-                <button className="btn btn-secondary" onClick={() => removeRow(i)} title="删除"
-                  style={{ ...actionButtonStyle, color: 'var(--color-error)' }}>
-                  <i className="fa-regular fa-trash" />
-                </button>
+              {/* Actions — 统一正方形，与预览框同尺寸 */}
+              <div className="flex gap-1">
+                <Button variant="outline" size="icon" className="size-7" onClick={() => handleUploadClick(i)}
+                  disabled={uploadingIdx === i} title="上传图片作为图标">
+                  {uploadingIdx === i ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                </Button>
+                <Button variant="outline" size="icon" className="size-7" onClick={() => moveRow(i, -1)} disabled={i === 0} title="上移">
+                  <ChevronUp className="size-3.5" />
+                </Button>
+                <Button variant="outline" size="icon" className="size-7" onClick={() => moveRow(i, 1)} disabled={i === items.length - 1} title="下移">
+                  <ChevronDown className="size-3.5" />
+                </Button>
+                <Button variant="outline" size="icon" className="size-7 text-destructive hover:text-destructive" onClick={() => removeRow(i)} title="删除">
+                  <Trash2 className="size-3.5" />
+                </Button>
               </div>
             </div>
           ))}
@@ -228,10 +207,10 @@ export default function FooterIconsEditor({
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-        <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+      <div className="mt-4 flex justify-end">
+        <Button onClick={handleSave} disabled={saving}>
           {saving ? '保存中…' : '保存'}
-        </button>
+        </Button>
       </div>
     </div>
   );

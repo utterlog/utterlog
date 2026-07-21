@@ -55,23 +55,23 @@ function RootShell({ children }: { children: ReactNode }) {
               style: {
                 borderRadius: '1px',
                 borderLeft: '4px solid #16a34a',
-                background: 'var(--color-success-bg)',
-                color: 'var(--color-success-text)',
+                background: '#ECFDF5',
+                color: '#065F46',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 padding: '12px 16px',
                 fontSize: '14px',
                 maxWidth: '480px',
               },
               success: {
-                style: { borderRadius: '1px', borderLeft: '4px solid #16a34a', background: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
-                iconTheme: { primary: 'var(--color-success)', secondary: '#fff' },
+                style: { borderRadius: '1px', borderLeft: '4px solid #16a34a', background: '#ECFDF5', color: '#065F46' },
+                iconTheme: { primary: '#10B981', secondary: '#fff' },
               },
               error: {
-                style: { borderRadius: '1px', borderLeft: '4px solid #dc2626', background: 'var(--color-error-bg)', color: 'var(--color-error-text)' },
-                iconTheme: { primary: 'var(--color-error)', secondary: '#fff' },
+                style: { borderRadius: '1px', borderLeft: '4px solid #dc2626', background: '#FEF2F2', color: '#991B1B' },
+                iconTheme: { primary: '#DC2626', secondary: '#fff' },
               },
               loading: {
-                style: { borderRadius: '1px', borderLeft: '4px solid #0052D9', background: 'var(--color-bg-soft)', color: 'var(--color-primary-hover)' },
+                style: { borderRadius: '1px', borderLeft: '4px solid #0052D9', background: '#F8F9FA', color: '#0044B8' },
               },
             }}
           />

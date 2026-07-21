@@ -34,6 +34,7 @@ import { formatRelativeTime } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
 import { Spinner } from '@/components/ui';
+import { Button } from '@/components/ui/shadcn';
 
 interface Stats { posts: number; comments: number; links: number; views: number; today: number; words: number; days: number; categories: number; tags: number }
 interface RecentPost { id: number; display_id?: number; title: string; slug: string; status: string; created_at: string; published_at?: string | null; view_count?: number; comment_count?: number; categories?: { id: number; name: string; slug: string; icon?: string }[] }
@@ -162,7 +163,7 @@ export default function DashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-4 gap-3">
         {statCards.map((c) => (
-          <div key={c.title} className="card flex items-center gap-3.5 p-4">
+          <div key={c.title} className="flex items-center gap-3.5 rounded-lg border border-border bg-card p-4 shadow-sm">
             <div className="flex size-10 items-center justify-center rounded-md" style={{ background: `color-mix(in srgb, ${c.color} 10%, transparent)` }}>
               <c.Icon className="size-[18px]" style={{ color: c.color }} />
             </div>
@@ -179,7 +180,7 @@ export default function DashboardPage() {
       {/* Trend + Quick actions */}
       <div className="grid grid-cols-[2fr_1fr] items-stretch gap-4">
         {/* Trend chart */}
-        <div className="card flex flex-col p-5 pb-2.5">
+        <div className="flex flex-col rounded-lg border border-border bg-card p-5 pb-2.5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BarChart3 className="size-[15px] text-primary" />
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                 <span className="size-2.5 bg-primary" />{t('admin.dashboard.visitors', '访客')}
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="size-2.5" style={{ background: 'color-mix(in srgb, var(--primary) 25%, transparent)' }} />{t('admin.dashboard.visits', '访问')}
+                <span className="size-2.5 bg-primary/25" />{t('admin.dashboard.visits', '访问')}
               </span>
             </div>
           </div>
@@ -203,8 +204,8 @@ export default function DashboardPage() {
                 return (
                   <div key={i} title={t('admin.dashboard.trendTooltip', '{date}  访问 {visits} · 访客 {visitors}', { date: s.date, visits: s.visits, visitors: s.visitors })}
                     className="flex flex-1 cursor-pointer flex-col-reverse" style={{ height: `${totalH}%`, maxHeight: '100%' }}>
-                    <div style={{ height: `${visitorH}%`, backgroundColor: 'var(--primary)' }} />
-                    <div style={{ height: `${100 - visitorH}%`, backgroundColor: 'color-mix(in srgb, var(--primary) 25%, transparent)' }} />
+                    <div className="bg-primary" style={{ height: `${visitorH}%` }} />
+                    <div className="bg-primary/25" style={{ height: `${100 - visitorH}%` }} />
                   </div>
                 );
               })}
@@ -221,7 +222,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick actions */}
-        <div className="card p-6">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Zap className="size-[15px] text-primary" />
             <h2 className="text-[15px] font-semibold text-foreground">{t('admin.dashboard.quickActions', '快捷操作')}</h2>
@@ -241,7 +242,7 @@ export default function DashboardPage() {
       {/* Recent content */}
       <div className="grid grid-cols-2 gap-4">
         {/* Recent posts */}
-        <div className="card overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div className="flex items-center gap-2">
               <SquarePen className="size-[15px] text-primary" />
@@ -252,9 +253,9 @@ export default function DashboardPage() {
           {loading ? <Spinner /> : recentPosts.length === 0 ? (
             <div className="px-5 py-12 text-center">
               <p className="mb-4 text-sm text-muted-foreground">{t('admin.dashboard.noPosts', '暂无文章')}</p>
-              <button type="button" onClick={() => navigate('/posts/create')} className="btn btn-primary">
+              <Button onClick={() => navigate('/posts/create')}>
                 <Plus className="size-4" />{t('admin.dashboard.writeFirstPost', '写第一篇')}
-              </button>
+              </Button>
             </div>
           ) : (
             recentPosts.map((post, idx) => {
@@ -283,7 +284,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent comments */}
-        <div className="card overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div className="flex items-center gap-2">
               <MessageSquare className="size-[15px] text-primary" />
@@ -324,7 +325,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Community panel */}
-      <div className="card overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
@@ -346,9 +347,9 @@ export default function DashboardPage() {
             <p className="mx-auto mb-5 max-w-md text-[13px] text-muted-foreground">
               {t('admin.dashboard.networkDescription', '连接到 Utterlog 社区，与其他独立博客互相订阅、共享内容、交流互动')}
             </p>
-            <button type="button" className="btn btn-primary" onClick={() => navigate('/utterlog')}>
+            <Button onClick={() => navigate('/utterlog')}>
               <Network className="size-4" />{t('admin.dashboard.goConnect', '前往连接')}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid min-h-[200px] grid-cols-2">

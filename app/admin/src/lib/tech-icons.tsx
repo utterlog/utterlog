@@ -2,9 +2,10 @@
  * 浏览器/操作系统/设备 图标映射
  *
  * 浏览器：/icons/browsers/*.svg
- * 操作系统：/icons/os/*.svg (部分用 FA)
- * 设备：FA icon class
+ * 操作系统：/icons/os/*.svg (部分用 lucide)
+ * 设备：lucide 图标
  */
+import { Globe, Cpu, Monitor, Smartphone, Tablet, type LucideIcon } from 'lucide-react';
 
 const browserMap: Record<string, string> = {
   chrome: '/icons/browsers/chrome.svg',
@@ -29,14 +30,14 @@ const osMap: Record<string, string> = {
   microsoft: '/icons/os/microsoft.svg',
 };
 
-// OS 用 FA icon 的（没有 SVG 文件的）
-const osFaMap: Record<string, string> = {
+// OS 用 lucide 图标的（没有 SVG 文件的）
+const osIconMap: Record<string, LucideIcon> = {
 };
 
-const deviceFaMap: Record<string, string> = {
-  desktop: 'fa-solid fa-desktop',
-  mobile: 'fa-solid fa-mobile-screen',
-  tablet: 'fa-solid fa-tablet-screen-button',
+const deviceIconMap: Record<string, LucideIcon> = {
+  desktop: Monitor,
+  mobile: Smartphone,
+  tablet: Tablet,
 };
 
 function normalize(name: string): string {
@@ -50,7 +51,7 @@ export function BrowserIcon({ name, size = 16 }: { name: string; size?: number }
   if (src) {
     return <img src={src} alt={name} style={{ width: size, height: size, objectFit: 'contain' }} />;
   }
-  return <i className="fa-regular fa-globe" style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
+  return <Globe size={size} className="text-muted-foreground" />;
 }
 
 /** 操作系统图标 */
@@ -61,17 +62,17 @@ export function OSIcon({ name, size = 16 }: { name: string; size?: number }) {
   if (src) {
     return <img src={src} alt={name} style={{ width: size, height: size, objectFit: 'contain' }} />;
   }
-  // Check FA map
-  const fa = osFaMap[key];
-  if (fa) {
-    return <i className={fa} style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
+  // Check lucide map
+  const Icon = osIconMap[key];
+  if (Icon) {
+    return <Icon size={size} className="text-muted-foreground" />;
   }
-  return <i className="fa-regular fa-microchip" style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
+  return <Cpu size={size} className="text-muted-foreground" />;
 }
 
 /** 设备图标 */
 export function DeviceIcon({ type, size = 16 }: { type: string; size?: number }) {
   const key = normalize(type);
-  const fa = deviceFaMap[key] || 'fa-solid fa-desktop';
-  return <i className={fa} style={{ fontSize: size - 2, color: 'var(--color-text-dim)' }} />;
+  const Icon = deviceIconMap[key] || Monitor;
+  return <Icon size={size} className="text-muted-foreground" />;
 }

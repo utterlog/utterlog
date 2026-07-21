@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import {
+  RefreshCw, Upload, Loader2, TriangleAlert, Lightbulb, Palette, Check,
+  ExternalLink, Trash2, List, IdCard, AppWindow, LayoutGrid, Share2,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { themesApi, type ExtensionManifest } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
 import AzureProfileSettings from '@/components/AzureProfileSettings';
 import MenusPage from './Menus';
-import { LoadingState } from '@/components/ui';
+import { Button, buttonVariants, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
+import { cn } from '@/lib/utils';
 
 export default function Themes() {
   const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero'>('themes');
@@ -100,13 +105,13 @@ export default function Themes() {
   // Tab bar — themes / menus 始终显示；profile / header / footer 三个
   // 自定义面板按 activeManifest.adminPanels 决定是否出现。新主题想用
   // 哪个面板，在 manifest.json 里写 "adminPanels": [...] 即可。
-  const allTabs: { key: typeof tab; label: string; icon: string; visible: boolean }[] = [
-    { key: 'themes', label: '主题', icon: 'fa-regular fa-palette', visible: true },
-    { key: 'menus', label: '菜单', icon: 'fa-regular fa-list', visible: true },
-    { key: 'profile', label: '资料卡', icon: 'fa-regular fa-id-card', visible: showProfile },
-    { key: 'header', label: '头部按钮', icon: 'fa-regular fa-window-maximize', visible: showHeader },
-    { key: 'hero', label: '首页图块', icon: 'fa-regular fa-grid-2', visible: showHero },
-    { key: 'footer', label: '页脚图标', icon: 'fa-regular fa-share-nodes', visible: showFooter },
+  const allTabs: { key: typeof tab; label: string; Icon: typeof List; visible: boolean }[] = [
+    { key: 'themes', label: '主题', Icon: Palette, visible: true },
+    { key: 'menus', label: '菜单', Icon: List, visible: true },
+    { key: 'profile', label: '资料卡', Icon: IdCard, visible: showProfile },
+    { key: 'header', label: '头部按钮', Icon: AppWindow, visible: showHeader },
+    { key: 'hero', label: '首页图块', Icon: LayoutGrid, visible: showHero },
+    { key: 'footer', label: '页脚图标', Icon: Share2, visible: showFooter },
   ];
   const tabs = allTabs.filter(t => t.visible);
   // 如果当前 tab 在新主题里被隐藏（比如刚切了主题），自动回退到 themes
@@ -117,21 +122,26 @@ export default function Themes() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--color-border)', marginBottom: 20 }}>
-        {tabs.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{
-            padding: '10px 18px', fontSize: 14,
-            fontWeight: tab === t.key ? 600 : 400,
-            color: tab === t.key ? 'var(--color-primary)' : 'var(--color-text-sub)',
-            border: 'none',
-            borderBottom: tab === t.key ? '2px solid var(--color-primary)' : '2px solid transparent',
-            background: 'none', cursor: 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-          }}>
-            <i className={t.icon} style={{ fontSize: 14 }} />
-            {t.label}
-          </button>
-        ))}
+      <div className="mb-5 flex gap-1 border-b border-border">
+        {tabs.map(ti => {
+          const TabIcon = ti.Icon;
+          const isActive = tab === ti.key;
+          return (
+            <button
+              key={ti.key}
+              onClick={() => setTab(ti.key)}
+              className={cn(
+                'inline-flex items-center gap-1.5 border-b-2 px-[18px] py-2.5 text-sm transition-colors',
+                isActive
+                  ? 'border-primary font-semibold text-primary'
+                  : 'border-transparent font-normal text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <TabIcon className="size-3.5" />
+              {ti.label}
+            </button>
+          );
+        })}
       </div>
 
       {tab === 'menus' && <MenusPage />}
@@ -167,30 +177,30 @@ export default function Themes() {
       {tab === 'footer' && showFooter && <FooterIconsEditor />}
       {tab === 'themes' && <>
       {/* Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div className="text-sub" style={{ fontSize: 14 }}>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
           共 {themes.length} 个主题
           {active && (
             <>
               {' · 当前 '}
-              <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+              <span className="font-semibold text-primary">
                 {themes.find((t) => t.id === active)?.name || active}
               </span>
             </>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-secondary btn-square" onClick={fetchList} disabled={loading} title="刷新列表">
-            <i className="fa-regular fa-arrows-rotate" style={{ fontSize: 14 }} />
-          </button>
-          <button className="btn btn-primary btn-square" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传主题 .zip'}>
-            <i className={uploading ? 'fa-regular fa-spinner fa-spin' : 'fa-regular fa-upload'} style={{ fontSize: 14 }} />
-          </button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" onClick={fetchList} disabled={loading} title="刷新列表">
+            <RefreshCw className="size-4" />
+          </Button>
+          <Button size="icon" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传主题 .zip'}>
+            {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
             accept=".zip"
-            style={{ display: 'none' }}
+            className="hidden"
             onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
           />
         </div>
@@ -198,225 +208,160 @@ export default function Themes() {
 
       {/* Upload hint */}
       {requestedTheme && (
-        <div style={{
-          padding: '12px 16px', marginBottom: 16,
-          background: 'color-mix(in srgb, #f59e0b 12%, var(--color-bg-soft))',
-          border: '1px solid color-mix(in srgb, #f59e0b 35%, var(--color-border))',
-          fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-sub)',
-        }}>
-          <i className="fa-regular fa-triangle-exclamation" style={{ marginRight: 6, color: 'var(--color-warning)' }} />
-          数据库记录的主题为 <strong>{requestedTheme}</strong>，但当前运行时不支持，前台实际渲染 <strong>{active}</strong>。请重新启用内置主题。
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+          <p className="m-0">数据库记录的主题为 <strong>{requestedTheme}</strong>，但当前运行时不支持，前台实际渲染 <strong>{active}</strong>。请重新启用内置主题。</p>
         </div>
       )}
-      <div style={{
-        padding: '12px 16px', marginBottom: 20,
-        background: 'var(--color-bg-soft)',
-        border: '1px solid var(--color-border)',
-        fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-sub)',
-      }}>
-        <i className="fa-regular fa-lightbulb" style={{ marginRight: 6, color: 'var(--color-primary)' }} />
-        主题包为 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>.zip</code> 格式，根目录包含 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code style={{ background: 'var(--color-bg-card)', padding: '1px 5px', fontSize: 11 }}>content/themes/&lt;id&gt;/</code>。
+      <div className="mb-5 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+        <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
+        <p className="m-0">主题包为 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code className="rounded bg-background px-1.5 py-0.5 text-[11px]">content/themes/&lt;id&gt;/</code>。</p>
       </div>
 
       {/* Grid */}
       {loading ? (
-        <LoadingState padding={60} />
+        <LoadingState />
       ) : themes.length === 0 ? (
-        <div className="card" style={{ padding: 60, textAlign: 'center' }}>
-          <i className="fa-regular fa-palette" style={{ fontSize: 32, color: 'var(--color-text-dim)', marginBottom: 12 }} />
-          <p className="text-sub" style={{ fontSize: 14, margin: 0 }}>暂无主题，点「上传主题」安装第一个</p>
-        </div>
+        <Card className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+          <Palette className="size-8 text-muted-foreground" />
+          <p className="m-0 text-sm text-muted-foreground">暂无主题，点「上传主题」安装第一个</p>
+        </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {themes.map((theme) => {
             const isActive = theme.id === active;
             const canActivate = theme.supported !== false;
             return (
-              <div
+              <Card
                 key={theme.id}
-                className="card"
-                style={{
-                  overflow: 'hidden', position: 'relative', padding: 0,
-                  borderRadius: 'var(--ctrl-radius)',
-                  borderColor: isActive ? 'var(--color-primary)' : 'var(--color-border)',
-                  borderWidth: 1,
-                  display: 'flex', flexDirection: 'column',
-                }}
+                className={cn(
+                  'relative flex flex-col overflow-hidden p-0',
+                  isActive ? 'border-primary' : 'border-border',
+                )}
               >
-                <div style={{
-                  aspectRatio: '16 / 9',
-                  background: 'linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg) 100%)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                  position: 'relative',
-                }}>
+                <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-muted">
                   {/* Fallback layer — theme name + initial, shown before img loads or when img fails */}
-                  <div style={{
-                    position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center', gap: 6,
-                    color: 'var(--color-text-dim)', pointerEvents: 'none',
-                  }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: 4,
-                      background: 'var(--color-primary)', opacity: 0.12,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 18, fontWeight: 700, color: 'var(--color-primary)',
-                    }}>
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
+                    <div className="flex size-10 items-center justify-center rounded bg-primary/10 text-lg font-bold text-primary">
                       {theme.name?.charAt(0).toUpperCase() || '?'}
                     </div>
-                    <span style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{theme.name}</span>
+                    <span className="text-[11px] uppercase tracking-wider">{theme.name}</span>
                   </div>
                   {theme.preview && (
                     <img src={theme.preview} alt={theme.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'relative', zIndex: 1 }}
+                      className="relative z-[1] size-full object-cover"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   )}
                 </div>
 
                 {isActive && (
-                  <div style={{
-                    position: 'absolute', top: 8, right: 8,
-                    padding: '3px 8px', fontSize: 11, fontWeight: 600,
-                    background: 'var(--color-primary)', color: '#fff',
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                  }}>
-                    <i className="fa-solid fa-check" style={{ fontSize: 10 }} /> 使用中
+                  <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                    <Check className="size-2.5" /> 使用中
                   </div>
                 )}
 
-                <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--color-text-main)' }}>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <h3 className="m-0 text-sm font-semibold text-foreground">
                       {theme.name}
                     </h3>
-                    <span className="text-dim" style={{ fontSize: 11 }}>v{theme.version}</span>
+                    <span className="text-[11px] text-muted-foreground">v{theme.version}</span>
                   </div>
                   {theme.author && (
-                    <p className="text-dim" style={{ fontSize: 11, margin: '0 0 8px' }}>by {theme.author}</p>
+                    <p className="mb-2 mt-0 text-[11px] text-muted-foreground">by {theme.author}</p>
                   )}
                   {theme.description && (
-                    <p className="text-sub" style={{
-                      fontSize: 12, lineHeight: 1.6, margin: '0 0 12px',
-                      overflow: 'hidden', display: '-webkit-box',
-                      WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
-                    }}>{theme.description}</p>
+                    <p className="mb-3 mt-0 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{theme.description}</p>
                   )}
                   {theme.supported === false && (
-                    <p style={{ fontSize: 11, color: 'var(--color-warning)', margin: '0 0 12px' }}>
+                    <p className="mb-3 mt-0 text-[11px] text-amber-600 dark:text-amber-400">
                       当前运行时不支持此主题，暂不可切换
                     </p>
                   )}
                   {theme.id === 'Azure' && isActive && (
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                    <div className="mb-3 flex gap-2">
                       {(['blue', 'red'] as const).map((accent) => (
-                        <button
+                        <Button
                           key={accent}
                           type="button"
-                          className="btn btn-sm"
+                          variant="outline"
+                          size="sm"
                           disabled={activating === theme.id}
                           onClick={() => handleActivate('Azure', accent)}
-                          style={{
-                            flex: 1,
-                            borderColor: azureAccent === accent ? 'var(--color-primary)' : 'var(--color-border)',
-                            background: azureAccent === accent ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent',
-                            color: accent === 'red' ? '#F53102' : 'var(--color-primary)',
-                          }}
+                          className={cn(
+                            'flex-1',
+                            azureAccent === accent ? 'border-primary bg-primary/10' : 'border-border',
+                            accent === 'red' ? 'text-[#F53102] hover:text-[#F53102]' : 'text-primary hover:text-primary',
+                          )}
                         >
                           {accent === 'blue' ? '蔚蓝' : '中国红'}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   )}
 
-                  {/* marginTop:auto pushes the action row to the bottom of
-                      the card so every theme's button lines up regardless
-                      of how long the description is. */}
-                  <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
+                  {/* mt-auto pushes the action row to the bottom of the card so
+                      every theme's button lines up regardless of description length. */}
+                  <div className="mt-auto flex gap-1.5">
                     {isActive ? (
-                      <button
-                        className="btn btn-sm"
+                      <Button
+                        variant="outline"
+                        size="sm"
                         disabled
-                        style={{
-                          flex: 1,
-                          background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                          color: 'var(--color-primary)',
-                          borderColor: 'var(--color-primary)',
-                          opacity: 1,
-                        }}
+                        className="flex-1 border-primary bg-primary/10 text-primary opacity-100 disabled:opacity-100"
                       >
-                        <i className="fa-solid fa-check" style={{ fontSize: 12 }} /> 当前主题
-                      </button>
+                        <Check className="size-3.5" /> 当前主题
+                      </Button>
                     ) : (
-                      <button
-                        className="btn btn-primary btn-sm"
+                      <Button
+                        size="sm"
+                        className="flex-1"
                         disabled={activating === theme.id || !canActivate}
                         onClick={() => handleActivate(theme.id)}
-                        style={{ flex: 1, ...(canActivate ? {} : { opacity: 0.55, cursor: 'not-allowed' }) }}
                       >
                         {activating === theme.id ? '切换中…' : (canActivate ? '启用' : '暂不可用')}
-                      </button>
+                      </Button>
                     )}
                     {theme.homepage && (
                       <a
                         href={theme.homepage}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-secondary"
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'px-2.5')}
                         title="主页"
-                        style={{ fontSize: 12, padding: '6px 10px' }}
                       >
-                        <i className="fa-regular fa-up-right-from-square" style={{ fontSize: 11 }} />
+                        <ExternalLink className="size-3.5" />
                       </a>
                     )}
                     {!isActive && !theme.builtin && (
-                      <button
-                        className="btn btn-secondary"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="px-2.5 text-destructive hover:text-destructive"
                         onClick={() => setDeleteId(theme.id)}
                         title="删除"
-                        style={{ fontSize: 12, padding: '6px 10px', color: 'var(--color-error)' }}
                       >
-                        <i className="fa-regular fa-trash" style={{ fontSize: 11 }} />
-                      </button>
+                        <Trash2 className="size-3.5" />
+                      </Button>
                     )}
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
 
       {/* Delete confirm */}
-      {deleteId && (
-        <div
-          onClick={() => setDeleteId(null)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="card"
-            style={{ padding: 24, maxWidth: 380, width: '90%' }}
-          >
-            <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px' }}>确认删除主题？</h3>
-            <p className="text-sub" style={{ fontSize: 14, margin: '0 0 20px', lineHeight: 1.7 }}>
-              将永久删除主题 <strong>{themes.find((t) => t.id === deleteId)?.name}</strong>，不可撤销。
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>取消</button>
-              <button
-                className="btn"
-                onClick={() => handleDelete(deleteId)}
-                style={{ background: 'var(--color-error)', borderColor: 'var(--color-error)' }}
-              >
-                删除
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(o) => !o && setDeleteId(null)}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        title="确认删除主题？"
+        message={`将永久删除主题「${themes.find((t) => t.id === deleteId)?.name || ''}」，不可撤销。`}
+        confirmText="删除"
+      />
 
       </>}
     </div>

@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { TriangleAlert, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/shadcn';
 
 export default class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -15,12 +17,12 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
     if (!this.state.error) return this.props.children;
     return (
       <div style={{ padding: '64px 20px', textAlign: 'center' }}>
-        <i className="fa-regular fa-triangle-exclamation" style={{ fontSize: 40, color: 'var(--color-error, #dc2626)' }} />
+        <TriangleAlert className="mx-auto size-10 text-destructive" />
         <h1 style={{ fontSize: 18, margin: '16px 0 8px' }}>页面渲染出错</h1>
-        <p className="text-sub" style={{ fontSize: 13 }}>这个模块加载失败，其他功能不受影响。</p>
-        <button className="btn btn-primary" onClick={() => this.setState({ error: null })}>
-          <i className="fa-regular fa-rotate-right" /> 重试
-        </button>
+        <p className="text-muted-foreground" style={{ fontSize: 13 }}>这个模块加载失败，其他功能不受影响。</p>
+        <Button className="mt-4" onClick={() => this.setState({ error: null })}>
+          <RotateCcw className="size-4" /> 重试
+        </Button>
       </div>
     );
   }

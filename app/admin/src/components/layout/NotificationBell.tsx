@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Bell, MessageSquare, ChevronRight } from 'lucide-react';
 import { Link } from '@/lib/router';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
@@ -83,16 +84,10 @@ export default function NotificationBell() {
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex' }}>
-      <button onClick={handleOpen} className="relative p-2 text-sub btn-ghost" style={{ borderRadius: '1px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-        <i className="fa-regular fa-bell" style={{ fontSize: '17px' }} />
+      <button onClick={handleOpen} className="relative inline-flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+        <Bell className="size-[18px]" />
         {(unread + pendingComments) > 0 && (
-          <span style={{
-            position: 'absolute', top: '4px', right: '4px',
-            minWidth: '16px', height: '16px', borderRadius: '8px',
-            background: '#F53F3F', color: '#fff', fontSize: '10px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '0 4px', fontWeight: 600,
-          }}>
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
             {(unread + pendingComments) > 99 ? '99+' : unread + pendingComments}
           </span>
         )}
@@ -101,19 +96,18 @@ export default function NotificationBell() {
       {open && (
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
-          <div style={{
-            position: 'absolute', right: 0, top: '100%', marginTop: '8px',
-            width: '340px', maxHeight: '400px', zIndex: 41,
-            background: 'var(--color-bg-card)', borderRadius: '1px',
-            border: '1px solid var(--color-border)',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-            display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          }}>
+          <div
+            className="flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-lg"
+            style={{
+              position: 'absolute', right: 0, top: '100%', marginTop: '8px',
+              width: '340px', maxHeight: '400px', zIndex: 41,
+            }}
+          >
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--color-border)' }}>
+            <div className="flex items-center justify-between border-b border-border" style={{ padding: '12px 16px' }}>
               <span style={{ fontSize: '14px', fontWeight: 600 }}>{t('admin.notification.title', '通知')}</span>
               {unread > 0 && (
-                <button onClick={markAllRead} style={{ fontSize: '12px', color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button onClick={markAllRead} className="cursor-pointer bg-transparent text-xs text-primary">
                   {t('admin.notification.markAllRead', '全部已读')}
                 </button>
               )}
@@ -121,39 +115,40 @@ export default function NotificationBell() {
 
             {/* Pending comments alert */}
             {pendingComments > 0 && (
-              <Link to="/comments/pending" onClick={() => setOpen(false)} style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '10px 16px', background: '#fef3c7', borderBottom: '1px solid #fde68a',
-                textDecoration: 'none', color: '#92400e', fontSize: '13px',
-              }}>
-                <i className="fa-solid fa-comment-dots" style={{ fontSize: '14px' }} />
+              <Link
+                to="/comments/pending"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/15 text-[13px] text-amber-700 no-underline dark:text-amber-400"
+                style={{ padding: '10px 16px' }}
+              >
+                <MessageSquare className="size-3.5" />
                 <span>{t('admin.notification.pendingComments', '{count} 条评论等待审核', { count: pendingComments })}</span>
-                <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', marginLeft: 'auto', opacity: 0.5 }} />
+                <ChevronRight className="ml-auto size-2.5 opacity-50" />
               </Link>
             )}
 
             {/* List */}
             <div style={{ flex: 1, overflow: 'auto' }}>
               {loading ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: '13px' }}>{t('common.loading', '加载中…')}</div>
+                <div className="text-center text-[13px] text-muted-foreground" style={{ padding: '24px' }}>{t('common.loading', '加载中…')}</div>
               ) : notifications.length === 0 ? (
-                <div style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: '13px' }}>{t('admin.notification.empty', '暂无通知')}</div>
+                <div className="text-center text-[13px] text-muted-foreground" style={{ padding: '32px' }}>{t('admin.notification.empty', '暂无通知')}</div>
               ) : (
                 notifications.map((n, i) => (
-                  <div key={i} style={{
-                    padding: '10px 16px', borderBottom: '1px solid var(--color-divider)',
-                    background: n.is_read ? 'transparent' : 'var(--color-bg-soft)',
-                    cursor: 'pointer',
-                  }}>
+                  <div
+                    key={i}
+                    className={n.is_read ? 'cursor-pointer border-b border-border bg-transparent' : 'cursor-pointer border-b border-border bg-muted'}
+                    style={{ padding: '10px 16px' }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <p style={{ fontSize: '13px', fontWeight: n.is_read ? 400 : 600, flex: 1 }}>
                         {typeof n.title === 'string' ? n.title : String(n.title || '')}
                       </p>
-                      <span style={{ fontSize: '11px', color: 'var(--color-text-dim)', flexShrink: 0, marginLeft: '8px' }}>
+                      <span className="text-muted-foreground" style={{ fontSize: '11px', flexShrink: 0, marginLeft: '8px' }}>
                         {formatTime(n.created_at)}
                       </span>
                     </div>
-                    {n.content && <p style={{ fontSize: '12px', color: 'var(--color-text-dim)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof n.content === 'string' ? n.content : ''}</p>}
+                    {n.content && <p className="text-muted-foreground" style={{ fontSize: '12px', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeof n.content === 'string' ? n.content : ''}</p>}
                   </div>
                 ))
               )}

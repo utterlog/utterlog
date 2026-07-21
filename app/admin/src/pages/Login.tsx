@@ -1,4 +1,5 @@
 import { MailOpen, Fingerprint } from 'lucide-react';
+import { Button, Input, Label } from '@/components/ui/shadcn';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store';
 import { authApi } from '@/lib/api';
@@ -192,123 +193,112 @@ export default function Login() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--color-bg-main)', padding: 24,
-    }}>
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <form
         onSubmit={needTotp ? handle2FA : handleSubmit}
-        className="login-form"
-        style={{
-          width: '100%', maxWidth: 380, background: 'var(--color-bg-card)',
-          border: '1px solid var(--color-border)', borderRadius: 'var(--ctrl-radius)', padding: '32px 28px',
-        }}
+        className="w-full max-w-[380px] rounded-md border border-border bg-card px-7 py-8"
       >
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div className="mb-7 text-center">
           <svg
             width="64" height="64" viewBox="0 0 24 24"
-            className="login-logo"
-            style={{ margin: '0 auto', display: 'block' }}
+            className="login-logo mx-auto block"
           >
-            <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--color-primary)" />
+            <path d="M12 0c9.601 0 12 2.399 12 12 0 9.601-2.399 12-12 12-9.601 0-12-2.399-12-12C0 2.399 2.399 0 12 0z" fill="var(--primary)" />
             <path d="M17.008 17.29H11.44a5.57 5.57 0 0 1-5.562-5.567A5.57 5.57 0 0 1 11.44 6.16a5.57 5.57 0 0 1 5.567 5.563Z" fill="white" />
           </svg>
-          <h1 style={{ fontSize: 18, fontWeight: 700, margin: '12px 0 4px', fontFamily: 'var(--font-logo)', letterSpacing: '-0.01em' }}>Utterlog</h1>
-          <p style={{ fontSize: 12, color: 'var(--color-text-dim)', margin: 0 }}>
+          <h1 className="mb-1 mt-3 font-logo text-lg font-bold tracking-tight">Utterlog</h1>
+          <p className="m-0 text-xs text-muted-foreground">
             {needTotp ? t('admin.login.enterTotpSubtitle', '请输入动态验证码') : t('admin.login.subtitle', '管理后台登录')}
           </p>
         </div>
 
         {!needTotp ? (
           <>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>{t('admin.login.email', '邮箱')}</label>
-              <input
+            <div className="mb-4">
+              <Label className="mb-1.5 block">{t('admin.login.email', '邮箱')}</Label>
+              <Input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                className="input" placeholder="you@example.com" autoFocus
+                placeholder="you@example.com" autoFocus
               />
             </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <label style={{ fontSize: 14, fontWeight: 500 }}>{t('admin.login.password', '密码')}</label>
+            <div className="mb-6">
+              <div className="mb-1.5 flex items-center justify-between">
+                <Label>{t('admin.login.password', '密码')}</Label>
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowForgot(true)}
-                  style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  className="text-xs text-primary hover:underline"
                 >
                   {t('admin.login.forgotPassword', '找回密码')}
                 </button>
               </div>
-              <input
+              <Input
                 type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                className="input"
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={submitting} style={{ width: '100%' }}>
+            <Button type="submit" size="lg" className="w-full" disabled={submitting}>
               {submitting ? t('admin.login.signingIn', '登录中…') : t('admin.login.signIn', '登录')}
-            </button>
+            </Button>
 
             {showPasskey && (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0 16px' }}>
-                  <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
-                  <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>{t('admin.login.or', '或')}</span>
-                  <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+                <div className="mb-4 mt-5 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-[11px] text-muted-foreground">{t('admin.login.or', '或')}</span>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="lg"
                   onClick={handlePasskeyLogin}
                   disabled={passkeyLoading}
-                  className="btn btn-secondary"
-                  style={{ width: '100%', gap: 8 }}
+                  className="w-full"
                 >
                   <Fingerprint className="size-4" />
                   {passkeyLoading ? t('admin.login.verifying', '验证中…') : t('admin.login.usePasskey', '使用通行密钥登录')}
-                </button>
+                </Button>
               </>
             )}
           </>
         ) : (
           <>
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
+            <div className="mb-6">
+              <Label className="mb-1.5 block">
                 {t('admin.login.sixDigitCode', '6 位验证码')}
-                <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--color-text-dim)', marginLeft: 6 }}>
+                <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">
                   {t('admin.login.authenticatorHint', '（Authenticator App 生成）')}
                 </span>
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text" inputMode="numeric" pattern="[0-9]*" maxLength={8}
                 value={totpCode}
                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
-                className="input"
                 placeholder="000000"
                 autoFocus
-                style={{
-                  textAlign: 'center', fontSize: 20, letterSpacing: 6,
-                  fontFamily: 'ui-monospace, monospace',
-                }}
+                className="text-center font-mono text-xl tracking-[6px]"
               />
-              <p style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: 6, margin: '6px 0 0' }}>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
                 {t('admin.login.recoveryCodeHint', '没有 App？使用 8 位备用恢复码')}
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
+            <div className="flex gap-2">
+              <Button
                 type="button"
+                variant="outline"
+                size="lg"
                 onClick={handleBack}
-                className="btn btn-secondary"
-                style={{ flex: 1 }}
+                className="flex-1"
               >
                 {t('admin.common.back', '返回')}
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={submitting} style={{ flex: 2 }}>
+              </Button>
+              <Button type="submit" size="lg" className="flex-[2]" disabled={submitting}>
                 {submitting ? t('admin.login.verifying', '验证中…') : t('admin.login.verify', '验证')}
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -318,64 +308,59 @@ export default function Login() {
         <>
           <div
             onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(''); }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 50 }}
+            className="fixed inset-0 z-50 bg-black/30"
           />
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            zIndex: 51, width: 380, maxWidth: '90vw',
-            background: 'var(--color-bg-card)', borderRadius: 'var(--ctrl-radius)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.15)', padding: 28,
-          }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>{t('admin.login.forgotPassword', '找回密码')}</h2>
-            <p style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 20 }}>
+          <div
+            className="fixed left-1/2 top-1/2 z-[51] w-[380px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-card p-7 shadow-xl"
+          >
+            <h2 className="mb-1.5 text-base font-bold">{t('admin.login.forgotPassword', '找回密码')}</h2>
+            <p className="mb-5 text-xs text-muted-foreground">
               {t('admin.login.forgotDescription', '输入管理员邮箱，系统将发送密码重置链接')}
             </p>
 
             {forgotSent ? (
-              <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>
-                  <MailOpen className="size-4" />
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 500 }}>{t('admin.login.resetLinkSent', '重置链接已发送')}</p>
-                <p style={{ fontSize: 12, color: 'var(--color-text-dim)', marginTop: 6 }}>
+              <div className="py-4 text-center">
+                <MailOpen className="mx-auto mb-3 size-8 text-primary" />
+                <p className="text-sm font-medium">{t('admin.login.resetLinkSent', '重置链接已发送')}</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">
                   {t('admin.login.checkInbox', '请检查 {email} 的收件箱', { email: forgotEmail })}
                 </p>
-                <button
+                <Button
                   onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(''); }}
-                  className="btn btn-primary"
-                  style={{ marginTop: 16, width: '100%' }}
+                  size="lg"
+                  className="mt-4 w-full"
                 >
                   {t('admin.login.backToLogin', '返回登录')}
-                </button>
+                </Button>
               </div>
             ) : (
               <>
-                <input
+                <Input
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   type="email"
                   placeholder={t('admin.login.adminEmailPlaceholder', '管理员邮箱')}
-                  className="input"
-                  style={{ marginBottom: 16 }}
+                  className="mb-4"
                 />
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
+                <div className="flex gap-2">
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="lg"
                     onClick={() => { setShowForgot(false); setForgotEmail(''); }}
-                    className="btn btn-secondary"
-                    style={{ flex: 1 }}
+                    className="flex-1"
                   >
                     {t('admin.common.cancel', '取消')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    size="lg"
                     disabled={forgotSending || !forgotEmail}
-                    className="btn btn-primary"
-                    style={{ flex: 1 }}
+                    className="flex-1"
                     onClick={handleForgotSubmit}
                   >
                     {forgotSending ? t('admin.login.sending', '发送中…') : t('admin.login.sendResetLink', '发送重置链接')}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -385,35 +370,31 @@ export default function Login() {
 
       {resetToken && (
         <>
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 50 }} />
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            zIndex: 51, width: 380, maxWidth: '90vw',
-            background: 'var(--color-bg-card)', borderRadius: 'var(--ctrl-radius)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.15)', padding: 28,
-          }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>{t('admin.login.resetPassword', '重置密码')}</h2>
-            <p style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 20 }}>
+          <div className="fixed inset-0 z-50 bg-black/30" />
+          <div
+            className="fixed left-1/2 top-1/2 z-[51] w-[380px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-card p-7 shadow-xl"
+          >
+            <h2 className="mb-1.5 text-base font-bold">{t('admin.login.resetPassword', '重置密码')}</h2>
+            <p className="mb-5 text-xs text-muted-foreground">
               {t('admin.login.resetPasswordDescription', '请输入新的管理员登录密码')}
             </p>
-            <input
+            <Input
               value={resetPassword}
               onChange={(e) => setResetPassword(e.target.value)}
               type="password"
               placeholder={t('admin.login.newPasswordPlaceholder', '新密码')}
-              className="input"
-              style={{ marginBottom: 16 }}
+              className="mb-4"
               autoFocus
             />
-            <button
+            <Button
               type="button"
+              size="lg"
               disabled={resetSubmitting || resetPassword.length < 8}
-              className="btn btn-primary"
-              style={{ width: '100%' }}
+              className="w-full"
               onClick={handleResetSubmit}
             >
               {resetSubmitting ? t('admin.login.resetting', '重置中…') : t('admin.login.confirmReset', '确认重置')}
-            </button>
+            </Button>
           </div>
         </>
       )}
