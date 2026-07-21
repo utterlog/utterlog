@@ -185,9 +185,21 @@ remote_build_from_src() {
   log "git archive 同步源码到服务器并在远端 docker build ..."
   "${SSH[@]}" "rm -rf ${REMOTE_PATH}/src && mkdir -p ${REMOTE_PATH}/src"
   git archive HEAD | "${SSH[@]}" "tar xf - -C ${REMOTE_PATH}/src"
+
+  # git archive HEAD 不含被 .gitignore 排除的预构建 admin dist（app/admin/dist）。
+  # 补传 preflight 已构建好的本地 dist，让 Dockerfile.bun 的 admin-builder 阶段
+  # 复用宿主机产物、跳过在 docker build 环境里会 ConnectionRefused 崩溃的 SPA prerender。
+  if [ ! -f app/admin/dist/client/index.html ]; then
+    err "本地 app/admin/dist/client/index.html 不存在，无法补传（preflight 是否已构建 admin？）"
+    exit 1
+  fi
+  log "补传本地预构建 admin dist 到服务器 src ..."
+  tar czf - app/admin/dist | "${SSH[@]}" "tar xzf - -C ${REMOTE_PATH}/src"
+
   "${SSH[@]}" bash -s <<EOF
 set -euo pipefail
 test -f ${REMOTE_PATH}/src/app/start/src/backend/backup/zip-safety.ts
+test -f ${REMOTE_PATH}/src/app/admin/dist/client/index.html
 cd ${REMOTE_PATH}
 docker tag ${IMAGE_REF} ${IMAGE_NAME}:backup-\$(date +%Y%m%d%H%M%S) 2>/dev/null || true
 cd src

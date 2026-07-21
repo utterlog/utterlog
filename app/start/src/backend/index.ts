@@ -29,6 +29,7 @@ console.log(`Utterlog Bun server listening on :${config.port} (${ready ? 'full' 
 
 const server = Bun.serve({
   port: config.port,
+  ...(config.host ? { hostname: config.host } : {}),
   fetch: async (request) => await handleStartRequest(request)
     || new Response('TanStack Start service unavailable', { status: 503 }),
 });
