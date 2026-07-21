@@ -20,16 +20,20 @@ function firstHeaderIp(value: string | null) {
 
 /**
  * Resolve the original visitor IP from the proxy headers used by the site.
- * EdgeOne writes the client address to EO-Client-IP before the request
- * reaches the origin. Fall back to standard proxy headers for other hosts.
+ * Prefer dedicated single-value CDN headers that carry ONLY the real client
+ * IP (EdgeOne → EO-Client-IP; Aliyun ESA → configure it to send X-Real-IP;
+ * Cloudflare → CF-Connecting-IP). `x-forwarded-for` is checked LAST because
+ * the local FrankenPHP/Caddy reverse proxy overwrites it with its own peer
+ * address (the CDN edge IP) unless trusted_proxies is configured — so it does
+ * not reflect the real visitor when a CDN sits in front.
  */
 export function requestIp(request: Request) {
   for (const header of [
     'eo-client-ip',
     'true-client-ip',
-    'x-forwarded-for',
     'x-real-ip',
     'cf-connecting-ip',
+    'x-forwarded-for',
   ]) {
     const ip = firstHeaderIp(request.headers.get(header));
     if (ip) return ip;
