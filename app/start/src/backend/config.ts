@@ -4,6 +4,7 @@ import { runtimePaths } from './paths';
 export type AppConfig = {
   nodeEnv: string;
   port: number;
+  host: string;
   dbHost: string;
   dbPort: number;
   dbName: string;
@@ -76,6 +77,9 @@ function tablePrefix() {
 export const config: AppConfig = {
   nodeEnv: env('NODE_ENV', env('BUN_ENV', 'development')),
   port: envInt('PORT', 8080),
+  // 绑定网卡。留空 = Bun 默认 0.0.0.0（容器内靠 docker 端口映射限制）。
+  // 无 Docker 直接跑 host 进程时设 HOST=127.0.0.1，仅本机可达、由 frankenphp 反代。
+  host: env('HOST', ''),
   dbHost: env('DB_HOST', 'localhost'),
   dbPort: envInt('DB_PORT', 5432),
   dbName: env('DB_NAME', 'utterlog'),
