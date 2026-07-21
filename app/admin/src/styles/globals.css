@@ -417,10 +417,10 @@ body {
 /* ========================================
    Global Resets
    ======================================== */
-* {
-  padding: 0;
-  margin: 0;
-}
+/* NOTE: 不要在这里加未分层的 `* { margin:0; padding:0 }`。Tailwind v4 的
+   Preflight 已在 @layer base 里做了同样的 reset（分层，utility 可覆盖）；
+   而未分层规则优先级高于任何 @layer，会盖掉所有 .p-* / .m-* / .space-* 间距
+   工具类，导致「标题/间距全丢」。历史上的那条 `*{padding:0;margin:0}` 已移除。 */
 
 html {
   max-width: 100vw;
