@@ -3,7 +3,7 @@ import { processGithubRepoLinks } from '../src/web/components/blog/shortcodes';
 
 describe('post block embeds', () => {
   test('isolates GitHub cards from surrounding Markdown paragraphs', () => {
-    const result = processGithubRepoLinks('正文\nhttps://github.com/gentpan/LitePic\n继续');
+    const result = processGithubRepoLinks('正文\nhttps://github.com/example-owner/example-repo\n继续');
     expect(result).toContain('正文\n\n<div data-github-repo-card');
     expect(result).toContain('</div>\n\n继续');
   });
@@ -12,6 +12,6 @@ describe('post block embeds', () => {
     const result = processGithubRepoLinks('正文\nhttps://x.com/example/status/12345\n继续');
     expect(result).toContain('正文\n\n<div data-x-post-embed');
     expect(result).toContain('</div>\n\n继续');
-    expect(processGithubRepoLinks('```\nhttps://github.com/gentpan/LitePic\n```')).toBe('```\nhttps://github.com/gentpan/LitePic\n```');
+    expect(processGithubRepoLinks('```\nhttps://github.com/example-owner/example-repo\n```')).toBe('```\nhttps://github.com/example-owner/example-repo\n```');
   });
 });

@@ -1,75 +1,102 @@
 import { useState } from 'react';
-import {
-  Gauge, SquarePen, FileText, MessageCircle, MapPin, Clapperboard, Music,
-  MonitorPlay, Film, Video, BookOpen, Gamepad2, ShoppingBag, Users,
-  MessagesSquare, Bot, Link as LinkIcon, Images, GalleryVerticalEnd,
-  LineChart, ShieldCheck, Palette, Plug, Wrench, Settings, Sparkles,
-  SlidersHorizontal, ChevronDown, ChevronRight, ChevronLeft,
-  type LucideIcon,
-} from 'lucide-react';
+import type { ComponentType, HTMLAttributes } from 'react';
+import { AudioLinesIcon } from '@/components/ui/audio-lines';
+import { BookTextIcon } from '@/components/ui/book-text';
+import { BotIcon } from '@/components/ui/bot';
+import { BoxesIcon } from '@/components/ui/boxes';
+import { CartIcon } from '@/components/ui/cart';
+import { ChartLineIcon } from '@/components/ui/chart-line';
+import { ChevronDownIcon } from '@/components/ui/chevron-down';
+import { ChevronLeftIcon } from '@/components/ui/chevron-left';
+import { ChevronRightIcon } from '@/components/ui/chevron-right';
+import { ClapIcon } from '@/components/ui/clap';
+import { ContrastIcon } from '@/components/ui/contrast';
+import { Disc3Icon } from '@/components/ui/disc-3';
+import { FileTextIcon } from '@/components/ui/file-text';
+import { GalleryThumbnailsIcon } from '@/components/ui/gallery-thumbnails';
+import { GalleryVerticalEndIcon } from '@/components/ui/gallery-vertical-end';
+import { GaugeIcon } from '@/components/ui/gauge';
+import { LinkIcon } from '@/components/ui/link';
+import { MapPinIcon } from '@/components/ui/map-pin';
+import { MessageCircleIcon } from '@/components/ui/message-circle';
+import { MessageSquareIcon } from '@/components/ui/message-square';
+import { MonitorCheckIcon } from '@/components/ui/monitor-check';
+import { PlayIcon } from '@/components/ui/play';
+import { PlugZapIcon } from '@/components/ui/plug-zap';
+import { SettingsIcon } from '@/components/ui/settings';
+import { ShieldCheckIcon } from '@/components/ui/shield-check';
+import { SlidersHorizontalIcon } from '@/components/ui/sliders-horizontal';
+import { SparklesIcon } from '@/components/ui/sparkles';
+import { SquarePenIcon } from '@/components/ui/square-pen';
+import { UsersIcon } from '@/components/ui/users';
+import { WrenchIcon } from '@/components/ui/wrench';
 import { NavLink } from '@/lib/router';
 import SystemStatusPanel from './SystemStatusPanel';
 import VersionBadge from '@/components/VersionBadge';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
+type AnimatedIcon = ComponentType<HTMLAttributes<HTMLDivElement> & { size?: number }>;
+
 interface MenuItem {
   to: string;
-  icon: LucideIcon;
+  icon: AnimatedIcon;
   label: string;
   key?: string;
   sub?: string;
-  children?: { to: string; icon: LucideIcon; label: string }[];
+  children?: { to: string; icon: AnimatedIcon; label: string }[];
 }
 
+// Use the closest animated semantic icon where lucide-animated has no exact
+// counterpart (for example, Clap for entertainment and Cart for goods).
 const menuItems: MenuItem[] = [
-  { to: '/', icon: Gauge, label: '概览', sub: 'Dashboard' },
-  { to: '/posts', icon: SquarePen, label: '文章', sub: 'Posts' },
-  { to: '/pages', icon: FileText, label: '页面', sub: 'Pages' },
-  { to: '/moments', icon: MessageCircle, label: '说说', sub: 'Moments' },
-  { to: '/footprints', icon: MapPin, label: '足迹', sub: 'Footprints' },
+  { to: '/', icon: GaugeIcon, label: '概览', sub: 'Dashboard' },
+  { to: '/posts', icon: SquarePenIcon, label: '文章', sub: 'Posts' },
+  { to: '/pages', icon: FileTextIcon, label: '页面', sub: 'Pages' },
+  { to: '/moments', icon: MessageCircleIcon, label: '说说', sub: 'Moments' },
+  { to: '/footprints', icon: MapPinIcon, label: '足迹', sub: 'Footprints' },
   {
-    to: '/music', icon: Clapperboard, label: '娱乐', key: 'admin.nav.entertainment', sub: 'Entertainment',
+    to: '/music', icon: ClapIcon, label: '娱乐', key: 'admin.nav.entertainment', sub: 'Entertainment',
     children: [
-      { to: '/music', label: '音乐', icon: Music },
+      { to: '/music', label: '音乐', icon: AudioLinesIcon },
       // 「影视」是带集数的专业影视作品（type=post.video，独立模板 + 海报
       // + 多线路播放器 + 集数网格）。与下面「电影」（ul_movies 观影评分
       // 日记）和「视频」（ul_videos 单视频库）三者并存、语义不同。
-      { to: '/films', label: '影视', icon: MonitorPlay },
-      { to: '/movies', label: '电影', icon: Film },
-      { to: '/videos', label: '视频', icon: Video },
-      { to: '/books', label: '图书', icon: BookOpen },
-      { to: '/games', label: '游戏', icon: Gamepad2 },
-      { to: '/goods', label: '好物', icon: ShoppingBag },
+      { to: '/films', label: '影视', icon: MonitorCheckIcon },
+      { to: '/movies', label: '电影', icon: Disc3Icon },
+      { to: '/videos', label: '视频', icon: PlayIcon },
+      { to: '/books', label: '图书', icon: BookTextIcon },
+      { to: '/games', label: '游戏', icon: BoxesIcon },
+      { to: '/goods', label: '好物', icon: CartIcon },
     ],
   },
-  { to: '/follows', icon: Users, label: '关注', sub: 'Follows' },
+  { to: '/follows', icon: UsersIcon, label: '关注', sub: 'Follows' },
   {
-    to: '/comments', icon: MessagesSquare, label: '评论', sub: 'Comments',
+    to: '/comments', icon: MessageSquareIcon, label: '评论', sub: 'Comments',
     children: [
-      { to: '/comments', label: '全部评论', icon: MessagesSquare },
-      { to: '/comments/ai', label: 'AI 队列', icon: Bot },
+      { to: '/comments', label: '全部评论', icon: MessageSquareIcon },
+      { to: '/comments/ai', label: 'AI 队列', icon: BotIcon },
     ],
   },
   { to: '/links', icon: LinkIcon, label: '友链', sub: 'Links' },
   {
-    to: '/media', icon: Images, label: '媒体', sub: 'Media',
+    to: '/media', icon: GalleryThumbnailsIcon, label: '媒体', sub: 'Media',
     children: [
-      { to: '/media', label: '媒体库', icon: Images },
-      { to: '/albums', label: '相册', icon: GalleryVerticalEnd },
+      { to: '/media', label: '媒体库', icon: GalleryThumbnailsIcon },
+      { to: '/albums', label: '相册', icon: GalleryVerticalEndIcon },
     ],
   },
-  { to: '/analytics', icon: LineChart, label: '统计', sub: 'Analytics' },
-  { to: '/security', icon: ShieldCheck, label: '安全', sub: 'Security' },
-  { to: '/themes', icon: Palette, label: '主题', sub: 'Themes' },
-  { to: '/plugins', icon: Plug, label: '插件', sub: 'Plugins' },
-  { to: '/tools', icon: Wrench, label: '工具', sub: 'Tools' },
-  { to: '/settings', icon: Settings, label: '设置', sub: 'Settings' },
+  { to: '/analytics', icon: ChartLineIcon, label: '统计', sub: 'Analytics' },
+  { to: '/security', icon: ShieldCheckIcon, label: '安全', sub: 'Security' },
+  { to: '/themes', icon: ContrastIcon, label: '主题', sub: 'Themes' },
+  { to: '/plugins', icon: PlugZapIcon, label: '插件', sub: 'Plugins' },
+  { to: '/tools', icon: WrenchIcon, label: '工具', sub: 'Tools' },
+  { to: '/settings', icon: SettingsIcon, label: '设置', sub: 'Settings' },
 ];
 
 const aiMenuItems: MenuItem[] = [
-  { to: '/ai', icon: Sparkles, label: 'AI 助手', sub: 'Assistant' },
-  { to: '/ai-settings', icon: SlidersHorizontal, label: 'AI 设置', sub: 'AI Settings' },
+  { to: '/ai', icon: SparklesIcon, label: 'AI 助手', sub: 'Assistant' },
+  { to: '/ai-settings', icon: SlidersHorizontalIcon, label: 'AI 设置', sub: 'AI Settings' },
 ];
 
 const navKeys: Record<string, string> = {
@@ -134,7 +161,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
             // chevron render at the same height as plain rows.
             className="flex h-10 w-full items-center gap-2.5 border-l-2 border-transparent bg-transparent px-3.5 text-sm text-muted-foreground"
           >
-            <Icon className="size-4 shrink-0" />
+            <Icon aria-hidden size={16} className="flex size-4 shrink-0 items-center justify-center" />
             <span className="flex flex-1 items-baseline gap-1.5 text-left">
               <span>{label}</span>
               {item.sub && (
@@ -143,7 +170,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
                 </span>
               )}
             </span>
-            {expanded ? <ChevronDown className="size-2.5" /> : <ChevronRight className="size-2.5" />}
+            {expanded ? <ChevronDownIcon aria-hidden size={10} className="flex size-2.5 shrink-0 items-center justify-center" /> : <ChevronRightIcon aria-hidden size={10} className="flex size-2.5 shrink-0 items-center justify-center" />}
           </button>
           {expanded && item.children!.map((child) => {
             const ChildIcon = child.icon;
@@ -156,7 +183,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
                       isActive ? 'bg-muted text-primary' : 'text-muted-foreground',
                     )}
                   >
-                    <ChildIcon className="size-3.5 shrink-0" />
+                    <ChildIcon aria-hidden size={14} className="flex size-3.5 shrink-0 items-center justify-center" />
                     <span>{t(navKeys[child.to] || '', child.label)}</span>
                   </span>
                 )}
@@ -183,7 +210,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               collapsed ? 'justify-center' : 'justify-start',
             )}
           >
-            <Icon className="size-4 shrink-0" />
+            <Icon aria-hidden size={16} className="flex size-4 shrink-0 items-center justify-center" />
             {!collapsed && (
               <span className="inline-flex items-baseline gap-1.5">
                 <span>{label}</span>
@@ -233,7 +260,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
             width: 24, height: 24, cursor: 'pointer',
           }}
         >
-          {collapsed ? <ChevronRight className="size-2.5" /> : <ChevronLeft className="size-2.5" />}
+          {collapsed ? <ChevronRightIcon aria-hidden size={10} className="flex size-2.5 items-center justify-center" /> : <ChevronLeftIcon aria-hidden size={10} className="flex size-2.5 items-center justify-center" />}
         </button>
       </div>
 

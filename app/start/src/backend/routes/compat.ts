@@ -9,9 +9,9 @@ import {
 } from '@simplewebauthn/server';
 import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { appendFile, cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, rm } from 'node:fs/promises';
 import { isIP } from 'node:net';
-import { hostname, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { basename, dirname, extname, join, posix } from 'node:path';
 import { signAccessToken, signRefreshToken, verifyAccessToken } from '../auth/jwt';
 import { config, table } from '../config';
@@ -53,7 +53,7 @@ function bufferToBase64url(value: Uint8Array | Buffer) {
 
 async function webAuthnRp() {
   const configured = (await optionValue('site_url', config.appUrl)).trim() || config.appUrl;
-  const appURL = configured.replace(/\/+$/, '') || 'http://localhost:8080';
+  const appURL = configured.replace(/\/+$/, '') || 'http://localhost:9260';
   const parsed = new URL(appURL);
   return { origin: appURL, rpID: parsed.hostname };
 }
@@ -139,20 +139,6 @@ function htmlEscape(value: string) {
 
 async function runCommand(cmd: string[]) {
   const proc = Bun.spawn(cmd, { stdout: 'pipe', stderr: 'pipe', env: { ...process.env, PGPASSWORD: config.dbPassword } });
-  const [stdout, stderr, code] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-    proc.exited,
-  ]);
-  return { code, stdout, stderr };
-}
-
-async function runCommandEnv(cmd: string[], env: Record<string, string> = {}) {
-  const proc = Bun.spawn(cmd, {
-    stdout: 'pipe',
-    stderr: 'pipe',
-    env: { ...process.env, ...env, PGPASSWORD: config.dbPassword },
-  });
   const [stdout, stderr, code] = await Promise.all([
     new Response(proc.stdout).text(),
     new Response(proc.stderr).text(),
@@ -1958,11 +1944,6 @@ function logTime() {
   return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
 
-async function appendUpgradeLog(line: string) {
-  await mkdir(config.uploadDir, { recursive: true }).catch(() => {});
-  await appendFile(upgradeLogPath, `${logTime()} ${line}\n`).catch(() => {});
-}
-
 function readUpgradeLogTail(maxBytes = 8192) {
   try {
     const file = Bun.file(upgradeLogPath);
@@ -1979,68 +1960,45 @@ function upgradeEnvEnabled() {
   return v !== '0' && v !== 'false' && v !== 'off' && v !== 'disabled';
 }
 
-async function dockerOk(args: string[]) {
-  try {
-    const out = await runCommand(['docker', ...args]);
-    return out.code === 0;
-  } catch {
-    return false;
-  }
+function updateInstallDir() {
+  return String(process.env.UTTERLOG_INSTALL_DIR || process.cwd()).trim() || process.cwd();
 }
 
-async function dockerOutput(args: string[]) {
-  try {
-    const out = await runCommand(['docker', ...args]);
-    return out.code === 0 ? out.stdout.trim() : '';
-  } catch {
-    return '';
-  }
-}
-
-async function currentAppContainerName() {
-  const explicit = String(process.env.UTTERLOG_APP_CONTAINER || process.env.UTTERLOG_API_CONTAINER || '').trim();
-  if (explicit) return explicit;
-  const inspected = await dockerOutput(['inspect', '--format', '{{.Name}}', hostname()]);
-  const name = inspected.replace(/^\/+/, '').trim();
-  return name || 'utterlog-app-1';
-}
-
-async function probeComposeWorkingDir(appName: string) {
-  const explicit = String(process.env.UTTERLOG_INSTALL_DIR || '').trim();
-  const inspected = await dockerOutput([
-    'inspect',
-    '--format',
-    '{{ index .Config.Labels "com.docker.compose.project.working_dir"}}',
-    appName,
-  ]);
-  return inspected || explicit || '/opt/utterlog';
-}
-
-async function probeAppUploadsMountSource(appName: string) {
-  const out = await dockerOutput([
-    'inspect',
-    '--format',
-    '{{range .Mounts}}{{if eq .Destination "/app/uploads"}}{{.Type}}|{{or .Name .Source}}{{end}}{{end}}',
-    appName,
-  ]);
-  const parts = out.split('|');
-  return parts.length === 2 ? parts[1].trim() : '';
+function updateRequestFile() {
+  return String(process.env.UTTERLOG_UPDATE_REQUEST_FILE || join(updateInstallDir(), '.runtime', 'update.request')).trim();
 }
 
 async function runtimeUpgradeProbe() {
   if (!upgradeEnvEnabled()) return { supported: false, reason: 'runtime upgrade disabled by env' };
-  if (!existsSync('/var/run/docker.sock')) return { supported: false, reason: 'docker socket not mounted' };
-  if (!await dockerOk(['version', '--format', '{{.Server.Version}}'])) return { supported: false, reason: 'docker daemon unavailable' };
-  if (!await dockerOk(['compose', 'version'])) return { supported: false, reason: 'docker compose unavailable' };
-  const appName = await currentAppContainerName();
-  const installDir = await probeComposeWorkingDir(appName);
-  return { supported: true, reason: '', appName, installDir };
+  const installDir = updateInstallDir();
+  const scriptPath = join(installDir, 'scripts', 'update-bun.sh');
+  if (!existsSync(scriptPath)) return { supported: false, reason: `update script missing: ${scriptPath}` };
+
+  const pathUnit = String(process.env.UTTERLOG_UPDATE_PATH_UNIT || 'utterlog-update.path').trim();
+  try {
+    const status = await runCommand(['systemctl', 'is-active', '--quiet', pathUnit]);
+    if (status.code !== 0) return { supported: false, reason: `${pathUnit} is not active` };
+  } catch {
+    return { supported: false, reason: 'systemd is unavailable' };
+  }
+
+  const requestFile = updateRequestFile();
+  const probeFile = `${requestFile}.${process.pid}.probe`;
+  try {
+    await mkdir(dirname(requestFile), { recursive: true });
+    await Bun.write(probeFile, 'ok');
+    await rm(probeFile, { force: true });
+  } catch {
+    return { supported: false, reason: `update request directory is not writable: ${dirname(requestFile)}` };
+  }
+  return { supported: true, reason: '', installDir, requestFile, pathUnit };
 }
 
 async function upgradeStatusPayload() {
   const stored = parseJsonOption<any>(await ephemeral.get('system:upgrade:status') || '{}', {});
   const logTail = await readUpgradeLogTail();
   const terminal = logTail.includes('[TASK-END]');
+  const started = logTail.includes('[START]');
   const success = /升级应用\s+\[Utterlog\]\s+成功\s+\[TASK-END\]/.test(logTail);
   if (terminal) {
     return {
@@ -2053,7 +2011,7 @@ async function upgradeStatusPayload() {
     };
   }
   return {
-    running: Boolean(stored.running),
+    running: Boolean(stored.running) || started,
     finished: Boolean(stored.finished),
     success: Boolean(stored.success),
     message: stored.message || '',
@@ -2065,202 +2023,6 @@ async function upgradeStatusPayload() {
 async function markUpgradeStatus(patch: Record<string, unknown>) {
   const current = parseJsonOption<any>(await ephemeral.get('system:upgrade:status') || '{}', {});
   await ephemeral.set('system:upgrade:status', JSON.stringify({ ...current, ...patch, updated_at: nowUnix() }), 86400);
-}
-
-async function runSystemUpgrade() {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  try {
-    const probe = await runtimeUpgradeProbe();
-    if (!probe.supported) {
-      await appendUpgradeLog(`ERROR ${probe.reason}`);
-      await appendUpgradeLog('升级应用 [Utterlog] 失败 [TASK-END]');
-      await markUpgradeStatus({ running: false, finished: true, success: false, message: probe.reason });
-      return;
-    }
-
-    const appName = probe.appName || await currentAppContainerName();
-    const installDir = probe.installDir || await probeComposeWorkingDir(appName);
-    const uploadsSource = await probeAppUploadsMountSource(appName);
-    await appendUpgradeLog(`检测容器名 app=[${appName}]`);
-    await appendUpgradeLog(`检测安装目录 [${installDir}]`);
-    if (uploadsSource) await appendUpgradeLog(`检测 uploads 挂载源 [${uploadsSource}]（与 app 共享）`);
-
-    const script = `
-set -e
-LOG_DIR="\${APP_UPLOADS_DIR:-$INSTALL_DIR/uploads}"
-mkdir -p "$LOG_DIR"
-LOG="$LOG_DIR/upgrade.log"
-exec >>"$LOG" 2>&1
-ts() { date '+%Y/%m/%d %H:%M:%S'; }
-log() { echo "$(ts) $*"; }
-log "升级应用 [Utterlog] 任务开始 [START]"
-log "检测容器名 app=[$APP_CONTAINER]"
-log "检测安装目录 [$INSTALL_DIR]"
-cd "$INSTALL_DIR"
-
-MODE="\${UTTERLOG_COMPOSE_MODE:-}"
-if [ -z "$MODE" ]; then
-  if [ -f docker-compose.prod.yml ] && [ -f docker-compose.pull.yml ]; then
-    MODE=overlay
-  elif [ -f docker-compose.yml ]; then
-    MODE=slim
-  else
-    log "ERROR 未找到 docker-compose 文件 [$INSTALL_DIR]"
-    log "升级应用 [Utterlog] 失败 [TASK-END]"
-    exit 1
-  fi
-fi
-log "检测部署模式 [$MODE]"
-
-compose() {
-  case "$MODE" in
-    overlay) docker compose -f docker-compose.prod.yml -f docker-compose.pull.yml "$@" ;;
-    slim)    docker compose "$@" ;;
-    *)       log "ERROR 未知部署模式 [$MODE]"; return 2 ;;
-  esac
-}
-
-persist_env() {
-  local key="$1" value="$2"
-  if [ -f .env ]; then
-    if grep -q "^\${key}=" .env 2>/dev/null; then
-      sed -i.bak "s|^\${key}=.*|\${key}=\${value}|" .env
-    else
-      echo "\${key}=\${value}" >> .env
-    fi
-    rm -f .env.bak
-  fi
-}
-
-run_timeout() {
-  local seconds="$1"
-  shift
-  if command -v timeout >/dev/null 2>&1; then
-    timeout "$seconds" "$@"
-  else
-    "$@"
-  fi
-}
-
-has_app_manifest() {
-  local prefix="$1"
-  local tag="\${UTTERLOG_IMAGE_TAG:-latest}"
-  run_timeout 20 docker manifest inspect "$prefix/utterlog-app:$tag" >/dev/null 2>&1
-}
-
-select_image_source() {
-  if [ -n "\${UTTERLOG_IMAGE_PREFIX:-}" ]; then
-    export UTTERLOG_IMAGE_PREFIX="\${UTTERLOG_IMAGE_PREFIX%/}"
-    persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
-    log "使用已配置镜像源 [$UTTERLOG_IMAGE_PREFIX]"
-    return 0
-  fi
-  log "探测镜像源 [registry.utterlog.io/utterlog]"
-  if has_app_manifest "registry.utterlog.io/utterlog"; then
-    export UTTERLOG_IMAGE_PREFIX="registry.utterlog.io/utterlog"
-    persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
-    log "选择镜像源 [$UTTERLOG_IMAGE_PREFIX]"
-    return 0
-  fi
-  log "WARN registry.utterlog.io manifest 不可读，切换到 [ghcr.io/utterlog]"
-  export UTTERLOG_IMAGE_PREFIX="ghcr.io/utterlog"
-  persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
-}
-
-select_image_source
-
-if compose config --services | grep -qx postgres; then
-  log "拉取基础镜像 [postgres]"
-  if compose pull postgres; then
-    log "拉取基础镜像 成功"
-  else
-    log "WARN 拉取 postgres 失败，继续升级 app"
-  fi
-fi
-
-log "拉取应用镜像 [app] —— 源 [$UTTERLOG_IMAGE_PREFIX]"
-if compose pull app; then
-  log "拉取应用镜像 成功"
-else
-  if [ "\${UTTERLOG_IMAGE_PREFIX:-}" != "ghcr.io/utterlog" ]; then
-    log "WARN $UTTERLOG_IMAGE_PREFIX 拉取失败，fallback 到 [ghcr.io/utterlog]"
-    export UTTERLOG_IMAGE_PREFIX="ghcr.io/utterlog"
-    persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
-    if compose pull app; then
-      log "拉取应用镜像 成功 (ghcr.io fallback)"
-    else
-      log "ERROR 应用镜像拉取失败 [app]（ghcr.io fallback 也失败）"
-      log "升级应用 [Utterlog] 失败 [TASK-END]"
-      exit 1
-    fi
-  else
-    log "ERROR 应用镜像拉取失败 [app]"
-    log "升级应用 [Utterlog] 失败 [TASK-END]"
-    exit 1
-  fi
-fi
-
-log "重建容器 [app]"
-compose up -d --remove-orphans app
-log "重建容器 成功"
-
-log "等待 app 健康检查 [$APP_CONTAINER]"
-HEALTHY=0
-for i in $(seq 1 60); do
-  code=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$APP_CONTAINER" 2>/dev/null || echo unknown)
-  if [ "$code" = "healthy" ] || [ "$code" = "running" ]; then
-    log "app 健康检查 成功 (\${i}s state=$code)"
-    HEALTHY=1
-    break
-  fi
-  sleep 2
-done
-if [ "$HEALTHY" != "1" ]; then
-  log "WARN app 120s 内未进入 healthy/running 状态 (state=$code)，请检查 [docker logs $APP_CONTAINER]"
-fi
-
-IMG=$(docker inspect "$APP_CONTAINER" --format='{{.Config.Image}}' 2>/dev/null || echo '?')
-DIGEST=$(docker inspect "$APP_CONTAINER" --format='{{.Image}}' 2>/dev/null | cut -c1-19)
-log "当前镜像 [$IMG] digest=[$DIGEST]"
-log "升级应用 [Utterlog] 成功 [TASK-END]"
-`;
-
-    const sidecarName = `utterlog-upgrade-${Date.now()}`;
-    const dockerArgs = [
-      'run', '--rm', '-d',
-      '--name', sidecarName,
-      '-v', '/var/run/docker.sock:/var/run/docker.sock',
-      '-v', `${installDir}:${installDir}`,
-    ];
-    if (uploadsSource) dockerArgs.push('-v', `${uploadsSource}:/app-uploads`);
-    dockerArgs.push(
-      '-e', `INSTALL_DIR=${installDir}`,
-      '-e', `UTTERLOG_COMPOSE_MODE=${process.env.UTTERLOG_COMPOSE_MODE || ''}`,
-      '-e', `APP_CONTAINER=${appName}`,
-      ...(uploadsSource ? ['-e', 'APP_UPLOADS_DIR=/app-uploads'] : []),
-      '-w', installDir,
-      'registry.utterlog.io/utterlog/docker:27-cli',
-      'sh', '-c', script,
-    );
-
-    const launched = await runCommandEnv(['docker', ...dockerArgs], {
-      UTTERLOG_IMAGE_PREFIX: process.env.UTTERLOG_IMAGE_PREFIX || '',
-      UTTERLOG_IMAGE_TAG: process.env.UTTERLOG_IMAGE_TAG || '',
-    });
-    if (launched.code !== 0) {
-      await appendUpgradeLog(`ERROR 启动 sidecar 容器失败：${launched.stderr || launched.stdout || 'unknown error'}`);
-      await appendUpgradeLog('升级应用 [Utterlog] 失败 [TASK-END]');
-      await markUpgradeStatus({ running: false, finished: true, success: false, message: launched.stderr || 'sidecar start failed' });
-      return;
-    }
-    await appendUpgradeLog(`sidecar 容器 [${sidecarName}] 启动 成功`);
-    await appendUpgradeLog(`app 容器 [${appName}] 即将被 sidecar 重建（正常现象，sidecar 独立运行）`);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'upgrade failed';
-    await appendUpgradeLog(`ERROR ${message}`);
-    await appendUpgradeLog('升级应用 [Utterlog] 失败 [TASK-END]');
-    await markUpgradeStatus({ running: false, finished: true, success: false, message });
-  }
 }
 
 export async function versionPayload(force = false) {
@@ -2310,16 +2072,16 @@ export async function requestSystemUpgrade() {
   if (current.running) throw new SystemServiceError(409, 'UPGRADE_IN_PROGRESS', '升级正在进行，请稍候');
   const probe = await runtimeUpgradeProbe();
   if (!probe.supported) {
-    const message = `当前 Bun 容器未启用运行时升级：${probe.reason}。请在部署目录执行 docker compose pull app && docker compose up -d app。`;
+    const message = `当前 Bun/systemd 部署未启用后台升级：${probe.reason}。请在部署目录执行 sudo bash scripts/update-bun.sh。`;
     await markUpgradeStatus({ running: false, finished: true, success: false, message, started_at: new Date().toISOString() });
     return { started: false, message };
   }
   await mkdir(config.uploadDir, { recursive: true }).catch(() => {});
   await Bun.write(upgradeLogPath, `${logTime()} 升级请求 已收到\n`);
   await markUpgradeStatus({ running: true, finished: false, success: false, message: '', started_at: new Date().toISOString() });
-  void runSystemUpgrade();
+  await Bun.write(probe.requestFile || updateRequestFile(), JSON.stringify({ requested_at: new Date().toISOString() }));
   return { started: true, log_path: '/uploads/upgrade.log',
-    hint: 'app 容器将在 sidecar 中被重新拉取并重建；期间请勿关闭升级日志窗口' };
+    hint: 'systemd 更新任务将拉取源码、使用 Bun 重新构建并重启服务；期间请勿关闭升级日志窗口' };
 }
 
 export async function systemUpgradeStatusPayload() {

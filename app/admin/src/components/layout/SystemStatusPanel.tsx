@@ -4,6 +4,9 @@ import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { adminTimeZone } from '@/lib/timezone';
+import { ChevronDownIcon } from '@/components/ui/chevron-down';
+import { LoaderIcon } from '@/components/ui/loader';
+import { MonitorCheckIcon } from '@/components/ui/monitor-check';
 
 // SVG Ring chart component
 function Ring({ percent, size = 48, stroke = 4, color = 'var(--primary)', label, sub }: {
@@ -81,24 +84,25 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
           fontSize: '12px', transition: 'all 0.15s',
         }}
       >
-        <span
-          className={cn(
-            'shrink-0 rounded-full',
-            data == null ? 'bg-muted-foreground' : ok ? 'bg-emerald-500' : 'bg-destructive',
-          )}
-          style={{
-            width: '8px', height: '8px',
-            boxShadow: data == null ? 'none' : ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
-            animation: data == null ? 'none' : 'pulse-dot 2s infinite',
-          }}
-        />
+        {data == null ? (
+          <LoaderIcon aria-hidden size={14} className="flex size-3.5 shrink-0 items-center justify-center text-muted-foreground" />
+        ) : (
+          <span
+            className={cn('shrink-0 rounded-full', ok ? 'bg-emerald-500' : 'bg-destructive')}
+            style={{
+              width: '8px', height: '8px',
+              boxShadow: ok ? '0 0 6px rgba(22,163,106,0.5)' : '0 0 6px rgba(220,38,38,0.5)',
+              animation: 'pulse-dot 2s infinite',
+            }}
+          />
+        )}
         {isOpen && <span>{t('admin.system.status', '系统状态')}</span>}
         {isOpen && <span className="text-muted-foreground" style={{ marginLeft: '4px', fontFamily: 'monospace', fontSize: '11px' }}>{clock}</span>}
         {isOpen && (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{
+          <ChevronDownIcon aria-hidden size={12} className="flex size-3 shrink-0 items-center justify-center" style={{
             marginLeft: 'auto', transition: 'transform 0.2s',
             transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}><path d="M18 15l-6-6-6 6" /></svg>
+          }} />
         )}
       </button>
 
@@ -119,7 +123,7 @@ export default function SystemStatusPanel({ isOpen }: { isOpen: boolean }) {
           {/* Info rows */}
           <div style={{ fontSize: '10px' }}>
             <InfoRow label={t('admin.system.os', '系统')}>
-              <OsValue icon={data.server?.os_icon} label={data.server?.os} />
+              <OsValue label={data.server?.os} />
             </InfoRow>
             <InfoRow label={t('admin.system.uptime', '运行时间')} value={formatUptime(data.server?.uptime, t)} />
             <InfoRow label={t('admin.system.hostIp', '主机 IP')}>
@@ -202,10 +206,10 @@ function InfoRow({ label, value, children }: { label: string; value?: string; ch
   );
 }
 
-function OsValue({ icon, label }: { icon?: string; label?: string }) {
+function OsValue({ label }: { label?: string }) {
   return (
     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-      <i className={icon || 'fa-brands fa-linux'} style={{ width: '14px', textAlign: 'center' }} aria-hidden="true" />
+      <MonitorCheckIcon aria-hidden size={14} className="flex size-3.5 shrink-0 items-center justify-center" />
       <span>{label || '-'}</span>
     </span>
   );

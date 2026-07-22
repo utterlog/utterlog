@@ -19,8 +19,8 @@ type VisitorWeatherData = {
 };
 
 const staticFallback: VisitorWeatherData = {
-  city: '塔什干',
-  country: '乌兹别克斯坦',
+  city: '上海',
+  country: '中国',
   country_code: 'UZ',
   temperature: null,
   weather_code: null,
@@ -121,7 +121,7 @@ export default function VisitorWeather() {
   return (
     <div className="azure-weather-strip" aria-label="访客天气" title={data.country ? `${data.country} · ${meta.label}` : meta.label}>
       <i className={meta.icon} aria-hidden="true" />
-      <span className="azure-weather-city">{data.city || '塔什干'}</span>
+      <span className="azure-weather-city">{data.city || '上海'}</span>
       <strong className="azure-weather-temp">{temperatureLabel(data.temperature)}</strong>
       <span className="azure-weather-condition">{meta.label}</span>
     </div>

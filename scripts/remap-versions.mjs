@@ -115,13 +115,13 @@ const bunSection = `## [${latest}] - 2026-06-24
 
 ### 新增
 
-- **Bun 单进程运行时**：以 Bun + Hono 替代 Go API，合并网关、管理后台与博客 SSR。
+- **Bun 单进程运行时**：以 Bun + TanStack Start 替代旧 API，合并网关、管理后台与博客 SSR。
 - **Azure 中国红配色**：删除独立 Chred 主题，改为 Azure \`data-accent=red\`。
 - **路由模块化**：拆分 \`telegram\` / \`security\` / \`footprints\` / \`extensions\` 等路由模块。
 
 ### 优化
 
-- **部署拓扑**：默认仅需 \`app + postgres\`，移除 Redis 运行时依赖。
+- **部署拓扑**：默认使用 Bun systemd 服务 + PostgreSQL，移除 Redis 运行时依赖。
 - **组织 Profile README**：更新为 Bun 技术栈说明。
 
 ### 修复

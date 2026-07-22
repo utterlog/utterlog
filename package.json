@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "dev": "bun run app/start/src/backend/index.ts",
+    "start": "NODE_ENV=production bun run app/start/src/backend/index.ts",
     "server:dev": "bun run app/start/src/backend/index.ts",
     "server:check": "cd app/start && bunx tsc -p tsconfig.json --noEmit",
     "test:server": "JWT_SECRET=test-secret-for-server-tests bun test app/start/test",
@@ -22,6 +23,9 @@
     "audit:api": "bun scripts/audit-api-coverage.ts",
     "build:web": "cd app/start && bun run sync:themes",
     "build:admin": "cd app/admin && bun run build",
+    "build": "bun run build:admin && bun run start:build",
+    "check": "bun run server:check && bun run start:check",
+    "verify": "bun run check && bun run build && bun run test:server && bun run audit:api",
     "start:dev": "cd app/start && bun run dev",
     "start:build": "cd app/start && bun run build",
     "start:check": "cd app/start && bun run check"

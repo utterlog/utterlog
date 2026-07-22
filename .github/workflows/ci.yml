@@ -13,43 +13,38 @@ jobs:
   app:
     name: Bun app + frontend builds
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: pgvector/pgvector:pg18
-        env:
-          POSTGRES_USER: utterlog_test
-          POSTGRES_PASSWORD: utterlog_test
-          POSTGRES_DB: utterlog_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U utterlog_test -d utterlog_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
     steps:
       - uses: actions/checkout@v5
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: canary
+          bun-version: 1.4.0
+
+      - name: Install PostgreSQL 18 and pgvector
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor --yes -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-18 postgresql-18-pgvector
+          sudo pg_ctlcluster 18 main start || sudo pg_ctlcluster 18 main status
+          sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'
+          create role utterlog_test with login password 'utterlog_test';
+          create database utterlog_test owner utterlog_test;
+          SQL
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -d utterlog_test -c 'create extension vector'
 
       - name: Install Bun app deps
         run: bun install --frozen-lockfile
 
-      - name: Type check Bun server
-        run: bun run server:check
+      - name: Type check application
+        run: bun run check
 
-      - name: Build admin SPA
-        working-directory: app/admin
+      - name: Build application
         run: bun run build
-
-      - name: Type check TanStack Start
-        run: bun run start:check
-
-      - name: Build TanStack Start
-        run: bun run start:build
 
       - name: Test Bun services and Start contracts
         env:

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Utterlog public API smoke test — run against BASE_URL (default http://127.0.0.1:8080)
+# Utterlog public API smoke test — run against BASE_URL (default http://127.0.0.1:9260)
 set -uo pipefail
 
-BASE="${1:-http://127.0.0.1:8080}"
+BASE="${1:-http://127.0.0.1:9260}"
 PASS=0
 FAIL=0
 SKIP=0
@@ -143,7 +143,7 @@ check POST /api/v1/track 200,400,204
 check POST /api/v1/track/duration 200,400,204
 check GET "/api/v1/music/search?q=test" 200,400
 check GET /api/v1/auth/passkey/available
-check GET /api/v1/rss/parse?url=https://xifeng.net/feed 200,400,502
+check GET /api/v1/rss/parse?url=https://example.com/feed 200,400,502
 check POST /api/v1/passport/identify 200,400
 check POST /api/v1/comments/federated 400,401,403,422
 check POST /api/v1/federation/follow 400,422

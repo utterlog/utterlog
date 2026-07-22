@@ -102,7 +102,7 @@ function bufferToBase64url(value: Uint8Array | Buffer) {
 
 async function relyingParty() {
   const configured = (await optionValue('site_url', config.appUrl)).trim() || config.appUrl;
-  const origin = configured.replace(/\/+$/, '') || 'http://localhost:8080';
+  const origin = configured.replace(/\/+$/, '') || 'http://localhost:9260';
   return { origin, rpID: new URL(origin).hostname };
 }
 

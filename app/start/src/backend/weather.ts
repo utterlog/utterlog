@@ -50,12 +50,12 @@ function normalizeLocation(location: WeatherLocation): WeatherLocation {
 }
 
 export async function defaultWeatherLocation(optionValue: OptionReader): Promise<WeatherLocation> {
-  const lat = Number(await optionValue('azure_sidebar_weather_default_latitude', '41.2995')) || 41.2995;
-  const lon = Number(await optionValue('azure_sidebar_weather_default_longitude', '69.2401')) || 69.2401;
+  const lat = Number(await optionValue('azure_sidebar_weather_default_latitude', '31.2304')) || 31.2304;
+  const lon = Number(await optionValue('azure_sidebar_weather_default_longitude', '121.4737')) || 121.4737;
   return normalizeLocation({
-    city: await optionValue('azure_sidebar_weather_default_city', '塔什干'),
-    country: await optionValue('azure_sidebar_weather_default_country', '乌兹别克斯坦'),
-    country_code: await optionValue('azure_sidebar_weather_default_country_code', 'UZ'),
+    city: await optionValue('azure_sidebar_weather_default_city', '上海'),
+    country: await optionValue('azure_sidebar_weather_default_country', '中国'),
+    country_code: await optionValue('azure_sidebar_weather_default_country_code', 'CN'),
     latitude: lat,
     longitude: lon,
     source: 'default',

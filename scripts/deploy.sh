@@ -1,351 +1,259 @@
 #!/usr/bin/env bash
-# ============================================================
-# deploy.sh — one-command production deployment for Utterlog
-#
-# Does:
-#   1. Auto-generate .env with random DB_PASSWORD / JWT_SECRET (if missing)
-#   2. Scan for a free TCP port starting from UTTERLOG_PORT
-#   3. docker compose up -d --build
-#   4. Poll /api/v1/install/status until healthy
-#   5. Print access URL + all credentials + nginx / caddy snippet
-#
-# Usage:
-#   bash scripts/deploy.sh             # full deploy
-#   bash scripts/deploy.sh --no-build  # skip rebuild
-# ============================================================
-set -euo pipefail
+# Configure and deploy Utterlog directly on a Linux host with Bun + systemd.
+set -Eeuo pipefail
 
-cd "$(dirname "$0")/.."
-ROOT=$(pwd)
-
-# Color helpers (no-op if not a tty)
-if [ -t 1 ]; then
-  C_BLUE=$'\e[34m'; C_GREEN=$'\e[32m'; C_YELLOW=$'\e[33m'
-  C_RED=$'\e[31m'; C_DIM=$'\e[2m'; C_BOLD=$'\e[1m'; C_RESET=$'\e[0m'
-else
-  C_BLUE=; C_GREEN=; C_YELLOW=; C_RED=; C_DIM=; C_BOLD=; C_RESET=
-fi
-
-log()  { printf "%s==>%s %s\n" "$C_BLUE$C_BOLD" "$C_RESET" "$*"; }
-ok()   { printf "%s✓%s %s\n" "$C_GREEN$C_BOLD" "$C_RESET" "$*"; }
-warn() { printf "%s!%s %s\n" "$C_YELLOW$C_BOLD" "$C_RESET" "$*"; }
-err()  { printf "%s✗%s %s\n" "$C_RED$C_BOLD" "$C_RESET" "$*" >&2; }
-
-# ============================================================
-# Step 1: ensure docker is installed
-# ============================================================
-if ! command -v docker >/dev/null 2>&1; then
-  err "未检测到 docker，请先安装：https://docs.docker.com/engine/install/"
-  exit 1
-fi
-if ! docker compose version >/dev/null 2>&1; then
-  err "未检测到 docker compose 插件，请先安装：sudo apt install docker-compose-plugin"
-  exit 1
-fi
-
-# ============================================================
-# Step 2: auto-generate .env if missing (with random secrets)
-# ============================================================
-rand_str() {
-  local len="${1:-32}"
-  if command -v openssl >/dev/null 2>&1; then
-    openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | head -c "$len"
-  else
-    LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$len"
-  fi
-  echo
-}
-
-persist_env() {
-  local key="$1" value="$2"
-  if grep -q "^${key}=" .env 2>/dev/null; then
-    sed -i.bak "s|^${key}=.*|${key}=${value}|" .env
-  else
-    echo "${key}=${value}" >> .env
-  fi
-  rm -f .env.bak
-}
-
-GENERATED=0
-INTERACTIVE=0
-TLS_MODE=0
-NO_BUILD=0
-PULL_MODE=-1   # -1 = auto-detect, 0 = force build, 1 = force pull
-# Parse flags
+BUILD=1
+SETUP_DB=1
 for arg in "$@"; do
   case "$arg" in
-    --interactive|-i) INTERACTIVE=1 ;;
-    --tls)            TLS_MODE=1 ;;
-    --no-build)       NO_BUILD=1 ;;
-    --pull)           PULL_MODE=1 ;;
-    --build)          PULL_MODE=0 ;;
+    --no-build) BUILD=0 ;;
+    --skip-db-setup) SETUP_DB=0 ;;
+    -h|--help)
+      printf '%s\n' \
+        'Usage: sudo bash scripts/deploy.sh [--no-build] [--skip-db-setup]' \
+        '' \
+        'Installs Bun host prerequisites, configures PostgreSQL and systemd, builds and starts Utterlog.'
+      exit 0
+      ;;
+    *) printf 'Unknown argument: %s\n' "$arg" >&2; exit 2 ;;
   esac
 done
 
-# Auto-detect deployment strategy based on available RAM.
-# Building images locally needs about 2GB RAM (Bun + TanStack Start build).
-# Below that, pulling pre-built images from GHCR is faster and safer.
-if [ "$PULL_MODE" -eq -1 ]; then
-  if [ -r /proc/meminfo ]; then
-    total_kb=$(awk '/^MemTotal:/{print $2}' /proc/meminfo)
-    total_mb=$((total_kb / 1024))
-    if [ "$total_mb" -lt 1800 ]; then
-      PULL_MODE=1
-      log "检测到 ${total_mb}MB 内存 → 拉取 ghcr.io 预构建镜像（小内存 VPS 更稳）"
+if [ "$(uname -s)" != Linux ]; then
+  printf 'Production deployment requires a Linux host with systemd. Use bun run dev on this machine.\n' >&2
+  exit 1
+fi
+
+if [ "$(id -u)" -ne 0 ]; then
+  command -v sudo >/dev/null 2>&1 || { printf 'Run this script as root.\n' >&2; exit 1; }
+  exec sudo -E bash "$0" "$@"
+fi
+
+ROOT="${UTTERLOG_INSTALL_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+APP_USER="${UTTERLOG_SERVICE_USER:-utterlog}"
+APP_GROUP="${UTTERLOG_SERVICE_GROUP:-$APP_USER}"
+SERVICE="${UTTERLOG_SERVICE:-utterlog-app}"
+UPDATE_REQUEST_FILE="${UTTERLOG_UPDATE_REQUEST_FILE:-$ROOT/.runtime/update.request}"
+ENV_FILE="$ROOT/.env"
+
+log() { printf '==> %s\n' "$*"; }
+ok() { printf 'OK: %s\n' "$*"; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+
+install_base_packages() {
+  if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+    apt-get install -y ca-certificates curl git gnupg openssl rsync unzip postgresql-client >/dev/null
+  elif command -v dnf >/dev/null 2>&1; then
+    dnf install -y ca-certificates curl git openssl rsync unzip postgresql >/dev/null
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y ca-certificates curl git openssl rsync unzip postgresql >/dev/null
+  else
+    die 'Unsupported package manager. Install curl, git, openssl, rsync, unzip and the PostgreSQL client first.'
+  fi
+}
+
+version_at_least() {
+  [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -1)" = "$2" ]
+}
+
+ensure_bun() {
+  BUN_BIN="$(command -v bun || true)"
+  if [ -n "$BUN_BIN" ] && version_at_least "$($BUN_BIN --version)" 1.4.0; then
+    return
+  fi
+  log 'Installing Bun 1.4+'
+  export BUN_INSTALL=/opt/bun
+  curl -fsSL https://bun.sh/install | bash >/dev/null
+  [ -x /opt/bun/bin/bun ] || die 'Bun installation failed.'
+  ln -sf /opt/bun/bin/bun /usr/local/bin/bun
+  BUN_BIN=/opt/bun/bin/bun
+}
+
+env_get() {
+  local key="$1" fallback="${2:-}" value=""
+  if [ -n "${!key:-}" ]; then
+    value="${!key}"
+  elif [ -f "$ENV_FILE" ]; then
+    value="$(sed -n "s/^${key}=//p" "$ENV_FILE" | tail -1 | tr -d '\r')"
+  fi
+  printf '%s' "${value:-$fallback}"
+}
+
+env_set() {
+  local key="$1" value="$2" escaped
+  case "$value" in *$'\n'*|*$'\r'*) die "Invalid newline in $key" ;; esac
+  escaped="${value//\\/\\\\}"
+  escaped="${escaped//&/\\&}"
+  escaped="${escaped//|/\\|}"
+  if grep -q "^${key}=" "$ENV_FILE" 2>/dev/null; then
+    sed -i.bak "s|^${key}=.*|${key}=${escaped}|" "$ENV_FILE"
+    rm -f "$ENV_FILE.bak"
+  else
+    printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
+  fi
+}
+
+APP_USER="$(env_get UTTERLOG_SERVICE_USER "$APP_USER")"
+SERVICE="$(env_get UTTERLOG_SERVICE "$SERVICE")"
+UPDATE_REQUEST_FILE="$(env_get UTTERLOG_UPDATE_REQUEST_FILE "$UPDATE_REQUEST_FILE")"
+case "$ROOT" in (/*) ;; (*) die 'UTTERLOG_INSTALL_DIR must be an absolute path.' ;; esac
+case "$ROOT" in (*[!a-zA-Z0-9_./-]*) die "Unsupported character in install path: $ROOT" ;; esac
+case "$APP_USER" in (*[!a-zA-Z0-9_-]*|'') die "Invalid service user: $APP_USER" ;; esac
+case "$SERVICE" in (*[!a-zA-Z0-9_.@-]*|'') die "Invalid service name: $SERVICE" ;; esac
+case "$UPDATE_REQUEST_FILE" in (/*) ;; (*) die 'UTTERLOG_UPDATE_REQUEST_FILE must be an absolute path.' ;; esac
+case "$UPDATE_REQUEST_FILE" in (*[!a-zA-Z0-9_./-]*) die "Unsupported character in update request path: $UPDATE_REQUEST_FILE" ;; esac
+
+valid_ident() {
+  [[ "$1" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]
+}
+
+install_local_postgres() {
+  command -v apt-get >/dev/null 2>&1 || die 'Automatic PostgreSQL 18 installation currently supports Debian/Ubuntu. Configure an external PostgreSQL 18 + pgvector instance and rerun with --skip-db-setup.'
+  local codename
+  codename="$(. /etc/os-release && printf '%s' "${VERSION_CODENAME:-}")"
+  [ -n "$codename" ] || die 'Cannot determine Debian/Ubuntu codename.'
+  install -d -m 0755 /usr/share/postgresql-common/pgdg
+  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+  printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg main\n' "$codename" > /etc/apt/sources.list.d/pgdg.list
+  apt-get update -qq
+  apt-get install -y postgresql-18 postgresql-client-18 postgresql-18-pgvector >/dev/null
+  systemctl enable --now postgresql
+}
+
+setup_database() {
+  local db_host db_port db_name db_user db_password
+  db_host="$(env_get DB_HOST 127.0.0.1)"
+  db_port="$(env_get DB_PORT 5432)"
+  db_name="$(env_get DB_NAME utterlog)"
+  db_user="$(env_get DB_USER utterlog)"
+  db_password="$(env_get DB_PASSWORD)"
+  valid_ident "$db_name" || die "Invalid DB_NAME: $db_name"
+  valid_ident "$db_user" || die "Invalid DB_USER: $db_user"
+  [ -n "$db_password" ] || die 'DB_PASSWORD is empty.'
+
+  if [ "$db_host" = 127.0.0.1 ] || [ "$db_host" = localhost ]; then
+    if ! command -v pg_isready >/dev/null 2>&1 || ! pg_isready -h "$db_host" -p "$db_port" >/dev/null 2>&1; then
+      log 'Installing local PostgreSQL 18 + pgvector'
+      install_local_postgres
+    fi
+    id postgres >/dev/null 2>&1 || die 'Local PostgreSQL service user is missing.'
+    if runuser -u postgres -- psql -tAc "select 1 from pg_roles where rolname='$db_user'" | grep -q 1; then
+      runuser -u postgres -- psql -v ON_ERROR_STOP=1 -v "db_password=$db_password" >/dev/null <<SQL
+alter role "$db_user" with login password :'db_password';
+SQL
     else
-      PULL_MODE=0
-      log "检测到 ${total_mb}MB 内存 → 本地编译镜像（改源码后迭代更快）"
+      runuser -u postgres -- psql -v ON_ERROR_STOP=1 -v "db_password=$db_password" >/dev/null <<SQL
+create role "$db_user" with login password :'db_password';
+SQL
     fi
-  elif [ "$(uname)" = "Darwin" ]; then
-    # macOS dev machine — always plenty of RAM
-    PULL_MODE=0
+    if ! runuser -u postgres -- psql -tAc "select 1 from pg_database where datname='$db_name'" | grep -q 1; then
+      runuser -u postgres -- createdb -O "$db_user" "$db_name"
+    fi
+    runuser -u postgres -- psql -v ON_ERROR_STOP=1 -d "$db_name" -c 'create extension if not exists vector' >/dev/null
   else
-    # Unknown platform — play safe, pull
-    PULL_MODE=1
+    PGPASSWORD="$db_password" psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1 -tAc 'select 1' >/dev/null \
+      || die 'Cannot connect to the configured external PostgreSQL database.'
+    PGPASSWORD="$db_password" psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1 -c 'create extension if not exists vector' >/dev/null \
+      || die 'pgvector is unavailable or DB_USER cannot create the vector extension.'
   fi
+  ok "PostgreSQL ready at $db_host:$db_port/$db_name"
+}
+
+render_unit() {
+  local source="$1" target="$2" bun_bin="$3"
+  sed \
+    -e "s|__INSTALL_DIR__|$ROOT|g" \
+    -e "s|__APP_USER__|$APP_USER|g" \
+    -e "s|__APP_GROUP__|$APP_GROUP|g" \
+    -e "s|__BUN_BIN__|$bun_bin|g" \
+    -e "s|__SERVICE__|$SERVICE|g" \
+    -e "s|__UPDATE_REQUEST_FILE__|$UPDATE_REQUEST_FILE|g" \
+    "$source" > "$target"
+}
+
+run_as_app() {
+  local bun_dir app_home
+  bun_dir="$(dirname "$BUN_BIN")"
+  app_home="$(getent passwd "$APP_USER" | cut -d: -f6)"
+  runuser -u "$APP_USER" -- env HOME="$app_home" PATH="$bun_dir:/usr/local/bin:/usr/bin:/bin" "$@"
+}
+
+log 'Installing host prerequisites'
+install_base_packages
+ensure_bun
+ok "Bun $($BUN_BIN --version)"
+
+if ! id "$APP_USER" >/dev/null 2>&1; then
+  useradd --system --home-dir "$ROOT" --shell /usr/sbin/nologin "$APP_USER"
 fi
+APP_GROUP="$(id -gn "$APP_USER")"
 
-if [ ! -f .env ]; then
-  if [ ! -f .env.example ]; then
-    err "找不到 .env.example —— 当前目录看起来不是 Utterlog 项目"
-    exit 1
-  fi
-
-  if [ "$INTERACTIVE" -eq 1 ] && [ -t 0 ]; then
-    # --- Interactive mode: prompt user ---
-    log "交互式配置。直接回车使用随机值，或输入自定义值。"
-    echo
-    suggested_db=$(rand_str 16)
-    suggested_jwt=$(rand_str 48)
-    printf "  DB_PASSWORD（默认 16 位随机）: "
-    read -r USER_DB_PASSWORD
-    [ -z "$USER_DB_PASSWORD" ] && USER_DB_PASSWORD="$suggested_db"
-    printf "  JWT_SECRET （默认 48 位随机）: "
-    read -r USER_JWT_SECRET
-    [ -z "$USER_JWT_SECRET" ] && USER_JWT_SECRET="$suggested_jwt"
-    cp .env.example .env
-    sed -i.bak "s|^DB_PASSWORD=.*|DB_PASSWORD=$USER_DB_PASSWORD|" .env
-    sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=$USER_JWT_SECRET|" .env
-    rm -f .env.bak
-    DB_PASSWORD_GEN="$USER_DB_PASSWORD"
-    JWT_SECRET_GEN="$USER_JWT_SECRET"
-    GENERATED=1
-    ok "已生成 .env"
-  else
-    # --- Auto mode: generate randoms ---
-    log "自动生成 .env（密码使用 /dev/urandom 随机）..."
-    log "  — 每次部署都使用全新随机值，不存在共享默认密码"
-    log "  — 如需自定义密码：make deploy-interactive"
-    DB_PASSWORD_GEN=$(rand_str 16)
-    JWT_SECRET_GEN=$(rand_str 48)
-    cp .env.example .env
-    if command -v sed >/dev/null 2>&1; then
-      sed -i.bak "s|^DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD_GEN|" .env
-      sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET_GEN|" .env
-      rm -f .env.bak
-    fi
-    GENERATED=1
-    ok "已生成 .env 及随机凭据"
-  fi
+ENV_CREATED=0
+if [ ! -f "$ENV_FILE" ]; then
+  cp "$ROOT/.env.example" "$ENV_FILE"
+  ENV_CREATED=1
+fi
+env_set HOST "$(env_get HOST 127.0.0.1)"
+if [ "$ENV_CREATED" -eq 1 ] || ! grep -q '^PORT=' "$ENV_FILE" || [ -z "$(env_get PORT)" ]; then
+  env_set PORT "$(bash "$ROOT/scripts/find-free-port.sh" 9260 50)"
+fi
+env_set DB_HOST "$(env_get DB_HOST 127.0.0.1)"
+env_set DB_PORT "$(env_get DB_PORT 5432)"
+env_set DB_NAME "$(env_get DB_NAME utterlog)"
+env_set DB_USER "$(env_get DB_USER utterlog)"
+DB_PASSWORD_VALUE="$(env_get DB_PASSWORD)"
+[ -n "$DB_PASSWORD_VALUE" ] || DB_PASSWORD_VALUE="$(openssl rand -hex 24)"
+env_set DB_PASSWORD "$DB_PASSWORD_VALUE"
+JWT_SECRET_VALUE="$(env_get JWT_SECRET)"
+[ -n "$JWT_SECRET_VALUE" ] || JWT_SECRET_VALUE="$(openssl rand -hex 48)"
+env_set JWT_SECRET "$JWT_SECRET_VALUE"
+if [ -n "${DOMAIN:-}" ]; then
+  env_set APP_URL "https://${DOMAIN}"
+  env_set REQUIRE_PUBLIC_APP_URL true
 else
-  ok ".env 已存在，沿用现有配置（不会重新生成密码）"
+  env_set APP_URL "$(env_get APP_URL "http://127.0.0.1:$(env_get PORT 9260)")"
+fi
+env_set UTTERLOG_INSTALL_DIR "$ROOT"
+env_set UTTERLOG_SERVICE "$SERVICE"
+env_set UTTERLOG_SERVICE_USER "$APP_USER"
+env_set UTTERLOG_UPDATE_PATH_UNIT utterlog-update.path
+env_set UTTERLOG_UPDATE_REQUEST_FILE "$UPDATE_REQUEST_FILE"
+
+mkdir -p "$ROOT/uploads" "$ROOT/content/themes" "$ROOT/content/plugins" "$ROOT/backup" "$ROOT/.runtime"
+chown -R "$APP_USER:$APP_GROUP" "$ROOT"
+chmod 600 "$ENV_FILE"
+
+if [ "$SETUP_DB" -eq 1 ]; then
+  setup_database
 fi
 
-# Source .env
-set -a
-. ./.env
-set +a
+if [ "$BUILD" -eq 1 ]; then
+  log 'Installing dependencies and verifying the Bun build'
+  run_as_app "$BUN_BIN" install --frozen-lockfile
+  run_as_app "$BUN_BIN" run verify
+fi
 
-if [ "${UTTERLOG_DB_MODE:-bundled}" = "external" ]; then
-  if [ -z "${DB_HOST:-}" ] || [ "${DB_HOST:-}" = "postgres" ]; then
-    export DB_HOST="host.docker.internal"
-    persist_env DB_HOST "$DB_HOST"
-    warn "UTTERLOG_DB_MODE=external：DB_HOST 仍是默认值，已改为 host.docker.internal"
+log 'Installing systemd units'
+render_unit "$ROOT/deploy/systemd/utterlog-app.service" "/etc/systemd/system/${SERVICE}.service" "$BUN_BIN"
+render_unit "$ROOT/deploy/systemd/utterlog-update.path" /etc/systemd/system/utterlog-update.path "$BUN_BIN"
+render_unit "$ROOT/deploy/systemd/utterlog-update.service" /etc/systemd/system/utterlog-update.service "$BUN_BIN"
+systemctl daemon-reload
+systemctl enable --now utterlog-update.path
+systemctl enable "$SERVICE"
+systemctl restart "$SERVICE"
+
+PORT_VALUE="$(env_get PORT 9260)"
+log "Waiting for http://127.0.0.1:${PORT_VALUE}/api/v1/install/status"
+for attempt in $(seq 1 60); do
+  if curl -fsS --max-time 3 "http://127.0.0.1:${PORT_VALUE}/api/v1/install/status" >/dev/null 2>&1; then
+    ok "Utterlog is running on 127.0.0.1:${PORT_VALUE}"
+    printf 'Logs: journalctl -u %s -f\n' "$SERVICE"
+    exit 0
   fi
-fi
-
-if [ "$PULL_MODE" -eq 1 ] && [ -z "${UTTERLOG_IMAGE_PREFIX:-}" ]; then
-  export UTTERLOG_IMAGE_PREFIX="ghcr.io/utterlog"
-  persist_env UTTERLOG_IMAGE_PREFIX "$UTTERLOG_IMAGE_PREFIX"
-fi
-
-# ============================================================
-# Step 3: find a free port (starting from UTTERLOG_PORT)
-# ============================================================
-START_PORT="${UTTERLOG_PORT:-9260}"
-log "检查端口 $START_PORT 是否可用 ..."
-
-if ! NEW_PORT=$(bash scripts/find-free-port.sh "$START_PORT" 50); then
-  err "范围 $START_PORT-$((START_PORT+49)) 内没有空闲端口"
-  exit 1
-fi
-
-if [ "$NEW_PORT" != "$START_PORT" ]; then
-  warn "端口 $START_PORT 被占用 —— 改用 $NEW_PORT"
-  if grep -q "^UTTERLOG_PORT=" .env; then
-    sed -i.bak "s|^UTTERLOG_PORT=.*|UTTERLOG_PORT=$NEW_PORT|" .env
-  else
-    echo "UTTERLOG_PORT=$NEW_PORT" >> .env
-  fi
-  rm -f .env.bak
-  UTTERLOG_PORT="$NEW_PORT"
-else
-  ok "端口 $START_PORT 可用"
-fi
-
-# ============================================================
-# Step 3b: TLS mode — prompt for / validate domain
-# ============================================================
-if [ "$TLS_MODE" -eq 1 ]; then
-  if [ -z "${DOMAIN:-}" ]; then
-    if [ -t 0 ]; then
-      echo
-      log "已启用 TLS 模式 —— Caddy 会自动申请 Let's Encrypt 证书"
-      printf "  请输入域名（例：blog.example.com）: "
-      read -r DOMAIN
-    fi
-    if [ -z "${DOMAIN:-}" ]; then
-      err "TLS 模式必须指定 DOMAIN。重新运行："
-      err "  DOMAIN=blog.example.com make deploy-tls"
-      exit 1
-    fi
-  fi
-  # Persist DOMAIN to .env for later `make` commands
-  if grep -q "^DOMAIN=" .env 2>/dev/null; then
-    sed -i.bak "s|^DOMAIN=.*|DOMAIN=$DOMAIN|" .env && rm -f .env.bak
-  else
-    echo "DOMAIN=$DOMAIN" >> .env
-  fi
-  export DOMAIN
-  # Also set APP_URL to the public https URL so the app serves correct absolute links
-  if grep -q "^APP_URL=" .env; then
-    sed -i.bak "s|^APP_URL=.*|APP_URL=https://$DOMAIN|" .env && rm -f .env.bak
-  fi
-  export COMPOSE_PROFILES=tls
-  ok "TLS 模式：$DOMAIN"
-fi
-
-# ============================================================
-# Step 4: build & start containers
-# ------------------------------------------------------------
-# UTTERLOG_DB_MODE=external disables the bundled postgres service and
-# lets the Bun app reach the host DB via host.docker.internal.
-# ============================================================
-EXTERNAL_OVERLAY=""
-DB_M="${UTTERLOG_DB_MODE:-bundled}"
-if [ "$DB_M" = "external" ]; then
-  EXTERNAL_OVERLAY="-f docker-compose.external-db.yml"
-  log "复用外部 PostgreSQL（UTTERLOG_DB_MODE=$DB_M）"
-fi
-
-if [ "$PULL_MODE" -eq 1 ]; then
-  # Pull pre-built images — skips all local compilation
-  COMPOSE="docker compose -f docker-compose.prod.yml -f docker-compose.pull.yml $EXTERNAL_OVERLAY"
-  log "拉取 ${UTTERLOG_IMAGE_PREFIX:-ghcr.io/utterlog} 预构建镜像 ..."
-  $COMPOSE pull
-  log "启动容器 ..."
-  $COMPOSE up -d
-elif [ "$NO_BUILD" -eq 1 ]; then
-  COMPOSE="docker compose -f docker-compose.prod.yml $EXTERNAL_OVERLAY"
-  log "启动容器（不重新构建）..."
-  $COMPOSE up -d
-else
-  COMPOSE="docker compose -f docker-compose.prod.yml $EXTERNAL_OVERLAY"
-  log "本地构建并启动容器（首次约 3-5 分钟，需要 2GB+ 内存）..."
-  log "  提示：低配机可改用 'make deploy-pull' 拉预构建镜像，跳过本地编译"
-  $COMPOSE up -d --build
-fi
-
-# ============================================================
-# Step 5: wait for app to respond
-# ============================================================
-log "等待 Bun app 就绪（最长 180 秒）..."
-HEALTHY=0
-for i in $(seq 1 36); do
-  if curl -fsS "http://127.0.0.1:$UTTERLOG_PORT/api/v1/install/status" >/dev/null 2>&1; then
-    HEALTHY=1
-    ok "Bun app 已响应（用时 ${i}×5 秒）"
-    break
-  fi
-  printf "   %s... 启动中 (%ds)%s\r" "$C_DIM" "$((i*5))" "$C_RESET"
-  sleep 5
+  [ "$attempt" -lt 60 ] && sleep 2
 done
-echo
 
-if [ "$HEALTHY" -eq 0 ]; then
-  err "Bun app 在 180 秒内未响应。下方是最近 40 行日志："
-  $COMPOSE logs app --tail=40
-  exit 1
-fi
-
-# ============================================================
-# Step 6: print access details
-# ============================================================
-if [ "$TLS_MODE" -eq 1 ]; then
-  cat <<EOF
-
-${C_GREEN}${C_BOLD}============================================================${C_RESET}
-${C_GREEN}${C_BOLD}  Utterlog 已上线：https://$DOMAIN ${C_RESET}
-${C_GREEN}${C_BOLD}============================================================${C_RESET}
-
-  ${C_BOLD}Caddy 正在后台申请 Let's Encrypt 证书${C_RESET}
-  首次访问可能需要 5-30 秒等待证书签发
-
-  ${C_BOLD}查看证书状态：${C_RESET}
-    $COMPOSE logs caddy | grep -i "certificate obtained\|error"
-
-  ${C_BOLD}下一步：${C_RESET}
-    打开 https://$DOMAIN  →  /install 向导创建管理员账户
-
-EOF
-else
-  cat <<EOF
-
-${C_GREEN}${C_BOLD}============================================================${C_RESET}
-${C_GREEN}${C_BOLD}  Utterlog 部署完成${C_RESET}
-${C_GREEN}${C_BOLD}============================================================${C_RESET}
-
-  ${C_BOLD}访问地址：${C_RESET}
-    http://127.0.0.1:$UTTERLOG_PORT  （仅本机环回，公网不可见）
-
-  ${C_BOLD}下一步：把反向代理指向 127.0.0.1:$UTTERLOG_PORT${C_RESET}
-
-  ${C_BOLD}各场景配置参考：${C_RESET}
-    • 1Panel / 宝塔 / AAPanel → 见 deploy/1panel.md
-    • 自建 nginx              → 见 deploy/nginx.conf.example
-    • 自建 Caddy              → 见 deploy/Caddyfile.example
-    • 还没有反代？            → 重跑：DOMAIN=你的域名 make deploy-tls
-                                  （启用内置 Caddy 占用 80/443）
-
-  ${C_BOLD}本地隧道测试（域名还没指过来时）：${C_RESET}
-    ssh -L 9260:127.0.0.1:$UTTERLOG_PORT your-vps
-    # 然后浏览器打开 http://localhost:9260
-
-EOF
-fi
-
-if [ "$GENERATED" -eq 1 ]; then
-  cat <<EOF
-  ${C_YELLOW}${C_BOLD}⚠  请妥善保存以下随机生成的凭据（只显示一次）：${C_RESET}
-
-    DB_PASSWORD = $DB_PASSWORD
-    JWT_SECRET  = $JWT_SECRET
-
-  两者都已写入 .env，建议把 .env 备份到安全的地方。
-
-EOF
-fi
-
-cat <<EOF
-  ${C_BOLD}常用命令：${C_RESET}
-    $COMPOSE logs -f              # 实时查看全部日志
-    $COMPOSE logs -f app          # 只看 Bun app 日志
-    $COMPOSE ps                   # 容器状态
-    $COMPOSE down                 # 停止
-    make deploy                   # 重新部署（等价于 bash scripts/deploy.sh）
-
-  ${C_BOLD}反代配置示例：${C_RESET}见 deploy/ 目录
-
-${C_DIM}============================================================${C_RESET}
-
-EOF
+systemctl status "$SERVICE" --no-pager || true
+die "Health check failed. Inspect: journalctl -u $SERVICE -n 100"

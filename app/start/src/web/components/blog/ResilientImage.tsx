@@ -4,7 +4,7 @@ import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 function isPancdnImage(src: string): boolean {
   try {
-    return new URL(src, 'https://xifeng.net').hostname === 'img.pancdn.net';
+    return new URL(src, window.location.origin).hostname === 'img.pancdn.net';
   } catch {
     return false;
   }
@@ -12,7 +12,7 @@ function isPancdnImage(src: string): boolean {
 
 function retryUrl(src: string): string {
   try {
-    const url = new URL(src, 'https://xifeng.net');
+    const url = new URL(src, window.location.origin);
     url.searchParams.set('retry', '1');
     return url.toString();
   } catch {

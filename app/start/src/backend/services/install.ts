@@ -164,7 +164,7 @@ export async function testSetupDatabase(input: unknown) {
     const existingTables = await client<{ count: number }[]>`
       select count(*)::int as count from information_schema.tables
       where table_schema = 'public' and table_name like ${`${config.dbPrefix}%`}`.catch(() => []);
-    return { ok: true, version: version[0]?.server_version || '', deployment: host === 'postgres' ? 'docker' : 'external',
+    return { ok: true, version: version[0]?.server_version || '', deployment: ['127.0.0.1', 'localhost', '::1'].includes(host) ? 'local' : 'external',
       address: `${host}:${port}`, server_addr: serverInfo[0]?.server_addr || '',
       has_utterlog_tables: Number(existingTables[0]?.count || 0) > 0 };
   } catch (error) {

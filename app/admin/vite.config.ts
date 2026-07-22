@@ -53,11 +53,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.UTTERLOG_API_DEV_TARGET || 'http://localhost:8080',
+        target: process.env.UTTERLOG_API_DEV_TARGET || 'http://localhost:9260',
         changeOrigin: true,
       },
       '/uploads': {
-        target: process.env.UTTERLOG_API_DEV_TARGET || 'http://localhost:8080',
+        target: process.env.UTTERLOG_API_DEV_TARGET || 'http://localhost:9260',
         changeOrigin: true,
       },
     },

@@ -1,10 +1,6 @@
 # 反向代理配置
 
-Utterlog 默认绑定 `127.0.0.1:9260`。按部署环境选择 [1Panel](1panel.md)、[Nginx](nginx.conf.example) 或 [Caddy](Caddyfile.example) 配置；也可以使用内置 Caddy：
-
-```bash
-DOMAIN=blog.example.com make deploy-tls
-```
+Utterlog 默认绑定 `127.0.0.1:9260`。按部署环境选择 [1Panel](1panel.md)、[Nginx](nginx.conf.example) 或 [Caddy](Caddyfile.example) 配置。
 
 ## 单端口架构
 

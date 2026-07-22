@@ -1,0 +1,17 @@
+[Unit]
+Description=Update and rebuild Utterlog with Bun
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=__INSTALL_DIR__
+Environment=UTTERLOG_INSTALL_DIR=__INSTALL_DIR__
+Environment=UTTERLOG_SERVICE=__SERVICE__
+Environment=UTTERLOG_SERVICE_USER=__APP_USER__
+Environment=UTTERLOG_BUN_BIN=__BUN_BIN__
+Environment=UTTERLOG_UPDATE_REQUEST_FILE=__UPDATE_REQUEST_FILE__
+ExecStart=/usr/bin/env bash __INSTALL_DIR__/scripts/update-bun.sh --runtime
+TimeoutStartSec=30min

@@ -80,7 +80,7 @@ function highlightLogLine(line: string): string {
     '<span style="color:#fbbf24;font-weight:600">[$1]</span>',
   );
 
-  // 其它 [...] —— 容器名 / 路径 / 镜像 tag 等"对象"，天蓝
+  // 其它 [...] —— 服务名 / 路径 / 源码版本等"对象"，天蓝
   // 注意：因为 escapeHtml 把 [ 没动，所以可以直接匹配
   s = s.replace(
     /\[([^\]]+)\]/g,
@@ -229,8 +229,7 @@ export default function SystemUpdatePanel() {
   const logEndRef = useRef<HTMLDivElement | null>(null);
 
   // 自动跟随：log_tail 变化 → 平滑滚到末尾哨兵；用户手动滚到中间想
-  // 看历史时，下次有新行还是会被拖回底部。这是 docker / k8s logs
-  // 经典行为，期望"实时刷"的用户最熟悉。
+  // 看历史时，下次有新行还是会被拖回底部，保持实时日志体验。
   useEffect(() => {
     if (!logModalOpen) return;
     const tail = upgradeStatus?.log_tail || '';
@@ -279,14 +278,12 @@ export default function SystemUpdatePanel() {
   // Verifies whether the upgrade actually took effect. 三种成功信号
   // 任一命中就算成功：
   //   1. current.version === 期望的 GitHub tag（最强信号）
-  //   2. current.commit 跟升级前不一样（容器二进制变了 = 拉到新镜像
-  //      重建过；覆盖 dev / sha-only 构建，BuildVersion 是 'dev' 时也能
+  //   2. current.commit 跟升级前不一样（服务已经拉取并切换到新源码；
+  //      覆盖 dev / sha-only 构建，BuildVersion 是 'dev' 时也能
   //      认）
   //   3. current.built_at 跟升级前不一样（兜底，仅当 commit 不可用时
   //      用 build time 当代理）
-  // 之前只看 (1)，dev 安装永远 'dev' 永远过不了；生产里如果 docker
-  // 镜像 :latest 还没更新到新 tag、或者用户 compose 锁定了具体版本号，
-  // 也会被卡 60s 然后误报"升级未生效"。
+  // 之前只看 (1)，dev 安装永远 'dev' 永远过不了，因此会误报升级未生效。
   async function verifyUpgradeApplied(expected: string, maxWaitSec = 180) {
     // 升级前先记录基线 —— commit / built_at 跟 expected 都要拿来对比
     const baseCommit = (info?.current?.commit || '').toLowerCase();
@@ -312,12 +309,12 @@ export default function SystemUpdatePanel() {
           return true;
         }
         if (baseCommit && commit && baseCommit !== commit) {
-          toast.success(`升级完成 — 容器已重建（commit ${commit.slice(0, 7)}）`);
+          toast.success(`升级完成 — 服务已更新（commit ${commit.slice(0, 7)}）`);
           window.dispatchEvent(new Event('admin:version-changed'));
           return true;
         }
         if (!baseCommit && !commit && baseBuiltAt && builtAt && baseBuiltAt !== builtAt) {
-          toast.success('升级完成 — 容器已重建');
+          toast.success('升级完成 — 服务已重建');
           window.dispatchEvent(new Event('admin:version-changed'));
           return true;
         }
@@ -328,31 +325,30 @@ export default function SystemUpdatePanel() {
     }
     // 兜底：3 种语气分级，避免一律用红色 error toast 吓到用户
     //   A. 网络 / 鉴权错误 —— 真的有问题，error toast
-    //   B. api 在响应、版本号没变化 —— 镜像 / tag 同步问题，warning info
+    //   B. api 在响应、版本号没变化 —— 分支 / tag 同步问题，warning info
     //   C. api 在响应、commit 已变（但版本号字串没匹配）—— 实际上升级了，
-    //      只是 docker label 跟 BuildVersion 注入对不上（main vs v2.x.x）。
+    //      只是源码版本与 BuildVersion 注入对不上（main vs v2.x.x）。
     //      这种情况是"成功未确认"，不是失败 —— 用 info toast 告诉用户
     //      "升级已应用，但版本号自动确认超时，可手动刷新核对"。
     const baseSnapshot = info?.current?.version || '';
     if (lastErr) {
       toast.error(`无法确认升级结果（${lastErr}）—— 请手动刷新页面核对版本`);
     } else if (lastCommit && lastCommit !== (info?.current?.commit || '').toLowerCase()) {
-      // commit 已经变了 —— 升级实际生效，但版本字串可能因为 docker
-      // label "main" 跟 BuildVersion ldflags 注入不一致而对不上。
+      // commit 已经变了 —— 升级实际生效，但版本字串可能因构建元信息不一致而对不上。
       // 这不是失败，是"成功 + 自动确认信号有歧义"。
       toast(
-        `升级已应用 —— 容器 commit 已更新到 ${lastCommit.slice(0, 7)}，` +
+        `升级已应用 —— 服务 commit 已更新到 ${lastCommit.slice(0, 7)}，` +
         `但版本号自动确认超时。可手动刷新页面核对。`
       );
     } else if (lastGot && lastGot === baseSnapshot) {
       toast(
         `升级超时未确认 —— 当前版本 ${lastGot}，期望 ${expected || '?'}。` +
-        `镜像可能还在拉取或 registry 还没同步，等几分钟刷新页面再看。`
+        `源码可能仍在拉取或服务仍在启动，等几分钟刷新页面再看。`
       );
     } else {
       toast.error(
-        `升级未生效 —— 容器仍在 ${lastGot || '旧版本'}（commit ${lastCommit.slice(0, 7) || '?'}），期望 ${expected || '?'}。` +
-        `请检查 docker logs。`
+        `升级未生效 —— 服务仍在 ${lastGot || '旧版本'}（commit ${lastCommit.slice(0, 7) || '?'}），期望 ${expected || '?'}。` +
+        `请检查 journalctl -u utterlog-app。`
       );
     }
     return false;
@@ -381,15 +377,15 @@ export default function SystemUpdatePanel() {
           // Backend's "success" is optimistic — verify the running
           // version actually flipped before declaring victory.
           // 这里超时**必须**给足时间 —— 真实升级流程包括：
-          //   sidecar pull 镜像 (~30s) + recreate container (~5s) +
-          //   新 api 启动 + DB 初始化 + cron 启动 (~15s) +
+          //   git pull + Bun 安装/构建 + systemd 重启 +
+          //   新 api 启动 + DB 初始化 + cron 启动 +
           //   utterlog.io 缓存同步 (~10s)
           // 总计经常 60-90s。之前写死 60s 导致升级实际成功了但 UI 还
           // 在 60s 截止时误报"升级未生效 / 升级失败"，吓到用户。
           // 给 240s 留足空间，verify 自己内部成功信号命中就立刻 return
           // 不会真等满 240s。
           const expected = info?.latest?.version || '';
-          toast('升级脚本已执行，正在确认容器版本…');
+          toast('升级脚本已执行，正在确认服务版本…');
           try {
             await verifyUpgradeApplied(expected, 240);
             await load(true);
@@ -426,7 +422,7 @@ export default function SystemUpdatePanel() {
       const r = await api.post<any>('/admin/system/upgrade');
       if (r.data?.started === false) {
         setUpgrading(false);
-        toast.error(r.data?.message || '当前部署环境不支持后台一键升级，请按提示手动执行 compose 更新。');
+        toast.error(r.data?.message || '当前部署环境不支持后台一键升级，请按提示手动执行 Bun 更新脚本。');
         await pollStatus();
         return;
       }
@@ -523,7 +519,7 @@ export default function SystemUpdatePanel() {
             <Button
               onClick={doUpgrade}
               disabled={upgrading || loading || !runtimeUpgradeSupported}
-              title={runtimeUpgradeSupported ? undefined : 'Bun 容器版需要通过部署命令更新'}
+              title={runtimeUpgradeSupported ? undefined : '后台更新任务未启用，请通过部署命令更新'}
             >
               {upgrading ? <Loader2 className="size-4 animate-spin" /> : <CloudDownload className="size-4" />}
               {upgrading ? '升级中…' : runtimeUpgradeSupported ? '一键升级到 ' + lat : '检测到新版本，需手动部署'}
@@ -536,17 +532,17 @@ export default function SystemUpdatePanel() {
           ) : (
             // Up-to-date — still let the admin force a re-pull. Useful
             // when latest == current but the user suspects a botched
-            // previous upgrade (network blip during compose pull, image
-            // layers half-cached, etc.), or when they just want to
+            // previous upgrade (network interruption during source pull/build),
+            // or when they just want to
             // redeploy the same tag.
             <Button
               onClick={doUpgrade}
               disabled={upgrading || loading || !runtimeUpgradeSupported}
               className={primaryFillClass}
-              title="重新拉取当前版本并重启容器"
+              title="重新拉取当前版本、构建并重启服务"
             >
               {upgrading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-              {upgrading ? '重新部署中…' : runtimeUpgradeSupported ? '重新部署 ' + cur : 'Bun 容器模式'}
+              {upgrading ? '重新部署中…' : runtimeUpgradeSupported ? '重新部署 ' + cur : '需手动部署'}
             </Button>
           )}
           <Button variant="outline" onClick={() => load(true)} disabled={loading || upgrading}>
@@ -570,8 +566,8 @@ export default function SystemUpdatePanel() {
         {!runtimeUpgradeSupported && (
           <div className="mt-3 border-l-[3px] border-muted-foreground bg-muted text-xs text-foreground" style={{ padding: '10px 12px', lineHeight: 1.7 }}>
             <Terminal className="mr-1.5 inline size-3.5" />
-            当前 Bun 版不在运行时操作 Docker。更新请在部署目录执行：
-            <code className="ml-1.5 font-mono">docker compose pull app && docker compose up -d app</code>
+            后台更新任务未启用。请在部署目录执行：
+            <code className="ml-1.5 font-mono">sudo bash scripts/update-bun.sh</code>
           </div>
         )}
       </div>
@@ -656,7 +652,7 @@ export default function SystemUpdatePanel() {
                 ? <CircleCheck size={14} style={{ color: '#4ade80' }} />
                 : <CircleX size={14} style={{ color: '#f87171' }} />}
               <span style={{ color: '#cbd5e1' }}>
-                {upgradeStatus?.running ? '正在拉取镜像 / 重建容器…' : upgradeStatus?.success ? '完成' : '失败'}
+                {upgradeStatus?.running ? '正在拉取源码 / Bun 构建 / 重启服务…' : upgradeStatus?.success ? '完成' : '失败'}
               </span>
               {upgradeStatus?.started_at && (
                 <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
@@ -686,7 +682,7 @@ export default function SystemUpdatePanel() {
               {!upgradeStatus?.log_tail && (
                 <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Loader2 className="animate-spin" size={13} />
-                  正在启动 sidecar 容器...
+                  正在启动 systemd 更新任务...
                 </div>
               )}
               {/* 末尾哨兵：useEffect 会让它 scrollIntoView，强制日志贴底显示 */}
@@ -840,8 +836,8 @@ export default function SystemUpdatePanel() {
             </div>
             <div className="mb-4 text-center text-sm text-muted-foreground" style={{ lineHeight: 1.7 }}>
               {checkState === 'update'
-                ? '拉取最新镜像并重建容器，约需 30-60 秒。'
-                : '重新拉取当前版本镜像并重建容器，约需 30-60 秒。'}
+                ? '拉取最新源码、使用 Bun 构建并重启服务，约需 1-3 分钟。'
+                : '重新拉取当前源码、使用 Bun 构建并重启服务，约需 1-3 分钟。'}
               <br />
               期间后台短暂不可访问，数据、配置、上传文件全部保留。
             </div>

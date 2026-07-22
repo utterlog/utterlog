@@ -248,7 +248,7 @@ export default function AboutPageEditor({ open, onClose }: { open: boolean; onCl
         ['title', '一句话标题', '例如 分享设计与科技生活'],
         ['bio', '简介', '显示在个人名片里的短介绍'],
         ['mbti', 'MBTI', '例如 INTJ / INFP'],
-        ['location', '所在地', '例如 塔什干 / 上海 / 互联网'],
+        ['location', '所在地', '例如 上海 / 互联网'],
         ['status', '当前状态', '例如 持续写作中'],
         ['occupation', '身份', '例如 产品设计师 / 开发者'],
         ['languages', '语言', '例如 中文 / English / Русский'],

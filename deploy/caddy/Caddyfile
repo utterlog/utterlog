@@ -1,11 +1,7 @@
 # ============================================================
-# Utterlog — bundled Caddy reverse proxy (auto-TLS mode)
+# Utterlog — host Caddy reverse proxy
 # ------------------------------------------------------------
-# Loaded when COMPOSE_PROFILES=tls and DOMAIN env is set.
-# Caddy automatically obtains & renews Let's Encrypt certificate.
-#
-# Uses internal docker network to reach the Bun app container —
-# no host port binding needed for tls mode.
+# Set DOMAIN in Caddy's environment. Caddy obtains and renews TLS.
 # ============================================================
 
 {$DOMAIN:localhost} {
@@ -16,12 +12,12 @@
 	@static path /assets/* /admin/assets/*
 	handle @static {
 		header Cache-Control "public, max-age=31536000, immutable"
-		reverse_proxy app:8080
+		reverse_proxy 127.0.0.1:9260
 	}
 
 	# Everything else -> the Bun gateway and TanStack Start application
 	handle {
-		reverse_proxy app:8080 {
+		reverse_proxy 127.0.0.1:9260 {
 			header_up X-Real-IP {remote_host}
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Host {host}

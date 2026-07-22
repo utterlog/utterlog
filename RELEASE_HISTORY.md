@@ -646,7 +646,7 @@ AWS SES 支持 `ses:no-track` HTML 属性跳过 click tracking。8 个邮件模�
 
 ### site_url 改动自动迁移 cover/media URL
 
-之前你在后台改 `site_url`（比如 `https://www.xifeng.net` → `https://xifeng.net`），DB 里所有已存的绝对 URL（文章 cover_url、media 表 url）都还指向旧域名，前端刷新后 cover 仍是旧链接，要手动 SQL replace 才能修。
+之前你在后台改 `site_url`（比如 `https://www.example.com` → `https://example.com`），DB 里所有已存的绝对 URL（文章 cover_url、media 表 url）都还指向旧域名，前端刷新后 cover 仍是旧链接，要手动 SQL replace 才能修。
 
 现在 `UpdateOptions` 在保存 site_url 前会捕获旧值，保存后比对 origin（scheme + host + port），如果变了就立即在 DB 跑 prefix replace：
 
@@ -658,7 +658,7 @@ UPDATE ul_media  SET url       = REPLACE(url,       $oldOrigin, $newOrigin) WHER
 - **只 prefix 替换**：`LIKE 'oldOrigin/%'` 不动 URL path/query 里偶然出现旧域名的字符串
 - **scope 限定**：只覆盖 cover_url + media.url（我们自己存的资产 URL 列）；post.content / 评论 / 其他 option 留给未来的 admin 显式"URL 迁移"工具去清，避免误伤引用文字
 - **malformed 输入跳过**：旧/新值任一无法 parse 出 origin 就 abort，typo 不会触发批量修改
-- **trailing slash insensitive**：`https://xifeng.net/` 和 `https://xifeng.net` 视同
+- **trailing slash insensitive**：`https://example.com/` 和 `https://example.com` 视同
 - **结果记 server log**：迁移行数会打印到 `[site_url-migrate]` log 行
 
 
@@ -1026,5 +1026,4 @@ Posts 管理页右上角新增 ⚙️ 设置，支持 6 种预设 + 自定义模
 ## [1.0.15] - 2026-04-22
 
 升级 sidecar 在 `docker compose pull && up -d` 前会从 utterlog.io 重新下载 `docker-compose.yml`，让既有安装在后续一键升级时自动同步新挂载（如 `/etc/os-release`、`/etc/hostname` 用于系统状态展示）。
-
 

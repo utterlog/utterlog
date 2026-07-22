@@ -20,7 +20,7 @@ describe('handleRevalidate', () => {
   beforeEach(async () => {
     clearTaggedCache();
     await ephemeral.set('coding:v4:test', '{"ok":true}', 3600);
-    setTaggedEntry('blog-coding', { data: { username: 'gentpan' } }, ['coding'], 300);
+    setTaggedEntry('blog-coding', { data: { username: 'example-user' } }, ['coding'], 300);
   });
 
   test('clears tagged SSR cache and coding ephemeral keys', async () => {

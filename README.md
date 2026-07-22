@@ -36,20 +36,20 @@ Utterlog 面向独立作者和个人站长，统一管理文章、说说、评�
 | 语言与构建 | TypeScript 7、Vite 8 |
 | 数据库 | PostgreSQL + pgvector |
 | 样式 | Tailwind CSS 4 |
-| 部署 | Docker Compose、Nginx 或 Caddy |
+| 部署 | Bun、systemd、Nginx 或 Caddy |
 
-前台、后台入口和全部 API 已迁移到 TanStack Start Server Routes。Hono 只保留为 Bun 进程内的安全头、限流、CORS 与静态文件外壳，不再注册或回退到旧业务 API。
+前台、后台入口和全部 API 已迁移到 TanStack Start Server Routes，并由同一个 Bun 进程提供服务。
 
 ## 快速开始
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo bash
 ```
 
 指定域名并启用自动 HTTPS：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | DOMAIN=blog.example.com bash
+curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo DOMAIN=blog.example.com bash
 ```
 
 默认服务监听 `127.0.0.1:9260`，生产环境请使用 Nginx、Caddy、1Panel 或宝塔反向代理。
@@ -90,7 +90,7 @@ make logs
 
 ## 维护者
 
-[gentpan](https://github.com/gentpan)
+[Utterlog contributors](https://github.com/utterlog/utterlog/graphs/contributors)
 
 ## License
 

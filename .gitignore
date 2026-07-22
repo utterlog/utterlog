@@ -55,7 +55,7 @@ logs/
 /storage/
 .phpunit.result.cache
 
-# Docker volumes (user data)
+# Runtime database/cache data from older installations (user data)
 pgdata/
 redisdata/
 data/

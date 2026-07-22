@@ -1,6 +1,6 @@
 [resolve.alias]
-"@/components" = "./app/web/components"
-"@/hooks" = "./app/web/hooks"
-"@/lib" = "./app/web/lib"
-"@/themes" = "./app/web/themes"
-"@/types" = "./app/web/types"
+"@/components" = "./app/start/src/web/components"
+"@/hooks" = "./app/start/src/web/hooks"
+"@/lib" = "./app/start/src/web/lib"
+"@/themes" = "./app/start/src/web/themes"
+"@/types" = "./app/start/src/web/types"

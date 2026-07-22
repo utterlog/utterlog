@@ -4,12 +4,12 @@ import { defaultWeatherLocation, visitorWeatherLocation } from '../src/backend/w
 describe('visitor weather location', () => {
   test('falls back to default city for private IPs', async () => {
     const optionValue = async (name: string, fallback = '') => {
-      if (name === 'azure_sidebar_weather_default_city') return '塔什干';
+      if (name === 'azure_sidebar_weather_default_city') return '测试城市';
       return fallback;
     };
     const result = await visitorWeatherLocation('127.0.0.1', optionValue);
     expect(result.fallback).toBe(true);
-    expect(result.location.city).toBe('塔什干');
+    expect(result.location.city).toBe('测试城市');
   });
 
   test('default weather location uses configured options', async () => {

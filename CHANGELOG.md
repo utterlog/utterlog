@@ -3,16 +3,18 @@
 本文件记录 Utterlog 的版本变更。版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
 发布说明统一使用中文分类，每个版本固定保留四个段落：`新增`、`优化`、`修复`、`移除`。
-Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Docker workflow 自动处理。
+发布产物由 GitHub Actions 的 Bun workflow 校验和生成，不在更新日志中罗列构建文件。
 
 ## 未发布
 
 ### 新增
 
-暂无。
+- **Bun 主机部署**：新增 systemd 应用服务、后台更新监听单元和统一的 Bun 更新脚本。
 
 ### 优化
 
+- **部署链路统一**：安装、更新、Makefile、远程同步、CI、发布构建和文档统一使用 Bun 1.4；默认监听端口统一为 9260。
+- **后台一键升级**：改为请求受限的 systemd 更新任务，依次拉取源码、校验构建、重启服务并执行健康检查。
 - **统一统计入口**：文章阅读量改为仅在客户端访问通过统计校验后递增，Umami 可通过 `utterlog:pageview-tracked` 事件复用同一可信访问结果。
 - **后台通知轮询**：隐藏标签页暂停请求，重新可见后立即同步通知数量，减少长期打开后台产生的无效请求。
 
@@ -24,7 +26,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 ### 移除
 
-暂无。
+- 移除旧应用打包、编排、镜像发布与镜像同步文件，生产运行方式收敛为 Bun + systemd。
 
 ## [1.3.8] - 2026-07-16
 
@@ -233,7 +235,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 ### 修复
 
-- **后台升级在自定义安装路径下"未找到 docker-compose 文件"**：v1.2.5 加的 `probeComposeWorkingDir()` (用 docker compose label 自动探测真实安装目录) 实际从来没被触发，因为 `docker-compose.yml` 默认 `UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}` 让 env 变量永远非空，老逻辑「env 优先 → 非空就直接用 → label 探测被跳过」导致用户装在 `/opt/utterlog-pancn/`、`/root/my-blog/` 等任何非 `/opt/utterlog` 路径时升级一律拿到错的 `/opt/utterlog` 然后报错。本次调整优先级 → docker compose label > env 变量 > `/opt/utterlog` 兜底。compose label 是 docker compose 自己起容器时打上的最权威路径，永远准确；env 变量退到 fallback（万一 label 探测失败 / docker socket 不可用时仍能用）。日志里也明确标出来源（`(来自 compose label)` / `(来自 UTTERLOG_INSTALL_DIR env)` / `(兜底默认)`）方便排查。
+- **后台升级在自定义安装路径下"未找到 docker-compose 文件"**：v1.2.5 加的 `probeComposeWorkingDir()` (用 docker compose label 自动探测真实安装目录) 实际从来没被触发，因为 `docker-compose.yml` 默认 `UTTERLOG_INSTALL_DIR=${UTTERLOG_INSTALL_DIR:-/opt/utterlog}` 让 env 变量永远非空，老逻辑「env 优先 → 非空就直接用 → label 探测被跳过」导致用户装在 `/opt/utterlog-custom/`、`/root/my-blog/` 等任何非 `/opt/utterlog` 路径时升级一律拿到错的 `/opt/utterlog` 然后报错。本次调整优先级 → docker compose label > env 变量 > `/opt/utterlog` 兜底。compose label 是 docker compose 自己起容器时打上的最权威路径，永远准确；env 变量退到 fallback（万一 label 探测失败 / docker socket 不可用时仍能用）。日志里也明确标出来源（`(来自 compose label)` / `(来自 UTTERLOG_INSTALL_DIR env)` / `(兜底默认)`）方便排查。
 
 ## [1.2.9] - 2026-05-08
 
@@ -340,7 +342,7 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 ### 优化
 
-- **升级日志输出格式参考 1Panel**：原 `[2026-05-07T15:30:20Z] sidecar starting in /opt/...` 改成 `2026/05/07 23:30:20 升级应用 [Utterlog] 任务开始 [START]` 风格 —— 时间戳本地时区 + 中文动作 + `[对象]` + 状态/`[标记]`，每一步语义清晰。容器名（`[utterlog-pancn-api-1]`）、安装目录、镜像 tag、digest 全部动态显示在日志里，肉眼能确认探测正确。
+- **升级日志输出格式参考 1Panel**：原 `[2026-05-07T15:30:20Z] sidecar starting in /opt/...` 改成 `2026/05/07 23:30:20 升级应用 [Utterlog] 任务开始 [START]` 风格 —— 时间戳本地时区 + 中文动作 + `[对象]` + 状态/`[标记]`，每一步语义清晰。容器名（`[utterlog-app-1]`）、安装目录、镜像 tag、digest 全部动态显示在日志里，肉眼能确认探测正确。
 - **后台升级日志面板高亮**：`SystemUpdatePanel.tsx` 新增 `highlightLogLine(line)` 函数，按语义着色：时间戳 → 暗灰 / `[START]` `[TASK-END]` → 琥珀加粗 / `[xxx]` 容器名/路径/镜像 → 天蓝 / `成功` → 亮绿 / `WARN` → 黄 / `ERROR` `失败` → 红。容器外观也调整：背景 `#0f172a` → 更深的 `#0a0e1a`（终端感）+ 圆角 6px + 顶部状态徽标分割线 + max-height 280 → 360px。
 - **GFM 表格在 changelog 渲染中支持**：admin 后台 `SystemUpdatePanel.tsx` 的 `renderChangelog()` 之前不识别 `| col1 | col2 |` + `|---|---|` 表格语法，release notes 里的对比表都显示成原文 raw 字符。补上 GFM table parser → 输出 `<table class="changelog-table">`，新增 CSS（紧凑边框 + 表头浅灰底 + zebra 行）。`---` 分隔线 → `<hr/>` 也补上。utterlog-landing 的 `app/changelog/page.tsx` 同步修复。
 - **后台升级面板"更新内容"标题只显示版本号**：`{info.latest.name || info.latest.version}` 改成 `{info.latest.version}`。GitHub release name 经常是 `v1.2.5 — upgrade works on any compose project name` 这种长描述，标题里啰嗦。现在固定显示 `更新内容 — v1.2.5`。
@@ -353,13 +355,13 @@ Docker 镜像地址不写入更新日志；镜像发布由 GitHub Actions 的 Do
 
 ### 修复
 
-- **后台一键升级在自定义 compose 项目名下静默失败**：sidecar 脚本写死 `docker inspect utterlog-api-1`，但 docker compose 给容器命名是 `<project>-<service>-<index>` —— 项目名取决于安装目录的 basename（或 `COMPOSE_PROJECT_NAME` env / `name:` 字段）。装在 `/opt/utterlog-pancn/`（1Panel 默认）/ `/root/my-blog/` 等任何非 `/opt/utterlog/` 路径，容器都叫 `utterlog-pancn-api-1` / `my-blog-api-1`，全部 `docker inspect` 调用都拿不到容器，健康检查 120s 干等到超时，admin UI 报 "升级未生效"。
+- **后台一键升级在自定义 compose 项目名下静默失败**：sidecar 脚本写死 `docker inspect utterlog-api-1`，但 docker compose 给容器命名是 `<project>-<service>-<index>` —— 项目名取决于安装目录的 basename（或 `COMPOSE_PROJECT_NAME` env / `name:` 字段）。装在 `/opt/utterlog-custom/`（1Panel 默认）/ `/root/my-blog/` 等任何非 `/opt/utterlog/` 路径，容器都叫 `utterlog-custom-api-1` / `my-blog-api-1`，全部 `docker inspect` 调用都拿不到容器，健康检查 120s 干等到超时，admin UI 报 "升级未生效"。
 - **修复方案**：`api/internal/handler/system_version.go` 新增 `apiContainerName()` 助手 —— api 进程用 `os.Hostname()`（docker 默认把 hostname 设成短 ID）+ `docker inspect <id>` 反查自己的真实容器名；`webContainerName(api)` 通过 `com.docker.compose.project` label 反查同项目里的 web 容器。所有原本写死 `utterlog-api-1` 的地方（`probeComposeWorkingDir` / `probeAPIUploadsMountSource` / sidecar 健康检查 loop / sidecar 终态 digest 输出）改成用动态名字；sidecar 启动时通过 `API_CONTAINER` / `WEB_CONTAINER` 环境变量传递。
-- **覆盖面**：未来任何用户不管装在哪个目录、用什么 compose project 名（`utterlog` / `utterlog-pancn` / `my-blog` / 大写小写下划线），后台升级按钮都能找到自己的容器、正确执行 pull / recreate / health check。
+- **覆盖面**：未来任何用户不管装在哪个目录、用什么 compose project 名（`utterlog` / `utterlog-custom` / `my-blog` / 大写小写下划线），后台升级按钮都能找到自己的容器、正确执行 pull / recreate / health check。
 - **GitHub API 403 rate-limit**：`api/internal/handler/system_version.go` 三个 GitHub API 调用（`releases/latest` / `releases?per_page=20` / `commits/{tag}`）都没鉴权，云出口共享 IP 的 60/h 匿名配额一打就爆。新增 `applyGitHubHeaders(req)` 助手，admin 配了 `github_access_token` / `coding_github_token` 时自动加 `Authorization: Bearer ...`，配额从 60/h 涨到 5000/h。403 错误信息也明确化（提示去后台填 token），不再是裸的 "github API 403: ..."。
 - **后台升级面板"升级未生效"误报**：`SystemUpdatePanel.tsx` 的 `verifyUpgradeApplied` 之前只看 version 字符串严格相等，dev 安装（BuildVersion='dev' 永不变）/ 生产 `:latest` 还没同步 / 用户 compose 锁定具体 tag 这些场景都会被卡 60s 然后误报 "升级未生效"。改成三层成功信号（version 等式 / commit 变化 / built_at 变化）任一命中即成功，超时 60s → 180s，错误信息显示实际拿到的 version + commit。
 - **生产 named volume 模式下 sidecar 日志看不到**：`docker-compose.prod.yml` 用 `uploads:/app/public/uploads`（命名卷），api 读卷里的 upgrade.log；sidecar 写到 `$INSTALL_DIR/uploads/upgrade.log`（宿主目录），两个完全不同的物理文件，admin 看不到 sidecar 真实输出。新增 `probeAPIUploadsMountSource()` 探测 api 容器 `/app/public/uploads` 的实际挂载源（bind 返宿主路径 / volume 返卷名），api 启动 sidecar 时把同一个源也挂载给 sidecar（`-v <source>:/api-uploads` + `API_UPLOADS_DIR=/api-uploads`），双方写读同一个文件。
-- **安装目录写死 `/opt/utterlog`**：`runUpgrade()` 之前默认 `installDir = /opt/utterlog`，1Panel 装在 `/opt/utterlog-pancn/` 或自定义路径直接报"找不到 docker-compose 文件"。新增 `probeComposeWorkingDir()` 用 `com.docker.compose.project.working_dir` label 自动探测真实路径，环境变量 / 兜底逻辑保留。
+- **安装目录写死 `/opt/utterlog`**：`runUpgrade()` 之前默认 `installDir = /opt/utterlog`，1Panel 装在 `/opt/utterlog-custom/` 或自定义路径直接报"找不到 docker-compose 文件"。新增 `probeComposeWorkingDir()` 用 `com.docker.compose.project.working_dir` label 自动探测真实路径，环境变量 / 兜底逻辑保留。
 - 停留在 v1.2.4 及更早版本的用户需在服务器上手动跑一次 `docker compose pull && docker compose up -d` 摆脱旧容器名探测 bug，后续升级恢复一键。
 
 ## [1.2.3] - 2026-05-07

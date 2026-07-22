@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "sync:themes": "node src/web/scripts/sync-theme-styles.mjs",
-    "predev": "node src/web/scripts/sync-theme-styles.mjs",
-    "prebuild": "node src/web/scripts/sync-theme-styles.mjs",
+    "sync:themes": "bun src/web/scripts/sync-theme-styles.mjs",
+    "predev": "bun src/web/scripts/sync-theme-styles.mjs",
+    "prebuild": "bun src/web/scripts/sync-theme-styles.mjs",
     "dev": "cd ../.. && bun --bun app/start/node_modules/vite/bin/vite.js app/start --config app/start/vite.config.ts --host 127.0.0.1 --port 3010",
     "build": "cd ../.. && bun --bun app/start/node_modules/vite/bin/vite.js build app/start --config app/start/vite.config.ts",
     "check": "tsc -p tsconfig.json --noEmit"

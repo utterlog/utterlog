@@ -76,10 +76,9 @@ function tablePrefix() {
 
 export const config: AppConfig = {
   nodeEnv: env('NODE_ENV', env('BUN_ENV', 'development')),
-  port: envInt('PORT', 8080),
-  // 绑定网卡。留空 = Bun 默认 0.0.0.0（容器内靠 docker 端口映射限制）。
-  // 无 Docker 直接跑 host 进程时设 HOST=127.0.0.1，仅本机可达、由 frankenphp 反代。
-  host: env('HOST', ''),
+  port: envInt('PORT', 9260),
+  // 生产默认只监听本机，由 Caddy/Nginx 反代；如需局域网直连可显式设为 0.0.0.0。
+  host: env('HOST', '127.0.0.1'),
   dbHost: env('DB_HOST', 'localhost'),
   dbPort: envInt('DB_PORT', 5432),
   dbName: env('DB_NAME', 'utterlog'),
@@ -88,7 +87,7 @@ export const config: AppConfig = {
   dbPrefix: tablePrefix(),
   jwtSecret: env('JWT_SECRET', ''),
   jwtTtl: envInt('JWT_TTL', 86400),
-  appUrl: env('APP_URL', 'http://localhost:8080'),
+  appUrl: env('APP_URL', 'http://localhost:9260'),
   corsOrigin: env('CORS_ORIGIN', ''),
   requirePublicAppUrl: envBool('REQUIRE_PUBLIC_APP_URL', false),
   storageDriver: env('STORAGE_DRIVER', 'local'),

@@ -1,131 +1,66 @@
-# ============================================================
-# Utterlog — 你只需要两条命令:
-#   make deploy    初次部署
-#   make update    每次更新
-# 其他是高级选项, 请用 make help-advanced 查看
-# ============================================================
+SERVICE ?= utterlog-app
 
-.PHONY: help
+.PHONY: help deploy update build check test verify dev logs status ps start stop restart deploy-utterlog deploy-utterlog-dry schema
+
 help:
 	@echo ""
-	@echo "  \033[1;36mUtterlog\033[0m — 你只需要这两条命令:"
+	@echo "  Utterlog — Bun + systemd"
 	@echo ""
-	@echo "    \033[1;32mmake deploy\033[0m         初次部署 (自动检测内存 / 生成密码 / 找空闲端口)"
-	@echo "    \033[1;32mmake update\033[0m         拉最新代码重新部署"
-	@echo ""
-	@echo "  常用辅助:"
-	@echo "    make logs           看日志"
-	@echo "    make ps             看容器状态"
-	@echo "    make stop           停止"
-	@echo ""
-	@echo "  高级选项 (特殊场景):"
-	@echo "    make help-advanced"
-	@echo ""
-
-.PHONY: help-advanced
-help-advanced:
-	@echo ""
-	@echo "  \033[1mUtterlog 高级命令:\033[0m"
-	@echo ""
-	@echo "  \033[1m部署变种:\033[0m"
-	@echo "    make deploy-tls          内置 Caddy + 自动 TLS (需 DOMAIN=your.site)"
-	@echo "    make deploy-interactive  提示输入密码 (默认自动生成)"
-	@echo "    make deploy-pull         强制用 ghcr.io 预构建镜像"
-	@echo "    make deploy-build        强制本地构建镜像"
-	@echo "    make deploy-fast         重启容器, 跳过构建"
-	@echo ""
-	@echo "  \033[1m生命周期:\033[0m"
-	@echo "    make logs-app            只看 Bun app 日志"
-	@echo "    make down                停止并删除容器 (保留数据)"
-	@echo "    make clean               删除容器 + 数据 (需确认)"
-	@echo ""
-	@echo "  \033[1m开发:\033[0m"
-	@echo "    make dev                 开发模式 (dev Dockerfile + hot reload)"
-	@echo "    make dev-local           本地 bun server"
-	@echo "    make deploy-xifeng       xifeng.net 本地构建 + SSH 部署"
-	@echo "    make schema              导出当前 DB schema 到 app/start/assets/schema.sql"
+	@echo "    make deploy              初次部署或重新配置主机"
+	@echo "    make update              拉取源码、校验、构建并重启服务"
+	@echo "    make build               构建后台和 TanStack Start"
+	@echo "    make check               TypeScript 检查"
+	@echo "    make test                服务端测试"
+	@echo "    make verify              完整校验"
+	@echo "    make dev                 本地 Bun 开发服务"
+	@echo "    make logs                跟踪 systemd 日志"
+	@echo "    make status              查看服务状态"
+	@echo "    make start|stop|restart  管理 systemd 服务"
+	@echo "    make deploy-utterlog     通过 SSH 同步到已配置的服务器"
+	@echo "    make schema              导出数据库 schema"
 	@echo ""
 
-# --- Main commands ---
-
-.PHONY: deploy
 deploy:
 	@bash scripts/deploy.sh
 
-.PHONY: update
 update:
-	@echo "==> Pulling latest code ..."
-	@git pull --ff-only || { echo "git pull failed; resolve manually then re-run 'make update'"; exit 1; }
-	@bash scripts/deploy.sh
+	@sudo bash scripts/update-bun.sh
 
-# --- Advanced commands ---
+build:
+	@bun run build
 
-.PHONY: deploy-tls
-deploy-tls:
-	@bash scripts/deploy.sh --tls
+check:
+	@bun run check
 
-.PHONY: deploy-interactive
-deploy-interactive:
-	@bash scripts/deploy.sh --interactive
+test:
+	@bun run test:server
 
-.PHONY: deploy-pull
-deploy-pull:
-	@bash scripts/deploy.sh --pull
+verify:
+	@bun run verify
 
-.PHONY: deploy-build
-deploy-build:
-	@bash scripts/deploy.sh --build
-
-.PHONY: deploy-fast
-deploy-fast:
-	@bash scripts/deploy.sh --no-build
-
-# --- Lifecycle ---
-
-.PHONY: logs
-logs:
-	docker compose -f docker-compose.prod.yml logs -f
-
-.PHONY: logs-app
-logs-app:
-	docker compose -f docker-compose.prod.yml logs -f app
-
-.PHONY: ps
-ps:
-	docker compose -f docker-compose.prod.yml ps
-
-.PHONY: stop
-stop:
-	docker compose -f docker-compose.prod.yml stop
-
-.PHONY: down
-down:
-	docker compose -f docker-compose.prod.yml down
-
-.PHONY: clean
-clean:
-	@echo "This will DELETE the database and all uploads!"
-	@read -p "Type 'yes' to confirm: " c && [ "$$c" = "yes" ] || exit 1
-	docker compose -f docker-compose.prod.yml down -v
-
-# --- Development ---
-
-.PHONY: dev
 dev:
-	docker compose up -d --build
+	@bun run dev
 
-.PHONY: deploy-xifeng
-deploy-xifeng:
-	@bash scripts/deploy-xifeng.sh
+logs:
+	@journalctl -u "$(SERVICE)" -f
 
-.PHONY: deploy-xifeng-dry
-deploy-xifeng-dry:
-	@bash scripts/deploy-xifeng.sh --dry-run
+status ps:
+	@systemctl status "$(SERVICE)" --no-pager
 
-.PHONY: dev-local
-dev-local:
-	bun run server:dev
+start:
+	@sudo systemctl start "$(SERVICE)"
 
-.PHONY: schema
+stop:
+	@sudo systemctl stop "$(SERVICE)"
+
+restart:
+	@sudo systemctl restart "$(SERVICE)"
+
+deploy-utterlog:
+	@bash scripts/deploy-utterlog-bun.sh
+
+deploy-utterlog-dry:
+	@bash scripts/deploy-utterlog-bun.sh --dry-run
+
 schema:
 	@bash scripts/dump-schema.sh

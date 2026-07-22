@@ -23,7 +23,7 @@ const frontendRoots = [
   'app/start/src',
 ];
 const routeRoots = ['app/start/src/backend/routes', 'app/start/src/backend/static'];
-const originalMain = '/Users/gentpan/projects/utterlog/api/main.go';
+const originalMain = join(process.cwd(), 'api', 'main.go');
 const contentTables = ['moments', 'music', 'movies', 'books', 'games', 'videos', 'goods', 'links', 'playlists'];
 const syncPlatforms = ['wordpress', 'typecho'];
 

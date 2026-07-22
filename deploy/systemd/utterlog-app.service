@@ -1,0 +1,21 @@
+[Unit]
+Description=Utterlog Bun application
+Wants=network-online.target
+After=network-online.target postgresql.service
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_GROUP__
+WorkingDirectory=__INSTALL_DIR__
+EnvironmentFile=__INSTALL_DIR__/.env
+Environment=NODE_ENV=production
+ExecStart=__BUN_BIN__ run app/start/src/backend/index.ts
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+KillSignal=SIGTERM
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

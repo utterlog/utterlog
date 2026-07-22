@@ -30,11 +30,11 @@ const defaultForm: AzureProfileForm = {
   azure_sidebar_profile_welcome: '',
   azure_sidebar_profile_bio: '',
   azure_sidebar_weather_enabled: 'true',
-  azure_sidebar_weather_default_city: '塔什干',
-  azure_sidebar_weather_default_country: '乌兹别克斯坦',
-  azure_sidebar_weather_default_country_code: 'UZ',
-  azure_sidebar_weather_default_latitude: '41.2995',
-  azure_sidebar_weather_default_longitude: '69.2401',
+  azure_sidebar_weather_default_city: '上海',
+  azure_sidebar_weather_default_country: '中国',
+  azure_sidebar_weather_default_country_code: 'CN',
+  azure_sidebar_weather_default_latitude: '31.2304',
+  azure_sidebar_weather_default_longitude: '121.4737',
 };
 
 // 每行的固定网格布局（label 列 + 值列）。颜色 / 边框走语义 utility class，
@@ -281,12 +281,12 @@ export default function AzureProfileSettings() {
             <Input
               value={form.azure_sidebar_weather_default_city}
               onChange={(e) => update('azure_sidebar_weather_default_city', e.target.value)}
-              placeholder="塔什干"
+              placeholder="上海"
             />
             <Input
               value={form.azure_sidebar_weather_default_country}
               onChange={(e) => update('azure_sidebar_weather_default_country', e.target.value)}
-              placeholder="乌兹别克斯坦"
+              placeholder="中国"
             />
             <Input
               value={form.azure_sidebar_weather_default_country_code}
@@ -303,12 +303,12 @@ export default function AzureProfileSettings() {
             <Input
               value={form.azure_sidebar_weather_default_latitude}
               onChange={(e) => update('azure_sidebar_weather_default_latitude', e.target.value)}
-              placeholder="41.2995"
+              placeholder="31.2304"
             />
             <Input
               value={form.azure_sidebar_weather_default_longitude}
               onChange={(e) => update('azure_sidebar_weather_default_longitude', e.target.value)}
-              placeholder="69.2401"
+              placeholder="121.4737"
             />
           </div>
         </div>

@@ -1,16 +1,15 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
- * 把 app/web/themes/<T>/{styles.css,theme.json} 同步到 app/web/public/themes/<T>/
+ * 把 themes/<T>/{styles.css,theme.json} 同步到 public/themes/<T>/
  *
  * 为什么要这个 script：
  *   1. TanStack Start 通过 `<link rel="stylesheet" href="/themes/<T>/styles.css">`
- *      加载，URL 必须落在 public/ 下才能由 Next 静态服务命中。
- *   2. 主题 source（开发者编辑入口）放在 app/web/themes/<T>/{styles.css,theme.json}。
- *   3. 之前用过 symlink 让 public 那份指向 source —— dev 完美但生产 docker
- *      镜像的 runner stage 只 COPY /app/public，symlink 解析不到 /app/themes/
- *      → 生产 404 → CSS 全丢 → 图片巨大覆盖页面。
+ *      加载，URL 必须落在 public/ 下才能由 TanStack Start 静态服务命中。
+ *   2. 主题 source（开发者编辑入口）放在 themes/<T>/{styles.css,theme.json}。
+ *   3. public 中必须是真实文件，不能依赖部署后可能失效的跨目录 symlink；
+ *      否则会导致主题资源 404。
  *   4. 现在改回真实文件副本：source 是唯一编辑入口，本 script 把改动同步
- *      到 public。npm `predev` / `prebuild` 钩子自动跑，开发者改完 source
+ *      到 public。Bun `predev` / `prebuild` 钩子自动跑，开发者改完 source
  *      启动 dev / build 时自动同步，不会忘。
  *
  * 同步对象：
@@ -30,7 +29,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, '..'); // app/web/
+const ROOT = resolve(__dirname, '..'); // app/start/src/web/
 const SRC_DIR = join(ROOT, 'themes');
 const PUBLIC_DIR = join(ROOT, 'public', 'themes');
 
