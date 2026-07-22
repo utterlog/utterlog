@@ -120,13 +120,19 @@ set -euo pipefail
 cd ${REMOTE_PATH}
 export PATH=/opt/bun/bin:\$PATH
 app_user=\$(systemctl show -p User --value ${SERVICE})
+[ -n "\$app_user" ] || app_user=root
 app_group=\$(id -gn "\$app_user")
 chown -R "\$app_user:\$app_group" app scripts package.json bun.lock bunfig.toml tsconfig.json
 app_home=\$(getent passwd "\$app_user" | cut -d: -f6)
-runuser -u "\$app_user" -- env HOME="\$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin \
-  ${REMOTE_BUN} install --frozen-lockfile
-runuser -u "\$app_user" -- env HOME="\$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin \
-  ${REMOTE_BUN} app/start/src/web/scripts/sync-theme-styles.mjs
+run_app() {
+  if [ "\$app_user" = root ]; then
+    env HOME="\$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin "\$@"
+  else
+    runuser -u "\$app_user" -- env HOME="\$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin "\$@"
+  fi
+}
+run_app ${REMOTE_BUN} install --frozen-lockfile
+run_app ${REMOTE_BUN} app/start/src/web/scripts/sync-theme-styles.mjs
 EOF
 ok "服务器依赖就绪"
 
