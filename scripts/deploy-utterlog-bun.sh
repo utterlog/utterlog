@@ -154,5 +154,9 @@ for i in $(seq 1 20); do
 done
 
 REV="$("${SSH[@]}" "cd ${REMOTE_PATH} && ${REMOTE_BUN} -e 'console.log(require(\"./package.json\").version)'" 2>/dev/null || true)"
-ok "部署完成${REV:+（app 版本 $REV）}"
+if [ -n "${REV:-}" ]; then
+  ok "部署完成（app 版本 ${REV}）"
+else
+  ok "部署完成"
+fi
 printf "  站点: %s/\n  日志: ssh -i %s %s@%s 'journalctl -u %s -f'\n" "$APP_URL" "$SSH_KEY" "$USER" "$HOST" "$SERVICE"
