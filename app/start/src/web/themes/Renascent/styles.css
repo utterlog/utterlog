@@ -880,9 +880,12 @@
   line-height: 1.45;
 }
 
+/* 内容列填满可用宽度（892px），不在这一层限宽 —— 原来这里卡了 760px，
+   右侧固定空出 132px，且把 grid 的 minmax(0,1fr) 自适应废掉了。
+   行宽改由下面的 .blog-prose 控制：纯文字段落限到 864px（规范的读物宽度），
+   而图片、代码块、引用、表格能出血到整列，排版更有层次。 */
 [data-theme="Renascent"] .renascent-article-content {
   min-width: 0;
-  max-width: 760px;
 }
 
 [data-theme="Renascent"] .renascent-content-frame {
@@ -898,6 +901,30 @@
   font-weight: 400;
   line-height: 1.78;
   word-break: break-word;
+}
+
+/* 行宽控制放在这一层，而不是外面的内容列上。
+   纯文字元素限到 864px（规范给的读物宽度），图片、代码块、引用、表格、
+   视频不受限，可以铺满整列（892px）—— 长内容有呼吸感，正文又不会因为
+   行太长而难读。 */
+[data-theme="Renascent"] .blog-prose > p,
+[data-theme="Renascent"] .blog-prose > ul,
+[data-theme="Renascent"] .blog-prose > ol,
+[data-theme="Renascent"] .blog-prose > h1,
+[data-theme="Renascent"] .blog-prose > h2,
+[data-theme="Renascent"] .blog-prose > h3,
+[data-theme="Renascent"] .blog-prose > h4,
+[data-theme="Renascent"] .blog-prose > h5,
+[data-theme="Renascent"] .blog-prose > h6 {
+  max-width: 864px;
+}
+
+/* markdown 渲染会把独占一行的图片包成 <p><span class="blog-image">…</span></p>，
+   于是上面那条 p 的限宽会把图片一起卡住。把这类段落放开，图片才能铺满整列。
+   pre / table / blockquote 本来就不在上面的列表里，天然是整列宽。 */
+[data-theme="Renascent"] .blog-prose > p:has(> .blog-image),
+[data-theme="Renascent"] .blog-prose > p:has(> a > .blog-image) {
+  max-width: none;
 }
 
 [data-theme="Renascent"] .blog-prose > p:first-child,
