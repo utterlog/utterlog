@@ -1693,12 +1693,15 @@
   background: var(--renascent-white);
 }
 
+/* 三块内容整体居中堆叠。原来是 minmax(0,1fr) auto auto —— 第一列吃掉所有
+   剩余空间，把链接和版权推到最右，视觉上是两端对齐。 */
 [data-theme="Renascent"] .renascent-footer-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 32px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 20px;
   padding: 40px 0;
+  text-align: center;
 }
 
 [data-theme="Renascent"] .renascent-footer-brand {
@@ -1709,7 +1712,8 @@
 }
 
 [data-theme="Renascent"] .renascent-footer-bio {
-  margin: 8px 0 0;
+  /* 居中布局下外层已有 gap，这里收到 6px 免得品牌名和简介之间太散 */
+  margin: 6px 0 0;
   color: var(--renascent-tertiary);
   font-size: 14px;
 }
@@ -1717,6 +1721,7 @@
 [data-theme="Renascent"] .renascent-footer-links {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
 }
 
@@ -1866,7 +1871,7 @@
   }
 
   [data-theme="Renascent"] .renascent-footer-inner {
-    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
