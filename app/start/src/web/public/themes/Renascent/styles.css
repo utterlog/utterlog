@@ -108,7 +108,7 @@
 [data-theme="Renascent"] .renascent-brand-title {
   overflow: hidden;
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 400;
   line-height: 1;
   text-overflow: ellipsis;
@@ -250,7 +250,7 @@
   width: min(680px, calc(100vw - 32px));
   border: 1px solid var(--renascent-line);
   background: var(--renascent-white);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="Renascent"] .renascent-search-form {
@@ -719,7 +719,7 @@
 [data-theme="Renascent"] .renascent-article-issue strong {
   color: var(--renascent-black);
   font-family: var(--font-serif);
-  font-size: 74px;
+  font-size: 76px;
   font-weight: 400;
   line-height: 0.9;
 }
@@ -770,7 +770,7 @@
   margin: 28px 0 0;
   color: var(--renascent-secondary);
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 300;
   line-height: 1.42;
 }
@@ -921,7 +921,7 @@
 }
 
 [data-theme="Renascent"] .blog-prose h2 {
-  font-size: 40px;
+  font-size: 38px;
   line-height: 1.05;
 }
 
@@ -963,6 +963,15 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+/* 正文链接原本没有 hover 态 —— 规范要求 hover 同时给出颜色变化和下划线变化，
+   作为明确的可供性信号。这里保持「默认就是蓝色带下划线」（比规范的「默认灰、
+   hover 才变蓝」对读者更友好，链接一眼可辨），hover 时加深并加粗下划线。 */
+[data-theme="Renascent"] .blog-prose a:hover {
+  color: var(--renascent-blue-dark);
+  text-decoration-thickness: 2px;
 }
 
 [data-theme="Renascent"] .blog-prose blockquote {
@@ -1092,30 +1101,9 @@
   font-weight: 500;
 }
 
-[data-theme="Renascent"] .blog-ai-summary {
-  margin: 0 0 40px;
-  padding: 22px 24px;
-  border: 1px solid var(--renascent-line);
-  border-radius: 0;
-  background: var(--renascent-soft);
-  box-shadow: none;
-}
-
-[data-theme="Renascent"] .blog-ai-summary-header {
-  margin-bottom: 12px;
-  color: var(--renascent-blue);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-[data-theme="Renascent"] .blog-ai-summary-body {
-  color: var(--renascent-secondary);
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-weight: 300;
-  line-height: 1.62;
-}
+/* .blog-ai-summary 的三条规则已删：Renascent 的 PostPage 不再渲染 AI 摘要卡片
+   （文章头部的 <p>{description}</p> 取的就是 excerpt || ai_summary，内容重复）。
+   其余四个主题仍在用这个组件，它们的样式各自在自己的 styles.css 里。 */
 
 [data-theme="Renascent"] .renascent-article-toc .blog-toc {
   opacity: 1 !important;
@@ -1274,7 +1262,7 @@
   margin-top: 10px;
   color: var(--renascent-black);
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 400;
   line-height: 1.15;
 }
@@ -1517,7 +1505,7 @@
 [data-theme="Renascent"] .renascent-footer-brand {
   color: var(--renascent-black);
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: 22px;
   text-decoration: none;
 }
 
@@ -1557,7 +1545,7 @@
   background: var(--renascent-white);
   color: var(--renascent-blue);
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 999px) {
@@ -1908,7 +1896,7 @@
 [data-theme="Renascent"] .friend-link-name {
   color: var(--renascent-black);
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0;

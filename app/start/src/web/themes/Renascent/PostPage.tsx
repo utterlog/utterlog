@@ -1,5 +1,4 @@
 import Link from '@/components/AppLink';
-import AISummary from '@/components/blog/AISummary';
 import FootprintFlags from '@/components/blog/FootprintFlags';
 import PostContent from '@/components/blog/PostContent';
 import PostNavigation from '@/components/blog/PostNavigation';
@@ -123,10 +122,9 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
                 {post.content ? <PostContent content={post.content} /> : null}
               </>
             ) : (
-              <>
-                <AISummary postId={post.id} aiSummary={post.ai_summary} excerpt={post.excerpt} />
-                <PostContent content={post.content || ''} />
-              </>
+              // 正文顶部不再放 AI 摘要卡片 —— 上面 header 里的 <p>{description}</p>
+              // 取的就是 excerpt || ai_summary，两处内容基本一样，连着显示是重复的。
+              <PostContent content={post.content || ''} />
             )}
           </div>
         </div>
