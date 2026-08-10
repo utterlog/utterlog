@@ -6,13 +6,14 @@ import {
 import toast from 'react-hot-toast';
 import { themesApi, type ExtensionManifest } from '@/lib/api';
 import FooterIconsEditor from '@/components/FooterIconsEditor';
+import RenascentHeroEditor from '@/components/RenascentHeroEditor';
 import AzureProfileSettings from '@/components/AzureProfileSettings';
 import MenusPage from './Menus';
 import { Button, buttonVariants, Callout, Card, ConfirmDialog, LoadingState } from '@/components/ui/shadcn';
 import { cn } from '@/lib/utils';
 
 export default function Themes() {
-  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero'>('themes');
+  const [tab, setTab] = useState<'themes' | 'menus' | 'profile' | 'header' | 'footer' | 'hero' | 'rhero'>('themes');
   const [themes, setThemes] = useState<ExtensionManifest[]>([]);
   const [active, setActive] = useState<string>('');
   const [requestedTheme, setRequestedTheme] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export default function Themes() {
   const showHeader = adminPanels.includes('header_buttons');
   const showFooter = adminPanels.includes('footer_icons');
   const showHero = adminPanels.includes('hero_tiles');
+  const showRenascentHero = adminPanels.includes('renascent_hero');
 
   const fetchList = async () => {
     setLoading(true);
@@ -111,6 +113,7 @@ export default function Themes() {
     { key: 'profile', label: '资料卡', Icon: IdCard, visible: showProfile },
     { key: 'header', label: '头部按钮', Icon: AppWindow, visible: showHeader },
     { key: 'hero', label: '首页图块', Icon: LayoutGrid, visible: showHero },
+    { key: 'rhero', label: '首页 Hero', Icon: LayoutGrid, visible: showRenascentHero },
     { key: 'footer', label: '页脚图标', Icon: Share2, visible: showFooter },
   ];
   const tabs = allTabs.filter(t => t.visible);
@@ -118,7 +121,7 @@ export default function Themes() {
   useEffect(() => {
     if (!tabs.find(t => t.key === tab)) setTab('themes');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showProfile, showHeader, showFooter, showHero]);
+  }, [showProfile, showHeader, showFooter, showHero, showRenascentHero]);
 
   return (
     <div>
@@ -174,6 +177,7 @@ export default function Themes() {
           }
         />
       )}
+      {tab === 'rhero' && showRenascentHero && <RenascentHeroEditor />}
       {tab === 'footer' && showFooter && <FooterIconsEditor />}
       {tab === 'themes' && <>
       {/* Toolbar */}

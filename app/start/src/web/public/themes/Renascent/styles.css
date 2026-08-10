@@ -389,7 +389,6 @@
   font-weight: 300;
   line-height: 1.45;
 }
-[data-theme="Renascent"] .renascent-dashboard-item,
 [data-theme="Renascent"] .renascent-category-strip a,
 [data-theme="Renascent"] .renascent-pagination a,
 [data-theme="Renascent"] .renascent-tags a {
@@ -406,54 +405,232 @@
   text-decoration: none;
 }
 
-[data-theme="Renascent"] .renascent-dashboard {
+/* ============ 首页 hero 左栏：档案表 ============ */
+
+[data-theme="Renascent"] .renascent-hero-facts {
   display: grid;
-  grid-template-columns: 1fr;
-  border-top: 1px solid var(--renascent-line);
+  gap: 10px;
+  margin: 40px 0 0;
 }
 
-[data-theme="Renascent"] .renascent-dashboard-item {
+[data-theme="Renascent"] .renascent-hero-facts > div {
   display: grid;
-  grid-template-columns: 40px minmax(76px, 0.28fr) minmax(0, 1fr);
-  align-items: baseline;
+  grid-template-columns: 132px minmax(0, 1fr);
   gap: 16px;
-  min-height: 72px;
-  padding: 16px 0;
-  border: 0;
-  border-bottom: 1px solid var(--renascent-line);
-  border-radius: 0;
-  color: var(--renascent-black);
-  font-family: var(--font-ui);
-  text-decoration: none;
+  align-items: baseline;
 }
 
-[data-theme="Renascent"] .renascent-dashboard-item:hover {
-  color: var(--renascent-blue);
-}
-
-[data-theme="Renascent"] .renascent-dashboard-item span {
+[data-theme="Renascent"] .renascent-hero-facts dt {
   color: var(--renascent-tertiary);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-[data-theme="Renascent"] .renascent-dashboard-item strong {
-  color: inherit;
+[data-theme="Renascent"] .renascent-hero-facts dd {
+  margin: 0;
+  color: var(--renascent-text);
+  font-family: var(--font-ui);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
-[data-theme="Renascent"] .renascent-dashboard-item em {
-  overflow: hidden;
-  color: inherit;
+/* 标题里 *星号* 包住的词 */
+[data-theme="Renascent"] .renascent-hero-accent {
+  color: var(--renascent-blue);
+  font-style: italic;
+}
+
+/* ============ 首页 hero 右栏：DISPATCH 卡片 ============ */
+
+[data-theme="Renascent"] .renascent-dispatch {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--renascent-line-soft);
+  background: var(--renascent-soft);
+}
+
+[data-theme="Renascent"] .renascent-dispatch-head {
+  padding: 14px 20px 12px;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-head span {
+  color: var(--renascent-blue);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+/* 地图 + 城市列表并排 */
+[data-theme="Renascent"] .renascent-dispatch-atlas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  padding: 4px 20px 16px;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-map-land path {
+  fill: var(--renascent-line);
+}
+
+[data-theme="Renascent"] .renascent-dispatch-map-pin circle {
+  fill: var(--renascent-blue);
+}
+
+[data-theme="Renascent"] .renascent-dispatch-map-halo {
+  fill: var(--renascent-blue);
+  opacity: 0.22;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-bureaux {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-bureaux span {
+  margin-bottom: 4px;
+  color: var(--renascent-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-bureaux em {
+  color: var(--renascent-text);
   font-family: var(--font-serif);
-  font-size: 22px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 1.2;
-  text-overflow: ellipsis;
+  font-size: 15px;
+  font-style: italic;
   white-space: nowrap;
+}
+
+/* 中间那条带 § 的分隔线 */
+[data-theme="Renascent"] .renascent-dispatch-rule {
+  position: relative;
+  margin: 0 20px;
+  border-top: 1px solid var(--renascent-line);
+  text-align: center;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-rule span {
+  position: relative;
+  top: -9px;
+  padding: 0 10px;
+  background: var(--renascent-soft);
+  color: var(--renascent-tertiary);
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-style: italic;
+}
+
+/* 条目列表 */
+[data-theme="Renascent"] .renascent-dispatch-list {
+  display: grid;
+  gap: 0;
+  margin: 4px 0 0;
+  padding: 0 20px;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list > div {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 16px;
+  align-items: baseline;
+  padding: 13px 0;
+  border-bottom: 1px dotted var(--renascent-line);
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list > div:last-child {
+  border-bottom: 0;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list dt {
+  color: var(--renascent-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list dd {
+  margin: 0;
+  color: var(--renascent-text);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list dd a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list dd a:hover {
+  color: var(--renascent-blue);
+}
+
+/* 项目名用蓝色（对应参考图 WRITING 那行） */
+[data-theme="Renascent"] .renascent-dispatch-list dd > span a {
+  color: var(--renascent-blue);
+}
+
+[data-theme="Renascent"] .renascent-dispatch-list dd i {
+  color: var(--renascent-tertiary);
+  font-size: 15px;
+  font-style: italic;
+}
+
+/* 底部：SET IN … + 日期框 */
+[data-theme="Renascent"] .renascent-dispatch-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 20px 0;
+  padding: 14px 0 16px;
+  border-top: 1px solid var(--renascent-line);
+}
+
+[data-theme="Renascent"] .renascent-dispatch-foot span {
+  color: var(--renascent-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-foot span i {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0;
+}
+
+[data-theme="Renascent"] .renascent-dispatch-foot time {
+  padding: 5px 10px;
+  border: 1px solid var(--renascent-blue);
+  color: var(--renascent-blue);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
 }
 
 [data-theme="Renascent"] .renascent-ticker {
@@ -1640,8 +1817,22 @@
     gap: 32px;
   }
 
-  [data-theme="Renascent"] .renascent-dashboard-item {
-    grid-template-columns: 40px minmax(86px, 0.24fr) minmax(0, 1fr);
+  /* DISPATCH 卡片在窄屏堆叠：地图与城市列表上下排，标签列收窄 */
+  [data-theme="Renascent"] .renascent-dispatch-atlas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  [data-theme="Renascent"] .renascent-dispatch-bureaux {
+    grid-auto-flow: column;
+    gap: 10px;
+    justify-items: start;
+    justify-content: start;
+    text-align: left;
+  }
+
+  [data-theme="Renascent"] .renascent-hero-facts > div {
+    grid-template-columns: 110px minmax(0, 1fr);
   }
 
   [data-theme="Renascent"] .renascent-section-heading {
@@ -1703,6 +1894,20 @@
 }
 
 @media (max-width: 599px) {
+  [data-theme="Renascent"] .renascent-dispatch-list > div {
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  [data-theme="Renascent"] .renascent-dispatch-list dd {
+    font-size: 16px;
+  }
+
+  [data-theme="Renascent"] .renascent-hero-facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
   [data-theme="Renascent"] .renascent-home {
     padding-top: 32px;
   }
@@ -1720,16 +1925,7 @@
     font-size: 56px;
   }
 
-  [data-theme="Renascent"] .renascent-dashboard-item {
-    grid-template-columns: 34px minmax(0, 1fr);
-    gap: 6px 14px;
-    min-height: auto;
-  }
-
-  [data-theme="Renascent"] .renascent-dashboard-item em {
-    grid-column: 2;
-    font-size: 19px;
-  }[data-theme="Renascent"] .renascent-article-title-block h1 {
+[data-theme="Renascent"] .renascent-article-title-block h1 {
     font-size: 44px;
   }
 

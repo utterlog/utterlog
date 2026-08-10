@@ -6,6 +6,8 @@ import { formatDateInTimeZone } from '@/lib/timezone';
 import { useThemeContext } from '@/lib/theme-context';
 import { postDateInput } from '@/lib/post-date';
 import PostCard from './PostCard';
+import WorldMap from './WorldMap';
+import { parseFacts, parsePlaces, parseProjects, splitAccentTitle } from './hero-config';
 
 export default function HomePage({
   posts,
@@ -26,7 +28,7 @@ export default function HomePage({
   archiveStats?: any;
   perPage?: number;
 }) {
-  const { site, categories: contextCategories, archiveStats: contextStats, timeZone } = useThemeContext();
+  const { site, categories: contextCategories, archiveStats: contextStats, timeZone, options } = useThemeContext();
   const categories = serverCategories.length ? serverCategories : contextCategories;
   const stats = archiveStats?.post_count ? archiveStats : contextStats;
   const featured = posts[0];
@@ -40,12 +42,33 @@ export default function HomePage({
   const heroIntro = site.description && site.title
     ? `${site.title} · ${site.subtitle || 'notes, essays and field records.'}`
     : (site.subtitle || 'Notes, essays and field records from a personal publishing system.');
-  const dashboardItems = [
-    { no: '01', label: 'Reading', value: featured?.title || 'No article yet', href: featured ? undefined : '/archives' },
-    { no: '02', label: 'Writing', value: `${totalPosts} published articles`, href: '/archives' },
-    { no: '03', label: 'Archive', value: `${totalWords} words`, href: '/archives' },
-    { no: '04', label: 'Discussing', value: `${totalComments} comments`, href: '/moments' },
-  ];
+  // ---- hero 配置（后台「主题 → 首页 Hero」写入，全部可留空）----
+  const heroPlaces = parsePlaces(options?.renascent_hero_places || '');
+  const heroFacts = parseFacts(options?.renascent_hero_facts || '');
+  const heroProjects = parseProjects(options?.renascent_hero_projects || '');
+  const mapPins = heroPlaces.filter((p) => Number.isFinite(p.lng) && Number.isFinite(p.lat));
+  // 标题里用 *星号* 包住的词渲染成斜体强调色
+  const titleParts = splitAccentTitle(heroTitle);
+  const thisYear = new Date(Date.now()).getFullYear();
+  const postsThisYear = posts.filter((p: any) => {
+    const d = postDateInput(p);
+    return d ? new Date(d).getFullYear() === thisYear : false;
+  }).length;
+  const todayLabel = formatDateInTimeZone(new Date(), 'en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  }, timeZone).toUpperCase();
+  // DISPATCH 卡片的条目：有数据才出现，没有就整行不渲染
+  const dispatchRows = [
+    featured && { key: 'reading', label: 'Reading', node: featured.title, href: undefined, post: featured },
+    heroProjects.length > 0 && {
+      key: 'writing', label: 'Writing',
+      node: heroProjects.map((p) => p.name).join('、'),
+      projects: heroProjects,
+    },
+    { key: 'shipping', label: 'Shipping', node: `${postsThisYear || totalPosts} articles`, note: 'the journal', href: '/archives' },
+    totalComments > 0 && { key: 'talking', label: 'Talking', node: `${totalComments} comments`, href: '/moments' },
+  ].filter(Boolean) as any[];
+
   const tickerItems = [
     featured?.title,
     `${totalPosts} articles`,
@@ -58,34 +81,82 @@ export default function HomePage({
     <div className="renascent-container renascent-home">
       <section className="renascent-hero">
         <div className="renascent-hero-copy">
-          <p className="renascent-eyebrow">Renascent·@{site.title || 'utterlog'} — {featuredDate || 'journal'}</p>
-          <h1>{heroTitle}</h1>
+          {heroPlaces.length > 0 && (
+            <p className="renascent-eyebrow">
+              {heroPlaces.map((place) => place.name).join(' · ')}
+            </p>
+          )}
+          <h1>
+            {titleParts.map((part, i) => (
+              part.accent
+                ? <em key={i} className="renascent-hero-accent">{part.text}</em>
+                : <span key={i}>{part.text}</span>
+            ))}
+          </h1>
           <p>{heroIntro}</p>
+
+          {heroFacts.length > 0 && (
+            <dl className="renascent-hero-facts">
+              {heroFacts.map((fact) => (
+                <div key={fact.label + fact.value}>
+                  <dt>{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
 
-        <div className="renascent-dashboard" aria-label="站点概览">
-          {dashboardItems.map((item) => {
-            const content = (
-              <>
-                <span>{item.no}</span>
-                <strong>{item.label}</strong>
-                <em>{item.value}</em>
-              </>
-            );
-            if (item.no === '01' && featured) {
-              return (
-                <PostLink key={item.no} post={featured} className="renascent-dashboard-item">
-                  {content}
-                </PostLink>
-              );
-            }
-            return (
-              <Link prefetch={false} key={item.no} href={item.href || '/'} className="renascent-dashboard-item">
-                {content}
-              </Link>
-            );
-          })}
-        </div>
+        <aside className="renascent-dispatch" aria-label="站点概览">
+          <div className="renascent-dispatch-head">
+            <span>§ DISPATCH · COLOPHON</span>
+          </div>
+
+          {mapPins.length > 0 && (
+            <div className="renascent-dispatch-atlas">
+              <WorldMap pins={mapPins} />
+              <div className="renascent-dispatch-bureaux">
+                <span>BUREAUX</span>
+                {heroPlaces.map((place, i) => (
+                  <em key={place.name}>{i > 0 ? '→ ' : ''}{place.name}</em>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="renascent-dispatch-rule" aria-hidden="true"><span>§</span></div>
+
+          <dl className="renascent-dispatch-list">
+            {dispatchRows.map((row) => (
+              <div key={row.key}>
+                <dt>{row.label}</dt>
+                <dd>
+                  {row.post ? (
+                    <PostLink post={row.post}>{row.node}</PostLink>
+                  ) : row.projects ? (
+                    row.projects.map((proj: any, i: number) => (
+                      <span key={proj.name}>
+                        {i > 0 && ', '}
+                        {proj.url
+                          ? <a href={proj.url} target="_blank" rel="noopener noreferrer">{proj.name}</a>
+                          : proj.name}
+                        {proj.note && <i> [{proj.note}]</i>}
+                      </span>
+                    ))
+                  ) : row.href ? (
+                    <Link prefetch={false} href={row.href}>{row.node}</Link>
+                  ) : row.node}
+                  {row.note && <i> · {row.note}</i>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="renascent-dispatch-foot">
+            <span>SET IN <i>Newsreader</i> &amp; INTER</span>
+            <time>{todayLabel}</time>
+          </div>
+        </aside>
       </section>
 
       {tickerItems.length > 0 && (
