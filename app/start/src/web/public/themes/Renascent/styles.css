@@ -48,13 +48,22 @@
   min-height: 0;
 }
 
+/* 全站唯一的限宽层。
+ *
+ * 之前每个页面各管各的：首页 / 文章页套 .renascent-container（1168px 居中），
+ * 内页只有一个没有类名的 <div>（宽度继承 frame 的 100%，等于全宽），页头
+ * .blog-page-title 又自己声明一次 1168px —— 于是页头居中、内容通栏，几个
+ * 页面的左右边界对不上。
+ *
+ * 现在宽度只在这里定义一次，下面的容器一律 width:100% 跟随。
+ * 想做通栏效果的元素用负 margin 突破（见 .renascent-ticker）。 */
 [data-theme="Renascent"] .renascent-frame {
-  width: 100%;
+  width: min(1168px, calc(100vw - 64px));
+  margin-inline: auto;
 }
 
 [data-theme="Renascent"] .renascent-container {
-  width: min(1168px, calc(100vw - 64px));
-  margin-inline: auto;
+  width: 100%;
 }
 
 [data-theme="Renascent"] .renascent-header {
@@ -449,6 +458,8 @@
 
 [data-theme="Renascent"] .renascent-ticker {
   overflow: hidden;
+  /* 突破 frame 做通栏。frame 宽 min(1168px, 100vw-64px)，两侧各留
+     (100vw - frame) / 2，取负值即可铺满视口。 */
   margin: 24px calc((100vw - min(1168px, calc(100vw - 64px))) / -2) 0;
   border-block: 1px solid var(--renascent-line-soft);
   color: var(--renascent-tertiary);
@@ -791,7 +802,7 @@
 }
 
 [data-theme="Renascent"] .renascent-article-cover-wrap {
-  width: min(1168px, calc(100vw - 64px));
+  width: 100%;
   margin: 48px auto 0;
 }
 
@@ -1468,8 +1479,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  width: min(1168px, calc(100vw - 64px));
-  margin: 56px auto 32px;
+  /* 宽度跟随 .renascent-frame，不再自己声明 —— 这样页头和下方内容左右对齐。
+     左边留 18px 是给 .blog-page-title-rail 那条 absolute 的蓝色竖线让位。 */
+  width: 100%;
+  margin: 56px 0 32px;
   padding: 0 0 24px 18px;
   border-bottom: 1px solid var(--renascent-line-soft);
   background: transparent;
@@ -1576,10 +1589,10 @@
 }
 
 @media (max-width: 999px) {
-  [data-theme="Renascent"] .renascent-container,
-  [data-theme="Renascent"] .renascent-header-inner,
-  [data-theme="Renascent"] .renascent-article-cover-wrap,
-  [data-theme="Renascent"] .blog-page-title {
+  /* 移动端同样只调 frame 一处，内层容器保持 100% 跟随。
+     header-inner 在 frame 外（header 是独立的），要单独给。 */
+  [data-theme="Renascent"] .renascent-frame,
+  [data-theme="Renascent"] .renascent-header-inner {
     width: min(100vw - 32px, 720px);
   }
 
@@ -1849,11 +1862,9 @@
   gap: 18px;
 }
 
-/* 通用页面正文容器（多数页面用 padding: 0 32px 32px 包裹） */
-[data-theme="Renascent"] .blog-main > main {
-  width: min(1168px, calc(100vw - 64px));
-  margin: 0 auto;
-}
+/* 原来这里有条 `.blog-main > main` 规则，但 blog-main 和 renascent-main 是同一个
+   <main> 上的两个类、不是父子关系，选择器永远匹配不到元素 —— 已删。
+   页面宽度统一由 .renascent-frame 控制。 */
 
 /* archive 分类卡 */
 [data-theme="Renascent"] .archive-cat-card {
@@ -1974,7 +1985,7 @@
 
 /* 足迹页 */
 [data-theme="Renascent"] .footprint-page {
-  width: min(1168px, calc(100vw - 64px));
+  width: 100%;
   margin: 0 auto;
   padding: 0 0 40px;
 }
