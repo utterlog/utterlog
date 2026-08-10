@@ -208,26 +208,8 @@
   object-fit: contain;
 }
 
-[data-theme="Renascent"] .renascent-search-trigger {
-  gap: 9px;
-  width: auto;
-  padding: 0 12px 0 14px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-[data-theme="Renascent"] .renascent-search-trigger kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  height: 22px;
-  border: 1px solid var(--renascent-line-soft);
-  border-radius: 999px;
-  color: var(--renascent-tertiary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-}
+/* 搜索按钮跟其他图标按钮一样是 44px 圆形 —— 原来这里把它撑成带「搜索」
+   文字和 ⌘K 标签的长条，现在快捷键提示放在 title 里。 */
 
 [data-theme="Renascent"] .renascent-menu-button {
   display: none;
@@ -1801,15 +1783,10 @@
     padding: 0 10px;
   }
 
-  [data-theme="Renascent"] .renascent-search-trigger span,
-  [data-theme="Renascent"] .renascent-search-trigger kbd,
+  /* 窄屏只留前两个（搜索 · 随机），其余自定义按钮收进汉堡菜单。
+     按 button 的位置数，跟按钮用什么类无关。 */
   [data-theme="Renascent"] .renascent-actions > .renascent-icon-button:not(.renascent-menu-button):nth-of-type(n+3) {
     display: none;
-  }
-
-  [data-theme="Renascent"] .renascent-search-trigger {
-    width: 44px;
-    padding: 0;
   }
 
   [data-theme="Renascent"] .renascent-hero {

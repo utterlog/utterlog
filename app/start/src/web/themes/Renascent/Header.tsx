@@ -234,6 +234,16 @@ export default function Header() {
           </nav>
 
           <div className="renascent-actions">
+            {/* 顺序：搜索 · 随机 · 后台配置的自定义按钮（开往 / 博客十年 …） */}
+            <button
+              type="button"
+              className="renascent-icon-button renascent-search-trigger"
+              title="搜索（⌘K）"
+              aria-label="搜索"
+              onClick={() => setSearchOpen(true)}
+            >
+              <i className="fa-sharp fa-light fa-magnifying-glass" aria-hidden="true" />
+            </button>
             <button
               type="button"
               className={`renascent-icon-button${randomLoading ? ' loading' : ''}`}
@@ -242,16 +252,6 @@ export default function Header() {
               onClick={visitRandomPost}
             >
               <i className={randomLoading ? 'fa-solid fa-circle-notch fa-spin' : 'fa-solid fa-dice'} aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className="renascent-search-trigger"
-              aria-label="搜索"
-              onClick={() => setSearchOpen(true)}
-            >
-              <i className="fa-sharp fa-light fa-magnifying-glass" aria-hidden="true" />
-              <span>搜索</span>
-              <kbd>⌘K</kbd>
             </button>
             {headerButtons.map(actionButton)}
             <button
