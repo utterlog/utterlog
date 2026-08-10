@@ -503,6 +503,31 @@ export async function codingPayload(includeRepos = false) {
     yearContributions = contributions.reduce((sum, day) => sum + day.count, 0);
     allContributions = yearContributions;
   }
+  // 选中但不在 owner 名下的仓库要单独拉。
+  //
+  // allRepos 只由 /users/<owner>/repos 填充，那个接口**不返回组织仓库**。而后台
+  // 的仓库选择器允许选任意 full_name，于是选了 utterlog/utterlog 这种组织项目后，
+  // 下面的 filter 拿 selected 去过滤 allRepos 永远匹配不上，被静默丢弃 ——
+  // 站长在后台明明选了 10 个，前台只出现 8 个，且没有任何提示。
+  // （实测：gentpan 名下 29 个仓库里确实没有 utterlog/utterlog。）
+  const missingSelected = Array.from(selected).filter((key) => !allRepos.has(key));
+  if (missingSelected.length) {
+    const targets = missingSelected.slice(0, 12); // 挡住「选了几百个」把配额打爆
+    const fetched = await Promise.all(targets.map((key) =>
+      githubJson<GitHubRepo>(`/repos/${key.split('/').map(encodeURIComponent).join('/')}`)
+        .catch((err) => {
+          // 改名、删除、转私有都会到这里；不写进 firstError（不该因为一个选项
+          // 就把整页标成出错），但要留一行日志，否则又是一次静默消失
+          console.warn(`[coding] 选中的仓库 ${key} 拉取失败:`, err instanceof Error ? err.message : err);
+          return null;
+        })));
+    for (const repo of fetched) {
+      if (!repo) continue;
+      const item = toCodingRepo(repo);
+      if (item.full_name) allRepos.set(item.full_name.toLowerCase(), item);
+    }
+  }
+
   const repos = Array.from(allRepos.values()).sort((a, b) => String(b.pushed_at || b.updated_at).localeCompare(String(a.pushed_at || a.updated_at)));
   const hasSelection = selected.size > 0;
   const displayRepos = repos
