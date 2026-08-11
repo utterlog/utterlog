@@ -16,6 +16,29 @@ type CachedCommentUser = {
   url?: string;
 };
 
+/** /api/v1/visitor 返回的公开档案 */
+type VisitorProfile = {
+  found: boolean;
+  name?: string;
+  avatar?: string;
+  level?: number;
+  comment_count?: number;
+};
+
+/** 与前台评论列表的等级徽章保持同一套配色 */
+const LEVEL_COLORS: Record<number, { bg: string; color: string }> = {
+  1: { bg: '#f0f0f0', color: '#999' },
+  2: { bg: '#e8f5e9', color: '#388e3c' },
+  3: { bg: '#e3f2fd', color: '#1565c0' },
+  4: { bg: '#e8eaf6', color: '#283593' },
+  5: { bg: '#f3e5f5', color: '#7b1fa2' },
+  6: { bg: '#fce4ec', color: '#1976d2' },
+  7: { bg: '#fff3e0', color: '#e65100' },
+  8: { bg: '#fff8e1', color: '#f57f17' },
+  9: { bg: '#fffde7', color: '#f9a825' },
+  10: { bg: 'linear-gradient(135deg, #ff6b6b, #ffa500, #ffd700)', color: '#fff' },
+};
+
 function parseSocialLinks(raw: unknown): ProfileSocialLink[] {
   if (!raw) return [];
   try {
@@ -65,16 +88,34 @@ function copyText(value: string) {
 export default function AzureProfileCard() {
   const { site, owner, options } = useThemeContext();
   const [visitor, setVisitor] = useState<CachedCommentUser | null>(null);
+  const [profile, setProfile] = useState<VisitorProfile | null>(null);
 
   useEffect(() => {
+    let email = '';
     try {
       const raw = localStorage.getItem('comment_user');
       if (!raw) return;
       const parsed = JSON.parse(raw) as CachedCommentUser;
-      if (parsed?.name) setVisitor(parsed);
+      if (!parsed?.name) return;
+      setVisitor(parsed);
+      email = String(parsed.email || '').trim();
     } catch {
       setVisitor(null);
+      return;
     }
+    // 有邮箱才去查档案（头像要 MD5、等级要聚合评论数，都得后端算）。
+    // 查不到或请求失败就保持 null，卡片自动退回「只有欢迎语」的样子。
+    if (!email) return;
+    let alive = true;
+    fetch(`/api/v1/visitor?email=${encodeURIComponent(email)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload) => {
+        if (!alive) return;
+        const data = payload?.data || payload;
+        if (data?.found) setProfile(data as VisitorProfile);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
   }, []);
 
   const enabled = options.azure_sidebar_profile_enabled !== 'false';
@@ -98,7 +139,24 @@ export default function AzureProfileCard() {
 
   return (
     <div className="azure-profile-card" data-has-intro={intro ? 'true' : 'false'}>
-      <div className="azure-profile-welcome">{welcome}</div>
+      {/* 认出访客时，欢迎语左侧带上他自己的头像和等级 —— 数据来自
+          /api/v1/visitor（按 localStorage 里缓存的评论邮箱查）。
+          没查到就退回纯文字，跟以前一样。 */}
+      <div className="azure-profile-welcome">
+        {profile?.found && profile.avatar && (
+          <img src={profile.avatar} alt="" className="azure-profile-visitor-avatar" />
+        )}
+        <span>{welcome}</span>
+        {profile?.found && profile.level ? (
+          <span
+            className="azure-profile-visitor-level"
+            title={`Lv.${profile.level}　累计 ${profile.comment_count || 0} 条评论`}
+            style={LEVEL_COLORS[profile.level] || LEVEL_COLORS[1]}
+          >
+            Lv.{profile.level}
+          </span>
+        ) : null}
+      </div>
 
       <div className="azure-profile-body">
         <div className="azure-profile-face">

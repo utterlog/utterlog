@@ -61,6 +61,7 @@ import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
 import { Route as DateYearMonthRouteImport } from './routes/date/$year/$month'
+import { Route as ApiV1VisitorRouteImport } from './routes/api/v1/visitor'
 import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
 import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
 import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
@@ -474,6 +475,11 @@ const DateYearMonthRoute = DateYearMonthRouteImport.update({
   path: '/$month',
   getParentRoute: () => DateYearRoute,
 } as any)
+const ApiV1VisitorRoute = ApiV1VisitorRouteImport.update({
+  id: '/api/v1/visitor',
+  path: '/api/v1/visitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1TrackRoute = ApiV1TrackRouteImport.update({
   id: '/api/v1/track',
   path: '/api/v1/track',
@@ -590,14 +596,14 @@ const DateYearMonthDayRoute = DateYearMonthDayRouteImport.update({
   getParentRoute: () => DateYearMonthRoute,
 } as any)
 const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
-  id: '/api/v1/visitor/weather',
-  path: '/api/v1/visitor/weather',
-  getParentRoute: () => rootRouteImport,
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => ApiV1VisitorRoute,
 } as any)
 const ApiV1VisitorGeoRoute = ApiV1VisitorGeoRouteImport.update({
-  id: '/api/v1/visitor/geo',
-  path: '/api/v1/visitor/geo',
-  getParentRoute: () => rootRouteImport,
+  id: '/geo',
+  path: '/geo',
+  getParentRoute: () => ApiV1VisitorRoute,
 } as any)
 const ApiV1UnsubscribeCommentReplyRoute =
   ApiV1UnsubscribeCommentReplyRouteImport.update({
@@ -1329,6 +1335,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
+  '/api/v1/visitor': typeof ApiV1VisitorRouteWithChildren
   '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
@@ -1535,6 +1542,7 @@ export interface FileRoutesByTo {
   '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
+  '/api/v1/visitor': typeof ApiV1VisitorRouteWithChildren
   '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
@@ -1742,6 +1750,7 @@ export interface FileRoutesById {
   '/api/v1/search': typeof ApiV1SearchRouteWithChildren
   '/api/v1/tags': typeof ApiV1TagsRouteWithChildren
   '/api/v1/track': typeof ApiV1TrackRouteWithChildren
+  '/api/v1/visitor': typeof ApiV1VisitorRouteWithChildren
   '/date/$year/$month': typeof DateYearMonthRouteWithChildren
   '/api/v1/$resource/$id': typeof ApiV1ResourceIdRoute
   '/api/v1/admin/bootstrap': typeof ApiV1AdminBootstrapRoute
@@ -1950,6 +1959,7 @@ export interface FileRouteTypes {
     | '/api/v1/search'
     | '/api/v1/tags'
     | '/api/v1/track'
+    | '/api/v1/visitor'
     | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
@@ -2156,6 +2166,7 @@ export interface FileRouteTypes {
     | '/api/v1/search'
     | '/api/v1/tags'
     | '/api/v1/track'
+    | '/api/v1/visitor'
     | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
@@ -2362,6 +2373,7 @@ export interface FileRouteTypes {
     | '/api/v1/search'
     | '/api/v1/tags'
     | '/api/v1/track'
+    | '/api/v1/visitor'
     | '/date/$year/$month'
     | '/api/v1/$resource/$id'
     | '/api/v1/admin/bootstrap'
@@ -2565,6 +2577,7 @@ export interface RootRouteChildren {
   ApiV1SearchRoute: typeof ApiV1SearchRouteWithChildren
   ApiV1TagsRoute: typeof ApiV1TagsRouteWithChildren
   ApiV1TrackRoute: typeof ApiV1TrackRouteWithChildren
+  ApiV1VisitorRoute: typeof ApiV1VisitorRouteWithChildren
   ApiV1AdminBootstrapRoute: typeof ApiV1AdminBootstrapRoute
   ApiV1AdminHeaderCountsRoute: typeof ApiV1AdminHeaderCountsRoute
   ApiV1AdminLinkEmailsRoute: typeof ApiV1AdminLinkEmailsRoute
@@ -2643,8 +2656,6 @@ export interface RootRouteChildren {
   ApiV1ThemesIdRoute: typeof ApiV1ThemesIdRouteWithChildren
   ApiV1ThemesUploadRoute: typeof ApiV1ThemesUploadRoute
   ApiV1UnsubscribeCommentReplyRoute: typeof ApiV1UnsubscribeCommentReplyRoute
-  ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
-  ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
   ApiV1AnalyticsIndexRoute: typeof ApiV1AnalyticsIndexRoute
   ApiV1CommentsIndexRoute: typeof ApiV1CommentsIndexRoute
   ApiV1MediaIndexRoute: typeof ApiV1MediaIndexRoute
@@ -3047,6 +3058,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DateYearMonthRouteImport
       parentRoute: typeof DateYearRoute
     }
+    '/api/v1/visitor': {
+      id: '/api/v1/visitor'
+      path: '/api/v1/visitor'
+      fullPath: '/api/v1/visitor'
+      preLoaderRoute: typeof ApiV1VisitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/track': {
       id: '/api/v1/track'
       path: '/api/v1/track'
@@ -3210,17 +3228,17 @@ declare module '@tanstack/react-router' {
     }
     '/api/v1/visitor/weather': {
       id: '/api/v1/visitor/weather'
-      path: '/api/v1/visitor/weather'
+      path: '/weather'
       fullPath: '/api/v1/visitor/weather'
       preLoaderRoute: typeof ApiV1VisitorWeatherRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiV1VisitorRoute
     }
     '/api/v1/visitor/geo': {
       id: '/api/v1/visitor/geo'
-      path: '/api/v1/visitor/geo'
+      path: '/geo'
       fullPath: '/api/v1/visitor/geo'
       preLoaderRoute: typeof ApiV1VisitorGeoRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiV1VisitorRoute
     }
     '/api/v1/unsubscribe/comment-reply': {
       id: '/api/v1/unsubscribe/comment-reply'
@@ -4286,6 +4304,20 @@ const ApiV1TrackRouteWithChildren = ApiV1TrackRoute._addFileChildren(
   ApiV1TrackRouteChildren,
 )
 
+interface ApiV1VisitorRouteChildren {
+  ApiV1VisitorGeoRoute: typeof ApiV1VisitorGeoRoute
+  ApiV1VisitorWeatherRoute: typeof ApiV1VisitorWeatherRoute
+}
+
+const ApiV1VisitorRouteChildren: ApiV1VisitorRouteChildren = {
+  ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,
+  ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
+}
+
+const ApiV1VisitorRouteWithChildren = ApiV1VisitorRoute._addFileChildren(
+  ApiV1VisitorRouteChildren,
+)
+
 interface ApiV1AiProvidersRouteChildren {
   ApiV1AiProvidersIdRoute: typeof ApiV1AiProvidersIdRoute
 }
@@ -4461,6 +4493,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SearchRoute: ApiV1SearchRouteWithChildren,
   ApiV1TagsRoute: ApiV1TagsRouteWithChildren,
   ApiV1TrackRoute: ApiV1TrackRouteWithChildren,
+  ApiV1VisitorRoute: ApiV1VisitorRouteWithChildren,
   ApiV1AdminBootstrapRoute: ApiV1AdminBootstrapRoute,
   ApiV1AdminHeaderCountsRoute: ApiV1AdminHeaderCountsRoute,
   ApiV1AdminLinkEmailsRoute: ApiV1AdminLinkEmailsRoute,
@@ -4539,8 +4572,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1ThemesIdRoute: ApiV1ThemesIdRouteWithChildren,
   ApiV1ThemesUploadRoute: ApiV1ThemesUploadRoute,
   ApiV1UnsubscribeCommentReplyRoute: ApiV1UnsubscribeCommentReplyRoute,
-  ApiV1VisitorGeoRoute: ApiV1VisitorGeoRoute,
-  ApiV1VisitorWeatherRoute: ApiV1VisitorWeatherRoute,
   ApiV1AnalyticsIndexRoute: ApiV1AnalyticsIndexRoute,
   ApiV1CommentsIndexRoute: ApiV1CommentsIndexRoute,
   ApiV1MediaIndexRoute: ApiV1MediaIndexRoute,

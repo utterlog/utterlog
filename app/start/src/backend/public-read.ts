@@ -67,15 +67,6 @@ function commentGeoFromRow(value: unknown) {
 }
 
 /**
- * 匿名访客拿不到的评论字段。
- *
- * 评论列表是 `select c.*` 再整行摊平返回的，等于把 comments 表的每一列都发给了
- * 前台 —— 任何人 curl 一次就能把全站评论者的邮箱和 IP 拖走。这里逐个置空，
- * 而不是改成白名单 select：前台和后台共用同一个查询，白名单会连带影响后台。
- *
- * UA 保留：前台评论上「Windows · Chrome」那行就是靠它渲染的，属于有意展示。
- */
-/**
  * 按累计评论数换算等级（1-10）。
  *
  * 前台的等级徽章有 10 档配色，这里给出对应的门槛。曲线前密后疏：
@@ -130,6 +121,15 @@ async function commentCountsByAuthor(rows: Array<Record<string, unknown>>) {
   return { byEmail, byUser };
 }
 
+/**
+ * 匿名访客拿不到的评论字段。
+ *
+ * 评论列表是 `select c.*` 再整行摊平返回的，等于把 comments 表的每一列都发给了
+ * 前台 —— 任何人 curl 一次就能把全站评论者的邮箱和 IP 拖走。这里逐个置空，
+ * 而不是改成白名单 select：前台和后台共用同一个查询，白名单会连带影响后台。
+ *
+ * UA 保留：前台评论上「Windows · Chrome」那行就是靠它渲染的，属于有意展示。
+ */
 const ANONYMOUS_COMMENT_REDACTIONS = {
   author_email: '',
   email: '',
@@ -645,6 +645,41 @@ export async function listPublicFootprints(filters: { city?: string; country?: s
      limit 200`,
     params,
   ).catch(() => []);
+}
+
+/**
+ * 按邮箱查一个访客的公开档案，给侧栏「欢迎回来」用。
+ *
+ * 前台只在 localStorage 里存了访客自己填过的昵称 / 邮箱 / 网址（评论表单缓存的），
+ * 头像要 MD5 算 Gravatar、等级要聚合评论数，这两件事都得后端做。
+ *
+ * **只返回公开信息**：邮箱本身不回显（前端本来就有），也不暴露 IP、具体评论内容。
+ * 查不到就返回 found:false，让前台退回默认欢迎语。
+ */
+export async function visitorProfileByEmail(email: string) {
+  const normalized = String(email || '').trim().toLowerCase();
+  if (!normalized || !normalized.includes('@')) return { found: false };
+
+  const row = await one<{ n: string; name: string; last_at: string }>(
+    `select count(*)::text as n,
+            max(author_name) as name,
+            max(created_at)::text as last_at
+     from ${table('comments')}
+     where status = 'approved' and lower(author_email) = $1`,
+    [normalized],
+  ).catch(() => null);
+
+  const count = Number(row?.n || 0);
+  if (!count) return { found: false };
+
+  return {
+    found: true,
+    name: String(row?.name || ''),
+    avatar: gravatarUrlForEmail(normalized, 96),
+    level: levelForCount(count),
+    comment_count: count,
+    last_comment_at: Number(row?.last_at || 0) || null,
+  };
 }
 
 export async function listPostComments(postId: number) {

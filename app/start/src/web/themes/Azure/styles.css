@@ -717,7 +717,10 @@
   border-radius: 0;
 }
 [data-theme="Azure"] .azure-profile-welcome {
-  display: block;
+  /* 认出访客时里面会多出头像和等级徽章，要横排对齐 —— 原来是 block */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   max-width: 100%;
   width: fit-content;
   margin: 0 auto;
@@ -2191,4 +2194,24 @@
   border-left-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 500;
+}
+
+/* ---- 侧栏认出访客后的头像与等级 ---- */
+
+[data-theme="Azure"] .azure-profile-visitor-avatar {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+[data-theme="Azure"] .azure-profile-visitor-level {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  /* 配色由行内 style 给（与评论列表的徽章同一套），这里只管排版 */
 }
