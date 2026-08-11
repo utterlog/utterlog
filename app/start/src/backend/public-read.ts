@@ -40,15 +40,30 @@ function normalizeDirection(input: string | undefined) {
   return input?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 }
 
+/**
+ * 把 comments.geo 这一列还原成对象。
+ *
+ * 库里存的格式不统一：有的是正常的 `{"country_code":"cn",…}`，有的被序列化了
+ * 两次，长这样 —— `"{\"country_code\":\"cn\",…}"`（最外层多一对引号、内部全是
+ * 转义）。对后者 JSON.parse 一次只剥掉外层，拿到的还是字符串，于是前台
+ * `comment.geo?.country_code` 取不到值，国旗和城市整块不渲染。
+ *
+ * 所以这里循环解析，直到拿到对象或解不动为止。限 3 次够用又不会被恶意数据
+ * 拖住。
+ */
 function commentGeoFromRow(value: unknown) {
   if (!value) return null;
-  if (typeof value === 'object') return value;
-  if (typeof value !== 'string') return null;
-  try {
-    return JSON.parse(value) as Record<string, unknown>;
-  } catch {
-    return null;
+  if (typeof value === 'object') return value as Record<string, unknown>;
+  let current: unknown = value;
+  for (let i = 0; i < 3; i++) {
+    if (typeof current !== 'string') break;
+    try {
+      current = JSON.parse(current);
+    } catch {
+      return null;
+    }
   }
+  return current && typeof current === 'object' ? current as Record<string, unknown> : null;
 }
 
 /**

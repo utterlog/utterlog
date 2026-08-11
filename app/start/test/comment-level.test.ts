@@ -98,3 +98,44 @@ describe('源码不能再写死等级', () => {
     expect(approvedCount).toBe(2); // 邮箱、user_id 两条查询各一次
   });
 });
+
+describe('geo 字段的还原', () => {
+  // 库里 geo 存的格式不统一：有的是正常 JSON，有的被序列化了两次，
+  // 长成 "{\"country_code\":\"cn\"}" —— parse 一次只剥掉外层引号，
+  // 结果还是字符串，前台 geo?.country_code 取不到值，国旗和城市整块不渲染。
+  function parseGeo(value: unknown) {
+    if (!value) return null;
+    if (typeof value === 'object') return value as Record<string, unknown>;
+    let current: unknown = value;
+    for (let i = 0; i < 3; i++) {
+      if (typeof current !== 'string') break;
+      try { current = JSON.parse(current); } catch { return null; }
+    }
+    return current && typeof current === 'object' ? current as Record<string, unknown> : null;
+  }
+
+  test('正常的一层 JSON', () => {
+    expect(parseGeo('{"country_code":"cn","city":"杭州"}')).toEqual({ country_code: 'cn', city: '杭州' });
+  });
+
+  test('双重序列化的也能还原 —— 这是线上实际存在的格式', () => {
+    const doubled = JSON.stringify(JSON.stringify({ country_code: 'uz', city: 'Tashkent' }));
+    expect(parseGeo(doubled)).toEqual({ country_code: 'uz', city: 'Tashkent' });
+  });
+
+  test('已经是对象就原样返回', () => {
+    const obj = { country_code: 'jp' };
+    expect(parseGeo(obj)).toBe(obj);
+  });
+
+  test('空值与坏数据返回 null，不抛错', () => {
+    for (const bad of [null, undefined, '', '不是JSON', '{坏', 0]) {
+      expect(parseGeo(bad)).toBeNull();
+    }
+  });
+
+  test('解析出非对象（数字/字符串字面量）也返回 null', () => {
+    expect(parseGeo('123')).toBeNull();
+    expect(parseGeo('"just a string"')).toBeNull();
+  });
+});
