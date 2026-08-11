@@ -341,35 +341,19 @@ function gravatar(email: string) {
   return normalized ? `https://gravatar.bluecdn.com/avatar/${createHash('md5').update(normalized).digest('hex')}?s=64&d=mp` : '';
 }
 
+/**
+ * 页脚的「N 人在线」。
+ *
+ * 只回人数。原来还逐个反查访客身份（按 visitor_id / IP 去 comments 表找昵称和
+ * 邮箱）再查一次 access_logs 拿归属地，拼成明细列表给前台弹层展示 —— 那等于
+ * 把每个在线访客的昵称、脱敏 IP、所在城市、**当前正在看哪一页**都公开给所有人。
+ * 前台已经不展示明细，这些查询（每位访客 2-3 条 SQL）也一并省掉。
+ *
+ * online 字段保留成空数组，是为了老前端拿到 d.online 时不会炸。
+ */
 export async function publicOnlineVisitors() {
   const enabled = !['0', 'false'].includes((await optionValue('show_online_visitors', '1')).toLowerCase());
   if (!enabled) return { count: 0, online: [], enabled: false };
   const keys = await ephemeral.scan('online:');
-  const raw = (await Promise.all(keys.map(async (key) => {
-    try { return JSON.parse(await ephemeral.get(key) || '{}') as Record<string, unknown>; } catch { return null; }
-  }))).filter(Boolean) as Record<string, unknown>[];
-  const online: Record<string, unknown>[] = [];
-  for (const item of raw) {
-    const visitorId = String(item.visitor_id || '');
-    const ip = String(item.ip || '');
-    const user: Record<string, unknown> = { visitor_id: visitorId, path: String(item.path || ''), ts: item.ts || 0, ip_masked: maskIp(ip) };
-    let comment = visitorId ? await one<{ author_name: string; author_email: string }>(
-      `select author_name,coalesce(author_email,'') as author_email from ${table('comments')}
-       where visitor_id=$1 and visitor_id!='' order by created_at desc,id desc limit 1`, [visitorId],
-    ).catch(() => null) : null;
-    if (!comment && ip) comment = await one<{ author_name: string; author_email: string }>(
-      `select author_name,coalesce(author_email,'') as author_email from ${table('comments')}
-       where author_ip=$1 order by created_at desc,id desc limit 1`, [ip],
-    ).catch(() => null);
-    if (comment?.author_name) { user.name = comment.author_name; if (comment.author_email) user.avatar = gravatar(comment.author_email); }
-    const geo = ip ? await one<{ country: string; country_code: string; city: string }>(
-      `select coalesce(country_name,'') as country,coalesce(country,'') as country_code,coalesce(city,'') as city
-       from ${table('access_logs')} where ip=$1 and country!='' order by created_at desc,id desc limit 1`, [ip],
-    ).catch(() => null) : null;
-    user.country = geo?.country || item.country || '';
-    user.country_code = geo?.country_code || item.country_code || '';
-    user.city = geo?.city || item.city || '';
-    online.push(user);
-  }
-  return { count: online.length, online, enabled: true };
+  return { count: keys.length, online: [], enabled: true };
 }

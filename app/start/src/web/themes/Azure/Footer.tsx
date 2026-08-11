@@ -28,8 +28,6 @@ export default function Footer() {
   const [siteOptions, setSiteOptions] = useState<any>({});
   const [visitor, setVisitor] = useState<{ city?: string; code?: string }>({});
   const [onlineCount, setOnlineCount] = useState(0);
-  const [onlineList, setOnlineList] = useState<any[]>([]);
-  const [onlineOpen, setOnlineOpen] = useState(false);
   const [onlineEnabled, setOnlineEnabled] = useState(true);
 
   // Scroll to top visibility — 超过 2 倍视口高度才显示
@@ -61,7 +59,6 @@ export default function Footer() {
     const fetchOnline = () => fetch(`${API}/online`, { cache: 'no-store' }).then(r => r.json()).then(r => {
       const d = r.data || r;
       setOnlineCount(d.count || 0);
-      setOnlineList(d.online || []);
       setOnlineEnabled(d.enabled !== false);
     }).catch(() => {});
     fetchOnline();
@@ -369,67 +366,11 @@ export default function Footer() {
               <i className="fa-regular fa-eye" style={{ fontSize: '11px' }} /> 总浏览量 {totalViews}
             </span>
             {onlineEnabled && (
-              <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                <button onClick={() => setOnlineOpen(!onlineOpen)} style={{
-                  display: 'flex', alignItems: 'center', gap: '5px',
-                  background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '12px', padding: 0,
-                }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 4px #22c55e' }} />
-                  {onlineCount} 人在线
-                </button>
-                {onlineOpen && (
-                  <>
-                    <div onClick={() => setOnlineOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
-                    <div className="azure-footer-online-popover" style={{
-                      position: 'absolute', left: 0, bottom: '100%', marginBottom: '10px', zIndex: 91,
-                      width: '280px', maxHeight: '300px', overflowY: 'auto',
-                      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-                      border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    }}>
-                    <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', color: '#333' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
-                        实时在线访客
-                      </span>
-                      <button onClick={() => setOnlineOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '14px' }}>
-                        <i className="fa-regular fa-xmark" />
-                      </button>
-                    </div>
-                    {onlineList.length === 0 ? (
-                      <div style={{ padding: '20px', textAlign: 'center', fontSize: '12px', color: '#999' }}>暂无在线访客</div>
-                    ) : (
-                      onlineList.map((u: any, i: number) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                          {/* Avatar or fallback icon */}
-                          {u.avatar ? (
-                            <img src={u.avatar} alt="" style={{ width: '28px', height: '28px', objectFit: 'cover', clipPath: 'url(#squircle)', flexShrink: 0, background: '#f0f0f0' }} />
-                          ) : (
-                            <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0', clipPath: 'url(#squircle)', flexShrink: 0 }}>
-                              <i className="fa-solid fa-user" style={{ fontSize: '12px', color: '#bbb' }} />
-                            </div>
-                          )}
-                          {/* Info */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 500, color: u.name ? '#333' : '#999', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {u.name || u.ip_masked || '匿名'}
-                              </span>
-                              {u.country_code && (
-                                <img src={`https://flagcdn.io/flags/4x3/${u.country_code.toLowerCase()}.svg`} alt="" style={{ width: '14px', height: '10px', objectFit: 'cover', flexShrink: 0 }} />
-                              )}
-                            </div>
-                            <div style={{ fontSize: '11px', color: '#999' }}>
-                              {[u.country, u.city].filter(Boolean).join(' · ') || u.path}
-                            </div>
-                          </div>
-                          {/* Green dot */}
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
-                        </div>
-                      ))
-                    )}
-                    </div>
-                  </>
-                )}
+              // 只显示人数。原来点一下会展开一个弹层，逐个列出在线访客的头像、
+              // 昵称、国旗和所在城市 —— 那等于把每个访客的位置摆给所有人看。
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#999', fontSize: '12px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 4px #22c55e' }} />
+                {onlineCount} 人在线
               </span>
             )}
           </div>
