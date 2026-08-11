@@ -683,14 +683,20 @@ export async function visitorProfileByEmail(email: string) {
 }
 
 export async function listPostComments(postId: number) {
+  // join users 是为了拿 role —— 博主的地理位置不对外露（理由见 listComments
+  // 里那段注释）。这个函数只服务前台，没有 authed 分支，一律隐藏。
   const rows = await many<Record<string, unknown>>(
-    `select * from ${table('comments')} where post_id = $1 and status = 'approved' order by created_at asc, id asc`,
+    `select c.*, u.role as user_role
+     from ${table('comments')} c
+     left join ${table('users')} u on u.id = c.user_id
+     where c.post_id = $1 and c.status = 'approved'
+     order by c.created_at asc, c.id asc`,
     [postId],
   ).catch(() => []);
   const friendIndex = await friendLinkIndex();
   return rows.map((row) => ({
     ...row,
-    geo: commentGeoFromRow(row.geo),
+    geo: row.user_role === 'admin' ? null : commentGeoFromRow(row.geo),
     friend: matchFriendBadge(String(row.author_url || ''), friendIndex),
     avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
     ...ANONYMOUS_COMMENT_REDACTIONS,
@@ -843,9 +849,14 @@ export async function listComments(params: {
     const authorCommentCount = (uid > 0 ? byUser.get(uid) : undefined)
       ?? (mail ? byEmail.get(mail) : undefined)
       ?? 1;  // 查不到就按 1 算，至少不会显示 0
+    // 博主的地理位置不对外露 —— 访客的归属地是社区氛围的一部分，但博主每条
+    // 评论都标出常驻城市等于公开自己的行踪。在后端抹掉而不是只在前台隐藏：
+    // 否则 API 照样查得到。后台（authed）保留，站长自己要能看。
+    const isAdmin = row.user_role === 'admin';
+    const hideGeo = isAdmin && !params.authed;
     return {
       ...row,
-      geo: commentGeoFromRow(row.geo),
+      geo: hideGeo ? null : commentGeoFromRow(row.geo),
       author: row.author_name,
       email: row.author_email,
       url: row.author_url,
@@ -854,7 +865,7 @@ export async function listComments(params: {
       user_agent: row.author_agent,
       avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
       author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
-      is_admin: row.user_role === 'admin',
+      is_admin: isAdmin,
       comment_count: authorCommentCount,
       level: levelForCount(authorCommentCount),
       parent: row.parent_id ? {

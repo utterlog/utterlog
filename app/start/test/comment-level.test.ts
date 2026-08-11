@@ -139,3 +139,31 @@ describe('geo 字段的还原', () => {
     expect(parseGeo('"just a string"')).toBeNull();
   });
 });
+
+describe('博主的地理位置不对外露', () => {
+  // 访客的归属地是社区氛围的一部分，但博主每条评论都标出常驻城市
+  // 等于公开自己的行踪（线上曾每条都显示 uz Tashkent）。
+  // 在后端抹掉而不是只在前台隐藏 —— 否则 API 照样查得到。
+  const SRC = 'app/start/src/backend/public-read.ts';
+
+  test('listComments 对匿名请求隐藏博主 geo，后台保留', async () => {
+    const src = await Bun.file(SRC).text();
+    expect(src).toContain('const hideGeo = isAdmin && !params.authed');
+    expect(src).toContain('geo: hideGeo ? null : commentGeoFromRow(row.geo)');
+  });
+
+  test('listPostComments 这条路径同样隐藏 —— 不能换个接口就露出来', async () => {
+    const src = await Bun.file(SRC).text();
+    const fn = src.slice(src.indexOf('export async function listPostComments'), src.indexOf('export async function listMoments'));
+    expect(fn).toContain("row.user_role === 'admin' ? null : commentGeoFromRow");
+    // 它原本没 join users，拿不到 role —— 必须 join 才判断得了
+    expect(fn).toContain('u.role as user_role');
+  });
+
+  test('两条路径都还给非博主返回 geo', async () => {
+    const src = await Bun.file(SRC).text();
+    // 判断的是 admin 分支返回 null，其余走正常解析
+    expect(src).not.toMatch(/geo:\s*null,\s*$/m); // 不能无条件置空
+    expect((src.match(/commentGeoFromRow\(row\.geo\)/g) || []).length).toBe(2);
+  });
+});
