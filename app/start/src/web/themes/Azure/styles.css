@@ -2128,3 +2128,67 @@
 /* Cover hover-zoom is now system-level: see .cover-zoom in
    app/globals.css. Theme-prefixed .azure-img-hover* classes were
    removed; main-content covers should wrap in .cover-zoom instead. */
+
+/* ============ 文章页侧边目录 ============
+   blog-toc / blog-toc-header / blog-toc-list / blog-toc-item 这组类
+   在 globals.css 里没有任何定义（Renascent 和 Nebula 各自在主题里写了，
+   Azure 一直漏着），所以目录只剩组件内联的 sticky 定位在撑，
+   没有边框、留白和层级，看起来像一堆散落的裸链接。 */
+
+[data-theme="Azure"] .blog-toc {
+  padding: 18px 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+}
+
+[data-theme="Azure"] .blog-toc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+[data-theme="Azure"] .blog-toc-header svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+[data-theme="Azure"] .blog-toc-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  list-style: none;
+}
+
+[data-theme="Azure"] .blog-toc-item {
+  display: block;
+  /* 组件用内联 style 给 paddingLeft 做层级缩进，这里只补上下左的留白，
+     不要写 padding 简写 —— 会把那个内联值盖掉，层级就没了。 */
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 4px;
+  border-left: 2px solid transparent;
+  color: var(--color-text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+[data-theme="Azure"] .blog-toc-item:hover {
+  color: var(--color-text-main);
+}
+
+[data-theme="Azure"] .blog-toc-item.active {
+  border-left-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 500;
+}

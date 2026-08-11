@@ -28,7 +28,9 @@ describe('TanStack Start document assets', () => {
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
       'https://static.bluecdn.com/fonts/alimama-fangyuanti.css',
       'https://static.bluecdn.com/fonts/luo.css',
-      '/themes/Azure/styles.css?v=2.0.6',
+      // 版本号跟 theme.json 走 —— 写死的话每次改主题都要来同步这个数字，
+      // 而它变化恰恰是正常的（用来给 CSS 打缓存标记）
+      `/themes/Azure/styles.css?v=${getThemeManifest('Azure')?.version || '0'}`,
     ]);
   });
 
