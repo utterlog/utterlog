@@ -23,7 +23,65 @@ type VisitorProfile = {
   avatar?: string;
   level?: number;
   comment_count?: number;
+  posts_commented?: number;
+  total_posts?: number;
+  coverage?: number;
+  sofa_count?: number;
+  first_comment_at?: number | null;
+  last_comment_at?: number | null;
 };
+
+/** 把 Unix 秒转成「2024年11月」这种短日期 */
+function shortDate(ts?: number | null) {
+  if (!ts) return '';
+  const d = new Date(ts * 1000);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月`;
+}
+
+/** 距今多久 —— 用于「陪伴了 N 天」 */
+function daysSince(ts?: number | null) {
+  if (!ts) return 0;
+  return Math.max(0, Math.floor((Date.now() / 1000 - ts) / 86400));
+}
+
+/**
+ * 访客徽章。
+ *
+ * 只在达到门槛时出现，没达到的不占位置 —— 免得新访客看到一排灰掉的成就。
+ * 图标统一用 Font Awesome，不拿 emoji 当功能图标。
+ */
+function visitorBadges(p: VisitorProfile) {
+  const badges: Array<{ key: string; icon: string; label: string; title: string }> = [];
+  const sofa = p.sofa_count || 0;
+  const coverage = p.coverage || 0;
+  const days = daysSince(p.first_comment_at);
+
+  if (sofa > 0) {
+    badges.push({
+      key: 'sofa',
+      icon: 'fa-solid fa-couch',
+      label: `沙发 ${sofa}`,
+      title: `抢到 ${sofa} 次沙发（某篇文章的第一条评论）`,
+    });
+  }
+  if (coverage > 0) {
+    badges.push({
+      key: 'coverage',
+      icon: 'fa-solid fa-book-open',
+      label: `${coverage}%`,
+      title: `读过并评论了 ${p.posts_commented} / ${p.total_posts} 篇文章`,
+    });
+  }
+  if (days >= 365) {
+    badges.push({
+      key: 'veteran',
+      icon: 'fa-solid fa-hourglass-half',
+      label: `${Math.floor(days / 365)} 年`,
+      title: `从 ${shortDate(p.first_comment_at)} 就在这里了，陪伴 ${days} 天`,
+    });
+  }
+  return badges;
+}
 
 
 function parseSocialLinks(raw: unknown): ProfileSocialLink[] {
@@ -132,6 +190,17 @@ export default function AzureProfileCard() {
   const cardTagline = isVisitor
     ? `Lv.${profile?.level ?? 1}　累计 ${profile?.comment_count ?? 0} 条评论`
     : tagline;
+  const badges = isVisitor && profile ? visitorBadges(profile) : [];
+  // 悬浮在头像上时给完整的履历
+  const visitorTitle = isVisitor && profile
+    ? [
+        `Lv.${profile.level}　${profile.comment_count} 条评论`,
+        profile.total_posts ? `覆盖 ${profile.posts_commented}/${profile.total_posts} 篇（${profile.coverage}%）` : '',
+        profile.sofa_count ? `沙发 ${profile.sofa_count} 次` : '',
+        profile.first_comment_at ? `首次评论 ${shortDate(profile.first_comment_at)}` : '',
+        profile.last_comment_at ? `最近评论 ${shortDate(profile.last_comment_at)}` : '',
+      ].filter(Boolean).join('\n')
+    : '';
 
   return (
     <div className="azure-profile-card" data-has-intro={intro ? 'true' : 'false'}>
@@ -139,7 +208,7 @@ export default function AzureProfileCard() {
 
       <div className="azure-profile-body">
         <div className="azure-profile-face">
-          <div className="azure-profile-avatar-wrap">
+          <div className="azure-profile-avatar-wrap" title={visitorTitle || undefined}>
             {cardAvatar ? (
               <img src={cardAvatar} alt="" className="azure-profile-avatar" />
             ) : (
@@ -162,6 +231,16 @@ export default function AzureProfileCard() {
         <div className="azure-profile-text">
           <div className="azure-profile-name">{cardName}</div>
           {cardTagline && <div className="azure-profile-tagline">{cardTagline}</div>}
+          {badges.length > 0 && (
+            <div className="azure-profile-badges">
+              {badges.map((b) => (
+                <span key={b.key} className="azure-profile-badge" title={b.title}>
+                  <i className={b.icon} aria-hidden="true" />
+                  {b.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         {!isVisitor && socials.length > 0 && (
           <div className="azure-profile-socials">

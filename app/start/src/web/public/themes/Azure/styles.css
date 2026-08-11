@@ -2215,3 +2215,34 @@
   line-height: 1.2;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
+
+/* ---- 访客徽章（沙发 / 覆盖率 / 资历）----
+   挂在副标题下面，只在达到门槛时出现。卡片是主色蓝底，所以用半透明白底 +
+   白字，比彩色徽章干净，也不跟头像右下角那个白底等级牌抢注意力。 */
+
+[data-theme="Azure"] .azure-profile-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+[data-theme="Azure"] .azure-profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: default;
+}
+
+[data-theme="Azure"] .azure-profile-badge i {
+  font-size: 10px;
+  opacity: 0.85;
+}

@@ -660,25 +660,52 @@ export async function visitorProfileByEmail(email: string) {
   const normalized = String(email || '').trim().toLowerCase();
   if (!normalized || !normalized.includes('@')) return { found: false };
 
-  const row = await one<{ n: string; name: string; last_at: string }>(
-    `select count(*)::text as n,
-            max(author_name) as name,
-            max(created_at)::text as last_at
-     from ${table('comments')}
-     where status = 'approved' and lower(author_email) = $1`,
-    [normalized],
-  ).catch(() => null);
+  const [base, sofa, sitePosts] = await Promise.all([
+    one<{ n: string; posts: string; name: string; first_at: string; last_at: string }>(
+      `select count(*)::text as n,
+              count(distinct post_id)::text as posts,
+              max(author_name) as name,
+              min(created_at)::text as first_at,
+              max(created_at)::text as last_at
+       from ${table('comments')}
+       where status = 'approved' and lower(author_email) = $1`,
+      [normalized],
+    ).catch(() => null),
+    // 沙发 = 某篇文章的第一条评论是他留的
+    one<{ n: string }>(
+      `select count(*)::text as n from (
+         select distinct on (post_id) post_id, lower(author_email) as em
+         from ${table('comments')}
+         where status = 'approved'
+         order by post_id, created_at asc, id asc
+       ) firsts where firsts.em = $1`,
+      [normalized],
+    ).catch(() => null),
+    one<{ n: string }>(
+      `select count(*)::text as n from ${table('posts')} where status = 'publish'`,
+    ).catch(() => null),
+  ]);
 
-  const count = Number(row?.n || 0);
+  const count = Number(base?.n || 0);
   if (!count) return { found: false };
+
+  const postsCommented = Number(base?.posts || 0);
+  const totalPosts = Number(sitePosts?.n || 0);
 
   return {
     found: true,
-    name: String(row?.name || ''),
+    name: String(base?.name || ''),
     avatar: gravatarUrlForEmail(normalized, 96),
     level: levelForCount(count),
     comment_count: count,
-    last_comment_at: Number(row?.last_at || 0) || null,
+    // 覆盖率按「评论过的文章数 / 站点文章数」算，不是按评论条数 ——
+    // 在同一篇下面刷十条不该等于读了十篇。
+    posts_commented: postsCommented,
+    total_posts: totalPosts,
+    coverage: totalPosts > 0 ? Math.round((postsCommented / totalPosts) * 100) : 0,
+    sofa_count: Number(sofa?.n || 0),
+    first_comment_at: Number(base?.first_at || 0) || null,
+    last_comment_at: Number(base?.last_at || 0) || null,
   };
 }
 
