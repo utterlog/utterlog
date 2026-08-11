@@ -717,10 +717,7 @@
   border-radius: 0;
 }
 [data-theme="Azure"] .azure-profile-welcome {
-  /* 认出访客时里面会多出头像和等级徽章，要横排对齐 —— 原来是 block */
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   max-width: 100%;
   width: fit-content;
   margin: 0 auto;
@@ -2196,22 +2193,25 @@
   font-weight: 500;
 }
 
-/* ---- 侧栏认出访客后的头像与等级 ---- */
+/* ---- 认出访客后：等级徽章挂在大头像右下角 ----
+   位置沿用博主的「心情表情」那个角标（.azure-profile-mood）。
+   卡片是主色蓝底，评论列表那套浅底徽章配色在这里会脏，所以改用
+   白底 + 主色字，跟卡片本身的对比关系一致。 */
 
-[data-theme="Azure"] .azure-profile-visitor-avatar {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-[data-theme="Azure"] .azure-profile-visitor-level {
-  flex-shrink: 0;
-  padding: 1px 5px;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.4;
-  /* 配色由行内 style 给（与评论列表的徽章同一套），这里只管排版 */
+[data-theme="Azure"] .azure-profile-level-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }

@@ -25,19 +25,6 @@ type VisitorProfile = {
   comment_count?: number;
 };
 
-/** 与前台评论列表的等级徽章保持同一套配色 */
-const LEVEL_COLORS: Record<number, { bg: string; color: string }> = {
-  1: { bg: '#f0f0f0', color: '#999' },
-  2: { bg: '#e8f5e9', color: '#388e3c' },
-  3: { bg: '#e3f2fd', color: '#1565c0' },
-  4: { bg: '#e8eaf6', color: '#283593' },
-  5: { bg: '#f3e5f5', color: '#7b1fa2' },
-  6: { bg: '#fce4ec', color: '#1976d2' },
-  7: { bg: '#fff3e0', color: '#e65100' },
-  8: { bg: '#fff8e1', color: '#f57f17' },
-  9: { bg: '#fffde7', color: '#f9a825' },
-  10: { bg: 'linear-gradient(135deg, #ff6b6b, #ffa500, #ffd700)', color: '#fff' },
-};
 
 function parseSocialLinks(raw: unknown): ProfileSocialLink[] {
   if (!raw) return [];
@@ -137,47 +124,46 @@ export default function AzureProfileCard() {
 
   if (!enabled) return null;
 
+  // 认出访客后，整张卡片换成他自己的信息：头像、昵称、等级。
+  // 社交图标是博主的联系方式，访客模式下不展示。
+  const isVisitor = Boolean(profile?.found);
+  const cardAvatar = isVisitor ? (profile?.avatar || '') : avatar;
+  const cardName = isVisitor ? (profile?.name || visitor?.name || '') : name;
+  const cardTagline = isVisitor
+    ? `Lv.${profile?.level ?? 1}　累计 ${profile?.comment_count ?? 0} 条评论`
+    : tagline;
+
   return (
     <div className="azure-profile-card" data-has-intro={intro ? 'true' : 'false'}>
-      {/* 认出访客时，欢迎语左侧带上他自己的头像和等级 —— 数据来自
-          /api/v1/visitor（按 localStorage 里缓存的评论邮箱查）。
-          没查到就退回纯文字，跟以前一样。 */}
-      <div className="azure-profile-welcome">
-        {profile?.found && profile.avatar && (
-          <img src={profile.avatar} alt="" className="azure-profile-visitor-avatar" />
-        )}
-        <span>{welcome}</span>
-        {profile?.found && profile.level ? (
-          <span
-            className="azure-profile-visitor-level"
-            title={`Lv.${profile.level}　累计 ${profile.comment_count || 0} 条评论`}
-            style={LEVEL_COLORS[profile.level] || LEVEL_COLORS[1]}
-          >
-            Lv.{profile.level}
-          </span>
-        ) : null}
-      </div>
+      <div className="azure-profile-welcome">{welcome}</div>
 
       <div className="azure-profile-body">
         <div className="azure-profile-face">
           <div className="azure-profile-avatar-wrap">
-            {avatar ? (
-              <img src={avatar} alt="" className="azure-profile-avatar" />
+            {cardAvatar ? (
+              <img src={cardAvatar} alt="" className="azure-profile-avatar" />
             ) : (
-              <span className="azure-profile-avatar-fallback">{name.charAt(0).toUpperCase()}</span>
+              <span className="azure-profile-avatar-fallback">{(cardName || '?').charAt(0).toUpperCase()}</span>
             )}
-            {mood && <span className="azure-profile-mood" aria-label="mood">{mood}</span>}
+            {/* 心情表情是博主自己配的，访客模式下换成他的等级 */}
+            {isVisitor ? (
+              <span className="azure-profile-level-badge" aria-label={`等级 ${profile?.level}`}>
+                Lv.{profile?.level ?? 1}
+              </span>
+            ) : (
+              mood && <span className="azure-profile-mood" aria-label="mood">{mood}</span>
+            )}
           </div>
         </div>
-        {intro && <p className="azure-profile-intro">{intro}</p>}
+        {!isVisitor && intro && <p className="azure-profile-intro">{intro}</p>}
       </div>
 
       <div className="azure-profile-footer">
         <div className="azure-profile-text">
-          <div className="azure-profile-name">{name}</div>
-          {tagline && <div className="azure-profile-tagline">{tagline}</div>}
+          <div className="azure-profile-name">{cardName}</div>
+          {cardTagline && <div className="azure-profile-tagline">{cardTagline}</div>}
         </div>
-        {socials.length > 0 && (
+        {!isVisitor && socials.length > 0 && (
           <div className="azure-profile-socials">
             {socials.map((item, index) => (
               item.copy ? (
