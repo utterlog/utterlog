@@ -3460,3 +3460,41 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
      • Maple Mono CN           — fonts/maple-mono-cn.css
                                family: 'Maple Mono CN'  (16 weights, 200–800 + italic)
 */
+
+/* ---- 路由切换的顶部进度条 ----
+   客户端导航时 loader 未完成，页面会短暂空白。这条 2px 的细线固定在顶部，
+   不占布局、不盖住已渲染的 header，让读者知道「在加载」而不是「卡住了」。
+   显示时机由 router 的 defaultPendingMs 控制（见 router.tsx）。 */
+
+.route-pending {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 9999;
+  height: 2px;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+.route-pending-bar {
+  width: 40%;
+  height: 100%;
+  background: var(--color-primary, #0052D9);
+  animation: routePendingSlide 1.1s ease-in-out infinite;
+}
+
+@keyframes routePendingSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-pending-bar {
+    /* 关掉动画时给一条静止的半宽指示，仍然表达「加载中」 */
+    width: 100%;
+    opacity: 0.5;
+    animation: none;
+  }
+}
