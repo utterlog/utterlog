@@ -60,6 +60,61 @@ function commentGeoFromRow(value: unknown) {
  *
  * UA 保留：前台评论上「Windows · Chrome」那行就是靠它渲染的，属于有意展示。
  */
+/**
+ * 按累计评论数换算等级（1-10）。
+ *
+ * 前台的等级徽章有 10 档配色，这里给出对应的门槛。曲线前密后疏：
+ * 前几级容易上去给新访客正反馈，高等级要长期参与才够得着。
+ */
+const LEVEL_THRESHOLDS = [1, 3, 6, 10, 20, 35, 60, 100, 160, 250];
+
+function levelForCount(count: number) {
+  let level = 1;
+  for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+    if (count >= LEVEL_THRESHOLDS[i]) level = i + 1;
+  }
+  return level;
+}
+
+/**
+ * 一次查出这批评论涉及的所有作者的累计评论数，避免每行一次查询。
+ *
+ * 按邮箱聚合：同一个人可能换过昵称，但邮箱通常稳定；登录用户则按 user_id
+ * 归并（他们的邮箱在 users 表里，评论行上可能是空的）。
+ */
+async function commentCountsByAuthor(rows: Array<Record<string, unknown>>) {
+  const emails = [...new Set(rows
+    .map((r) => String(r.author_email || '').trim().toLowerCase())
+    .filter(Boolean))];
+  const userIds = [...new Set(rows
+    .map((r) => Number(r.user_id || 0))
+    .filter((id) => id > 0))];
+  const byEmail = new Map<string, number>();
+  const byUser = new Map<number, number>();
+
+  if (emails.length) {
+    const counts = await many<{ email: string; n: string }>(
+      `select lower(author_email) as email, count(*)::text as n
+       from ${table('comments')}
+       where status = 'approved' and lower(author_email) = any($1)
+       group by lower(author_email)`,
+      [emails],
+    ).catch(() => []);
+    for (const row of counts) byEmail.set(String(row.email), Number(row.n) || 0);
+  }
+  if (userIds.length) {
+    const counts = await many<{ uid: string; n: string }>(
+      `select user_id::text as uid, count(*)::text as n
+       from ${table('comments')}
+       where status = 'approved' and user_id = any($1)
+       group by user_id`,
+      [userIds],
+    ).catch(() => []);
+    for (const row of counts) byUser.set(Number(row.uid), Number(row.n) || 0);
+  }
+  return { byEmail, byUser };
+}
+
 const ANONYMOUS_COMMENT_REDACTIONS = {
   author_email: '',
   email: '',
@@ -728,8 +783,16 @@ export async function listComments(params: {
     [...queryParams, perPage, offset],
   ).catch(() => []);
   const friendIndex = await friendLinkIndex();
+  // 等级和累计评论数原来是写死的 comment_count: 1 / level: 1 —— 所有人永远
+  // 显示 Lv.1、1 条评论，跟实际完全无关（线上有人已经 25 条，照样显示 Lv.1）。
+  const { byEmail, byUser } = await commentCountsByAuthor(rows);
   const data = rows.map((row) => {
     const parentContent = String(row.parent_content || '');
+    const uid = Number(row.user_id || 0);
+    const mail = String(row.author_email || '').trim().toLowerCase();
+    const authorCommentCount = (uid > 0 ? byUser.get(uid) : undefined)
+      ?? (mail ? byEmail.get(mail) : undefined)
+      ?? 1;  // 查不到就按 1 算，至少不会显示 0
     return {
       ...row,
       geo: commentGeoFromRow(row.geo),
@@ -742,8 +805,8 @@ export async function listComments(params: {
       avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
       author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
       is_admin: row.user_role === 'admin',
-      comment_count: 1,
-      level: 1,
+      comment_count: authorCommentCount,
+      level: levelForCount(authorCommentCount),
       parent: row.parent_id ? {
         id: row.parent_id,
         author: row.parent_author,
