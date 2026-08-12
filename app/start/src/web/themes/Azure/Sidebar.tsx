@@ -185,20 +185,24 @@ export default function Sidebar({ initialComments = [] }: { initialComments?: an
       {/* Tags — colorful cloud */}
       <div style={{ borderBottom: '1px solid #e5e5e5' }}>
         {sectionTitle('fa-solid fa-tags', '关键词')}
-        <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+        {/* 去掉标签底色后靠间距分隔，gap 从 6px 拉到 10px/14px（行/列） */}
+        <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: '10px 14px' }}>
           {tags.map((tag, i) => {
             const colors = ['#0052D9', '#e53935', '#43a047', '#f57c00', '#8e24aa', '#00838f', '#c62828', '#1565c0', '#2e7d32', '#d84315'];
             const c = colors[i % colors.length];
             const size = tag.count > 5 ? 14 : tag.count > 2 ? 13 : 12;
             return (
               <Link key={tag.id} href={`/tags/${tag.slug}`} prefetch={false} style={{
-                padding: '4px 10px', fontSize: `${size}px`,
-                border: `1px solid ${c}40`, color: c, background: `${c}08`,
-                textDecoration: 'none', transition: 'all 0.15s',
+                // 只留彩色文字：原来每个标签外面还有 1px 边框和 8% 淡色底，
+                // 十几个标签堆在窄侧栏里就是十几个小色块，很吵。
+                padding: '2px 0', fontSize: `${size}px`,
+                color: c,
+                textDecoration: 'none', transition: 'opacity 0.15s',
                 fontWeight: tag.count > 3 ? 600 : 400,
               }}
-                onMouseEnter={e => { e.currentTarget.style.background = c; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = c; }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${c}08`; e.currentTarget.style.color = c; e.currentTarget.style.borderColor = `${c}40`; }}
+                // 没有底色以后「反白填充」那套不成立了，改成压透明度
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.6'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
               >
                 {tag.name} <span style={{ fontSize: '10px', opacity: 0.6 }}>{tag.count}</span>
               </Link>
