@@ -6,6 +6,7 @@ import CommentForm from './CommentForm';
 import { BrowserIcon, OSIcon } from '@/lib/tech-icons';
 import { getVisitorId } from '@/lib/fingerprint';
 import { useThemeContext } from '@/lib/theme-context';
+import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { formatDateTimeInTimeZone } from '@/lib/timezone';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
@@ -588,7 +589,7 @@ function CommentCard({ comment, postId, floor, onReplySuccess, editableIds }: {
   editableIds: Set<number>;
 }) {
   return (
-    <div style={{ marginTop: '16px', border: '1px solid var(--color-border, #eee)' }}>
+    <div data-reveal style={{ marginTop: '16px', border: '1px solid var(--color-border, #eee)' }}>
       <CommentRow comment={comment} postId={postId} depth={0} floor={floor} onReplySuccess={onReplySuccess} editableIds={editableIds} />
     </div>
   );
@@ -596,7 +597,11 @@ function CommentCard({ comment, postId, floor, onReplySuccess, editableIds }: {
 
 export default function CommentList({ postId, title, onCommentCountChange }: { postId: number; title?: string; onCommentCountChange?: (count: number) => void }) {
   const { options } = useThemeContext();
+  // 评论逐条显现，同批错开 40ms（比首页卡片密，错开小一点）
   const [comments, setComments] = useState<Comment[]>([]);
+  // 评论逐条显现，同批错开 40ms。评论是异步拉的，把条数当 revision 传进去，
+  // 数据到了 hook 才能观察到那些新节点。
+  const listRevealRef = useScrollReveal<HTMLDivElement>('[data-reveal]', 40, undefined, comments.length);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
@@ -704,7 +709,7 @@ export default function CommentList({ postId, title, onCommentCountChange }: { p
       </div>
 
       {!loading && tree.length > 0 && (
-        <div style={{ position: 'relative' }}>
+        <div ref={listRevealRef} style={{ position: 'relative' }}>
           {tree.map((comment, idx) => {
             const floor = order === 'oldest' ? idx + 1 : tree.length - idx;
             return <CommentCard key={comment.id} comment={comment} postId={postId} floor={floor} onReplySuccess={(id) => { if (id) addEditableId(id); fetchComments('background'); }} editableIds={editableIds} />;

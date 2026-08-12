@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypePrism from 'rehype-prism-plus';
+import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -292,6 +293,20 @@ export default function PostContent({ content }: PostContentProps) {
   // every `.blog-image img` into the gallery list on each click so
   // the overlay can step through all the post's images in order.
   const containerRef = useRef<HTMLDivElement>(null);
+  // 正文只给图片和代码块做滚动显现 —— 段落逐个淡入会把长文读得很碎。
+  // 不错开（stagger=0）：读到哪儿就该看到哪儿，不该等。
+  // 'soft' 让它们用更小的位移（12px），这两类元素本来就占地方，动大了晃眼。
+  const revealRef = useScrollReveal<HTMLDivElement>(
+    ':scope > p > img, :scope > img, :scope > pre, :scope > figure, :scope > table',
+    0,
+    'soft',
+  );
+  // blog-prose 这个节点上已经挂了 containerRef（图片点击、代码复制都用它），
+  // 两个 ref 指向同一个元素，用 callback ref 一起赋值
+  const setProseRef = useCallback((el: HTMLDivElement | null) => {
+    containerRef.current = el;
+    revealRef.current = el;
+  }, [revealRef]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -424,7 +439,7 @@ export default function PostContent({ content }: PostContentProps) {
 
   const inner = (
     <>
-      <div className="blog-prose" ref={containerRef}>
+      <div className="blog-prose" ref={setProseRef}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[

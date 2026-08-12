@@ -13,6 +13,7 @@ import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
 import { getCategoryIcon } from './constants';
+import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = '/api/v1';
@@ -173,6 +174,9 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 也跟着变。现在固定 360px，配合容器宽度约等于 3.5:1 的横幅比例。
   const heroHeight = 360;
   const heroTitleH = 56;
+  // 文章卡片滚动显现，同批错开 60ms
+  const listRevealRef = useScrollReveal<HTMLElement>('.azure-post-list-item', 60);
+
   const heroVars = {
     '--azure-hero-height': `${heroHeight}px`,
     '--azure-hero-title-height': `${heroTitleH}px`,
@@ -274,14 +278,14 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
           </div>
         </aside>
         {/* Right: Post list */}
-        <section className="azure-post-list">
+        <section className="azure-post-list" ref={listRevealRef}>
           {pageLoading ? (
             <div className="azure-loading">
               <LoadingSpinner size={18} />加载中…
             </div>
           ) : currentPosts.length > 0 ? (
             currentPosts.map((post, idx) => (
-              <div key={post.id} className="azure-post-list-item">
+              <div key={post.id} className="azure-post-list-item" data-reveal>
                 <PostCard post={post} isNewest={currentPage === 1 && idx === 0} priority={currentPage === 1 && idx === 0} />
               </div>
             ))

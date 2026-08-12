@@ -3498,3 +3498,49 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
     animation: none;
   }
 }
+
+/* ============ 滚动显现 ============
+
+   关键约定：**没有 data-reveal-ready 时一切照常显示**。
+   这个标记由 useScrollReveal 在挂载后加上，所以 JS 没跑起来（报错、被拦、
+   老浏览器）时，SSR 输出的内容不会被 CSS 藏住 —— 只是没有动画而已。
+
+   幅度刻意保守：位移 12-16px、400ms、ease-out。这个站以长文为主，
+   大开大合的入场会打断阅读节奏。 */
+
+[data-reveal-ready] [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 420ms ease-out, transform 420ms ease-out;
+  will-change: opacity, transform;
+}
+
+/* 正文里的图片和代码块位移小一些 —— 它们本来就占地方，动大了晃眼 */
+[data-reveal-ready] [data-reveal="soft"] {
+  transform: translateY(12px);
+}
+
+[data-reveal-ready] [data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+/* 首屏那批：直接到位，不播动画（避免打开页面就看一堆东西往上飘） */
+[data-reveal-ready] [data-revealed="instant"] {
+  transition: none;
+}
+
+/* 动画播完把 will-change 撤掉，别让几十个元素长期占着合成层 */
+[data-reveal-ready] [data-revealed] {
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* hook 里已经直接 return 不加 ready 标记了，这里再兜一层：
+     万一标记以别的方式加上，也不要有位移和淡入 */
+  [data-reveal-ready] [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
