@@ -12,6 +12,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
+import { getCategoryIcon } from './constants';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = '/api/v1';
@@ -222,6 +223,14 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                       text stays legible over both dark and bright
                       covers without dimming the image itself. */}
                   <div className="azure-hero-titlebar">
+                    {/* 分类图标 —— heroPost.categories[0] 带 icon 字段，
+                        没配图标的分类由 getCategoryIcon 按名字给兜底 */}
+                    {heroPost.categories?.[0] && (
+                      <i
+                        className={`${getCategoryIcon(heroPost.categories[0])} azure-hero-title-icon`}
+                        aria-hidden="true"
+                      />
+                    )}
                     <h2 className="azure-hero-title">{heroPost.title}</h2>
                   </div>
                 </PostLink>

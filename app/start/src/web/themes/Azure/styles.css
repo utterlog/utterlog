@@ -527,6 +527,17 @@
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
 }
+
+/* 标题前的分类图标。跟标题同色同阴影 —— 图片背景什么颜色都有，
+   少一层阴影就会在浅色图上糊掉。flex-shrink:0 保证长标题省略时
+   图标不被压扁。 */
+[data-theme="Azure"] .azure-hero-title-icon {
+  flex-shrink: 0;
+  margin-right: 9px;
+  color: #fff;
+  font-size: 17px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.8);
+}
 [data-theme="Azure"] .azure-hero-mode {
   position: absolute;
   top: 0;
@@ -2192,15 +2203,7 @@
   width: 100%;
 }
 
-/* 图片底部压暗，保证标题在任何图上都读得清 —— 原来标题那一侧有 tabs
-   的白底垫着，通栏后没有这层保障了。 */
-[data-theme="Azure"] .azure-hero-grid .azure-hero::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 45%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
-  pointer-events: none;
-}
+/* 不要给图片底部加压暗遮罩。
+   通栏后一度担心浅色图上白字读不清，加过一层 45% 高的黑色渐变，但
+   .azure-hero-title 本来就带两层 text-shadow（0 2px 6px / 0 1px 2px），
+   足够兜底；叠上遮罩反而把图片底部压得发灰、细节糊掉。 */
