@@ -132,7 +132,10 @@ export default function TableOfContents({ content }: TableOfContentsProps) {
               href={`#${item.id}`}
               onClick={(e) => { e.preventDefault(); scrollTo(item.id); }}
               className={`blog-toc-item${activeId === item.id ? ' active' : ''}`}
-              style={{ paddingLeft: `${(item.level - 1) * 14}px` }}
+              title={item.text}
+              // 16px 基准：只写 (level-1)*14 的话 H2 算出 0，会把
+              // toc-styles.css 的 padding-left 覆盖成 0 贴到竖线上
+              style={{ paddingLeft: `${16 + (item.level - 1) * 14}px` }}
             >
               {item.text}
             </a>

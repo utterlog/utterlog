@@ -155,7 +155,11 @@ export default function TableOfContents({ content }: TableOfContentsProps) {
               href={`#${item.id}`}
               onClick={(e) => { e.preventDefault(); scrollTo(item.id); }}
               className={`blog-toc-item${activeId === item.id ? ' active' : ''}`}
-              style={{ paddingLeft: `${(item.level - 1) * 14}px` }}
+              // 窄侧栏里长标题会被省略号截断，悬浮给完整的
+              title={item.text}
+              // 16px 基准让文字和左侧竖线之间留出空隙 —— 只写 (level-1)*14
+              // 的话 H2 算出 0，会把 toc-styles.css 的 padding-left 覆盖掉
+              style={{ paddingLeft: `${16 + (item.level - 1) * 14}px` }}
             >
               {item.text}
             </a>

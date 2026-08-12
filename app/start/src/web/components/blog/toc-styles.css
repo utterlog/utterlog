@@ -30,7 +30,9 @@
 }
 .blog-toc-item {
   display: block;
-  padding: 5px 12px 5px 16px;
+  /* 左内边距由组件的内联 paddingLeft 给（16px 基准 + 每级 14px 缩进），
+     这里只管上下和右侧 —— 写 padding 简写会把那个内联值盖掉。 */
+  padding: 5px 12px;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--color-text-dim);

@@ -177,6 +177,7 @@ export default function TableOfContents({ content, variant = 'desktop' }: TableO
                     setMobileOpen(false);
                   }}
                   className={`azure-mobile-toc-item${activeId === item.id ? ' active' : ''}`}
+                  title={item.text}
                   style={{ paddingLeft: `${10 + (item.level - 1) * 14}px` }}
                 >
                   {item.text}
@@ -205,7 +206,12 @@ export default function TableOfContents({ content, variant = 'desktop' }: TableO
               href={`#${item.id}`}
               onClick={(e) => { e.preventDefault(); scrollTo(item.id); }}
               className={`blog-toc-item${activeId === item.id ? ' active' : ''}`}
-              style={{ paddingLeft: `${(item.level - 1) * 14}px` }}
+              // 标题在窄侧栏里会被省略号截断，悬浮给完整的
+              title={item.text}
+              // 基准 16px 让文字和左侧竖线之间留出空隙 —— 原来是
+              // (level-1)*14，H2 算出来是 0，直接把 CSS 里的 padding-left
+              // 覆盖成 0，一级标题就贴到竖线上了
+              style={{ paddingLeft: `${16 + (item.level - 1) * 14}px` }}
             >
               {item.text}
             </a>
