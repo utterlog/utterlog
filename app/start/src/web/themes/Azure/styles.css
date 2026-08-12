@@ -452,6 +452,14 @@
 [data-theme="Azure"] .azure-grid {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
+}
+
+/* 侧栏和社交栏的右侧分隔线。
+   这两个选择器原本和 .azure-hero-tabs 共用一条规则，删 hero tabs 时把整条
+   规则一起删掉了 —— tabs 是没了，但侧栏的右边框是它自己的，被误伤。 */
+[data-theme="Azure"] .azure-social-cell,
+[data-theme="Azure"] .azure-sidebar-cell {
+  border-right: 1px solid var(--color-border);
 }[data-theme="Azure"] .azure-hero-panel {
   position: relative;
   z-index: 1;
