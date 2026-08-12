@@ -2068,61 +2068,10 @@
    app/globals.css. Theme-prefixed .azure-img-hover* classes were
    removed; main-content covers should wrap in .cover-zoom instead. */
 
-/* ============ 文章页侧边目录 ============
-   .blog-toc 这组类在 globals.css 里没有定义，但它本来就不需要容器样式 ——
-   目录直接坐在页面底色上，靠留白和字重分层次。我一度给它加了白底 + 1px
-   边框，结果反而在灰底页面上抠出一个突兀的白方块。
-
-   这里只保留必要的：列表限高可滚、条目层级缩进、当前位置用左侧竖条标记。 */
-
-[data-theme="Azure"] .blog-toc-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 14px;
-  color: var(--color-text-main);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-[data-theme="Azure"] .blog-toc-header svg {
-  flex-shrink: 0;
-  color: var(--color-text-dim);
-}
-
-[data-theme="Azure"] .blog-toc-list {
-  display: grid;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-  list-style: none;
-}
-
-[data-theme="Azure"] .blog-toc-item {
-  display: block;
-  /* 层级缩进由组件的内联 paddingLeft 给，这里只补上下留白 ——
-     写 padding 简写会把那个内联值盖掉，缩进就没了 */
-  padding-top: 6px;
-  padding-bottom: 6px;
-  border-left: 2px solid transparent;
-  color: var(--color-text-dim);
-  font-size: 14px;
-  line-height: 1.6;
-  text-decoration: none;
-  transition: color 150ms ease, border-color 150ms ease;
-}
-
-[data-theme="Azure"] .blog-toc-item:hover {
-  color: var(--color-text-main);
-}
-
-[data-theme="Azure"] .blog-toc-item.active {
-  border-left-color: var(--color-primary);
-  color: var(--color-primary);
-  font-weight: 600;
-}
+/* 文章页侧边目录的样式在 components/blog/toc-styles.css —— 那是 TOC 组件
+   自带的一份，多个主题共用（左侧竖线 + 12.5px 条目 + active 主色竖条）。
+   这里曾经加过一套 Azure 专属覆写，但它是在没找到那个文件的前提下写的，
+   等于把原样式盖掉了，已移除。要调 TOC 请改 toc-styles.css。 */
 
 /* ---- 认出访客后：等级徽章挂在大头像右下角 ----
    位置沿用博主的「心情表情」那个角标（.azure-profile-mood）。
