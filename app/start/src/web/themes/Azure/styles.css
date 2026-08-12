@@ -2246,3 +2246,88 @@
   font-size: 10px;
   opacity: 0.85;
 }
+
+/* ============ 首页 Hero：图片通栏 + tabs 横排在下方 ============
+
+   原来是 280px | 1fr 两栏并排：左边一列白底 tabs，右边图片只占剩下的宽度。
+   改成图片独占一整行（能按标准比例出图，不用给 tabs 让宽），分类 tabs
+   横向排成一条挪到图片下方。
+
+   .azure-grid 是共享类（社交栏、侧栏也在用它的 280px | 1fr），所以只在
+   .azure-hero-grid 这一层覆写，不动基类。 */
+
+[data-theme="Azure"] .azure-hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+}
+
+/* 图片在上，占满整宽 */
+[data-theme="Azure"] .azure-hero-grid > .azure-hero {
+  grid-row: 1;
+  width: 100%;
+}
+
+/* tabs 在下，一整条 */
+[data-theme="Azure"] .azure-hero-grid > .azure-hero-tabs {
+  grid-row: 2;
+  width: 100%;
+  border-right: 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: #fff;
+}
+
+/* 竖向 flex 改成横向，高度不再被 --azure-hero-height 撑开 */
+[data-theme="Azure"] .azure-hero-grid .azure-hero-tabs-inner {
+  flex-direction: row;
+  height: auto;
+  overflow-x: auto;
+  /* 分类多了在窄屏可以横向滑，但不显示滚动条 */
+  scrollbar-width: none;
+}
+
+[data-theme="Azure"] .azure-hero-grid .azure-hero-tabs-inner::-webkit-scrollbar {
+  display: none;
+}
+
+[data-theme="Azure"] .azure-hero-grid .azure-hero-tab {
+  flex: 0 0 auto;
+  gap: 8px;
+  width: auto;
+  min-height: 46px;
+  padding: 0 18px;
+  /* 竖排时靠 border-bottom 分隔，横排要改成右侧竖线 */
+  border-bottom: 0;
+  border-right: 1px solid var(--color-border);
+}
+
+[data-theme="Azure"] .azure-hero-grid .azure-hero-tab:last-child {
+  border-right: 0;
+}
+
+/* 图标原来在行尾靠右（justify-content: space-between 撑开的），
+   横排后紧跟文字更自然 */
+[data-theme="Azure"] .azure-hero-grid .azure-hero-tab {
+  justify-content: flex-start;
+}
+
+/* 图片底部给一层压暗，保证标题在任何图上都读得清 —— 原来标题所在的
+   那一侧有 tabs 的白底垫着，现在图片通栏了没有这层保障。 */
+[data-theme="Azure"] .azure-hero-grid > .azure-hero::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 45%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  [data-theme="Azure"] .azure-hero-grid .azure-hero-tab {
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+}

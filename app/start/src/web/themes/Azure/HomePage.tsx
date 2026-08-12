@@ -233,15 +233,11 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
 
   // Hero height — tab row count depends on which sidebar mode we're in.
   // Custom menu still keeps the fixed "全部" tab at the top.
-  // 改用 visibleCats.length（过滤掉 0 count 的分类后），让 hero 高度
-  // 不会为隐藏的空分类预留行高造成空白。
-  const tabCount = useCustomSidebar ? 1 + sidebarMenu.length : 1 + visibleCats.length;
-  const heroHeight = Math.max(280, tabCount * 56); // min 280px
-  // Title bar height = exactly one sidebar tab's height. When the
-  // hero is taller than tabCount * 56 (the min-280 floor kicks in
-  // for sites with very few categories), we still anchor on 56 so
-  // each row stays visually consistent.
-  const heroTitleH = tabCount > 0 ? heroHeight / tabCount : 56;
+  // tabs 已经从 hero 左侧挪到图片下方横排，高度不再跟分类数挂钩 ——
+  // 原来是 max(280, 分类数 × 56)，分类增减会让 banner 忽高忽低，出图比例
+  // 也跟着变。现在固定 360px，配合容器宽度约等于 3.5:1 的横幅比例。
+  const heroHeight = 360;
+  const heroTitleH = 56;
   const heroVars = {
     '--azure-hero-height': `${heroHeight}px`,
     '--azure-hero-title-height': `${heroTitleH}px`,
