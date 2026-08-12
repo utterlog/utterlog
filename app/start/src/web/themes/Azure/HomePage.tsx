@@ -8,7 +8,6 @@ import FadeCover from '@/components/blog/FadeCover';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import Link from '@/components/AppLink';
-import { getCategoryIcon } from './constants';
 import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
@@ -27,26 +26,15 @@ const MODES = [
 let latestMomentCache: any | null = null;
 
 export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, latestMoment: serverLatestMoment = null, latestComments: serverLatestComments = [], perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; latestMoment?: any; latestComments?: any[]; perPage?: number }) {
-  const [categories, setCategories] = useState<any[]>(serverCategories);
-  const [activeCatIdx, setActiveCatIdx] = useState(0);
   // Admin-configured sidebar menu items. When non-empty, each row
   // becomes a static navigation link in the hero sidebar instead of
   // the auto-generated category filter tabs. Empty ⇒ fall back to
   // the category auto-list behavior.
-  const { menus: ctxMenus, options } = useThemeContext();
-  const isAllSidebarItem = (item: any) => {
-    const label = String(item?.label || '').trim();
-    const href = String(item?.href || '').trim();
-    return item?.type === 'all' || href === '__all__' || (label === '全部' && (!href || href === '/' || href === '#'));
-  };
-  const rawSidebarMenu = Array.isArray(ctxMenus?.sidebar) ? ctxMenus.sidebar : [];
-  const sidebarMenu = rawSidebarMenu.filter((item: any) => !isAllSidebarItem(item));
-  const useCustomSidebar = sidebarMenu.length > 0;
+  const { options } = useThemeContext();
   const [modeIdx, setModeIdx] = useState(0);
   const [heroPost, setHeroPost] = useState<any>(posts[0] || null);
   const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache || serverLatestMoment);
   const momentLazy = useLazyVisible<HTMLDivElement>();
-  const [totalPostCount, setTotalPostCount] = useState(serverStats.post_count || 0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -58,49 +46,6 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const [pageLoading, setPageLoading] = useState(false);
   // Preloaded cache: heroCache[catSlug][modeKey] = post
   const heroCacheRef = useRef<Record<string, Record<string, any>>>({});
-
-  // Resolve a sidebar menu item to its underlying category (or shape one).
-  const categoryFromMenuItem = (item: any) => {
-    if (!item) return null;
-    const rawSlug = item.slug || String(item.href || '').match(/^\/categor(?:y|ies)\/([^/?#]+)/)?.[1] || '';
-    const slug = rawSlug ? decodeURIComponent(rawSlug) : '';
-    const id = Number(item.category_id || 0);
-    const found = categories.find((cat: any) => (id > 0 && Number(cat.id) === id) || (slug && cat.slug === slug));
-    if (found) return found;
-    if (item.type === 'category') {
-      return {
-        id: item.category_id || item.href || item.label,
-        name: item.label,
-        slug,
-        icon: item.icon,
-        count: item.count || 0,
-      };
-    }
-    return null;
-  };
-
-  // visibleCats = hero 切换实际能落到的分类。自定义 sidebar 时只使用
-  // sidebar 配置里映射成分类的那几项；否则退回全部分类。这样 hero
-  // 状态空间和侧栏 UI 一致，不会切到 sidebar 里看不见的隐藏分类。
-  // 额外过滤 0 篇文章的分类（用户要求"侧栏 / 分类导航 文章数量 0 不显示"）
-  const visibleCats: any[] = (useCustomSidebar
-    ? sidebarMenu.map(categoryFromMenuItem).filter((c: any) => !!c)
-    : categories
-  ).filter((c: any) => (c.count || 0) > 0);
-  const allTabs = ['', ...visibleCats.map((c: any) => c.slug)];
-  // Clamp activeCatIdx to visible range (defensive — user toggling
-  // sidebar config in admin shrinks visibleCats while a stale idx
-  // is still selected).
-  const safeActiveIdx = activeCatIdx < allTabs.length ? activeCatIdx : 0;
-  const activeCatSlug = allTabs[safeActiveIdx] || '';
-
-  useEffect(() => {
-    // Always fetch fresh categories and stats from client
-    fetch(`${API}/categories`).then(r => r.json()).then(r => {
-      setCategories(r.data || []);
-    }).catch(() => {});
-    fetch(`${API}/archive/stats`).then(r => r.json()).then(r => setTotalPostCount(r.data?.post_count || 0)).catch(() => {});
-  }, [serverCategories, serverStats.post_count]);
 
   useEffect(() => {
     if (!momentLazy.visible || latestMoment) return;
@@ -120,45 +65,34 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // combo until all are seen, then stays cached for the rest of the
   // session — vs the old preload that fired (N+1)×4 fetches up-front.
   useEffect(() => {
-    const cached = heroCacheRef.current[activeCatSlug]?.[MODES[modeIdx].key];
+    const cached = heroCacheRef.current[MODES[modeIdx].key];
     if (cached) {
       setHeroPost(cached);
       return;
     }
     let url = `${API}/posts?per_page=1&status=publish${MODES[modeIdx].param}`;
-    if (activeCatSlug) url += `&category=${activeCatSlug}`;
     fetch(url).then(r => r.json()).then(r => {
       const items = r.data?.posts || r.data || [];
       if (items.length > 0) {
-        if (!heroCacheRef.current[activeCatSlug]) heroCacheRef.current[activeCatSlug] = {};
-        heroCacheRef.current[activeCatSlug][MODES[modeIdx].key] = items[0];
+        heroCacheRef.current[MODES[modeIdx].key] = items[0];
         setHeroPost(items[0]);
       }
     }).catch(() => {});
-  }, [activeCatIdx, modeIdx, activeCatSlug]);
+  }, [modeIdx]);
 
-  // 自动轮播：按 visibleCats 范围循环（[0, visibleCats.length] 之间），
-  // 不会切到 sidebar 配置之外的隐藏分类。鼠标 hover 在 hero 上时暂停。
+  // 自动轮播：只在 MODES（最新 / 热门 / 热评 / 随机）之间切。
+  // 原来还会同时推进分类维度，但 hero 下方那排分类 tabs 已经删掉了 ——
+  // 没有 UI 能表达「现在看的是哪个分类」，图却在自己换，读者只会觉得乱。
+  // 鼠标 hover 在 hero 上时暂停。
   const advance = useCallback(() => {
-    setActiveCatIdx(prev => (prev + 1) % (visibleCats.length + 1));
-    setModeIdx(Math.floor(Math.random() * MODES.length));
-  }, [visibleCats.length]);
+    setModeIdx(prev => (prev + 1) % MODES.length);
+  }, []);
 
   useEffect(() => {
     if (paused) return;
     timerRef.current = setInterval(advance, 5000);
     return () => clearInterval(timerRef.current);
-  }, [paused, advance, page, safeActiveIdx, modeIdx]);
-
-  // Click same tab = cycle to next mode; click different tab = switch + random mode
-  const handleTabClick = (idx: number) => {
-    if (idx === safeActiveIdx) {
-      setModeIdx(prev => (prev + 1) % MODES.length);
-    } else {
-      setActiveCatIdx(idx);
-      setModeIdx(Math.floor(Math.random() * MODES.length));
-    }
-  };
+  }, [paused, advance, page, modeIdx]);
 
   // 原本这里有播放控制按钮（goFirst/goPrev/goNext/goLast 切换 hero 分类轮播），
   // 但用户反馈这一行没人用，已改为渲染博主社交链接图标。
@@ -245,79 +179,11 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const heroModeStyle = {
     '--azure-hero-mode-color': MODES[modeIdx].color,
   } as CSSProperties;
-  const renderAllHeroTab = () => (
-    <button key="__all" type="button" onClick={() => handleTabClick(0)} className={`azure-hero-tab${safeActiveIdx === 0 ? ' active' : ''}`}>
-      <span className="azure-hero-tab-label">
-        全部 <span className="azure-hero-tab-count">({totalPostCount})</span>
-      </span>
-      <i className="fa-sharp fa-light fa-grid-2 azure-hero-tab-icon" aria-hidden="true" />
-    </button>
-  );
-
   return (
     <div className="azure-home">
       {/* ===== Hero area: tabs + image — single unit, scrolls together ===== */}
       {(
         <div className="azure-grid azure-hero-grid" style={heroVars}>
-          {/* Left: sidebar — admin-configured menu if set, otherwise
-              auto-generated category filter tabs. */}
-          <aside className="azure-hero-tabs">
-            <div className="azure-hero-tabs-inner">
-              {useCustomSidebar ? (
-                <>
-                  {renderAllHeroTab()}
-                  {sidebarMenu.map((item: any, i: number) => {
-                    const cat = categoryFromMenuItem(item);
-                    if (cat) {
-                      // 0 篇文章的分类不显示（用户要求只展示有内容的）
-                      if ((cat.count || 0) === 0) return null;
-                      // tabIdx 按 visibleCats 顺序（即 sidebar 配置中分类
-                      // 项的相对位置 + 1），不再走全集 categories.findIndex。
-                      // 这样 activeCatIdx 永远落在 sidebar 实际显示的范围
-                      // 内，hero 状态空间和 UI 完全一致。
-                      const found = visibleCats.findIndex((c: any) => c.slug === cat.slug);
-                      const tabIdx = found >= 0 ? found + 1 : -1;
-                      const active = safeActiveIdx === tabIdx;
-                      return (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => { if (tabIdx >= 0) handleTabClick(tabIdx); }}
-                          className={`azure-hero-tab${active ? ' active' : ''}`}
-                          disabled={tabIdx < 0}
-                        >
-                          <span className="azure-hero-tab-label">
-                            {cat.name} <span className="azure-hero-tab-count">({cat.count || 0})</span>
-                          </span>
-                          <i className={`${getCategoryIcon(cat)} azure-hero-tab-icon`} aria-hidden="true" />
-                        </button>
-                      );
-                    }
-                    return (
-                      <Link key={i} href={item.href || '#'} prefetch={false} className="azure-hero-tab link">
-                        <span className="azure-hero-tab-label">{item.label}</span>
-                        <i className={`${item.icon || 'fa-sharp fa-light fa-circle-arrow-right'} azure-hero-tab-icon`} aria-hidden="true" />
-                      </Link>
-                    );
-                  })}
-                </>
-              ) : (
-                <>
-                  {renderAllHeroTab()}
-                  {/* 用 visibleCats（已 filter 0 count）保证渲染顺序和
-                     allTabs / activeCatIdx 索引完全对齐 */}
-                  {visibleCats.map((cat: any, i: number) => (
-                    <button key={cat.id} type="button" onClick={() => handleTabClick(i + 1)} className={`azure-hero-tab${safeActiveIdx === i + 1 ? ' active' : ''}`}>
-                      <span className="azure-hero-tab-label">
-                        {cat.name} <span className="azure-hero-tab-count">({cat.count || 0})</span>
-                      </span>
-                      <i className={`${getCategoryIcon(cat)} azure-hero-tab-icon`} aria-hidden="true" />
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
-          </aside>
           {/* Right: Hero image — overlaps border line */}
           <section className="azure-hero-panel">
             {heroPost && (
