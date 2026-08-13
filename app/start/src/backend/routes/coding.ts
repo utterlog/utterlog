@@ -483,7 +483,11 @@ export async function codingPayload(includeRepos = false) {
       firstError ||= err instanceof Error ? err.message : 'GitHub 数据读取失败';
     }
   }
-  const includeFollowing = (await optionValue('coding_include_following', 'true')) !== 'false';
+  // 默认只显示站长自己的动态。这里原本默认 'true'，而数据库里从来没有这条
+  // 记录 —— 于是「拉取关注者动态」这个行为一直在跑，站长没开过也关不掉
+  // （后台没有对应的设置项）。既然是把别人的提交混进自己的时间线，默认
+  // 关闭更合理，要看的人去后台打开。
+  const includeFollowing = (await optionValue('coding_include_following', 'false')) === 'true';
   const followingMax = Math.min(30, Math.max(0, Number(await optionValue('coding_github_following_max', '20')) || 20));
   if (includeFollowing && owners[0]) {
     const ownerKeys = new Set(owners.map((owner) => owner.toLowerCase()));

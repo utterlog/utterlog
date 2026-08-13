@@ -141,6 +141,7 @@ export default function PagesPage() {
   const [aboutEditorOpen, setAboutEditorOpen] = useState(false);
   const [codingEditorOpen, setCodingEditorOpen] = useState(false);
   const [codingGitHubURL, setCodingGitHubURL] = useState('');
+  const [codingIncludeFollowing, setCodingIncludeFollowing] = useState(false);
   const [codingDetectedURL, setCodingDetectedURL] = useState('');
   // Token 已统一到「设置 → 第三方服务 → GitHub」(github_access_token)；
   // 这里只显示状态，不再提供编辑入口，避免两处写入互相覆盖。
@@ -196,6 +197,7 @@ export default function PagesPage() {
       if (saveCurrent) {
         await optionsApi.updateMany({
           coding_github_url: codingGitHubURL.trim(),
+        coding_include_following: codingIncludeFollowing ? 'true' : 'false',
         });
       }
       const r: any = await api.get('/coding?include_repos=true');
@@ -218,6 +220,7 @@ export default function PagesPage() {
       const r: any = await optionsApi.list();
       const opts = r.data || r || {};
       setCodingGitHubURL(String(opts.coding_github_url || '').trim());
+      setCodingIncludeFollowing(String(opts.coding_include_following || '') === 'true');
       setCodingTokenConfigured(String(opts.github_access_token || '').trim() !== '');
       setCodingDetectedURL(detectGitHubFromOptions(opts));
       setCodingSelectedRepos(parseCodingSelectedRepos(opts.coding_selected_repos));
@@ -235,6 +238,7 @@ export default function PagesPage() {
     try {
       await optionsApi.updateMany({
         coding_github_url: codingGitHubURL.trim(),
+        coding_include_following: codingIncludeFollowing ? 'true' : 'false',
         coding_selected_repos: JSON.stringify(codingSelectedRepos),
       });
       toast.success(t('admin.common.saved', '已保存'));
@@ -415,6 +419,20 @@ export default function PagesPage() {
                 placeholder={'https://github.com/username\nhttps://github.com/org\nhttps://github.com/org/repo'}
                 className="min-h-22 w-full resize-y leading-relaxed"
               />
+              <div className="mt-3 flex items-start gap-3 border border-line p-3">
+                <Switch
+                  checked={codingIncludeFollowing}
+                  onCheckedChange={setCodingIncludeFollowing}
+                />
+                <div className="flex-1">
+                  <Label className="text-xs-plus font-semibold">同时显示我关注的人的动态</Label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    打开后，Coding 页的动态列表里会混入你在 GitHub 上关注的人的提交记录（最多 10 位）。
+                    默认关闭 —— 别人的提交会把你自己的动态挤掉，而且每位关注者都要额外请求一次
+                    GitHub API。
+                  </p>
+                </div>
+              </div>
               <div className="mt-2.5 flex justify-end">
                 <Button variant="outline" onClick={() => loadCodingRepos(true)} disabled={loadingCodingRepos}>
                   <RefreshCw className={cn('size-4', loadingCodingRepos && 'animate-spin')} />保存并刷新项目
