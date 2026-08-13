@@ -17,6 +17,17 @@ function ymdInTz(d: Date, tz: string): string {
   return `${t.year}-${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')}`;
 }
 
+/**
+ * GitHub 官方绿阶（无贡献 → 最活跃），实测取自 github.com 的
+ * .ContributionCalendar-day。**不是**网上到处流传的
+ * #ebedf0 / #9be9a8 / #40c463 / #30a14e / #216e39 —— 那套是 2022 年改版前的旧值。
+ *
+ * 单元格和图例共用这一个数组：之前两处各写了一遍字面量，改一处漏一处。
+ * coding 页的热力图有同样一套（globals.css 的 .coding-heatmap-cell），
+ * 那边是纯 CSS 没法共享常量，改配色时记得一起动。
+ */
+const GITHUB_GREENS = ['#eff2f5', '#aceebb', '#4ac26b', '#2da44e', '#116329'];
+
 export default function Heatmap({ data, timeZone }: HeatmapProps) {
   const tz = isValidTimeZone(timeZone) ? timeZone! : 'UTC';
 
@@ -61,11 +72,11 @@ export default function Heatmap({ data, timeZone }: HeatmapProps) {
   });
 
   const getColor = (count: number) => {
-    if (count === 0) return '#ebedf0';
-    if (count === 1) return '#9be9a8';
-    if (count === 2) return '#40c463';
-    if (count <= 4) return '#30a14e';
-    return '#216e39';
+    if (count === 0) return GITHUB_GREENS[0];
+    if (count === 1) return GITHUB_GREENS[1];
+    if (count === 2) return GITHUB_GREENS[2];
+    if (count <= 4) return GITHUB_GREENS[3];
+    return GITHUB_GREENS[4];
   };
 
   return (
@@ -104,7 +115,7 @@ export default function Heatmap({ data, timeZone }: HeatmapProps) {
       {/* Legend */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '8px', fontSize: '11px', color: '#999' }}>
         <span>少</span>
-        {['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'].map((c, i) => (
+        {GITHUB_GREENS.map((c, i) => (
           <div key={i} style={{ width: '11px', height: '11px', background: c }} />
         ))}
         <span>多</span>

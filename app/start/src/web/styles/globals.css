@@ -2256,19 +2256,20 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   width: 100%;
   aspect-ratio: 1;
   border-radius: 2px;
-  background: #ebedf0;
+  background: #eff2f5;
 }
 
 .coding-heatmap-cell.level-blank {
   background: transparent;
 }
 
-/* GitHub 官方的绿色四阶（浅→深）。原来是站点主色的蓝阶，但热力图这个形式
-   本身就来自 GitHub，用它的绿更容易被一眼认出来。 */
-.coding-heatmap-cell.level-1 { background: #9be9a8; }
-.coding-heatmap-cell.level-2 { background: #40c463; }
-.coding-heatmap-cell.level-3 { background: #30a14e; }
-.coding-heatmap-cell.level-4 { background: #216e39; }
+/* GitHub 官方绿阶（浅→深）。注意这是**改版后**的 Primer 配色，不是网上到处
+   流传的 #9be9a8 / #40c463 / #30a14e / #216e39 —— 那套是 2022 年以前的旧值。
+   下面这五个是直接从 github.com 的 .ContributionCalendar-day 上取的实测值。 */
+.coding-heatmap-cell.level-1 { background: #aceebb; }
+.coding-heatmap-cell.level-2 { background: #4ac26b; }
+.coding-heatmap-cell.level-3 { background: #2da44e; }
+.coding-heatmap-cell.level-4 { background: #116329; }
 
 .coding-heatmap-legend {
   display: flex;
@@ -2282,14 +2283,15 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 .coding-heatmap-legend i {
   width: 11px;
   height: 11px;
-  background: #e9edf3;
+  border-radius: 2px;
+  background: #eff2f5;
 }
 
 /* 跟单元格保持同一套绿阶 —— 图例是独立的一组规则，改配色时容易漏 */
-.coding-heatmap-legend i.level-1 { background: #9be9a8; }
-.coding-heatmap-legend i.level-2 { background: #40c463; }
-.coding-heatmap-legend i.level-3 { background: #30a14e; }
-.coding-heatmap-legend i.level-4 { background: #216e39; }
+.coding-heatmap-legend i.level-1 { background: #aceebb; }
+.coding-heatmap-legend i.level-2 { background: #4ac26b; }
+.coding-heatmap-legend i.level-3 { background: #2da44e; }
+.coding-heatmap-legend i.level-4 { background: #116329; }
 
 /* ---- 热力图 + 语言占比 左右分栏 ---- */
 
@@ -2319,33 +2321,56 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   letter-spacing: 0.12em;
 }
 
-.coding-langs-bar {
-  display: flex;
-  width: 100%;
-  height: 8px;
-  overflow: hidden;
-  border-radius: 4px;
-  background: #ebedf0;
+/* ---- 语言占比：环形图 ---- */
+
+.coding-langs-donut {
+  display: block;
+  width: 132px;
+  height: 132px;
+  margin: 0 auto;
 }
 
-.coding-langs-bar i {
-  display: block;
-  height: 100%;
+/* 从 12 点开始顺时针，而不是 SVG 默认的 3 点 */
+.coding-langs-donut g {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.coding-langs-donut circle {
+  fill: none;
+  stroke-width: 15;
+}
+
+.coding-langs-center {
+  fill: var(--color-text-main, #333);
+  font-family: var(--font-mono, monospace);
+  font-size: 22px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.coding-langs-center-sub {
+  fill: var(--color-text-dim, #999);
+  font-family: var(--font-mono, monospace);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-anchor: middle;
 }
 
 .coding-langs-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin: 12px 0 0;
+  flex-direction: column;
+  gap: 7px;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .coding-langs-list li {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-size: 12px;
 }
 
@@ -2356,23 +2381,31 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   flex-shrink: 0;
 }
 
+/* 名字占满中间，百分比被挤到右侧对齐成一列 */
 .coding-langs-list span {
+  flex: 1;
+  overflow: hidden;
   color: var(--color-text-main, #333);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .coding-langs-list em {
+  flex-shrink: 0;
   color: var(--color-text-dim, #999);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
   font-style: normal;
 }
 
 @media (min-width: 1000px) {
-  /* 宽屏才并排：热力图占主，语言占比 220px 一栏 */
+  /* 宽屏才并排：热力图占主，语言占比一栏 */
   .coding-heatmap-section .coding-heatmap-split {
     grid-template-columns: minmax(0, 1fr);
   }
   .coding-heatmap-section {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-columns: minmax(0, 1fr) 200px;
     grid-template-areas:
       "head head"
       "map  langs";

@@ -157,6 +157,12 @@ const LANGUAGE_COLORS: Record<string, string> = {
   CSS: '#563d7c', SCSS: '#c6538c', Dart: '#00B4AB', Lua: '#000080',
 };
 
+const OTHER_COLOR = '#8b949e';
+
+/** 环形图的半径与周长。半径 52 + 环宽 15 → 外径 119，装进 132 的画布还剩点余量。 */
+const DONUT_R = 52;
+const DONUT_C = 2 * Math.PI * DONUT_R;
+
 /** 按仓库数统计语言占比。GitHub 那种按字节数算的数据要逐仓库再请求一次，
     不值当 —— 仓库数已经能反映「主要在写什么」。 */
 function languageShare(repos: CodingRepo[]) {
@@ -168,15 +174,22 @@ function languageShare(repos: CodingRepo[]) {
   }
   const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
   if (!total) return [];
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([name, count]) => ({
-      name,
-      count,
-      percent: Math.round((count / total) * 100),
-      color: LANGUAGE_COLORS[name] || '#8b949e',
-    }));
+
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const top = sorted.slice(0, 5).map(([name, count]) => ({ name, count }));
+  // 第 6 名往后并成「Other」。截断后直接丢弃的话，环会缺一块却不说明原因。
+  const rest = sorted.slice(5).reduce((sum, [, count]) => sum + count, 0);
+  const items = rest ? [...top, { name: 'Other', count: rest }] : top;
+
+  return items.map(({ name, count }) => ({
+    name,
+    count,
+    // 画弧长用未取整的 ratio：percent 各自四舍五入后加起来不一定是 100
+    // （三等分就是 33×3=99），拿它算弧长环上会留一道缝。
+    ratio: count / total,
+    percent: Math.round((count / total) * 100),
+    color: name === 'Other' ? OTHER_COLOR : (LANGUAGE_COLORS[name] || OTHER_COLOR),
+  }));
 }
 
 function contributionLevel(count: number) {
@@ -456,16 +469,40 @@ export default function CodingPage({
             {languages.length > 0 && (
               <aside className="coding-langs" aria-label="语言占比">
                 <span className="coding-langs-title">LANGUAGES</span>
-                {/* 一条堆叠比例条，下面是图例 */}
-                <div className="coding-langs-bar">
-                  {languages.map((lang) => (
-                    <i
-                      key={lang.name}
-                      style={{ width: `${lang.percent}%`, background: lang.color }}
-                      title={`${lang.name} · ${lang.count} 个仓库 · ${lang.percent}%`}
-                    />
-                  ))}
-                </div>
+                {/* 环形图。每段是一个整圆，靠 dasharray 只露出自己那段弧，
+                    再用 dashoffset 转到该在的位置（负值 = 顺时针推）。 */}
+                <svg
+                  className="coding-langs-donut"
+                  viewBox="0 0 132 132"
+                  role="img"
+                  aria-label={languages.map((l) => `${l.name} ${l.percent}%`).join('，')}
+                >
+                  <g>
+                    {languages.map((lang, index) => {
+                      const len = lang.ratio * DONUT_C;
+                      // 起点 = 前面所有段的弧长之和。段数最多 6，
+                      // 这点重复求和换来不用在 map 里维护累加变量。
+                      const before = languages
+                        .slice(0, index)
+                        .reduce((sum, prev) => sum + prev.ratio, 0);
+                      return (
+                        <circle
+                          key={lang.name}
+                          cx="66"
+                          cy="66"
+                          r={DONUT_R}
+                          stroke={lang.color}
+                          strokeDasharray={`${len} ${DONUT_C - len}`}
+                          strokeDashoffset={-before * DONUT_C}
+                        >
+                          <title>{`${lang.name} · ${lang.count} 个仓库 · ${lang.percent}%`}</title>
+                        </circle>
+                      );
+                    })}
+                  </g>
+                  <text className="coding-langs-center" x="66" y="70">{languages.length}</text>
+                  <text className="coding-langs-center-sub" x="66" y="84">LANGS</text>
+                </svg>
                 <ul className="coding-langs-list">
                   {languages.map((lang) => (
                     <li key={lang.name}>
