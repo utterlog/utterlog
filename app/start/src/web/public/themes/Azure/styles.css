@@ -23,7 +23,7 @@
 }
 [data-theme="Azure"] .azure-frame {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;
   min-height: calc(100vh - 60px);
   margin: 0 auto;
   background: var(--color-bg-card);
@@ -451,9 +451,7 @@
 }
 [data-theme="Azure"] .azure-grid {
   display: grid;
-  /* 侧栏跟着外壳一起缩（1400→1280 时 280→240），维持约 19% 的占比。
-     写死 280 的话主内容会从 1118 掉到 998，正文那栏明显变挤。 */
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
 }
 
 /* 侧栏和社交栏的右侧分隔线。
