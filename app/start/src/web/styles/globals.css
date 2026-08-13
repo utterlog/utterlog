@@ -2255,17 +2255,20 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   display: block;
   width: 100%;
   aspect-ratio: 1;
-  background: #e9edf3;
+  border-radius: 2px;
+  background: #ebedf0;
 }
 
 .coding-heatmap-cell.level-blank {
   background: transparent;
 }
 
-.coding-heatmap-cell.level-1 { background: #d6e2f3; }
-.coding-heatmap-cell.level-2 { background: #9db8da; }
-.coding-heatmap-cell.level-3 { background: #5f86c4; }
-.coding-heatmap-cell.level-4 { background: var(--color-primary, #3a52b8); }
+/* GitHub 官方的绿色四阶（浅→深）。原来是站点主色的蓝阶，但热力图这个形式
+   本身就来自 GitHub，用它的绿更容易被一眼认出来。 */
+.coding-heatmap-cell.level-1 { background: #9be9a8; }
+.coding-heatmap-cell.level-2 { background: #40c463; }
+.coding-heatmap-cell.level-3 { background: #30a14e; }
+.coding-heatmap-cell.level-4 { background: #216e39; }
 
 .coding-heatmap-legend {
   display: flex;
@@ -2282,10 +2285,104 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   background: #e9edf3;
 }
 
-.coding-heatmap-legend i.level-1 { background: #d6e2f3; }
-.coding-heatmap-legend i.level-2 { background: #9db8da; }
-.coding-heatmap-legend i.level-3 { background: #5f86c4; }
-.coding-heatmap-legend i.level-4 { background: var(--color-primary, #3a52b8); }
+/* 跟单元格保持同一套绿阶 —— 图例是独立的一组规则，改配色时容易漏 */
+.coding-heatmap-legend i.level-1 { background: #9be9a8; }
+.coding-heatmap-legend i.level-2 { background: #40c463; }
+.coding-heatmap-legend i.level-3 { background: #30a14e; }
+.coding-heatmap-legend i.level-4 { background: #216e39; }
+
+/* ---- 热力图 + 语言占比 左右分栏 ---- */
+
+.coding-heatmap-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+/* 热力图整体收窄：单元格上限 13px（GitHub 自己是 10px），
+   53 周 × 13 + 间隙约 780px，右边给语言占比留出位置。 */
+.coding-heatmap {
+  max-width: 780px;
+}
+
+.coding-langs {
+  display: block;
+}
+
+.coding-langs-title {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-text-dim, #888);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.coding-langs-bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #ebedf0;
+}
+
+.coding-langs-bar i {
+  display: block;
+  height: 100%;
+}
+
+.coding-langs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.coding-langs-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.coding-langs-list i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.coding-langs-list span {
+  color: var(--color-text-main, #333);
+}
+
+.coding-langs-list em {
+  color: var(--color-text-dim, #999);
+  font-style: normal;
+}
+
+@media (min-width: 1000px) {
+  /* 宽屏才并排：热力图占主，语言占比 220px 一栏 */
+  .coding-heatmap-section .coding-heatmap-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .coding-heatmap-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-areas:
+      "head head"
+      "map  langs";
+    gap: 0 32px;
+    align-items: start;
+  }
+  .coding-heatmap-section .coding-section-head { grid-area: head; }
+  .coding-heatmap-section .coding-heatmap-split { grid-area: map; }
+  .coding-heatmap-section .coding-langs { grid-area: langs; align-self: center; }
+}
 
 .coding-grid {
   display: grid;

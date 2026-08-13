@@ -148,6 +148,37 @@ function displayLogRepoName(repo: CodingActivityRepoGroup) {
   return String(repo.name || 'Repository');
 }
 
+/** GitHub 官方的语言配色（取最常见的一批，其余走兜底灰） */
+const LANGUAGE_COLORS: Record<string, string> = {
+  TypeScript: '#3178c6', JavaScript: '#f1e05a', PHP: '#4F5D95', Go: '#00ADD8',
+  Python: '#3572A5', Rust: '#dea584', Java: '#b07219', 'C++': '#f34b7d',
+  C: '#555555', 'C#': '#178600', Ruby: '#701516', Swift: '#F05138',
+  Kotlin: '#A97BFF', Vue: '#41b883', Shell: '#89e051', HTML: '#e34c26',
+  CSS: '#563d7c', SCSS: '#c6538c', Dart: '#00B4AB', Lua: '#000080',
+};
+
+/** 按仓库数统计语言占比。GitHub 那种按字节数算的数据要逐仓库再请求一次，
+    不值当 —— 仓库数已经能反映「主要在写什么」。 */
+function languageShare(repos: CodingRepo[]) {
+  const counts = new Map<string, number>();
+  for (const repo of repos) {
+    const lang = String(repo.language || '').trim();
+    if (!lang) continue;
+    counts.set(lang, (counts.get(lang) || 0) + 1);
+  }
+  const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
+  if (!total) return [];
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percent: Math.round((count / total) * 100),
+      color: LANGUAGE_COLORS[name] || '#8b949e',
+    }));
+}
+
 function contributionLevel(count: number) {
   if (count >= 8) return 4;
   if (count >= 4) return 3;
@@ -296,6 +327,7 @@ export default function CodingPage({
    })();
   const days = rollingDays;
   const weeks = contributionWeeks(days);
+  const languages = languageShare(Array.isArray(data.repos) ? data.repos : []);
   const todayContributions = todayContributionCount(days, timeZone);
   const heatmapYear = contributionYear(days);
   const stats = data.stats || {};
@@ -391,6 +423,7 @@ export default function CodingPage({
                 ) : null}
               </div>
             </div>
+            <div className="coding-heatmap-split">
             <div className="coding-heatmap-scroll">
               {/* 布局走 globals.css 的 flex（53 周等分父级宽度），不再
                   inline 设 gridTemplateColumns —— 之前是 display: grid
@@ -418,6 +451,32 @@ export default function CodingPage({
               {[0, 1, 2, 3, 4].map((level) => <i key={level} className={`level-${level}`} />)}
               <span>More · {formatCount(stats.total_contributions)} contributions in {heatmapYear}</span>
             </div>
+            </div>
+
+            {languages.length > 0 && (
+              <aside className="coding-langs" aria-label="语言占比">
+                <span className="coding-langs-title">LANGUAGES</span>
+                {/* 一条堆叠比例条，下面是图例 */}
+                <div className="coding-langs-bar">
+                  {languages.map((lang) => (
+                    <i
+                      key={lang.name}
+                      style={{ width: `${lang.percent}%`, background: lang.color }}
+                      title={`${lang.name} · ${lang.count} 个仓库 · ${lang.percent}%`}
+                    />
+                  ))}
+                </div>
+                <ul className="coding-langs-list">
+                  {languages.map((lang) => (
+                    <li key={lang.name}>
+                      <i style={{ background: lang.color }} />
+                      <span>{lang.name}</span>
+                      <em>{lang.percent}%</em>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            )}
           </section>
 
           <section className="coding-section coding-log-section">
