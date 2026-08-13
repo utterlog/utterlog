@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TagsRouteImport } from './routes/tags'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
@@ -27,14 +26,12 @@ import { Route as InstallRouteImport } from './routes/install'
 import { Route as GoodsRouteImport } from './routes/goods'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as FootprintsRouteImport } from './routes/footprints'
-import { Route as FilmsRouteImport } from './routes/films'
 import { Route as FeedsRouteImport } from './routes/feeds'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as FaviconDoticoRouteImport } from './routes/favicon[.]ico'
 import { Route as FaviconDotextRouteImport } from './routes/favicon[.]$ext'
 import { Route as DarkLogoDotextRouteImport } from './routes/dark-logo[.]$ext'
 import { Route as CodingRouteImport } from './routes/coding'
-import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as BooksRouteImport } from './routes/books'
 import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
 import { Route as ArchivesRouteImport } from './routes/archives'
@@ -43,6 +40,9 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TagsIndexRouteImport } from './routes/tags/index'
+import { Route as FilmsIndexRouteImport } from './routes/films/index'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as UploadsSplatRouteImport } from './routes/uploads/$'
 import { Route as ThemesSplatRouteImport } from './routes/themes/$'
 import { Route as TagsSlugRouteImport } from './routes/tags/$slug'
@@ -215,11 +215,6 @@ import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v
 import { Route as ApiV1AdminSyncPlatformSitesUuidRouteImport } from './routes/api/v1/admin/sync/$platform/sites/$uuid'
 import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
 
-const TagsRoute = TagsRouteImport.update({
-  id: '/tags',
-  path: '/tags',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -305,11 +300,6 @@ const FootprintsRoute = FootprintsRouteImport.update({
   path: '/footprints',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FilmsRoute = FilmsRouteImport.update({
-  id: '/films',
-  path: '/films',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FeedsRoute = FeedsRouteImport.update({
   id: '/feeds',
   path: '/feeds',
@@ -338,11 +328,6 @@ const DarkLogoDotextRoute = DarkLogoDotextRouteImport.update({
 const CodingRoute = CodingRouteImport.update({
   id: '/coding',
   path: '/coding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriesRoute = CategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BooksRoute = BooksRouteImport.update({
@@ -385,6 +370,21 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TagsIndexRoute = TagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmsIndexRoute = FilmsIndexRouteImport.update({
+  id: '/films/',
+  path: '/films/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadsSplatRoute = UploadsSplatRouteImport.update({
   id: '/uploads/$',
   path: '/uploads/$',
@@ -396,9 +396,9 @@ const ThemesSplatRoute = ThemesSplatRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const TagsSlugRoute = TagsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => TagsRoute,
+  id: '/tags/$slug',
+  path: '/tags/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const StylesSplatRoute = StylesSplatRouteImport.update({
   id: '/styles/$',
@@ -431,9 +431,9 @@ const IconsSplatRoute = IconsSplatRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const FilmsSlugRoute = FilmsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => FilmsRoute,
+  id: '/films/$slug',
+  path: '/films/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const EmojiSplatRoute = EmojiSplatRouteImport.update({
   id: '/emoji/$',
@@ -446,9 +446,9 @@ const DateYearRoute = DateYearRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CategoriesRoute,
+  id: '/categories/$slug',
+  path: '/categories/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AssetsSplatRoute = AssetsSplatRouteImport.update({
   id: '/assets/$',
@@ -1279,14 +1279,12 @@ export interface FileRoutesByFullPath {
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
-  '/categories': typeof CategoriesRouteWithChildren
   '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
   '/favicon.ico': typeof FaviconDoticoRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
-  '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
   '/goods': typeof GoodsRoute
@@ -1304,7 +1302,6 @@ export interface FileRoutesByFullPath {
   '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tags': typeof TagsRouteWithChildren
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
@@ -1322,6 +1319,9 @@ export interface FileRoutesByFullPath {
   '/tags/$slug': typeof TagsSlugRoute
   '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/films/': typeof FilmsIndexRoute
+  '/tags/': typeof TagsIndexRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
@@ -1486,14 +1486,12 @@ export interface FileRoutesByTo {
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
-  '/categories': typeof CategoriesRouteWithChildren
   '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
   '/favicon.ico': typeof FaviconDoticoRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
-  '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
   '/goods': typeof GoodsRoute
@@ -1511,7 +1509,6 @@ export interface FileRoutesByTo {
   '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tags': typeof TagsRouteWithChildren
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
@@ -1529,6 +1526,9 @@ export interface FileRoutesByTo {
   '/tags/$slug': typeof TagsSlugRoute
   '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
+  '/categories': typeof CategoriesIndexRoute
+  '/films': typeof FilmsIndexRoute
+  '/tags': typeof TagsIndexRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
@@ -1694,14 +1694,12 @@ export interface FileRoutesById {
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
-  '/categories': typeof CategoriesRouteWithChildren
   '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
   '/favicon.ico': typeof FaviconDoticoRoute
   '/feed': typeof FeedRoute
   '/feeds': typeof FeedsRoute
-  '/films': typeof FilmsRouteWithChildren
   '/footprints': typeof FootprintsRoute
   '/games': typeof GamesRoute
   '/goods': typeof GoodsRoute
@@ -1719,7 +1717,6 @@ export interface FileRoutesById {
   '/rss.xml': typeof RssDotxmlRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tags': typeof TagsRouteWithChildren
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
   '/api/revalidate': typeof ApiRevalidateRoute
@@ -1737,6 +1734,9 @@ export interface FileRoutesById {
   '/tags/$slug': typeof TagsSlugRoute
   '/themes/$': typeof ThemesSplatRoute
   '/uploads/$': typeof UploadsSplatRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/films/': typeof FilmsIndexRoute
+  '/tags/': typeof TagsIndexRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
   '/api/v1/coding': typeof ApiV1CodingRoute
@@ -1903,14 +1903,12 @@ export interface FileRouteTypes {
     | '/archives'
     | '/atom.xml'
     | '/books'
-    | '/categories'
     | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
     | '/favicon.ico'
     | '/feed'
     | '/feeds'
-    | '/films'
     | '/footprints'
     | '/games'
     | '/goods'
@@ -1928,7 +1926,6 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/search'
     | '/sitemap.xml'
-    | '/tags'
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
@@ -1946,6 +1943,9 @@ export interface FileRouteTypes {
     | '/tags/$slug'
     | '/themes/$'
     | '/uploads/$'
+    | '/categories/'
+    | '/films/'
+    | '/tags/'
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
@@ -2110,14 +2110,12 @@ export interface FileRouteTypes {
     | '/archives'
     | '/atom.xml'
     | '/books'
-    | '/categories'
     | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
     | '/favicon.ico'
     | '/feed'
     | '/feeds'
-    | '/films'
     | '/footprints'
     | '/games'
     | '/goods'
@@ -2135,7 +2133,6 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/search'
     | '/sitemap.xml'
-    | '/tags'
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
@@ -2153,6 +2150,9 @@ export interface FileRouteTypes {
     | '/tags/$slug'
     | '/themes/$'
     | '/uploads/$'
+    | '/categories'
+    | '/films'
+    | '/tags'
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
@@ -2317,14 +2317,12 @@ export interface FileRouteTypes {
     | '/archives'
     | '/atom.xml'
     | '/books'
-    | '/categories'
     | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
     | '/favicon.ico'
     | '/feed'
     | '/feeds'
-    | '/films'
     | '/footprints'
     | '/games'
     | '/goods'
@@ -2342,7 +2340,6 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/search'
     | '/sitemap.xml'
-    | '/tags'
     | '/admin/$'
     | '/api/$'
     | '/api/revalidate'
@@ -2360,6 +2357,9 @@ export interface FileRouteTypes {
     | '/tags/$slug'
     | '/themes/$'
     | '/uploads/$'
+    | '/categories/'
+    | '/films/'
+    | '/tags/'
     | '/api/v1/$resource'
     | '/api/v1/categories'
     | '/api/v1/coding'
@@ -2525,14 +2525,12 @@ export interface RootRouteChildren {
   ArchivesRoute: typeof ArchivesRoute
   AtomDotxmlRoute: typeof AtomDotxmlRoute
   BooksRoute: typeof BooksRoute
-  CategoriesRoute: typeof CategoriesRouteWithChildren
   CodingRoute: typeof CodingRoute
   DarkLogoDotextRoute: typeof DarkLogoDotextRoute
   FaviconDotextRoute: typeof FaviconDotextRoute
   FaviconDoticoRoute: typeof FaviconDoticoRoute
   FeedRoute: typeof FeedRoute
   FeedsRoute: typeof FeedsRoute
-  FilmsRoute: typeof FilmsRouteWithChildren
   FootprintsRoute: typeof FootprintsRoute
   GamesRoute: typeof GamesRoute
   GoodsRoute: typeof GoodsRoute
@@ -2550,20 +2548,25 @@ export interface RootRouteChildren {
   RssDotxmlRoute: typeof RssDotxmlRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TagsRoute: typeof TagsRouteWithChildren
   ApiSplatRoute: typeof ApiSplatRoute
   ApiRevalidateRoute: typeof ApiRevalidateRoute
   AssetsSplatRoute: typeof AssetsSplatRoute
+  CategoriesSlugRoute: typeof CategoriesSlugRoute
   DateYearRoute: typeof DateYearRouteWithChildren
   EmojiSplatRoute: typeof EmojiSplatRoute
+  FilmsSlugRoute: typeof FilmsSlugRoute
   IconsSplatRoute: typeof IconsSplatRoute
   ImagesSplatRoute: typeof ImagesSplatRoute
   PageNumRoute: typeof PageNumRoute
   PostsSlugRoute: typeof PostsSlugRoute
   StaticSplatRoute: typeof StaticSplatRoute
   StylesSplatRoute: typeof StylesSplatRoute
+  TagsSlugRoute: typeof TagsSlugRoute
   ThemesSplatRoute: typeof ThemesSplatRoute
   UploadsSplatRoute: typeof UploadsSplatRoute
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
+  FilmsIndexRoute: typeof FilmsIndexRoute
+  TagsIndexRoute: typeof TagsIndexRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
   ApiV1CodingRoute: typeof ApiV1CodingRoute
@@ -2694,13 +2697,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tags': {
-      id: '/tags'
-      path: '/tags'
-      fullPath: '/tags'
-      preLoaderRoute: typeof TagsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -2820,13 +2816,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FootprintsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/films': {
-      id: '/films'
-      path: '/films'
-      fullPath: '/films'
-      preLoaderRoute: typeof FilmsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/feeds': {
       id: '/feeds'
       path: '/feeds'
@@ -2867,13 +2856,6 @@ declare module '@tanstack/react-router' {
       path: '/coding'
       fullPath: '/coding'
       preLoaderRoute: typeof CodingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/categories': {
-      id: '/categories'
-      path: '/categories'
-      fullPath: '/categories'
-      preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/books': {
@@ -2932,6 +2914,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tags/': {
+      id: '/tags/'
+      path: '/tags'
+      fullPath: '/tags/'
+      preLoaderRoute: typeof TagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/films/': {
+      id: '/films/'
+      path: '/films'
+      fullPath: '/films/'
+      preLoaderRoute: typeof FilmsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/uploads/$': {
       id: '/uploads/$'
       path: '/uploads/$'
@@ -2948,10 +2951,10 @@ declare module '@tanstack/react-router' {
     }
     '/tags/$slug': {
       id: '/tags/$slug'
-      path: '/$slug'
+      path: '/tags/$slug'
       fullPath: '/tags/$slug'
       preLoaderRoute: typeof TagsSlugRouteImport
-      parentRoute: typeof TagsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/styles/$': {
       id: '/styles/$'
@@ -2997,10 +3000,10 @@ declare module '@tanstack/react-router' {
     }
     '/films/$slug': {
       id: '/films/$slug'
-      path: '/$slug'
+      path: '/films/$slug'
       fullPath: '/films/$slug'
       preLoaderRoute: typeof FilmsSlugRouteImport
-      parentRoute: typeof FilmsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/emoji/$': {
       id: '/emoji/$'
@@ -3018,10 +3021,10 @@ declare module '@tanstack/react-router' {
     }
     '/categories/$slug': {
       id: '/categories/$slug'
-      path: '/$slug'
+      path: '/categories/$slug'
       fullPath: '/categories/$slug'
       preLoaderRoute: typeof CategoriesSlugRouteImport
-      parentRoute: typeof CategoriesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/assets/$': {
       id: '/assets/$'
@@ -4142,38 +4145,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface CategoriesRouteChildren {
-  CategoriesSlugRoute: typeof CategoriesSlugRoute
-}
-
-const CategoriesRouteChildren: CategoriesRouteChildren = {
-  CategoriesSlugRoute: CategoriesSlugRoute,
-}
-
-const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
-  CategoriesRouteChildren,
-)
-
-interface FilmsRouteChildren {
-  FilmsSlugRoute: typeof FilmsSlugRoute
-}
-
-const FilmsRouteChildren: FilmsRouteChildren = {
-  FilmsSlugRoute: FilmsSlugRoute,
-}
-
-const FilmsRouteWithChildren = FilmsRoute._addFileChildren(FilmsRouteChildren)
-
-interface TagsRouteChildren {
-  TagsSlugRoute: typeof TagsSlugRoute
-}
-
-const TagsRouteChildren: TagsRouteChildren = {
-  TagsSlugRoute: TagsSlugRoute,
-}
-
-const TagsRouteWithChildren = TagsRoute._addFileChildren(TagsRouteChildren)
-
 interface DateYearMonthRouteChildren {
   DateYearMonthDayRoute: typeof DateYearMonthDayRoute
 }
@@ -4441,14 +4412,12 @@ const rootRouteChildren: RootRouteChildren = {
   ArchivesRoute: ArchivesRoute,
   AtomDotxmlRoute: AtomDotxmlRoute,
   BooksRoute: BooksRoute,
-  CategoriesRoute: CategoriesRouteWithChildren,
   CodingRoute: CodingRoute,
   DarkLogoDotextRoute: DarkLogoDotextRoute,
   FaviconDotextRoute: FaviconDotextRoute,
   FaviconDoticoRoute: FaviconDoticoRoute,
   FeedRoute: FeedRoute,
   FeedsRoute: FeedsRoute,
-  FilmsRoute: FilmsRouteWithChildren,
   FootprintsRoute: FootprintsRoute,
   GamesRoute: GamesRoute,
   GoodsRoute: GoodsRoute,
@@ -4466,20 +4435,25 @@ const rootRouteChildren: RootRouteChildren = {
   RssDotxmlRoute: RssDotxmlRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TagsRoute: TagsRouteWithChildren,
   ApiSplatRoute: ApiSplatRoute,
   ApiRevalidateRoute: ApiRevalidateRoute,
   AssetsSplatRoute: AssetsSplatRoute,
+  CategoriesSlugRoute: CategoriesSlugRoute,
   DateYearRoute: DateYearRouteWithChildren,
   EmojiSplatRoute: EmojiSplatRoute,
+  FilmsSlugRoute: FilmsSlugRoute,
   IconsSplatRoute: IconsSplatRoute,
   ImagesSplatRoute: ImagesSplatRoute,
   PageNumRoute: PageNumRoute,
   PostsSlugRoute: PostsSlugRoute,
   StaticSplatRoute: StaticSplatRoute,
   StylesSplatRoute: StylesSplatRoute,
+  TagsSlugRoute: TagsSlugRoute,
   ThemesSplatRoute: ThemesSplatRoute,
   UploadsSplatRoute: UploadsSplatRoute,
+  CategoriesIndexRoute: CategoriesIndexRoute,
+  FilmsIndexRoute: FilmsIndexRoute,
+  TagsIndexRoute: TagsIndexRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
   ApiV1CodingRoute: ApiV1CodingRoute,
