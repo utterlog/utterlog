@@ -23,7 +23,7 @@
 }
 [data-theme="Azure"] .azure-frame {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1280px;
   min-height: calc(100vh - 60px);
   margin: 0 auto;
   background: var(--color-bg-card);
@@ -451,7 +451,9 @@
 }
 [data-theme="Azure"] .azure-grid {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  /* 侧栏跟着外壳一起缩（1400→1280 时 280→240），维持约 19% 的占比。
+     写死 280 的话主内容会从 1118 掉到 998，正文那栏明显变挤。 */
+  grid-template-columns: 240px minmax(0, 1fr);
 }
 
 /* 侧栏和社交栏的右侧分隔线。
@@ -469,6 +471,9 @@
 [data-theme="Azure"] .azure-hero {
   position: relative;
   overflow: hidden;
+  /* 跟封面同一套比例与限高，否则父级按内容撑开，图片裁切后底下会留白 */
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
 }
 [data-theme="Azure"] .azure-hero-link {
   position: relative;
@@ -478,7 +483,14 @@
 }
 [data-theme="Azure"] .azure-hero-cover {
   width: 100%;
-  height: var(--azure-hero-height, 280px);
+  /* 按 16:9 出图（1920×1080 这类标准尺寸直接用），但显示时限高 —— 通栏
+     1278px 的 16:9 是 719px 高，首屏会被 banner 占满，文章列表得滚一屏
+     才看得到。object-fit:cover 居中裁掉上下，出图方便和版面平衡兼顾。 */
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
 }
 [data-theme="Azure"] .azure-hero-loading {
   position: absolute;
@@ -1228,8 +1240,11 @@
   [data-theme="Azure"] .azure-hero-panel {
     margin-left: 0;
   }
-  [data-theme="Azure"] .azure-hero-cover {
-    height: clamp(220px, 58vw, 320px);
+  [data-theme="Azure"] .azure-hero-cover,
+  [data-theme="Azure"] .azure-hero {
+    /* 窄屏下 16:9 算出来本来就不高（1023px 宽 → 575px），限高放宽到 360，
+       让比例说了算。写 height 会把 aspect-ratio 覆盖掉，所以只调 max-height。 */
+    max-height: 360px;
   }
   [data-theme="Azure"] .azure-hero-titlebar {
     height: auto;
@@ -1520,8 +1535,10 @@
 
 
 
-  [data-theme="Azure"] .azure-hero-cover {
-    height: clamp(210px, 62vw, 280px);
+  [data-theme="Azure"] .azure-hero-cover,
+  [data-theme="Azure"] .azure-hero {
+    /* 手机上 16:9 就是 767×431 以下，不需要再限高，给个宽松上限兜底 */
+    max-height: 300px;
   }
   [data-theme="Azure"] .azure-moment-ticker {
     gap: 8px;

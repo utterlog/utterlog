@@ -167,18 +167,14 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
     return () => { cancelled = true; };
   }, [heroSrc, displaySrc]);
 
-  // Hero height — tab row count depends on which sidebar mode we're in.
-  // Custom menu still keeps the fixed "全部" tab at the top.
-  // tabs 已经从 hero 左侧挪到图片下方横排，高度不再跟分类数挂钩 ——
-  // 原来是 max(280, 分类数 × 56)，分类增减会让 banner 忽高忽低，出图比例
-  // 也跟着变。现在固定 360px，配合容器宽度约等于 3.5:1 的横幅比例。
-  const heroHeight = 360;
+  // 高度交给 CSS 的 aspect-ratio 算（16:9 + max-height 限高），这里不再写死。
+  // 早先是 max(280, 分类数 × 56) —— 因为要跟左侧 tabs 那列对齐，分类增减
+  // 会让 banner 忽高忽低；tabs 删掉后那个约束就没了。
   const heroTitleH = 56;
   // 文章卡片滚动显现，同批错开 60ms
   const listRevealRef = useScrollReveal<HTMLElement>('.azure-post-list-item', 60);
 
   const heroVars = {
-    '--azure-hero-height': `${heroHeight}px`,
     '--azure-hero-title-height': `${heroTitleH}px`,
   } as CSSProperties;
   const heroModeStyle = {
