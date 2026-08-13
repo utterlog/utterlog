@@ -72,7 +72,6 @@ export default function Header() {
     ? menus.header
     : [
         { href: '/', label: '首页' },
-        { href: '/coding', label: 'Coding' },
         { href: '/archives', label: '归档' },
         { href: '/moments', label: '说说' },
         { href: '/links', label: '友链' },

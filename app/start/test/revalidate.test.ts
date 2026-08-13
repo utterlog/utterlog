@@ -12,26 +12,19 @@ import { handleRevalidate } from '../src/backend/cache/revalidate';
  */
 describe('handleRevalidate', () => {
   beforeEach(async () => {
-    await ephemeral.set('coding:v4:test', '{"ok":true}', 3600);
+    await ephemeral.set('weather:v1:test', '{"ok":true}', 3600);
   });
 
   test('按 tag 清掉对应前缀的 ephemeral 键', async () => {
-    const result = await handleRevalidate({ tags: ['coding'], paths: [] });
+    const result = await handleRevalidate({ tags: ['weather'], paths: [] });
     expect(result.cleared_ephemeral).toBe(1);
-    expect(await ephemeral.get('coding:v4:test')).toBeNull();
-  });
-
-  test('/coding 路径自动补上 coding tag —— 调用方只传路径也能命中', async () => {
-    const result = await handleRevalidate({ paths: ['/coding'] });
-    expect(result.tags).toContain('coding');
-    expect(result.cleared_ephemeral).toBe(1);
-    expect(await ephemeral.get('coding:v4:test')).toBeNull();
+    expect(await ephemeral.get('weather:v1:test')).toBeNull();
   });
 
   test('无关的 tag 不会误清别人的键', async () => {
     const result = await handleRevalidate({ tags: ['options'], paths: [] });
     expect(result.cleared_ephemeral).toBe(0);
-    expect(await ephemeral.get('coding:v4:test')).not.toBeNull();
+    expect(await ephemeral.get('weather:v1:test')).not.toBeNull();
   });
 
   test('空入参不报错，也不清任何东西', async () => {

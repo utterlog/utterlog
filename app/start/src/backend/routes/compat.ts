@@ -733,7 +733,7 @@ async function findStaleAlbumCoverIds() {
 
 async function clearEphemeralCache() {
   let cleared = 0;
-  for (const prefix of ['captcha:', 'online:', 'coding:', 'weather:', 'reader-chat:', 'ai:batch:']) {
+  for (const prefix of ['captcha:', 'online:', 'weather:', 'reader-chat:', 'ai:batch:']) {
     for (const key of await ephemeral.scan(prefix)) {
       await ephemeral.del(key);
       cleared++;

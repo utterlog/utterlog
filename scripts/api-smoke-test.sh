@@ -109,7 +109,6 @@ check GET /api/v1/footprints
 check GET /api/v1/online
 check GET /api/v1/visitor/geo
 check GET /api/v1/visitor/weather
-check GET /api/v1/coding
 check GET /api/v1/federation/metadata
 check GET /api/v1/public/albums
 check GET /api/v1/moments/recent-tags

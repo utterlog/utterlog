@@ -183,7 +183,7 @@ export const mediaApi = {
 };
 
 // Revalidate frontend cache (called after settings/theme/plugin changes).
-// Sends `tags: ['options', 'coding']`; the server maps each tag to the
+// Sends `tags: ['options']`; the server maps each tag to the
 // ephemeral key prefixes it owns and drops them immediately — otherwise the
 // time-based expiry keeps serving the old value and admin changes look like
 // they didn't apply.
@@ -195,7 +195,7 @@ function revalidateCache() {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ paths: ['/', '/about', '/coding'], tags: ['options', 'coding'] }),
+    body: JSON.stringify({ paths: ['/', '/about'], tags: ['options'] }),
   }).catch(() => {});
 }
 

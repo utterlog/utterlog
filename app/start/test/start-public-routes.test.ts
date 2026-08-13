@@ -9,7 +9,6 @@ const publicRoutes = [
   '/books',
   '/categories',
   '/categories/$slug',
-  '/coding',
   '/date/$year',
   '/date/$year/$month',
   '/date/$year/$month/$day',

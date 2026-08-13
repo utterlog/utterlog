@@ -9,7 +9,6 @@ export function isVisitorPersonalizedPage(pathname: string) {
 // isVisitorPersonalizedPage 单独打 no-store。
 const PUBLIC_CACHEABLE_EXACT = new Set([
   '/about',
-  '/coding',
   '/moments',
   '/footprints',
   '/albums',

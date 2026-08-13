@@ -1,13 +1,10 @@
 import { ephemeral } from '../store/ephemeral';
 
 const TAG_EPHEMERAL_PREFIXES: Record<string, string[]> = {
-  coding: ['coding:'],
   weather: ['weather:'],
   captcha: ['captcha:'],
   online: ['online:'],
 };
-
-const CODING_PATHS = new Set(['/coding']);
 
 export type RevalidateInput = {
   paths?: string[];
@@ -17,10 +14,6 @@ export type RevalidateInput = {
 export async function handleRevalidate(input: RevalidateInput = {}) {
   const paths = Array.isArray(input.paths) ? input.paths.map((p) => String(p || '').trim()).filter(Boolean) : [];
   const tags = Array.isArray(input.tags) ? input.tags.map((t) => String(t || '').trim()).filter(Boolean) : [];
-
-  if (paths.some((path) => CODING_PATHS.has(path) || path.startsWith('/coding/'))) {
-    if (!tags.includes('coding')) tags.push('coding');
-  }
 
   const prefixes = new Set<string>();
   for (const tag of tags) {

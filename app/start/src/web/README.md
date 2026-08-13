@@ -18,7 +18,7 @@
 
 | 路径 | 内容 |
 |---|---|
-| `components/pages/` | 关于、相册、Coding、订阅、足迹、友链、说说、音乐、安装和登录页面 |
+| `components/pages/` | 关于、相册、订阅、足迹、友链、说说、音乐、安装和登录页面 |
 | `components/blog/` | 文章、评论、导航、媒体和公共页面组件 |
 | `themes/` | 内置主题及其 React 组件 |
 | `styles/globals.css` | Tailwind CSS 4 入口和全局样式 |

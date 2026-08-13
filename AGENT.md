@@ -17,7 +17,7 @@
 - Admin 是 **TanStack Start 的 SPA 模式**（无 SSR，预渲染一个静态壳，Bun 网关对
   所有 `/admin/*` 返回它，再由客户端 router 水合）。产物是 `dist/client` +
   `dist/server` 两层，Bun 读 `app/admin/dist/client`。
-- 临时状态（验证码、在线访客、coding 缓存、陪读会话）只用进程内内存，不依赖 Redis。
+- 临时状态（验证码、在线访客、陪读会话）只用进程内内存，不依赖 Redis。
 - 部署形态：systemd 托管的 Bun 进程 + 本机或外部 PostgreSQL。**不用 Docker**
   （仓库里没有任何 Dockerfile）。
 
@@ -497,7 +497,6 @@ ssh <host> "curl -s -H 'Accept-Encoding: identity' http://127.0.0.1:<PORT>/ | gr
 | AI | `backend/routes/ai.ts` |
 | 备份 / 维护 | `backend/routes/backup.ts` |
 | Telegram | `backend/routes/telegram.ts` + `backend/telegram.ts` |
-| GitHub 贡献 | `backend/routes/coding.ts` |
 | WordPress 兼容 / 站点同步 | `backend/routes/compat.ts` |
 | 插件 / 扩展 | `backend/routes/extensions.ts` |
 | GeoIP / Bot 检测 | `backend/{geoip,bot-detect}.ts` |

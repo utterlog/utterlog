@@ -31,7 +31,6 @@ import { Route as FeedRouteImport } from './routes/feed'
 import { Route as FaviconDoticoRouteImport } from './routes/favicon[.]ico'
 import { Route as FaviconDotextRouteImport } from './routes/favicon[.]$ext'
 import { Route as DarkLogoDotextRouteImport } from './routes/dark-logo[.]$ext'
-import { Route as CodingRouteImport } from './routes/coding'
 import { Route as BooksRouteImport } from './routes/books'
 import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
 import { Route as ArchivesRouteImport } from './routes/archives'
@@ -72,7 +71,6 @@ import { Route as ApiV1OnlineRouteImport } from './routes/api/v1/online'
 import { Route as ApiV1HealthRouteImport } from './routes/api/v1/health'
 import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
 import { Route as ApiV1FeedRouteImport } from './routes/api/v1/feed'
-import { Route as ApiV1CodingRouteImport } from './routes/api/v1/coding'
 import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
 import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
 import { Route as ApiV1ThemesIndexRouteImport } from './routes/api/v1/themes/index'
@@ -325,11 +323,6 @@ const DarkLogoDotextRoute = DarkLogoDotextRouteImport.update({
   path: '/dark-logo.$ext',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CodingRoute = CodingRouteImport.update({
-  id: '/coding',
-  path: '/coding',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BooksRoute = BooksRouteImport.update({
   id: '/books',
   path: '/books',
@@ -528,11 +521,6 @@ const ApiV1FootprintsRoute = ApiV1FootprintsRouteImport.update({
 const ApiV1FeedRoute = ApiV1FeedRouteImport.update({
   id: '/api/v1/feed',
   path: '/api/v1/feed',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1CodingRoute = ApiV1CodingRouteImport.update({
-  id: '/api/v1/coding',
-  path: '/api/v1/coding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1CategoriesRoute = ApiV1CategoriesRouteImport.update({
@@ -1279,7 +1267,6 @@ export interface FileRoutesByFullPath {
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
-  '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
   '/favicon.ico': typeof FaviconDoticoRoute
@@ -1324,7 +1311,6 @@ export interface FileRoutesByFullPath {
   '/tags/': typeof TagsIndexRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
-  '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
@@ -1486,7 +1472,6 @@ export interface FileRoutesByTo {
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
-  '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
   '/favicon.ico': typeof FaviconDoticoRoute
@@ -1531,7 +1516,6 @@ export interface FileRoutesByTo {
   '/tags': typeof TagsIndexRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
-  '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
@@ -1694,7 +1678,6 @@ export interface FileRoutesById {
   '/archives': typeof ArchivesRoute
   '/atom.xml': typeof AtomDotxmlRoute
   '/books': typeof BooksRoute
-  '/coding': typeof CodingRoute
   '/dark-logo.$ext': typeof DarkLogoDotextRoute
   '/favicon.$ext': typeof FaviconDotextRoute
   '/favicon.ico': typeof FaviconDoticoRoute
@@ -1739,7 +1722,6 @@ export interface FileRoutesById {
   '/tags/': typeof TagsIndexRoute
   '/api/v1/$resource': typeof ApiV1ResourceRouteWithChildren
   '/api/v1/categories': typeof ApiV1CategoriesRouteWithChildren
-  '/api/v1/coding': typeof ApiV1CodingRoute
   '/api/v1/feed': typeof ApiV1FeedRoute
   '/api/v1/footprints': typeof ApiV1FootprintsRoute
   '/api/v1/health': typeof ApiV1HealthRoute
@@ -1903,7 +1885,6 @@ export interface FileRouteTypes {
     | '/archives'
     | '/atom.xml'
     | '/books'
-    | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
     | '/favicon.ico'
@@ -1948,7 +1929,6 @@ export interface FileRouteTypes {
     | '/tags/'
     | '/api/v1/$resource'
     | '/api/v1/categories'
-    | '/api/v1/coding'
     | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
@@ -2110,7 +2090,6 @@ export interface FileRouteTypes {
     | '/archives'
     | '/atom.xml'
     | '/books'
-    | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
     | '/favicon.ico'
@@ -2155,7 +2134,6 @@ export interface FileRouteTypes {
     | '/tags'
     | '/api/v1/$resource'
     | '/api/v1/categories'
-    | '/api/v1/coding'
     | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
@@ -2317,7 +2295,6 @@ export interface FileRouteTypes {
     | '/archives'
     | '/atom.xml'
     | '/books'
-    | '/coding'
     | '/dark-logo.$ext'
     | '/favicon.$ext'
     | '/favicon.ico'
@@ -2362,7 +2339,6 @@ export interface FileRouteTypes {
     | '/tags/'
     | '/api/v1/$resource'
     | '/api/v1/categories'
-    | '/api/v1/coding'
     | '/api/v1/feed'
     | '/api/v1/footprints'
     | '/api/v1/health'
@@ -2525,7 +2501,6 @@ export interface RootRouteChildren {
   ArchivesRoute: typeof ArchivesRoute
   AtomDotxmlRoute: typeof AtomDotxmlRoute
   BooksRoute: typeof BooksRoute
-  CodingRoute: typeof CodingRoute
   DarkLogoDotextRoute: typeof DarkLogoDotextRoute
   FaviconDotextRoute: typeof FaviconDotextRoute
   FaviconDoticoRoute: typeof FaviconDoticoRoute
@@ -2569,7 +2544,6 @@ export interface RootRouteChildren {
   TagsIndexRoute: typeof TagsIndexRoute
   ApiV1ResourceRoute: typeof ApiV1ResourceRouteWithChildren
   ApiV1CategoriesRoute: typeof ApiV1CategoriesRouteWithChildren
-  ApiV1CodingRoute: typeof ApiV1CodingRoute
   ApiV1FeedRoute: typeof ApiV1FeedRoute
   ApiV1FootprintsRoute: typeof ApiV1FootprintsRoute
   ApiV1HealthRoute: typeof ApiV1HealthRoute
@@ -2851,13 +2825,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DarkLogoDotextRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coding': {
-      id: '/coding'
-      path: '/coding'
-      fullPath: '/coding'
-      preLoaderRoute: typeof CodingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/books': {
       id: '/books'
       path: '/books'
@@ -3136,13 +3103,6 @@ declare module '@tanstack/react-router' {
       path: '/api/v1/feed'
       fullPath: '/api/v1/feed'
       preLoaderRoute: typeof ApiV1FeedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/coding': {
-      id: '/api/v1/coding'
-      path: '/api/v1/coding'
-      fullPath: '/api/v1/coding'
-      preLoaderRoute: typeof ApiV1CodingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/categories': {
@@ -4412,7 +4372,6 @@ const rootRouteChildren: RootRouteChildren = {
   ArchivesRoute: ArchivesRoute,
   AtomDotxmlRoute: AtomDotxmlRoute,
   BooksRoute: BooksRoute,
-  CodingRoute: CodingRoute,
   DarkLogoDotextRoute: DarkLogoDotextRoute,
   FaviconDotextRoute: FaviconDotextRoute,
   FaviconDoticoRoute: FaviconDoticoRoute,
@@ -4456,7 +4415,6 @@ const rootRouteChildren: RootRouteChildren = {
   TagsIndexRoute: TagsIndexRoute,
   ApiV1ResourceRoute: ApiV1ResourceRouteWithChildren,
   ApiV1CategoriesRoute: ApiV1CategoriesRouteWithChildren,
-  ApiV1CodingRoute: ApiV1CodingRoute,
   ApiV1FeedRoute: ApiV1FeedRoute,
   ApiV1FootprintsRoute: ApiV1FootprintsRoute,
   ApiV1HealthRoute: ApiV1HealthRoute,

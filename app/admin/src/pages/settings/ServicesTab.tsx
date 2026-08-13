@@ -39,7 +39,7 @@ export default function ServicesTab({ t, register, watch }: {
     {
       title: t('admin.settings.services.github.section', 'GitHub'),
       icon: GitBranch,
-      description: t('admin.settings.services.github.description', '全站统一 GitHub Token。Coding 页面读取公开项目时可不填；填写后用于服务端贡献统计和提升 GitHub API 速率。'),
+      description: t('admin.settings.services.github.description', '全站统一 GitHub Token。可不填；填写后用于服务端 GitHub API 调用并提升速率上限。'),
       footerHint: t('admin.settings.services.github.footer', '建议只授予最小只读权限。Token 只保存在服务端，不会输出到前台；公开页面不会因为配置 Token 自动混入私有仓库。'),
       fields: [
         { name: 'github_access_token', label: t('admin.settings.services.github.token', 'GitHub Token'), type: 'password', placeholder: 'github_pat_...' , testable: true},

@@ -19,7 +19,6 @@ describe('TanStack Start route metadata', () => {
     expect(publicPageMeta({ kind: 'moments', site, moments: [], tags: [], fetchedAt: 0 }).title).toBe('说说 - 示例站点');
     expect(publicPageMeta({ kind: 'date', site, posts: [], year: 2026, month: 7, timeZone: 'UTC' }).title).toBe('2026/07 归档 - 示例站点');
     expect(publicPageMeta({ kind: 'about', site }).title).toBe('关于 - 示例站点');
-    expect(publicPageMeta({ kind: 'coding', site, data: {}, timeZone: 'UTC' }).title).toBe('Coding - 示例站点');
   });
 
   test('falls back when the page loader could not resolve the site', () => {

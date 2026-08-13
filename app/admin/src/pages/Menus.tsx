@@ -25,7 +25,6 @@ interface MenuItem {
 const BUILTIN_PAGES: { key: string; label: string; href: string }[] = [
   { key: 'home', label: '首页',   href: '/' },
   { key: 'about', label: '关于',   href: '/about' },
-  { key: 'coding', label: 'Coding', href: '/coding' },
   { key: 'archives', label: '归档',   href: '/archives' },
   { key: 'footprints', label: '足迹', href: '/footprints' },
   { key: 'moments', label: '说说',   href: '/moments' },
@@ -227,7 +226,6 @@ export default function MenusPage() {
       updateItems([
         { href: '/', label: t('admin.menus.builtin.home', '首页') },
         { href: '/about', label: t('admin.menus.builtin.about', '关于') },
-        { href: '/coding', label: t('admin.menus.builtin.coding', 'Coding') },
         { href: '/archives', label: t('admin.menus.builtin.archives', '归档') },
         { href: '/moments', label: t('admin.menus.builtin.moments', '说说') },
         { href: '/links', label: t('admin.menus.builtin.links', '友链') },

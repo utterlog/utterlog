@@ -298,7 +298,7 @@ export async function sitemapXmlResponse() {
   const items: { loc: string; lastmod: string; changefreq: string; priority: string }[] = [
     { loc: `${site}/`, lastmod: now, changefreq: 'daily', priority: '1.0' },
   ];
-  for (const path of ['/about', '/archives', '/films', '/moments', '/footprints', '/coding', '/links', '/albums', '/music', '/books', '/games', '/movies', '/goods', '/feeds']) {
+  for (const path of ['/about', '/archives', '/films', '/moments', '/footprints', '/links', '/albums', '/music', '/books', '/games', '/movies', '/goods', '/feeds']) {
     items.push({ loc: `${site}${path}`, lastmod: now, changefreq: 'weekly', priority: '0.6' });
   }
   const posts = await many<Record<string, unknown>>(

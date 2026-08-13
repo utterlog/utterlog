@@ -23,8 +23,6 @@ function ymdInTz(d: Date, tz: string): string {
  * #ebedf0 / #9be9a8 / #40c463 / #30a14e / #216e39 —— 那套是 2022 年改版前的旧值。
  *
  * 单元格和图例共用这一个数组：之前两处各写了一遍字面量，改一处漏一处。
- * coding 页的热力图有同样一套（globals.css 的 .coding-heatmap-cell），
- * 那边是纯 CSS 没法共享常量，改配色时记得一起动。
  */
 const GITHUB_GREENS = ['#eff2f5', '#aceebb', '#4ac26b', '#2da44e', '#116329'];
 

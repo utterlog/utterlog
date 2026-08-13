@@ -425,6 +425,34 @@ export async function runCoreMigrations() {
   // 段落点评（读者对文章某段落做批注）整体下线，schema.sql 里已不再建这张表；
   // 老库升上来还留着，在这里清掉。
   await sql.unsafe(`drop table if exists ${table('annotations')}`);
+  // coding 页（GitHub 贡献热力图 / 仓库列表 / 提交动态）整体下线。
+  // 五个专属配置项没有别的消费方，直接删。
+  await sql.unsafe(`delete from ${table('options')} where name in (
+    'coding_github_url', 'coding_include_following', 'coding_selected_repos',
+    'coding_github_following', 'coding_github_following_max'
+  )`);
+  // 导航菜单里指向 /coding 的条目要单独摘掉。**不能整行删 menu_***
+  // —— 那是全站导航的唯一存储，删一行等于清空用户配的整组菜单，
+  // 所以只能读出来改数组再写回。
+  const menuRows = await sql.unsafe<{ name: string; value: string }[]>(
+    `select name, value from ${table('options')}
+     where name like 'menu\\_%' and value like '%/coding%'`,
+  );
+  for (const row of menuRows) {
+    try {
+      const list = JSON.parse(String(row.value ?? ''));
+      if (!Array.isArray(list)) continue;
+      const next = list.filter((item: any) => String(item?.href || '') !== '/coding');
+      if (next.length === list.length) continue;
+      await sql.unsafe(`update ${table('options')} set value = $1 where name = $2`, [
+        JSON.stringify(next),
+        row.name,
+      ]);
+    } catch {
+      // 菜单值不是合法 JSON（用户手工改过之类）就跳过。
+      // 一条脏数据不该把整个启动流程挡住。
+    }
+  }
 }
 
 export async function initDb() {

@@ -3,7 +3,6 @@ import { getRequestHeader } from '@tanstack/react-start/server';
 import type { ThemeContextData } from '@/lib/theme-context';
 import { datePartsInTimeZone, resolveSiteTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
-import { codingPayload } from '@backend/routes/coding';
 import {
   getPostBySlug,
   getOptionsMap,
@@ -23,7 +22,7 @@ import { loadStartThemeContextDirect } from './theme';
 export type PublicPageRequest =
   | { kind: 'home'; page?: number }
   | { kind: 'post' | 'film'; slug: string }
-  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'coding' | 'footprints' | 'moments' | 'links' | 'feeds' | 'albums' | 'music' }
+  | { kind: 'archives' | 'categories' | 'tags' | 'about' | 'footprints' | 'moments' | 'links' | 'feeds' | 'albums' | 'music' }
   | { kind: 'category' | 'tag'; slug: string }
   | { kind: 'search'; query?: string }
   | { kind: 'shelf'; shelf: 'movies' | 'books' | 'games' | 'goods' }
@@ -32,7 +31,7 @@ export type PublicPageRequest =
   | { kind: 'permalink'; pathname: string };
 
 const staticPageKinds = new Set([
-  'archives', 'categories', 'tags', 'about', 'coding', 'footprints',
+  'archives', 'categories', 'tags', 'about', 'footprints',
   'moments', 'links', 'feeds', 'albums', 'music',
 ]);
 const shelfKinds = new Set(['movies', 'books', 'games', 'goods']);
@@ -142,7 +141,6 @@ export type PublicPageBody =
   | { kind: 'tags' }
   | { kind: 'tag'; tag: any; posts: any[] }
   | { kind: 'about' }
-  | { kind: 'coding'; data: any; timeZone: string }
   | { kind: 'footprints'; rows: any[] }
   | { kind: 'moments'; moments: any[]; tags: string[]; fetchedAt: number }
   | { kind: 'client'; page: 'links' | 'feeds' | 'albums' | 'music'; items?: any[] }
@@ -356,11 +354,6 @@ async function resolvePublicPage(ctx: ThemeContextData | null, data: PublicPageR
     }
 
     if (data.kind === 'about') return { kind: 'about' };
-
-    if (data.kind === 'coding') {
-      const coding = await safe(codingPayload(false), {}, 10_000);
-      return { kind: 'coding', data: coding, timeZone: ctx?.timeZone || 'UTC' };
-    }
 
     if (data.kind === 'footprints') {
       const footprints = await safe(listPublicFootprints(), []);

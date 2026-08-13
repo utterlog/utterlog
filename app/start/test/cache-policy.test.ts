@@ -16,7 +16,6 @@ test('public content pages are cacheable', () => {
     '/tags/PHP',
     '/date/2026/04',
     '/about',
-    '/coding',
     '/moments',
     '/footprints',
     '/albums',

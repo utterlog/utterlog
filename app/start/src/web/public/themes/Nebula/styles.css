@@ -3582,7 +3582,7 @@
 /* ============================================================ */
 
 [data-theme="Nebula"] .nebula-frame > div:not(.nebula-home):not(.nebula-article):not(.nebula-post):not(.moments-page) {
-  /* Nebula 全站统一 960px：跟首页 / 文章页 / coding 等页面的内容栏宽度
+  /* Nebula 全站统一 960px：跟首页 / 文章页等页面的内容栏宽度
      对齐，视觉一致。v2.3.6 临时拉到 1200 是为了 tags / categories chip
      多列时少换行，但破坏了全站宽度统一感，本次回到 960。 */
   max-width: var(--nebula-shell-max);
@@ -3638,8 +3638,7 @@
      tags / categories / archive / search 这些页的标题都是中文，
      用 PingFang SC 比 Google Sans 的中文回退更清爽、字形更规整，
      跟 macOS / iOS 系统字体一致的视觉。Windows / Android 走
-     Microsoft YaHei / Noto Sans SC 兜底；coding 页另有自己的
-     .coding-page-title 覆盖，不受影响。 */
+     Microsoft YaHei / Noto Sans SC 兜底。 */
   font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont,
     'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', system-ui,
     'Segoe UI', sans-serif;
@@ -3673,19 +3672,6 @@
 [data-theme="Nebula"] .about-page .about-page-body {
   padding-left: 0;
   padding-right: 0;
-}
-
-/* coding-page-title 走横向分隔线，把分隔线改为蓝边 */
-[data-theme="Nebula"] .coding-page-title .blog-page-title-text {
-  font-family: var(--nebula-font-display);
-}
-[data-theme="Nebula"] .coding-title-stat {
-  border-right-color: var(--nebula-border-blue-soft);
-  color: var(--color-text-sub);
-}
-[data-theme="Nebula"] .coding-title-stat strong {
-  color: var(--color-text-main);
-  font-family: var(--nebula-font-display);
 }
 
 /* DefaultArchivePage 等默认页里 React 渲染的 inline-style 卡片，
@@ -4339,99 +4325,6 @@
 [data-theme="Nebula"] .btn-secondary {
   border-radius: 8px;
 }
-
-/* ---- /coding 页（globals.css 给的是浅色稿纸视觉）----
-   宽度收到 960，跟 Nebula 其他页面（friend links / archives / search 等）
-   保持一致；section / grid 通过覆盖 CSS 变量 --coding-content-width 拉齐 */
-[data-theme="Nebula"] .coding-page {
-  --coding-content-width: min(var(--nebula-content-max), calc(100% - (var(--nebula-content-pad) * 2)));
-  background: var(--color-bg-card) !important;
-  color: var(--color-text-main);
-}
-[data-theme="Nebula"] .coding-hero {
-  max-width: var(--nebula-shell-max);
-  margin-inline: auto;
-  padding-left: var(--nebula-content-pad);
-  padding-right: var(--nebula-content-pad);
-  background-color: var(--color-bg-card) !important;
-  background-image:
-    linear-gradient(rgba(168, 199, 250, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 199, 250, 0.04) 1px, transparent 1px);
-  border-bottom-color: var(--color-border);
-}
-
-[data-theme="Nebula"] .coding-hero-title em,
-[data-theme="Nebula"] .coding-section-head h3 em {
-  color: var(--color-primary); /* 原 #8f2f24 burgundy → 天蓝 */
-}
-/* "代码持续生长" 中文主标 字号 -5px */
-[data-theme="Nebula"] .coding-hero-title span {
-  font-size: 67px !important;
-}
-/* "Code keeps moving, one commit at a time." 单行显示不换行 */
-[data-theme="Nebula"] .coding-hero-title em {
-  font-size: 34px !important;
-  white-space: nowrap !important;
-}
-/* 副标双语：中文 21px / 英文 15px（两个 span 分开控制） */
-[data-theme="Nebula"] .coding-hero-copy {
-  font-size: 21px !important;
-}
-[data-theme="Nebula"] .coding-hero-copy span:last-child {
-  font-size: 15px !important;
-}
-[data-theme="Nebula"] .coding-notice {
-  background: var(--nebula-tile);
-  border-color: var(--nebula-border-blue-soft);
-  color: var(--color-text-sub);
-  border-radius: 15px;
-}
-
-/* coding 热力图尺寸交给 globals.css（flex / gap 2px / flex: 1 0 0），
-   跟 /archives 页 nebula-heatmap 完全一致；Nebula 这里只覆写颜色阶梯。 */
-
-/* coding 热力图：GitHub 绿色阶梯（4 级 + 空白）
-   颜色取自 GitHub dark contribution graph：
-   blank #161b22 / l1 #0e4429 / l2 #006d32 / l3 #26a641 / l4 #39d353 */
-[data-theme="Nebula"] .coding-heatmap-cell {
-  background: #161b22 !important; /* 兜底：所有 cell 默认深底（globals 默认 #e9edf3 浅） */
-}
-[data-theme="Nebula"] .coding-heatmap-cell.level-blank {
-  background: #161b22 !important;
-}
-[data-theme="Nebula"] .coding-heatmap-cell.level-1,
-[data-theme="Nebula"] .coding-heatmap-legend i.level-1 {
-  background: #0e4429 !important;
-}
-[data-theme="Nebula"] .coding-heatmap-cell.level-2,
-[data-theme="Nebula"] .coding-heatmap-legend i.level-2 {
-  background: #006d32 !important;
-}
-[data-theme="Nebula"] .coding-heatmap-cell.level-3,
-[data-theme="Nebula"] .coding-heatmap-legend i.level-3 {
-  background: #26a641 !important;
-}
-[data-theme="Nebula"] .coding-heatmap-cell.level-4,
-[data-theme="Nebula"] .coding-heatmap-legend i.level-4 {
-  background: #39d353 !important;
-}
-/* 图例默认（无 level 类）方块也用深底 */
-[data-theme="Nebula"] .coding-heatmap-legend i {
-  background: #161b22 !important;
-}
-/* 图例文字 #555 灰 → 半透白 */
-[data-theme="Nebula"] .coding-heatmap-legend {
-  color: rgba(225, 231, 238, 0.55) !important;
-}
-/* 头像边框 #d4d4d4 → 蓝细边 */
-[data-theme="Nebula"] .coding-heatmap-avatar {
-  border-color: rgba(128, 207, 255, 0.18) !important;
-}
-
-
-
-
-
 
 /* ---- code-block-wrapper（PostContent 渲染的代码块外层）---- */
 /* globals: border-radius:0; collapsed::after 用 #1d1f21 渐变兜底

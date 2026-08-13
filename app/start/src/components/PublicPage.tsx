@@ -25,7 +25,6 @@ const FeedsClient = lazy(() => import('@/components/pages/feeds/FeedsClient'));
 const AlbumsClient = lazy(() => import('@/components/pages/albums/AlbumsClient'));
 const MusicClient = lazy(() => import('@/components/pages/music/MusicClient'));
 const AboutContent = lazy(() => import('@/components/pages/about/AboutContent'));
-const CodingPage = lazy(() => import('@/components/pages/coding/CodingPage'));
 
 const shelfMeta = {
   movies: { title: '电影', subtitle: '我看过的', icon: 'fa-sharp fa-light fa-film', unit: '部电影', imageRatio: '2/3' },
@@ -259,7 +258,6 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           return <Component tag={data.tag} posts={data.posts} timeZone={ctx.timeZone} />;
         }
         if (data.kind === 'about') return <AboutContent />;
-        if (data.kind === 'coding') return <CodingPage data={data.data} timeZone={data.timeZone} />;
         if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;
         if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
         if (data.kind === 'client' && data.page === 'links') return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
