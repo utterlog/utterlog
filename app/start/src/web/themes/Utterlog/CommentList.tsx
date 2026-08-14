@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 
 // 表情 slug → 文件名映射
 import emojiPack from '@/public/emoji/bilibili/pack-bilibili.json';
+import Avatar from '@/components/blog/Avatar';
 const emojiMap = new Map(emojiPack.emojis.map(e => [e.slug, e]));
 
 // 渲染评论纯文本 + 表情图片（不使用 Markdown）
@@ -274,12 +275,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
         {/* 头像 */}
         {!isReply && (
           <div style={{ flexShrink: 0 }}>
-            <img
-              src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'}
-              alt=""
-              style={{ width: '40px', height: '40px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '4px', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', transform: hovered ? 'scale(1.15)' : 'scale(1)' }}
-              onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'; }}
-            />
+            <Avatar src={comment.avatar_url} size={40} radius={'4px'} hovered={hovered} />
           </div>
         )}
         {/* 内容 */}
@@ -287,12 +283,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
           {/* Meta 行 */}
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '6px', fontSize: '12px' }}>
             {isReply && (
-              <img
-                src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'}
-                alt=""
-                style={{ width: '24px', height: '24px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '4px' }}
-                onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'; }}
-              />
+              <Avatar src={comment.avatar_url} size={24} radius={'4px'} />
             )}
             {comment.url ? (
               <a href={comment.url} target="_blank" rel="noopener noreferrer"
@@ -488,8 +479,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
                     display: 'none', fontSize: '12px', lineHeight: 1.6, color: 'var(--color-text-sub, #666)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                      <img src={parentComment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'} alt=""
-                        style={{ width: '20px', height: '20px', borderRadius: '4px', background: '#f0f0f0' }} />
+                      <Avatar src={parentComment.avatar_url} size={20} radius={'4px'} />
                       <span style={{ fontWeight: 600, color: 'var(--color-text-main, #333)' }}>{parentComment.author}</span>
                     </div>
                     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>
