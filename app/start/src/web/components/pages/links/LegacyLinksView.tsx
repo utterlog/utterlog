@@ -283,6 +283,11 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                       src={link.avatar || link.logo || getFavicon(link.url)}
                       alt=""
                       className="friend-link-logo"
+                      // 不加 lazy 的话 React 19 会把这些 eager 图片提升成 head 里的
+                      // <link rel="preload">，36 条友链就是 36 条 —— 首屏只看得到
+                      // 七八条，其余全在抢带宽。
+                      loading="lazy"
+                      decoding="async"
                       onError={e => { (e.target as HTMLImageElement).src = getFavicon(link.url); }}
                     />
                     <span className="friend-link-row-name">{link.name}</span>

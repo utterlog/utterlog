@@ -28,6 +28,8 @@ type AvatarProps = {
   style?: React.CSSProperties;
   className?: string;
   alt?: string;
+  /** 默认懒加载。首屏一定看得见的位置（比如文章作者）可以传 'eager'。 */
+  loading?: 'lazy' | 'eager';
 };
 
 export default function Avatar({
@@ -38,12 +40,18 @@ export default function Avatar({
   style,
   className,
   alt = '',
+  loading = 'lazy',
 }: AvatarProps) {
   return (
     <img
       src={src || FALLBACK_AVATAR}
       alt={alt}
       className={className}
+      // 默认 lazy：评论头像动辄几十个，绝大多数在视口外。
+      // 更要紧的是 React 19 会把 eager 图片提升成 head 里的 preload，
+      // 一页几十条 preload 会跟正文图片抢带宽。
+      loading={loading}
+      decoding="async"
       style={{
         width: `${size}px`,
         height: `${size}px`,

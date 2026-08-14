@@ -169,14 +169,17 @@ export default function PostNavigation({ postId, coverUrl, pageSize }: { postId:
 
   const feeds = data.feeds || [];
 
+  // count 与 items 分开：friends 这类 tab 的数据不在 items 里（渲染走下面
+  // 独立的 feeds 分支），但禁用与否要看真实条数。原先 disabled 直接读
+  // items.length，feeds 的 items 恒为空数组，这个 tab 就永远点不开。
   const tabs = [
-    { key: 'related', label: '相关文章', items: data.related || [] },
-    { key: 'random', label: '随机文章', items: data.random || [] },
-    { key: 'popular', label: '热门文章', items: data.popular || [] },
-    { key: 'category', label: '分类文章', items: data.category || [] },
-    { key: 'feeds', label: '友链更新', items: [] as NavPost[] },
-    { key: 'network_latest', label: '最新更新', items: [] as NavPost[] },
-    { key: 'network_hot', label: '网络热门', items: [] as NavPost[] },
+    { key: 'related', label: '相关文章', items: data.related || [], count: (data.related || []).length },
+    { key: 'random', label: '随机文章', items: data.random || [], count: (data.random || []).length },
+    { key: 'popular', label: '热门文章', items: data.popular || [], count: (data.popular || []).length },
+    { key: 'category', label: '分类文章', items: data.category || [], count: (data.category || []).length },
+    { key: 'feeds', label: '友链更新', items: [] as NavPost[], count: feeds.length },
+    { key: 'network_latest', label: '最新更新', items: [] as NavPost[], count: 0 },
+    { key: 'network_hot', label: '网络热门', items: [] as NavPost[], count: 0 },
   ];
 
   const allActiveItems = tabs.find(t => t.key === activeTab)?.items || [];
@@ -239,7 +242,7 @@ export default function PostNavigation({ postId, coverUrl, pageSize }: { postId:
                 key={tab.key}
                 className={`post-related-tab${activeTab === tab.key ? ' active' : ''}`}
                 onClick={() => { setActiveTab(tab.key); setPageIndex(0); }}
-                disabled={tab.items.length === 0}
+                disabled={tab.count === 0}
               >
                 {tab.label}
               </button>
