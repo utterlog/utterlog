@@ -28,6 +28,12 @@ describe('TanStack Start document assets', () => {
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
       'https://static.bluecdn.com/fonts/alimama-fangyuanti.css',
       'https://static.bluecdn.com/fonts/luo.css',
+      // 这三个原先写在 globals.css 的 @import 里 —— CSS @import 是串行的，
+      // 要等 65KB 的主样式下完解析到才开始取，实测晚 630ms，页面会先用
+      // 系统字体渲染再闪一下。移到这里跟其余字体一起并行。
+      'https://static.bluecdn.com/fonts/fugaz-one.css',
+      'https://static.bluecdn.com/fonts/ubuntu.css',
+      'https://static.bluecdn.com/fonts/google-sans-code.css',
       // 版本号跟 theme.json 走 —— 写死的话每次改主题都要来同步这个数字，
       // 而它变化恰恰是正常的（用来给 CSS 打缓存标记）
       `/themes/Azure/styles.css?v=${getThemeManifest('Azure')?.version || '0'}`,

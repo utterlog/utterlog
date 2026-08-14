@@ -11,40 +11,47 @@ interface LoadingSpinnerProps {
 }
 
 /**
- * Loading spinner — pure CSS border ring + global `spin` keyframe.
+ * 全站统一的加载指示：一段沿圆周伸缩的弧线 + 整体旋转。
  *
- * 之前是 SVG + SMIL `<animateTransform>`，在 React 19 hydration 边界
- * Chromium 可能冻结首帧，表现为导航中右上角 / 评论区 / 随机访问按钮
- * 里的圆圈"卡住"不转。纯 CSS 旋转是 hydration-safe 的，必然跑起来。
+ * **动画走 CSS，不用 SMIL。** 视觉是照着 SVG + `<animate>` 那版做的，
+ * 但那种写法在这个项目上出过事：React 19 的 hydration 边界会让
+ * Chromium 冻结 SMIL 的首帧，圆圈就那么定在那儿不转 —— 导航按钮、
+ * 评论区、随机访问都中过招。CSS 动画不经过 hydration，必然跑起来。
  *
- * 视觉跟原来几乎一致：3/4 可见环 + 单边 transparent + 旋转。颜色用
- * 原来的 hsl(228, 97%, 42%) 蓝色做默认，调用方不传 color 时保持原样。
+ * 所以这里保留 SVG 的形（r=9.5 / stroke-width 3 / 圆头端点），
+ * 把 stroke-dasharray、stroke-dashoffset、rotate 三条动画交给
+ * globals.css 的 keyframes（.blog-spinner）。
+ *
+ * 尺寸靠 viewBox 缩放，stroke-width 固定 3 —— 小尺寸下线条会跟着变细，
+ * 正是想要的效果。
  */
-export default function LoadingSpinner({ size = 20, color = 'hsl(228, 97%, 42%)', className, style, title }: LoadingSpinnerProps) {
-  // Border width scales with size —— 12px 评论区小点 2px，28px 卡片用 3px。
-  const borderWidth = Math.max(2, Math.round(size / 10));
+export default function LoadingSpinner({
+  size = 20,
+  color = 'hsl(228, 97%, 42%)',
+  className,
+  style,
+  title,
+}: LoadingSpinnerProps) {
   return (
-    <span
+    <svg
       className={['blog-spinner', className].filter(Boolean).join(' ')}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      stroke={color}
       role={title ? 'status' : undefined}
       aria-label={title}
       aria-hidden={title ? undefined : true}
       style={{
         display: 'inline-block',
-        width: size,
-        height: size,
-        boxSizing: 'border-box',
-        border: `${borderWidth}px solid ${color}`,
-        borderTopColor: 'transparent',
-        borderRadius: '50%',
-        opacity: 0.9,
         verticalAlign: 'middle',
         flexShrink: 0,
-        // Reuse globals.css @keyframes spin (line 1348). inline animation
-        // keeps the component self-contained without adding a new class.
-        animation: 'spin 0.75s linear infinite',
         ...style,
       }}
-    />
+    >
+      <circle cx="12" cy="12" r="9.5" strokeWidth="3" strokeLinecap="round" />
+    </svg>
   );
 }

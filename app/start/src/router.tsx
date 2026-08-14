@@ -7,10 +7,17 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: 'intent',
-    // ⚠ 2026-08-14 关闭：开着会和 hydration 打架 —— 线上 /links 出现
-    // 「Transition was aborted because of invalid state」+ React #418
-    // （hydration 失败）反复循环，页面无限闪烁。原因待查，先回滚止血。
-    // defaultViewTransition: true,
+    // 切页面时让浏览器原生做交叉淡化，动画跑在合成器上不占主线程。
+    // 不支持的浏览器（目前是 Firefox）自动退回瞬间切换，不用写兼容分支。
+    //
+    // 曾在 2026-08-14 因为 /links 无限闪烁回滚过一次，当时以为是它的锅。
+    // 真凶是 formatLastPost 用了本地时区，SSR 与浏览器算出不同日期造成
+    // hydration 失败（React #418）—— view transition 只是把这个静默
+    // mismatch 放大成了看得见的死循环。根因修掉后重新启用。
+    //
+    // 前提是页面不能有 hydration mismatch。以后再出现「切页面反复闪烁」，
+    // 先查控制台有没有 #418，别急着怪这一行。
+    defaultViewTransition: true,
     // 客户端导航时 loader 还没回来，默认渲染的是空 —— 点进文章会先白屏一下。
     // 给一个顶部进度条兜住。
     //

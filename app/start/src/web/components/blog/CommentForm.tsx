@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import emojiPack from '@/public/emoji/bilibili/pack-bilibili.json';
 import CommentCaptcha from './CommentCaptcha';
 import { useThemeContext } from '@/lib/theme-context';
+import LoadingSpinner from './LoadingSpinner';
 
 function md5(s:string){let h0=1732584193,h1=-271733879,h2=-1732584194,h3=271733878;const k=[],w=[];for(let i=0;i<64;i++)k[i]=Math.floor(2**32*Math.abs(Math.sin(i+1)));const bytes=[];for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);if(c<128)bytes.push(c);else if(c<2048){bytes.push(192|(c>>6));bytes.push(128|(c&63));}else{bytes.push(224|(c>>12));bytes.push(128|((c>>6)&63));bytes.push(128|(c&63));}}const bl=bytes.length*8;bytes.push(128);while(bytes.length%64!==56)bytes.push(0);bytes.push(bl&0xff,(bl>>8)&0xff,(bl>>16)&0xff,(bl>>24)&0xff,0,0,0,0);for(let i=0;i<bytes.length;i+=64){for(let j=0;j<16;j++)w[j]=bytes[i+j*4]|(bytes[i+j*4+1]<<8)|(bytes[i+j*4+2]<<16)|(bytes[i+j*4+3]<<24);let[a,b,c,d]=[h0,h1,h2,h3];for(let i=0;i<64;i++){let f,g;if(i<16){f=(b&c)|((~b)&d);g=i;}else if(i<32){f=(d&b)|((~d)&c);g=(5*i+1)%16;}else if(i<48){f=b^c^d;g=(3*i+5)%16;}else{f=c^(b|(~d));g=(7*i)%16;}const r=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];const t=d;d=c;c=b;const x=(a+f+k[i]+w[g])>>>0;b=(b+(((x<<r[i])|(x>>>(32-r[i])))>>>0))>>>0;a=t;}h0=(h0+a)>>>0;h1=(h1+b)>>>0;h2=(h2+c)>>>0;h3=(h3+d)>>>0;}const hex=(n:number)=>[0,8,16,24].map(s=>((n>>>s)&0xff).toString(16).padStart(2,'0')).join('');return hex(h0)+hex(h1)+hex(h2)+hex(h3);}
 
@@ -418,12 +419,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
       <button onClick={handleSubmit} disabled={submitting} className="comment-submit-button"
         style={{ padding: '8px 20px', fontSize: '13px', fontWeight: 600, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: submitting ? 'wait' : 'pointer', opacity: submitting ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
         {submitting ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#fff">
-            <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
-            <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
-              <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/>
-            </path>
-          </svg>
+          <LoadingSpinner size={14} color="currentColor" />
         ) : '提交评论'}
       </button>
     </div>

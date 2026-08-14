@@ -19,6 +19,11 @@ export function startDocumentLinks(ctx: ThemeContextData | null | undefined): Do
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/noto-sans-sc.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/alimama-fangyuanti.css' },
     { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/luo.css' },
+    // 这三个原本写在 globals.css 的 @import 里，要等主样式下完解析到才开始取，
+    // 实测晚 630ms。放这儿跟上面几个并行。
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/fugaz-one.css' },
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/ubuntu.css' },
+    { rel: 'stylesheet', href: 'https://static.bluecdn.com/fonts/google-sans-code.css' },
     ...(ctx ? [{ rel: 'stylesheet', href: `/themes/${ctx.theme.name}/styles.css?v=${ctx.theme.manifest?.version || '0'}` }] : []),
   ];
 }
