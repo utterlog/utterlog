@@ -139,7 +139,7 @@ const ANONYMOUS_COMMENT_REDACTIONS = {
   visitor_id: '',
 } as const;
 
-function gravatarUrlForEmail(email: string, size = 64) {
+function gravatarUrlForEmail(email: string, size = 256) {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return '';
   const hash = createHash('md5').update(normalized).digest('hex');
@@ -197,7 +197,7 @@ async function ownerPublicPayload(user: Record<string, unknown> | null) {
   const email = String(user.email || '');
   const profileAvatar = String(user.avatar || '');
   const utterlogAvatar = String(user.utterlog_avatar || '') || utterlogAvatarUrlForEmail(email);
-  const gravatarUrl = gravatarUrlForEmail(email, 128);
+  const gravatarUrl = gravatarUrlForEmail(email, 256);
   const avatarSource = await optionValue('avatar_source', 'auto');
   const ownerAvatarOption = await optionValue('owner_avatar', '');
 
@@ -610,7 +610,7 @@ export async function listPublicContent(name: PublicContentTable, params: { page
     data: name === 'links'
       ? rows.map(({ email, ...rest }) => ({
           ...rest,
-          avatar: friendLinkAvatar({ email: String(email || ''), logo: String(rest.logo || ''), iconUrl: String(rest.icon_url || '') }, 128),
+          avatar: friendLinkAvatar({ email: String(email || ''), logo: String(rest.logo || ''), iconUrl: String(rest.icon_url || '') }, 256),
           // 没抓到 / 没填 RSS 的给 0，前端据此不显示时间
           last_post_at: lastPostByRss.get(String(rest.rss_url || '').trim()) || 0,
         }))
@@ -701,7 +701,7 @@ export async function visitorProfileByEmail(email: string) {
   return {
     found: true,
     name: String(base?.name || ''),
-    avatar: gravatarUrlForEmail(normalized, 96),
+    avatar: gravatarUrlForEmail(normalized, 256),
     level: levelForCount(count),
     comment_count: count,
     // 覆盖率按「评论过的文章数 / 站点文章数」算，不是按评论条数 ——
@@ -731,7 +731,7 @@ export async function listPostComments(postId: number) {
     ...row,
     geo: row.user_role === 'admin' ? null : commentGeoFromRow(row.geo),
     friend: matchFriendBadge(String(row.author_url || ''), friendIndex),
-    avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
+    avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 256),
     ...ANONYMOUS_COMMENT_REDACTIONS,
   }));
 }
@@ -896,8 +896,8 @@ export async function listComments(params: {
       ip: row.author_ip,
       friend: matchFriendBadge(String(row.author_url || ''), friendIndex),
       user_agent: row.author_agent,
-      avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 64),
-      author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 48),
+      avatar_url: gravatarUrlForEmail(String(row.author_email || ''), 256),
+      author_avatar: gravatarUrlForEmail(String(row.author_email || ''), 256),
       is_admin: isAdmin,
       comment_count: authorCommentCount,
       level: levelForCount(authorCommentCount),

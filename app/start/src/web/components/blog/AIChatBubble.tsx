@@ -209,7 +209,7 @@ export default function AIChatBubble() {
   const positionStyle: React.CSSProperties = positionLeft ? { left: 24 } : { right: 24 };
 
   // Avatar fallback: site owner > generic mp.
-  const avatarSrc = owner?.avatar || 'https://gravatar.bluecdn.com/avatar/0?s=64&d=mp';
+  const avatarSrc = owner?.avatar || 'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp';
 
   // ── 折叠态：圆形浮标 ──
   // transition: 跟左侧音乐卡片 GlobalMiniPlayer 完全一致 —— bottom 0.25s ease。

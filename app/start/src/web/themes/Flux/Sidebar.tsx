@@ -206,7 +206,7 @@ export default function Sidebar({ initialComments = [] }: { initialComments?: an
         {comments.map((c: any, idx: number) => (
           <div key={c.id} style={{ display: 'flex', gap: '10px', padding: '10px 16px', borderBottom: idx < comments.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
             <img
-              src={c.avatar_url || `https://gravatar.bluecdn.com/avatar/${c.author_email ? md5(String(c.author_email).trim().toLowerCase()) : '0'}?s=40&d=mp`}
+              src={c.avatar_url || `https://gravatar.bluecdn.com/avatar/${c.author_email ? md5(String(c.author_email).trim().toLowerCase()) : '0'}?s=256&d=mp`}
               alt="" style={{ width: 32, height: 32, objectFit: 'cover', flexShrink: 0, clipPath: 'url(#squircle)' }}
             />
             <div style={{ minWidth: 0, flex: 1 }}>

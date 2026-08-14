@@ -125,7 +125,7 @@ export default function Sidebar({ initialComments = [] }: { initialComments?: an
             onMouseLeave={(e: any) => { e.currentTarget.style.background = 'transparent'; }}
           >
             <img
-              src={c.avatar_url || `https://gravatar.bluecdn.com/avatar/${c.author_email ? md5(String(c.author_email).trim().toLowerCase()) : '0'}?s=40&d=mp`}
+              src={c.avatar_url || `https://gravatar.bluecdn.com/avatar/${c.author_email ? md5(String(c.author_email).trim().toLowerCase()) : '0'}?s=256&d=mp`}
               alt="" style={{ width: 32, height: 32, objectFit: 'cover', flexShrink: 0, clipPath: 'url(#squircle)' }}
             />
             <div style={{ minWidth: 0, flex: 1 }}>

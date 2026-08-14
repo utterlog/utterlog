@@ -89,7 +89,7 @@ export function matchFriendBadge(url: string, index: Map<string, FriendLink>): F
  *   3. icon_url    —— 抓回来存在本地的站点 favicon，给没留邮箱的友链兜底
  *   4. 空          —— 交给前台回落到 favicon 服务（实时，不占本地存储）
  */
-export function friendLinkAvatar(link: Partial<Pick<FriendLink, 'email' | 'logo' | 'iconUrl'>>, size = 64): string {
+export function friendLinkAvatar(link: Partial<Pick<FriendLink, 'email' | 'logo' | 'iconUrl'>>, size = 256): string {
   if (link.logo) return link.logo;
   const email = String(link.email || '').trim().toLowerCase();
   if (email) {

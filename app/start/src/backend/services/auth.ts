@@ -121,7 +121,7 @@ async function authUser(user: AuthUserRow) {
     ...publicAuthUser(user),
     avatar: source === 'utterlog'
       ? `https://id.utterlog.com/avatar/${hash}`
-      : `https://gravatar.bluecdn.com/avatar/${hash}?s=128&d=mp`,
+      : `https://gravatar.bluecdn.com/avatar/${hash}?s=256&d=mp`,
   };
 }
 
@@ -197,7 +197,7 @@ export async function getProfile(request: Request) {
     ...profile,
     avatar: user.avatar || '',
     avatar_source: avatarSource || 'gravatar',
-    gravatar_url: profile.email ? `https://gravatar.bluecdn.com/avatar/${emailHash(profile.email)}?s=128&d=mp` : '',
+    gravatar_url: profile.email ? `https://gravatar.bluecdn.com/avatar/${emailHash(profile.email)}?s=256&d=mp` : '',
     utterlog_avatar: user.utterlog_avatar || '',
   };
 }

@@ -162,7 +162,7 @@ export default function Footer() {
     }
   };
 
-  const avatarUrl = user?.avatar || (user ? 'https://gravatar.bluecdn.com/avatar/0?s=64&d=mp' : null);
+  const avatarUrl = user?.avatar || (user ? 'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp' : null);
 
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [onlineEnabled, setOnlineEnabled] = useState(true);

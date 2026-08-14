@@ -89,7 +89,7 @@ export default function LatestCommenters({ initialComments = [] }: { initialComm
       <ul className="nebula-commenters-row">
         {comments.map((c) => {
           const name = c.author_name || c.author || '匿名';
-          const avatar = c.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?s=80&d=mp';
+          const avatar = c.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp';
           const href = buildPermalink(
             { id: c.post_id, slug: c.post_slug || '', categories: c.post_categories || [] },
             options?.permalink_structure,

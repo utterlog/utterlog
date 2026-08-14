@@ -274,7 +274,7 @@ export default function Footer() {
   }
   const iconLinks: Array<{ icon: string; label: string; href?: string; copy?: string }> = [fixedRssIcon, ...customIconLinks];
 
-  const avatarUrl = user?.avatar || (user ? `https://gravatar.bluecdn.com/avatar/0?s=64&d=mp` : null);
+  const avatarUrl = user?.avatar || (user ? `https://gravatar.bluecdn.com/avatar/0?s=256&d=mp` : null);
 
   // 复制成功后把图标换成绿色对号，2 秒还原。toast 一闪就没，鼠标还停在按钮上时
   // 图标本身给个持续状态，"到底复制上没有"一眼可见。

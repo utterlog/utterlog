@@ -168,7 +168,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
   };
 
   const avatarHash = email.trim() ? md5(email.trim().toLowerCase()) : '';
-  const avatarUrl = email.trim() ? `https://gravatar.bluecdn.com/avatar/${avatarHash}?d=mp&s=80` : '';
+  const avatarUrl = email.trim() ? `https://gravatar.bluecdn.com/avatar/${avatarHash}?d=mp&s=256` : '';
   const showInfoFields = !isAdmin && !passportIdentity?.identified && (!hasCached || editing);
 
   // Compact mode (reply form)

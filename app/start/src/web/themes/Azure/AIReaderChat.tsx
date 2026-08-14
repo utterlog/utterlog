@@ -202,7 +202,7 @@ export default function AIReaderChat({ postId, title, excerpt, authorAvatar }: A
   const avatarSrc =
     owner?.avatar ||
     authorAvatar ||
-    'https://gravatar.bluecdn.com/avatar/0?s=64&d=mp';
+    'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp';
 
   // Honour AI 设置 → 聊天配置 → 气泡位置. Was hard-coded right-side
   // even after admins picked left in the dropdown — the option got

@@ -338,7 +338,7 @@ export async function trackDuration(request: Request, input: Record<string, unkn
 
 function gravatar(email: string) {
   const normalized = email.trim().toLowerCase();
-  return normalized ? `https://gravatar.bluecdn.com/avatar/${createHash('md5').update(normalized).digest('hex')}?s=64&d=mp` : '';
+  return normalized ? `https://gravatar.bluecdn.com/avatar/${createHash('md5').update(normalized).digest('hex')}?s=256&d=mp` : '';
 }
 
 /**

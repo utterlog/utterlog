@@ -116,7 +116,7 @@ export default function PostPage({ post, options }: { post: any; options?: Recor
         <div className="azure-post-license-author">
           <span>作者</span>
           <img
-            src={post.author?.avatar || 'https://gravatar.bluecdn.com/avatar/0?s=40&d=mp'}
+            src={post.author?.avatar || 'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp'}
             alt=""
             referrerPolicy="no-referrer"
             className="azure-post-author-avatar"

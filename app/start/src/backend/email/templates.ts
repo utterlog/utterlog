@@ -160,7 +160,7 @@ function quote(content: string, accent = '#c8d3e0', postedAt = '', color = MUTED
  * （analytics / tracking 的在线访客、评论作者）用的都是这个域，保持一致。
  * d=mp 让没注册过 Gravatar 的邮箱也能拿到一张默认头像，不会是破图。
  */
-export function gravatarUrl(email: string, size = 80) {
+export function gravatarUrl(email: string, size = 256) {
   const normalized = String(email || '').trim().toLowerCase();
   if (!normalized) return '';
   return `https://gravatar.bluecdn.com/avatar/${createHash('md5').update(normalized).digest('hex')}?s=${size}&d=mp`;
@@ -250,11 +250,11 @@ export function commentReplyEmail(site: EmailSite, input: {
 }) {
   // 收件人（原评论者）头像放卡片右上角，回复者头像缩小挂在「XX 的回复：」
   // 的昵称前 —— 引用块不再单独占一列头像，正文就能占满宽度。
-  const recipientAvatar = gravatarUrl(input.recipientEmail || '', 64);
+  const recipientAvatar = gravatarUrl(input.recipientEmail || '', 256);
   const headerAvatar = recipientAvatar
     ? `<img src="${htmlEscape(recipientAvatar)}" alt="" width="32" height="32" style="display:block;">`
     : '';
-  const replierAvatar = gravatarUrl(input.replierEmail || '', 40);
+  const replierAvatar = gravatarUrl(input.replierEmail || '', 256);
 
   // 标签行：左边说明文字（可带小头像），右边时间靠右。
   const label = (text: string, at: number | undefined, avatarUrl = '') => {
@@ -346,7 +346,7 @@ export function newCommentEmail(site: EmailSite, input: {
   // 访客头像放昵称前面，单独占一格。22px 是跟 14px 昵称的行高对齐出来的 ——
   // 再大会把这一行撑高、跟右侧的 IP 归属错位。方角（4px 圆角）跟状态徽章
   // 统一，不用圆形。没有邮箱就整格不渲染，昵称直接顶格。
-  const visitorAvatar = gravatarUrl(input.email || '', 44);
+  const visitorAvatar = gravatarUrl(input.email || '', 256);
   const avatarCell = visitorAvatar
     ? `<td width="30" valign="middle" style="padding-right:8px;"><img src="${htmlEscape(visitorAvatar)}" alt="" width="22" height="22" style="display:block;"></td>`
     : '';

@@ -18,7 +18,7 @@ import { useI18n } from '@/lib/i18n';
 import { postUrlOf } from '@/lib/site';
 import { usePageBadge } from '@/layouts/DashboardLayout';
 
-const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=64';
+const defaultAvatar = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256';
 
 function commentPostUrl(row: any) {
   return postUrlOf({

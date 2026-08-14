@@ -274,10 +274,10 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
         {!isReply && (
           <div style={{ flexShrink: 0 }}>
             <img
-              src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
+              src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'}
               alt=""
               style={{ width: '40px', height: '40px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', transform: hovered ? 'scale(1.15)' : 'scale(1)' }}
-              onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
+              onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'; }}
             />
           </div>
         )}
@@ -287,10 +287,10 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '6px', fontSize: '12px' }}>
             {isReply && (
               <img
-                src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'}
+                src={comment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'}
                 alt=""
                 style={{ width: '24px', height: '24px', objectFit: 'cover', background: '#f0f0f0', borderRadius: '50%' }}
-                onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=80'; }}
+                onError={e => { (e.target as HTMLImageElement).src = 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'; }}
               />
             )}
             {comment.url ? (
@@ -475,7 +475,7 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
                     display: 'none', fontSize: '12px', lineHeight: 1.6, color: 'var(--color-text-sub, #666)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                      <img src={parentComment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=40'} alt=""
+                      <img src={parentComment.avatar_url || 'https://gravatar.bluecdn.com/avatar/0?d=mp&s=256'} alt=""
                         style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#f0f0f0', objectFit: 'cover' }} />
                       <span style={{ fontWeight: 600, color: 'var(--color-text-main, #333)' }}>{parentComment.author}</span>
                     </div>

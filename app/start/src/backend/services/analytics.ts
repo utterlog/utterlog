@@ -198,7 +198,7 @@ async function countryRows(period: AnalyticsPeriod, limit = 20) {
   return rows.map((row) => ({ name: row.name, code: row.code, count: Number(row.count || 0), ratio: Number((Number(row.count || 0) / total).toFixed(4)) }));
 }
 
-function gravatar(email: string, size = 64) {
+function gravatar(email: string, size = 256) {
   const normalized = email.trim().toLowerCase();
   return normalized ? `https://gravatar.bluecdn.com/avatar/${createHash('md5').update(normalized).digest('hex')}?s=${size}&d=mp` : '';
 }
