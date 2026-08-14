@@ -4,7 +4,11 @@ import './code-highlight-styles.css';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypePrism from 'rehype-prism-plus';
+// 用 /common 而不是全量：全量带 200 多种语言的语法定义，实测把文章页的
+// prism chunk 撑到 797KB（占该页 JS 总量的一半），而全站文章实际只用到
+// bash / html / css / json / yaml / php / bat / perl 八种。
+// 下面已传 ignoreMissing: true，common 集合外的语言只是不高亮，不会抛错。
+import rehypePrism from 'rehype-prism-plus/common';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';

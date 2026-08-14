@@ -103,38 +103,58 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-# ---- 2. rsync 到服务器（排除 node_modules；不碰 content/uploads/.env/pgdata）----
+# 服务器端跑命令的公共前奏：查出服务以哪个用户运行，并提供 run_app。
+# 下面两个 ssh 段各是独立的 shell，函数带不过去，只能各注入一次。
+REMOTE_PRELUDE='set -euo pipefail
+cd REMOTE_PATH_PLACEHOLDER
+export PATH=/opt/bun/bin:$PATH
+app_user=$(systemctl show -p User --value SERVICE_PLACEHOLDER)
+[ -n "$app_user" ] || app_user=root
+app_group=$(id -gn "$app_user")
+app_home=$(getent passwd "$app_user" | cut -d: -f6)
+run_app() {
+  if [ "$app_user" = root ]; then
+    env HOME="$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin "$@"
+  else
+    runuser -u "$app_user" -- env HOME="$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin "$@"
+  fi
+}'
+REMOTE_PRELUDE="${REMOTE_PRELUDE//REMOTE_PATH_PLACEHOLDER/${REMOTE_PATH}}"
+REMOTE_PRELUDE="${REMOTE_PRELUDE//SERVICE_PLACEHOLDER/${SERVICE}}"
+
+# ---- 2. 先传依赖清单并装依赖 ----
+#
+# **顺序很重要，别改回去。** bun install 要跑几十秒，而 rsync --delete 一旦
+# 换掉带 hash 的 dist，老进程引用的旧 chunk 就没了 —— 这期间任何未预热的
+# 路由都是 ENOENT → SSR 500 白页。日志里有过 15 条实证。
+#
+# 所以把「慢且不依赖 app/」的 bun install 放在换代码之前：它只需要
+# package.json 和 bun.lock。等它跑完，换代码到重启之间只剩 rsync + 一次
+# 主题样式同步，窗口从几十秒压到秒级。
 "${SSH[@]}" "mkdir -p '${REMOTE_PATH}/app' '${REMOTE_PATH}/scripts'"
 log "rsync 根依赖清单文件"
 rsync -az -e "$RSYNC_SSH" package.json bun.lock bunfig.toml tsconfig.json "${USER}@${HOST}:${REMOTE_PATH}/"
 rsync -az -e "$RSYNC_SSH" scripts/update-bun.sh "${USER}@${HOST}:${REMOTE_PATH}/scripts/"
+
+log "服务器: bun install --frozen-lockfile（此时线上仍是旧版本，服务正常）"
+"${SSH[@]}" bash -s <<EOF
+${REMOTE_PRELUDE}
+chown "\$app_user:\$app_group" package.json bun.lock bunfig.toml tsconfig.json
+chown -R "\$app_user:\$app_group" scripts
+run_app ${REMOTE_BUN} install --frozen-lockfile
+EOF
+ok "依赖就绪"
+
+# ---- 3. 换代码（从这里开始进入新旧不一致窗口，到重启为止，要尽量短）----
 log "rsync app/（含 dist，排除 node_modules）"
 rsync -az --delete -e "$RSYNC_SSH" --exclude node_modules --exclude .DS_Store \
   app/ "${USER}@${HOST}:${REMOTE_PATH}/app/"
-ok "源码+dist 已同步"
-
-# ---- 3. 服务器端装依赖（原生模块必须服务器装）+ 同步主题样式 ----
-log "服务器: bun install --frozen-lockfile + sync-theme-styles"
 "${SSH[@]}" bash -s <<EOF
-set -euo pipefail
-cd ${REMOTE_PATH}
-export PATH=/opt/bun/bin:\$PATH
-app_user=\$(systemctl show -p User --value ${SERVICE})
-[ -n "\$app_user" ] || app_user=root
-app_group=\$(id -gn "\$app_user")
-chown -R "\$app_user:\$app_group" app scripts package.json bun.lock bunfig.toml tsconfig.json
-app_home=\$(getent passwd "\$app_user" | cut -d: -f6)
-run_app() {
-  if [ "\$app_user" = root ]; then
-    env HOME="\$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin "\$@"
-  else
-    runuser -u "\$app_user" -- env HOME="\$app_home" PATH=/opt/bun/bin:/usr/local/bin:/usr/bin:/bin "\$@"
-  fi
-}
-run_app ${REMOTE_BUN} install --frozen-lockfile
+${REMOTE_PRELUDE}
+chown -R "\$app_user:\$app_group" app
 run_app ${REMOTE_BUN} app/start/src/web/scripts/sync-theme-styles.mjs
 EOF
-ok "服务器依赖就绪"
+ok "源码+dist 已同步"
 
 # ---- 4. 重启服务 + 健康检查 ----
 log "重启 ${SERVICE}"

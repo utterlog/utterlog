@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
+// 地图样式跟着这个组件走，不放 globals.css —— 那样全站每个页面都要为
+// 一个只有 /footprints 用得上的地图库付阻塞渲染的代价。
+import 'mapbox-gl/dist/mapbox-gl.css';
 import type mapboxgl from 'mapbox-gl';
 import { useThemeContext } from '@/lib/theme-context';
 

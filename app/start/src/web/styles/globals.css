@@ -2,7 +2,6 @@
 @import url("https://static.bluecdn.com/fonts/ubuntu.css");
 @import url("https://static.bluecdn.com/fonts/google-sans-code.css");
 @import "tailwindcss";
-@import "mapbox-gl/dist/mapbox-gl.css";
 @import "./video-post.css";
 @import "../components/pages/about/about-content.css";
 
