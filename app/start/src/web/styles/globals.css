@@ -1205,6 +1205,39 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
 /* ========================================
    Animations
    ======================================== */
+/* ---- 块状区域的加载指示（LoadingBars 组件）----
+
+   三条竖条依次起伏。原设计用 SMIL 的链式 begin
+   （begin="spinner_aqiq.begin+0.15s"）串起三条的时间差，这里换成
+   animation-delay —— SMIL 在 React 19 hydration 边界会被冻住，
+   这个项目在圆环上栽过一次。
+
+   形变走 transform: scaleY 而不是直接动 y / height：走合成器、
+   不触发布局。22 → 14 即 scaleY(0.636)，与原动画一致。 */
+
+.blog-bars rect {
+  transform-origin: center;
+  animation: blogBarsPulse 0.75s ease-in-out infinite alternate;
+}
+
+.blog-bars rect:nth-of-type(2) { animation-delay: 0.15s; }
+.blog-bars rect:nth-of-type(3) { animation-delay: 0.3s; }
+
+@keyframes blogBarsPulse {
+  from { transform: scaleY(1);     opacity: 1; }
+  to   { transform: scaleY(0.636); opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 停在三条不等高的静态形态，仍能看出是「加载中」而不是装饰 */
+  .blog-bars rect {
+    animation: none;
+    opacity: 0.55;
+  }
+  .blog-bars rect:nth-of-type(2) { opacity: 0.8; }
+  .blog-bars rect:nth-of-type(3) { opacity: 0.35; }
+}
+
 /* ---- 全站加载指示（LoadingSpinner 组件）----
 
    一段沿圆周伸缩的弧线 + 整体旋转。动画写在 CSS 而不是 SVG 的 SMIL

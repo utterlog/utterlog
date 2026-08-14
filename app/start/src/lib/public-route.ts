@@ -1,5 +1,6 @@
 import { notFound } from '@tanstack/react-router';
 import { publicPageMeta } from './public-meta';
+import { preloadPageChunk } from '../components/PublicPage';
 import {
   loadStartPublicPage,
   type PublicPageData,
@@ -14,6 +15,18 @@ import {
  * 一篇文章。数据本身不受影响，预取拿到的和真实导航拿到的是同一份。
  */
 export async function loadPublicPage(request: PublicPageRequest, preload = false) {
+  // 取数的同时把这个页面的组件 chunk 也拉下来，两件事并行。
+  //
+  // 不这么做的话：数据先到、组件还在下载，框架（header/footer）已经渲染
+  // 而内容区空着 —— 就是「切页面先出框架再出内容」的由来。router 的
+  // defaultPreload: 'intent' 只预取数据，管不到组件代码。
+  //
+  // 放在 await 之前，不是之后：等 data 回来才知道 kind 就太晚了，而
+  // request 里本来就带着 kind。配合 'intent' 预取，鼠标划过链接时
+  // 数据和组件会一起开始下载，点下去基本是即时的。
+  if ('kind' in request && typeof request.kind === 'string') {
+    preloadPageChunk(request.kind);
+  }
   const data = await loadStartPublicPage({ data: { ...request, preload } });
   if (data.kind === 'not-found') throw notFound();
   return data;

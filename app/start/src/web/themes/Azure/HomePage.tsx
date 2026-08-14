@@ -12,6 +12,7 @@ import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
 import LoadingSpinner from '@/components/blog/LoadingSpinner';
+import LoadingBars from '@/components/blog/LoadingBars';
 import { getCategoryIcon } from './constants';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
@@ -214,12 +215,10 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                     aria-hidden={!heroLoading}
                     className={`azure-hero-loading${heroLoading ? ' active' : ''}`}
                   >
-                    {/* 纯 CSS 旋转环 —— 之前用 SVG + SMIL animateTransform 在 React
-                        hydration 边界仍有可能被 Chromium 冻结，肉眼看到的就是静态圆
-                        环"卡死"。换成纯 CSS 旋转环（跟 .azure-weather-loading 同款）
-                        就稳了：border-style 圆 + 单边 highlight + @keyframes rotate，
-                        不依赖任何 SMIL / SVG transform。 */}
-                    <i className="azure-hero-loading-icon" aria-hidden="true" />
+                    {/* banner 是块状区域，用三条竖条比圆环压得住；小尺寸的
+                        行内位置仍用 LoadingSpinner。动画同样是 CSS 而非 SMIL ——
+                        SMIL 在 hydration 边界会被冻住，这里原本就是为此换过一次。 */}
+                    <LoadingBars size={34} color="#fff" />
                   </div>
                   {/* Title strip: same height as one left-sidebar tab
                       so the baseline lines up with the last tab. No

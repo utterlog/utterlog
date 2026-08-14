@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Link, rootRouteId, useLoaderData } from '@tanstack/react-router';
 import { getThemeComponents } from '@/lib/theme';
 import PageTitle from '@/components/blog/PageTitle';
@@ -18,13 +18,71 @@ import type { ThemeContextData } from '@/lib/theme-context';
 import type { PublicPageData } from '../server/public-pages';
 import { StartThemeShell } from './StartThemeShell';
 
-const FootprintsClient = lazy(() => import('@/components/pages/footprints/FootprintsClient'));
-const MomentsClient = lazy(() => import('@/components/pages/moments/MomentsClient'));
-const LinksClient = lazy(() => import('@/components/pages/links/LinksClient'));
-const FeedsClient = lazy(() => import('@/components/pages/feeds/FeedsClient'));
-const AlbumsClient = lazy(() => import('@/components/pages/albums/AlbumsClient'));
-const MusicClient = lazy(() => import('@/components/pages/music/MusicClient'));
-const AboutContent = lazy(() => import('@/components/pages/about/AboutContent'));
+/**
+ * 各页面的动态导入。**单独拎出来是为了能提前触发**。
+ *
+ * 这些组件是 lazy 的，默认要等 React 渲染到它才开始下载 chunk。而路由的
+ * `defaultPreload: 'intent'` 只预取数据、不碰组件代码 —— 结果就是数据到了、
+ * 组件还在路上，框架（header/footer）已经在那儿而内容区空着，看起来像
+ * 「先出框架再出内容」。
+ *
+ * 把 import 函数存下来，loader 取数的同时按 kind 把对应 chunk 也拉下来，
+ * 两件事并行。等数据回来组件通常已经就绪，Suspense 不触发，整页一起出现。
+ */
+const pageImports = {
+  footprints: () => import('@/components/pages/footprints/FootprintsClient'),
+  moments: () => import('@/components/pages/moments/MomentsClient'),
+  links: () => import('@/components/pages/links/LinksClient'),
+  feeds: () => import('@/components/pages/feeds/FeedsClient'),
+  albums: () => import('@/components/pages/albums/AlbumsClient'),
+  music: () => import('@/components/pages/music/MusicClient'),
+  about: () => import('@/components/pages/about/AboutContent'),
+} as const;
+
+/**
+ * 提前把某个页面的组件 chunk 拉下来。由路由 loader 调用。
+ *
+ * 只在浏览器里做：服务端渲染没有 chunk 的概念，调了也是白费。
+ * 失败静默 —— 这只是提前量，真正需要时 lazy 会自己再取一次。
+ */
+export function preloadPageChunk(kind: string) {
+  if (typeof window === 'undefined') return;
+  const load = pageImports[kind as keyof typeof pageImports];
+  if (load) void load().catch(() => {});
+}
+
+/**
+ * 首屏安顿下来之后，把其余页面的组件 chunk 也悄悄拉了。
+ *
+ * loader 里的按需预取（preloadPageChunk）只能让组件和数据并行，实测
+ * 组件仍比数据慢 300 多毫秒 —— 首次进某个页面还是会看到内容区空一下。
+ * 这里补一刀：空闲时把七个页面全预取，之后无论点哪个都是命中缓存，
+ * 组件即时可用，页面整块出现。
+ *
+ * 走 requestIdleCallback，不跟首屏抢带宽；失败静默。七个 chunk 合计
+ * 一百多 KB，对已经加载完的页面是无感的后台流量。
+ */
+function useIdlePreloadPages() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const idle: (cb: () => void) => number =
+      (window as any).requestIdleCallback || ((cb: () => void) => window.setTimeout(cb, 2000));
+    const cancel: (id: number) => void =
+      (window as any).cancelIdleCallback || window.clearTimeout;
+    const id = idle(() => {
+      for (const load of Object.values(pageImports)) void load().catch(() => {});
+    });
+    return () => cancel(id);
+  }, []);
+}
+
+const FootprintsClient = lazy(pageImports.footprints);
+const MomentsClient = lazy(pageImports.moments);
+const LinksClient = lazy(pageImports.links);
+const FeedsClient = lazy(pageImports.feeds);
+const AlbumsClient = lazy(pageImports.albums);
+const MusicClient = lazy(pageImports.music);
+const AboutContent = lazy(pageImports.about);
 
 const shelfMeta = {
   movies: { title: '电影', subtitle: '我看过的', icon: 'fa-sharp fa-light fa-film', unit: '部电影', imageRatio: '2/3' },
@@ -61,6 +119,7 @@ function RouteFallback() {
 }
 
 function Shell({ ctx, children }: { ctx: ThemeContextData | null; children: React.ReactNode }) {
+  useIdlePreloadPages();
   const content = (
     <Suspense fallback={<RouteFallback />}>
       {children}
