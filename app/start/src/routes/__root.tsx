@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import '@/styles/globals.css';
 import {
   HeadContent,
@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useRouter,
 } from '@tanstack/react-router';
 import { blogThemeAccentAttr } from '@shared/blog-theme';
 import { imageEffectAttrs } from '@/lib/blog-image';
@@ -50,10 +51,61 @@ function StartNotFound() {
   );
 }
 
+/**
+ * 导航进度条。
+ *
+ * router.tsx 里配了 `defaultPendingComponent`，但实测它在这套 SSR 路由上
+ * 一次都没渲染过：点导航后旧页面原地停留三四百毫秒（loader 在跑），
+ * 期间没有任何反馈，看着像点了没反应。
+ *
+ * 也不能用 `useRouterState(s => s.status === 'pending')` —— 实测这套路由
+ * 走 serverFn 取数，导航全程 status 一直是 idle，isLoading / isTransitioning
+ * 也都不翻。真正可靠的是 router 自己发的这两个事件，实测
+ * onBeforeLoad 在点击后 3ms 触发、onRendered 在 355ms，正好圈住那段空窗。
+ *
+ * 150ms 延迟是为了不让快导航闪一下进度条 —— 一帧的闪烁比不显示更难受。
+ */
+function NavProgress() {
+  const router = useRouter();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const clearTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = null;
+    };
+
+    const offStart = router.subscribe('onBeforeLoad', () => {
+      clearTimer();
+      timer = setTimeout(() => setVisible(true), 150);
+    });
+    // onRendered 而不是 onResolved：数据到位不等于画面画出来了
+    const offEnd = router.subscribe('onRendered', () => {
+      clearTimer();
+      setVisible(false);
+    });
+
+    return () => {
+      clearTimer();
+      offStart();
+      offEnd();
+    };
+  }, [router]);
+
+  if (!visible) return null;
+  return (
+    <div className="route-pending" role="status" aria-label="加载中">
+      <div className="route-pending-bar" />
+    </div>
+  );
+}
+
 function RootComponent() {
   const ctx = Route.useLoaderData();
   return (
     <RootDocument ctx={ctx}>
+      <NavProgress />
       <Outlet />
     </RootDocument>
   );

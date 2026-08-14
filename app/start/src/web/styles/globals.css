@@ -2690,10 +2690,47 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   100% { transform: translateX(350%); }
 }
 
+/* 页面组件加载中的占位（Suspense fallback） */
+.route-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 两条动画叠着跑：一直转 + 延迟 0.25s 才淡入。
+   延迟交给 CSS 而不是 JS 计时器 —— 切得快的时候读者压根看不到它，
+   只有真慢下来才浮出来，避免每次切页都闪一下转圈。 */
+.route-fallback-spinner {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--color-line, #e5e7eb);
+  border-top-color: var(--color-primary, #0052D9);
+  border-radius: 50%;
+  opacity: 0;
+  animation:
+    routeFallbackSpin 0.7s linear infinite,
+    routeFallbackIn 0.2s ease 0.25s forwards;
+}
+
+@keyframes routeFallbackSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes routeFallbackIn {
+  to { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .route-pending-bar {
     /* 关掉动画时给一条静止的半宽指示，仍然表达「加载中」 */
     width: 100%;
+    opacity: 0.5;
+    animation: none;
+  }
+
+  /* 转圈停下，但要留着可见 —— 动画同时负责淡入，一律 none 会让它彻底
+     不显示（opacity 停在 0），占位就又变回一片空白了。 */
+  .route-fallback-spinner {
     opacity: 0.5;
     animation: none;
   }

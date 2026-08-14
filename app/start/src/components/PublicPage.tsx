@@ -42,9 +42,27 @@ const filmTabs = [
   { key: 'doc', label: '纪录片' },
 ];
 
+/**
+ * 页面组件加载时的占位。
+ *
+ * 原来这里是个空的 60vh div —— 切页面时 loader 已经返回、旧内容已经撤掉，
+ * 但页面组件还在路上，屏幕上就只剩主题外框那几条边框线，看着像卡住了。
+ *
+ * 转圈本身延迟 250ms 才淡入（CSS animation-delay 实现，不用 JS 计时）：
+ * 大多数切换快过这个数，读者根本看不到它；只有真的慢下来才会出现，
+ * 不会每次切页都闪一下。minHeight 跟原来保持一致，避免页脚上下跳。
+ */
+function RouteFallback() {
+  return (
+    <div className="route-fallback" style={{ minHeight: '60vh' }} role="status" aria-label="加载中">
+      <span className="route-fallback-spinner" />
+    </div>
+  );
+}
+
 function Shell({ ctx, children }: { ctx: ThemeContextData | null; children: React.ReactNode }) {
   const content = (
-    <Suspense fallback={<div style={{ minHeight: '60vh' }} aria-hidden="true" />}>
+    <Suspense fallback={<RouteFallback />}>
       {children}
       {ctx ? (
         <ImageEffects
