@@ -145,9 +145,12 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 过场，新图加载完成且最短时间到了再切 displaySrc，配合 key 触发
   // 现有的 [data-blog-image][data-loaded] 淡入动画。
   // 后台「图片显示效果」选了像素化时，hero 换图走马赛克消散。
-  // 时长复用同一个配置项，最少给 400ms —— 再短就只看得到一闪。
+  //
+  // 时长不复用 image_display_duration —— 那个值（默认 500ms）是给正文小图
+  // 的淡入定的，套在整幅 banner 上太快，马赛克刚成形就没了。banner 是
+  // 首屏最大的一块，值得让它慢慢显影。取配置值的 2.5 倍，下限 1400ms。
   const pixelate = options?.image_display_effect === 'pixel';
-  const heroPixelMs = Math.max(400, Number(options?.image_display_duration) || 700);
+  const heroPixelMs = Math.max(1400, (Number(options?.image_display_duration) || 500) * 2.5);
 
   const [displaySrc, setDisplaySrc] = useState(heroSrc);
   const [heroLoading, setHeroLoading] = useState(false);

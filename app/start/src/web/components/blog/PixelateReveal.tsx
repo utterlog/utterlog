@@ -18,10 +18,16 @@ import { useEffect, useRef, useState } from 'react';
  * 跟图片本身多大无关。绘制不读像素，所以不涉及跨域画布污染。
  */
 
-/** 起始格数：横向切成几块。数字越小马赛克越粗。 */
-const START_TILES = 6;
+/**
+ * 起始格数：横向切成几块。数字越小马赛克越粗。
+ *
+ * 一开始设的 6 —— 太粗了，大色块看不出是什么图，观感廉价。20 格左右
+ * 既能明显看出是马赛克，又还认得出画面轮廓，从这里往细走才有「逐渐
+ * 显影」的味道。
+ */
+const START_TILES = 20;
 /** 收尾格数：到这个粒度就直接换成清晰原图，再往上加没有肉眼区别，白费帧。 */
-const END_TILES = 160;
+const END_TILES = 200;
 
 export default function PixelateReveal({
   src,
@@ -67,8 +73,12 @@ export default function PixelateReveal({
     img.onload = () => {
       if (cancelled) return;
       const box = canvas.getBoundingClientRect();
-      const w = Math.max(1, Math.round(box.width || img.width));
-      const h = Math.max(1, Math.round(box.height || img.height));
+      // 画布的位图尺寸按 CSS 尺寸 × 像素比 —— 只设 CSS 尺寸的话，
+      // 2x 屏上位图只有一半分辨率，收尾那几帧本该清晰却还是糊的。
+      // 上限 2 是够用与开销的平衡，3x 屏再翻一倍收益已不明显。
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const w = Math.max(1, Math.round((box.width || img.width) * dpr));
+      const h = Math.max(1, Math.round((box.height || img.height) * dpr));
       canvas.width = w;
       canvas.height = h;
 
@@ -79,20 +89,32 @@ export default function PixelateReveal({
         onDone?.();
         return;
       }
+      // 按 object-fit: cover 的规则算出源图要取哪一块 —— 直接把整张图
+      // 拉伸铺满会变形，hero 容器往往很扁（实测 2070×200），拉伸后
+      // 马赛克方块都成了长条。
+      const scale = Math.max(w / img.width, h / img.height);
+      const sw = w / scale;
+      const sh = h / scale;
+      const sx = (img.width - sw) / 2;
+      const sy = (img.height - sh) / 2;
       const ratio = h / w;
       const start = performance.now();
 
       const frame = (now: number) => {
         if (cancelled) return;
         const t = Math.min(1, (now - start) / durationMs);
-        // easeOutCubic：一开始粒度变化快，末尾慢下来，收得住
-        const eased = 1 - Math.pow(1 - t, 3);
-        const tiles = Math.max(1, Math.round(START_TILES + eased * (END_TILES - START_TILES)));
+        // 慢起步、慢收尾（easeInOutSine）。之前用 easeOutCubic，开头几帧
+        // 粒度就冲过去了大半，看着像「闪一下就清晰了」，没有过程感。
+        const eased = 0.5 - Math.cos(t * Math.PI) / 2;
+        const tiles = Math.max(
+          1,
+          Math.round(START_TILES * Math.pow(END_TILES / START_TILES, eased)),
+        );
 
         off.width = tiles;
         off.height = Math.max(1, Math.round(tiles * ratio));
         offCtx.imageSmoothingEnabled = true;          // 缩小时平滑，块内颜色才是区域均值
-        offCtx.drawImage(img, 0, 0, off.width, off.height);
+        offCtx.drawImage(img, sx, sy, sw, sh, 0, 0, off.width, off.height);
 
         ctx.imageSmoothingEnabled = false;            // 放大时不插值，才有硬边马赛克
         ctx.clearRect(0, 0, w, h);
@@ -122,17 +144,31 @@ export default function PixelateReveal({
     };
   }, [src, durationMs, onDone]);
 
-  if (done) {
-    return <img src={src} alt={alt} className={className} style={style} />;
-  }
+  // 结构必须跟 FadeCover 一致：className 给外层 div，内部元素填满它。
+  // 早先把 className 直接套在 canvas 上 —— 那个 class 是给外层容器写的
+  // （position/overflow/background），套错层样式就全乱了。
+  const inner: React.CSSProperties = {
+    display: 'block',
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  };
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
       className={className}
-      style={style}
-      role="img"
-      aria-label={alt || undefined}
-    />
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'var(--color-bg-soft, #f0f0f0)',
+        ...style,
+      }}
+    >
+      {done ? (
+        <img src={src} alt={alt} style={inner} />
+      ) : (
+        <canvas ref={canvasRef} style={inner} role="img" aria-label={alt || undefined} />
+      )}
+    </div>
   );
 }
