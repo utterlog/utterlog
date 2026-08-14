@@ -1534,8 +1534,11 @@ html[data-img-effect="fade"] :where(
   transition: filter var(--img-effect-duration) linear, transform .6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Image itself just renders immediately when `pixel` is active —
-   the overlay handles the whole visual reveal. */
+/* pixel 效果下图片自身不做动画 —— 揭示过程由 PixelateReveal 那块 canvas
+   负责（马赛克粒度从粗到细，CSS 做不到这个：image-rendering 只是个开关，
+   没法让粒度随时间变化）。
+   注：这条规则在很长时间里是「说好有 overlay 但 overlay 不存在」，
+   所以后台选了像素化等于没效果，2026-08-15 才补上真正的实现。 */
 html[data-img-effect="pixel"] :where([data-blog-image] img, img[data-blog-image]) {
   animation: none;
 }

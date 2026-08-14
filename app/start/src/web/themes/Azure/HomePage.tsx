@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import VisitorWeather from './VisitorWeather';
 import Pagination from './Pagination';
 import FadeCover from '@/components/blog/FadeCover';
+import PixelateReveal from '@/components/blog/PixelateReveal';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import Link from '@/components/AppLink';
@@ -143,6 +144,11 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 现在加一层「先预加载新图 + 显示 loading 蒙层 + 至少展示 700ms」的
   // 过场，新图加载完成且最短时间到了再切 displaySrc，配合 key 触发
   // 现有的 [data-blog-image][data-loaded] 淡入动画。
+  // 后台「图片显示效果」选了像素化时，hero 换图走马赛克消散。
+  // 时长复用同一个配置项，最少给 400ms —— 再短就只看得到一闪。
+  const pixelate = options?.image_display_effect === 'pixel';
+  const heroPixelMs = Math.max(400, Number(options?.image_display_duration) || 700);
+
   const [displaySrc, setDisplaySrc] = useState(heroSrc);
   const [heroLoading, setHeroLoading] = useState(false);
   useEffect(() => {
@@ -207,7 +213,20 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                     的状态机，触发现有的淡入动画。配合上面的 displaySrc
                     延迟切换，得到「loading 圈展示一会儿 → 新图淡入」效果。 */}
                 <PostLink post={heroPost} className="azure-hero-link">
-                  <FadeCover key={displaySrc} src={displaySrc} alt={heroPost.title} className="azure-hero-cover" />
+                  {/* 后台把「图片显示效果」设成 pixel 时，hero 换图走马赛克消散；
+                      其余效果仍走 FadeCover 那套淡入。像素化只给 hero 用 ——
+                      正文里几十张图各跑一条 rAF 不划算，而 hero 一次只有一张。 */}
+                  {pixelate ? (
+                    <PixelateReveal
+                      key={displaySrc}
+                      src={displaySrc}
+                      alt={heroPost.title}
+                      className="azure-hero-cover"
+                      durationMs={heroPixelMs}
+                    />
+                  ) : (
+                    <FadeCover key={displaySrc} src={displaySrc} alt={heroPost.title} className="azure-hero-cover" />
+                  )}
                   {/* Loading overlay —— 切分类时盖在旧图上，模糊 + 半透黑底
                       + 中央旋转环 spinner。淡出由 transition 0.4s 控制，跟新图
                       淡入并行，整体过渡总长 ≈ 500ms（最短展示）+ 0.4s（淡出）。 */}
