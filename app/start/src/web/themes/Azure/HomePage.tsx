@@ -20,8 +20,10 @@ import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 const API = '/api/v1';
 
+// hero 轮播的口味。**不含「最新文章」** —— 下面的文章列表本身就是按时间
+// 倒序排的，第一条永远是最新那篇；hero 再放一次等于同一篇文章占了首屏两个
+// 位置。这里只留「最新之外」的几种视角。
 const MODES = [
-  { key: 'latest', label: '最新文章', color: '#0052D9', param: '&order_by=published_at&order=desc' },
   { key: 'hot', label: '热门文章', color: '#e53935', param: '&order_by=view_count&order=desc' },
   { key: 'comments', label: '热评文章', color: '#f57c00', param: '&order_by=comment_count&order=desc' },
   { key: 'random', label: '随机文章', color: '#43a047', param: '&order_by=random' },
@@ -36,7 +38,12 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // the category auto-list behavior.
   const { options } = useThemeContext();
   const [modeIdx, setModeIdx] = useState(0);
-  const [heroPost, setHeroPost] = useState<any>(posts[0] || null);
+  // 首屏还没有热门数据（那是挂载后才 fetch 的），先从服务端给的这批文章里
+  // 挑浏览量最高的顶上。直接用 posts[0] 的话首屏就是最新那篇 —— 正是要避开的。
+  // 纯计算、无随机，SSR 与客户端结果一致，不会引起 hydration 失配。
+  const [heroPost, setHeroPost] = useState<any>(
+    () => [...posts].sort((a, b) => (Number(b?.view_count) || 0) - (Number(a?.view_count) || 0))[0] || null,
+  );
   const [latestMoment, setLatestMoment] = useState<any>(latestMomentCache || serverLatestMoment);
   const momentLazy = useLazyVisible<HTMLDivElement>();
   const [paused, setPaused] = useState(false);
@@ -86,7 +93,7 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
     }).catch(() => {});
   }, [modeIdx]);
 
-  // 自动轮播：只在 MODES（最新 / 热门 / 热评 / 随机）之间切。
+  // 自动轮播：只在 MODES（热门 / 热评 / 随机）之间切。
   // 原来还会同时推进分类维度，但 hero 下方那排分类 tabs 已经删掉了 ——
   // 没有 UI 能表达「现在看的是哪个分类」，图却在自己换，读者只会觉得乱。
   // 鼠标 hover 在 hero 上时暂停。
