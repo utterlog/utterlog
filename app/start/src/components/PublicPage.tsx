@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Link, rootRouteId, useLoaderData, useRouterState } from '@tanstack/react-router';
+import { Link, rootRouteId, useLoaderData } from '@tanstack/react-router';
 import { getThemeComponents } from '@/lib/theme';
 import PageTitle from '@/components/blog/PageTitle';
 import PostLink from '@/components/blog/PostLink';
@@ -61,23 +61,9 @@ function RouteFallback() {
 }
 
 function Shell({ ctx, children }: { ctx: ThemeContextData | null; children: React.ReactNode }) {
-  // 路径当 key：内容换掉时强制重新挂载这层，CSS 动画才会重新播。
-  // 不给 key 的话 React 会复用同一个 div，动画只在首屏播一次，之后每次
-  // 切页内容还是「啪」地出现。
-  //
-  // **必须用 resolvedLocation，不能用 location。** location 在点击后
-  // 12ms 就变成新路径了，那时 children 还是旧页面的内容 —— 拿它当 key
-  // 会把旧内容卸载重挂、重播一遍淡入，看起来就是「点了链接后当前页面
-  // 先自己刷新一下，然后才进新页面」。resolvedLocation 要等新内容真正
-  // 渲染完（实测 652ms）才更新，跟内容切换是同一时刻。
-  const pathname = useRouterState({
-    select: (s) => s.resolvedLocation?.pathname ?? s.location.pathname,
-  });
   const content = (
     <Suspense fallback={<RouteFallback />}>
-      <div className="route-enter" key={pathname}>
-        {children}
-      </div>
+      {children}
       {ctx ? (
         <ImageEffects
           effect={ctx.options.image_display_effect}

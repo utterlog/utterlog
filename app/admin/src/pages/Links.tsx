@@ -173,9 +173,9 @@ export default function LinksPage() {
       const failed = d?.failed ?? 0;
       const removed = (d?.pruned_items ?? 0) + (d?.refreshed_items_deleted ?? 0);
       if (failed > 0) {
-        toast.error(t('admin.links.toast.feedsRefreshedWithFailures', '已刷新 {fetched} 个订阅，失败 {failed} 个，新增 {newItems} 条', { fetched, failed, newItems }));
+        toast.error(t('admin.links.toast.feedsRefreshedWithFailures', '已刷新 {fetched} 个订阅源，抓回 {newItems} 篇文章，{failed} 个源失败', { fetched, failed, newItems }));
       } else {
-        toast.success(t('admin.links.toast.feedsRefreshed', '已刷新 {fetched} 个订阅，新增 {newItems} 条，清理 {removed} 条旧缓存', { fetched, newItems, removed }));
+        toast.success(t('admin.links.toast.feedsRefreshed', '已刷新 {fetched} 个订阅源，抓回 {newItems} 篇文章，清理 {removed} 篇旧缓存', { fetched, newItems, removed }));
       }
     } catch {
       toast.error(t('admin.common.refreshFailed', '刷新失败'));

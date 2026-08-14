@@ -7,14 +7,10 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: 'intent',
-    // 切页面时让浏览器原生做交叉淡化：截住旧画面，新画面就绪后淡进去，
-    // 动画跑在合成器上不占主线程。不支持的浏览器（目前是 Firefox）
-    // 自动退回瞬间切换，不用写兼容分支。
-    //
-    // 它只平滑「旧页面 → 组件加载占位」这一跳；占位换成真实内容那一跳
-    // 不再触发 view transition（同一次导航内的后续渲染），那段由
-    // PublicPage 里的 .route-enter 淡入接手。两者互补，不会双重淡入。
-    defaultViewTransition: true,
+    // ⚠ 2026-08-14 关闭：开着会和 hydration 打架 —— 线上 /links 出现
+    // 「Transition was aborted because of invalid state」+ React #418
+    // （hydration 失败）反复循环，页面无限闪烁。原因待查，先回滚止血。
+    // defaultViewTransition: true,
     // 客户端导航时 loader 还没回来，默认渲染的是空 —— 点进文章会先白屏一下。
     // 给一个顶部进度条兜住。
     //
