@@ -40,15 +40,48 @@ const pageImports = {
 } as const;
 
 /**
- * 提前把某个页面的组件 chunk 拉下来。由路由 loader 调用。
+ * 已经取回来、可以直接渲染的页面组件。
+ *
+ * **这个 Map 是消除切页面空白的关键。** 光把 chunk 提前下载下来还不够：
+ * React.lazy 每次首渲染都要挂起一个微任务周期才拿到模块 —— 哪怕 chunk
+ * 早在缓存里。实测那 260ms 空窗就是这么来的，Suspense 一挂起，内容区
+ * 就空一下。
+ *
+ * 所以预取时顺手把解析好的组件存进来，渲染时优先取这里的：命中就是
+ * 同步渲染，根本不进 Suspense，一帧空白都没有。
+ */
+const readyPages = new Map<string, React.ComponentType<any>>();
+
+/**
+ * 提前把某个页面的组件 chunk 拉下来并缓存组件本身。由路由 loader 调用。
  *
  * 只在浏览器里做：服务端渲染没有 chunk 的概念，调了也是白费。
- * 失败静默 —— 这只是提前量，真正需要时 lazy 会自己再取一次。
+ * 失败静默 —— 这只是提前量，真正需要时 lazy 会兜底。
  */
 export function preloadPageChunk(kind: string) {
   if (typeof window === 'undefined') return;
+  if (readyPages.has(kind)) return;
   const load = pageImports[kind as keyof typeof pageImports];
-  if (load) void load().catch(() => {});
+  if (!load) return;
+  void load()
+    .then((mod) => {
+      readyPages.set(kind, mod.default);
+    })
+    .catch(() => {});
+}
+
+/**
+ * 取某个页面该用的组件：预取好了就用现成的（同步、不挂起），
+ * 否则退回 lazy 版本（会挂起，走 Suspense）。
+ *
+ * 服务端一律用 lazy —— 那边靠流式 Suspense 输出，readyPages 永远是空的。
+ * 客户端首屏 hydration 时它也还是空的，但此时 SSR 已经把 HTML 吐出来了，
+ * React 会保留那段 HTML 等 lazy resolve，不会闪 fallback。真正吃到好处的
+ * 是之后的每一次客户端导航。
+ */
+function pageComponent(kind: string, fallback: React.ComponentType<any>) {
+  if (typeof window === 'undefined') return fallback;
+  return readyPages.get(kind) || fallback;
 }
 
 /**
@@ -70,7 +103,9 @@ function useIdlePreloadPages() {
     const cancel: (id: number) => void =
       (window as any).cancelIdleCallback || window.clearTimeout;
     const id = idle(() => {
-      for (const load of Object.values(pageImports)) void load().catch(() => {});
+      // 走 preloadPageChunk 而不是直接调 pageImports —— 前者会把解析好的
+      // 组件存进 readyPages，后者只是让浏览器缓存 chunk，渲染时仍要挂起。
+      for (const kind of Object.keys(pageImports)) preloadPageChunk(kind);
     });
     return () => cancel(id);
   }, []);
@@ -334,13 +369,36 @@ export function PublicPage({ data }: { data: PublicPageData }) {
           const Component = theme.TagPage || DefaultTagPage;
           return <Component tag={data.tag} posts={data.posts} timeZone={ctx.timeZone} />;
         }
-        if (data.kind === 'about') return <AboutContent />;
-        if (data.kind === 'footprints') return <FootprintsClient initialRows={data.rows} options={ctx?.options || {}} />;
-        if (data.kind === 'moments') return <MomentsClient initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
-        if (data.kind === 'client' && data.page === 'links') return <LinksClient initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
-        if (data.kind === 'client' && data.page === 'feeds') return <FeedsClient />;
-        if (data.kind === 'client' && data.page === 'albums') return <AlbumsClient initialAlbums={data.items || []} />;
-        if (data.kind === 'client' && data.page === 'music') return <MusicClient initialItems={data.items || []} />;
+        // 下面一律走 pageComponent()：预取过就拿到真组件同步渲染，
+        // 没预取过才退回 lazy 走 Suspense。
+        if (data.kind === 'about') {
+          const C = pageComponent('about', AboutContent);
+          return <C />;
+        }
+        if (data.kind === 'footprints') {
+          const C = pageComponent('footprints', FootprintsClient);
+          return <C initialRows={data.rows} options={ctx?.options || {}} />;
+        }
+        if (data.kind === 'moments') {
+          const C = pageComponent('moments', MomentsClient);
+          return <C initialLoaded initialMoments={data.moments} initialTags={data.tags} initialFetchedAt={data.fetchedAt} />;
+        }
+        if (data.kind === 'client' && data.page === 'links') {
+          const C = pageComponent('links', LinksClient);
+          return <C initialLinks={data.items || []} initialOptions={ctx?.options || {}} />;
+        }
+        if (data.kind === 'client' && data.page === 'feeds') {
+          const C = pageComponent('feeds', FeedsClient);
+          return <C />;
+        }
+        if (data.kind === 'client' && data.page === 'albums') {
+          const C = pageComponent('albums', AlbumsClient);
+          return <C initialAlbums={data.items || []} />;
+        }
+        if (data.kind === 'client' && data.page === 'music') {
+          const C = pageComponent('music', MusicClient);
+          return <C initialItems={data.items || []} />;
+        }
         if (data.kind === 'shelf') return <MediaGrid data={data} />;
         if (data.kind === 'search') return <SearchPage data={data} />;
         if (data.kind === 'films') return <FilmsPage data={data} />;
