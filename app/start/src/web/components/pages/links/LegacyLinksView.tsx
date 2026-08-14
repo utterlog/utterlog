@@ -23,6 +23,26 @@ interface Link {
   avatar?: string;
   group_name?: string;
   rss_url?: string;
+  /** 该站 RSS 里最新一条的发布时间（unix 秒）。0 = 没填 RSS 或还没抓到。 */
+  last_post_at?: number;
+}
+
+/**
+ * 友链最后更新时间。
+ *
+ * 近期用相对时间（"3 天前"）—— 判断"这站还活着吗"比具体日期直观；
+ * 超过 30 天退回绝对日期，那时候"87 天前"反而不如"2026-05-19"好读。
+ */
+function formatLastPost(at?: number) {
+  const ts = Number(at || 0);
+  if (!ts) return '';
+  const days = Math.floor((Date.now() / 1000 - ts) / 86400);
+  if (days < 0) return '';           // 对方 RSS 把日期写到未来了，不显示
+  if (days === 0) return '今天';
+  if (days === 1) return '昨天';
+  if (days < 30) return `${days} 天前`;
+  const d = new Date(ts * 1000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 type LinkGroupStyle = 'card' | 'compact';
@@ -30,6 +50,8 @@ type LinkGroupStyle = 'card' | 'compact';
 interface LinkGroupConfig {
   key: string;
   name: string;
+  /** 后台仍能配 card / compact，但本视图统一走行式布局，这里只做解析不参与渲染。
+      Nebula 走 NebulaLinksView，那边仍按分组切换卡片/紧凑。 */
   style: LinkGroupStyle;
   icon?: string;
 }
@@ -126,7 +148,6 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
   const visibleGroupKeys = [...configuredVisibleKeys, ...orphanVisibleKeys];
   const groups = ['all', ...visibleGroupKeys];
   const groupLabel = (key: string) => key === 'all' ? '全部' : groupMap.get(key)?.name || (key === DEFAULT_GROUP_KEY ? '默认' : key);
-  const groupStyle = (key: string) => groupMap.get(key)?.style || 'card';
   const groupIcon = (key: string) => groupMap.get(key)?.icon || 'fa-regular fa-folder';
   const filteredLinks = activeGroup === 'all' ? links : links.filter(l => normalizeGroupKey(l.group_name) === activeGroup);
 
@@ -227,14 +248,14 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                 </div>
               )}
 
-              <div className={groupStyle(groupName) === 'compact' ? 'friend-link-compact-grid' : 'friend-link-card-grid'}>
+              <div className="friend-link-row-list">
                 {groupLinks.map(link => (
                   <a
                     key={link.id}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={groupStyle(groupName) === 'compact' ? 'friend-link-compact-item' : 'friend-link-card-item'}
+                    className="friend-link-row"
                   >
                     <img
                       src={link.avatar || link.logo || getFavicon(link.url)}
@@ -242,19 +263,15 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                       className="friend-link-logo"
                       onError={e => { (e.target as HTMLImageElement).src = getFavicon(link.url); }}
                     />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="friend-link-name">
-                        {link.name}
-                      </div>
-                      {groupStyle(groupName) !== 'compact' && link.description && (
-                        <div className="friend-link-description">
-                          {link.description}
-                        </div>
-                      )}
-                    </div>
-                    {groupStyle(groupName) !== 'compact' && (
-                      <i className="fa-regular fa-arrow-up-right-from-square friend-link-external" />
-                    )}
+                    <span className="friend-link-row-name">{link.name}</span>
+                    {/* 描述超长就省略号，完整内容挂 title */}
+                    <span className="friend-link-row-desc" title={link.description || undefined}>
+                      {link.description}
+                    </span>
+                    {/* 没填 RSS 或还没抓到条目的，这里留空 —— 显示「未知」会让人以为站挂了 */}
+                    <span className="friend-link-row-time">
+                      {formatLastPost(link.last_post_at)}
+                    </span>
                   </a>
                 ))}
               </div>

@@ -276,12 +276,23 @@ export default function Footer() {
 
   const avatarUrl = user?.avatar || (user ? `https://gravatar.bluecdn.com/avatar/0?s=64&d=mp` : null);
 
-  const handleIconClick = async (item: { href?: string; copy?: string; label: string }, e: React.MouseEvent) => {
+  // 复制成功后把图标换成绿色对号，2 秒还原。toast 一闪就没，鼠标还停在按钮上时
+  // 图标本身给个持续状态，"到底复制上没有"一眼可见。
+  // 存索引而不是布尔：几个图标共用这套逻辑，布尔会让点 A 时 B 也变对号。
+  const [copiedIcon, setCopiedIcon] = useState<number | null>(null);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
+
+  const handleIconClick = async (item: { href?: string; copy?: string; label: string }, e: React.MouseEvent, index: number) => {
     if (item.copy) {
       e.preventDefault();
       try {
         await navigator.clipboard.writeText(item.copy);
         toast.success(`${item.label} 链接已复制`);
+        // 连点时重新计时，否则第一次的定时器会把第二次的对号提前撤掉
+        if (copiedTimer.current) clearTimeout(copiedTimer.current);
+        setCopiedIcon(index);
+        copiedTimer.current = setTimeout(() => setCopiedIcon(null), 2000);
       } catch {
         toast.error('复制失败，请手动复制');
       }
@@ -414,10 +425,24 @@ export default function Footer() {
             const onEnter = (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.color = '#0052D9'; e.currentTarget.style.borderColor = '#0052D9'; };
             const onLeave = (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.color = '#bbb'; e.currentTarget.style.borderColor = '#ddd'; };
             if (item.copy) {
+              const copied = copiedIcon === i;
               return (
-                <button key={i} onClick={(e) => handleIconClick(item, e)} title={`${item.label}（点击复制）`}
-                  style={baseStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
-                  {renderIcon(item.icon)}
+                <button key={i} onClick={(e) => handleIconClick(item, e, i)}
+                  title={copied ? '已复制' : `${item.label}（点击复制）`}
+                  style={copied
+                    ? { ...baseStyle, color: '#16a34a', borderColor: '#16a34a' }
+                    : baseStyle}
+                  // 对号亮着的时候不让 hover 把绿色改回蓝色
+                  onMouseEnter={copied ? undefined : onEnter}
+                  onMouseLeave={copied ? undefined : onLeave}>
+                  {copied
+                    ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    )
+                    : renderIcon(item.icon)}
                 </button>
               );
             }

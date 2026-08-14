@@ -5,7 +5,7 @@ import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';
 import { siteTotalViews } from './services/analytics';
-import { friendLinkAvatar, friendLinkIndex, matchFriendBadge } from './services/friend-links';
+import { friendLinkAvatar, friendLinkIndex, lastPostAtByFeed, matchFriendBadge } from './services/friend-links';
 import { bumpPostViewOnRead, type ReadVisitor } from './services/tracking';
 import { defaultWeatherLocation, fetchVisitorWeather, visitorWeatherLocation, type VisitorWeatherResponse } from './weather';
 
@@ -600,6 +600,10 @@ export async function listPublicContent(name: PublicContentTable, params: { page
     [status, perPage, offset],
   ).catch(() => []);
   const count = Number(total?.count || 0);
+  // 友链的「最后更新」取自各自 RSS 已抓回来的条目，聚合逻辑见 lastPostAtByFeed。
+  const lastPostByRss = name === 'links' && rows.length
+    ? await lastPostAtByFeed(rows.map((row) => String(row.rss_url || '')))
+    : new Map<string, number>();
   return {
     // 友链存了站长邮箱（拿来算 Gravatar），而这里是 select * 直出的公开接口。
     // 邮箱换成算好的头像 URL 再发出去 —— 否则等于把友链站长的邮箱挂在公网上。
@@ -607,6 +611,8 @@ export async function listPublicContent(name: PublicContentTable, params: { page
       ? rows.map(({ email, ...rest }) => ({
           ...rest,
           avatar: friendLinkAvatar({ email: String(email || ''), logo: String(rest.logo || ''), iconUrl: String(rest.icon_url || '') }, 128),
+          // 没抓到 / 没填 RSS 的给 0，前端据此不显示时间
+          last_post_at: lastPostByRss.get(String(rest.rss_url || '').trim()) || 0,
         }))
       : Array.from(rows),
     meta: { total: count, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(count / perPage)) },

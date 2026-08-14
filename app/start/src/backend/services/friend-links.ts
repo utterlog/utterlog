@@ -208,3 +208,33 @@ export async function saveLinkEmails(updates: { linkId: number; email: string }[
 }
 
 export { normalizeSiteHost };
+
+/**
+ * 友链各站「最后更新时间」，key 是 rss_url，value 是 unix 秒。
+ *
+ * 数据是现成的，这里不发任何外部请求：links.rss_url 由 mirrorLinkSubscriptions()
+ * 同步成 rss_subscriptions，feed-cron 每 6 小时抓一次写进 feed_items，
+ * 这里只是把已抓到的条目按订阅聚合出最大发布时间。
+ *
+ * 一条 group by 查完，不能每行查一次 —— 几十条友链就是几十个来回。
+ * 抽在这里是因为 SSR（public-read）和 REST（content-records）两条路径都要用，
+ * 各写一份迟早漂移。
+ */
+export async function lastPostAtByFeed(feedUrls: string[]): Promise<Map<string, number>> {
+  const result = new Map<string, number>();
+  const feeds = Array.from(new Set(feedUrls.map((url) => String(url || '').trim()).filter(Boolean)));
+  if (!feeds.length) return result;
+  const rows = await many<{ feed_url: string; last_post_at: string }>(
+    `select rs.feed_url, max(fi.pub_date)::text as last_post_at
+       from ${table('rss_subscriptions')} rs
+       join ${table('feed_items')} fi on fi.subscription_id = rs.id
+      where rs.feed_url = any($1::text[])
+      group by rs.feed_url`,
+    [feeds],
+  ).catch(() => []);
+  for (const row of rows) {
+    const at = Number(row.last_post_at || 0);
+    if (at > 0) result.set(String(row.feed_url), at);
+  }
+  return result;
+}

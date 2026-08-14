@@ -1,6 +1,6 @@
 import { table } from '../config';
 import { exec, many, nowUnix, one } from '../db/helpers';
-import { friendLinkAvatar, invalidateFriendLinks } from './friend-links';
+import { friendLinkAvatar, invalidateFriendLinks, lastPostAtByFeed } from './friend-links';
 
 export const contentResources = ['albums', 'books', 'games', 'goods', 'links', 'movies', 'music', 'playlists', 'videos'] as const;
 export type ContentResource = typeof contentResources[number];
@@ -86,8 +86,19 @@ export async function listContentRecords(resource: ContentResource, options: {
     [...params, perPage, (page - 1) * perPage],
   );
   const total = Number(totalRow?.count || 0);
+  // 友链带上「最后更新」。SSR 走 public-read 的同名逻辑，两边共用 lastPostAtByFeed，
+  // 免得 SSR 失败降级到这条 fetch 路径时时间就没了。后台友链列表也能看到，
+  // 顺带能发现哪些友链已经停更。
+  const lastPostByRss = resource === 'links' && rows.length
+    ? await lastPostAtByFeed(rows.map((row) => String(row.rss_url || '')))
+    : new Map<string, number>();
   return {
-    rows: resource === 'links' ? rows.map((row) => publicLinkRow(row, options.authed)) : rows,
+    rows: resource === 'links'
+      ? rows.map((row) => ({
+          ...publicLinkRow(row, options.authed),
+          last_post_at: lastPostByRss.get(String(row.rss_url || '').trim()) || 0,
+        }))
+      : rows,
     meta: { total, page, per_page: perPage, total_pages: Math.max(1, Math.ceil(total / perPage)) },
   };
 }
