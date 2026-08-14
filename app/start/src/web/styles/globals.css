@@ -1211,8 +1211,8 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(var(--mosaic-cols, 14), 1fr);
-  grid-template-rows: repeat(var(--mosaic-rows, 4), 1fr);
+  grid-template-columns: repeat(var(--mosaic-cols, 30), 1fr);
+  grid-template-rows: repeat(var(--mosaic-rows, 6), 1fr);
   pointer-events: none;   /* 遮罩盖在图上，别挡住 hero 的点击 */
 }
 
@@ -1221,8 +1221,12 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
 .mosaic-overlay span {
   background: rgba(12, 14, 18, 0.92);
   opacity: 1;
-  animation: mosaicReveal 0.42s ease-out forwards;
-  animation-delay: calc(var(--wave, 0) * 0.055s);
+  animation: mosaicReveal 0.38s ease-out forwards;
+  /* --wave 是组件归一化后的 0~1，所以这里直接乘总排队时长即可 ——
+     不管用哪种揭示图案（斜扫 / 左右推 / 中心扩散 / 打散），
+     整段时长都是这个 0.62s 加上单块 0.38s，约 1 秒。
+     改网格密度也不用再动这里。 */
+  animation-delay: calc(var(--wave, 0) * 0.62s);
 }
 
 @keyframes mosaicReveal {
