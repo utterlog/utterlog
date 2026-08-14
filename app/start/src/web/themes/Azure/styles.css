@@ -88,10 +88,21 @@
   top: 0;
   z-index: 50;
   padding-right: 10px;
-  background: rgba(255, 255, 255, 0.97);
+  /* 半透明 + 磨砂：往下滚时内容从这条栏底下穿过去，能透出颜色和轮廓，
+     有层次。原来是 0.97 —— 几乎全白，磨砂等于白设，滚动时看着就是
+     一条实心白板压在页面上。
+
+     0.62 是权衡出来的：再低文字对比度就不够了（导航是 13px 的细字，
+     底下滚过深色封面图时会发飘），配合 saturate 把透出的颜色提一点，
+     不至于灰蒙蒙。
+
+     **先 webkit 后标准。** CSS 压缩器会把两条认作重复只留后写的那条，
+     反过来写产物里就只剩前缀版，而 Chrome 只认标准属性。主题 CSS 目前
+     是原样 copy 不压缩，但别人拿这份文件去打包时会踩到。 */
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+  background: rgba(255, 255, 255, 0.62);
   border-bottom: 1px solid var(--color-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 [data-theme="Azure"] .azure-header-inner {
   position: relative;
@@ -207,7 +218,16 @@
   display: none;
   min-width: 120px;
   padding: 6px 0;
-  background: var(--color-bg-card);
+  /* 磨砂，跟 header 本身同一套观感（header 用的是 blur(12px)）。
+     原来是不透明的 --color-bg-card，一块实心白板压在页面上，
+     跟半透明的 header 接不上。
+
+     **两条声明的顺序不能反：先 webkit 后标准。** CSS 压缩器会把它认作
+     重复声明只留后写的那条 —— 反过来写的话产物里只剩前缀版，
+     而 Chrome 只认标准属性，磨砂直接失效。全屏遮罩那处踩过这个坑。 */
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  background: color-mix(in srgb, var(--color-bg-card, #fff) 82%, transparent);
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transform: translateX(-50%);
