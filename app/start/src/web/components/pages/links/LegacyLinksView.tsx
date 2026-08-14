@@ -12,6 +12,8 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import PageTitle from '@/components/blog/PageTitle';
 import { siteFaviconUrl } from '@/lib/site-favicon';
+import { datePartsInTimeZone } from '@/lib/timezone';
+import { useThemeContext } from '@/lib/theme-context';
 
 interface Link {
   id: number;
@@ -27,22 +29,39 @@ interface Link {
   last_post_at?: number;
 }
 
+/** 某个时刻在指定时区里是哪一天，换算成「儒略日」序号，用来算日历天差。 */
+function dayNumberInTimeZone(ms: number, timeZone: string) {
+  const { year, month, day } = datePartsInTimeZone(ms, timeZone);
+  return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+}
+
 /**
  * 友链最后更新时间。
  *
  * 近期用相对时间（"3 天前"）—— 判断"这站还活着吗"比具体日期直观；
  * 超过 30 天退回绝对日期，那时候"87 天前"反而不如"2026-05-19"好读。
+ *
+ * **必须传站点时区，不能用 new Date() 的本地方法。** 这个函数 SSR 和
+ * 客户端各跑一次：服务器在 America/Los_Angeles（Bun 进程按 UTC 算），
+ * 浏览器在读者本地。同一个时间戳算出的日期能差一天，React 一比对就是
+ * hydration 失败（#418），页面反复重渲染。
+ *
+ * 这个 bug 一度被误判成 View Transition 引起的 —— 开了 view transition
+ * 只是把静默的 mismatch 放大成看得见的死循环，回滚它并没有修掉根因。
+ *
+ * 「今天/昨天/N 天前」同样按时区算**日历天**差，不是按 86400 秒整除：
+ * 后者在跨日边界上会把「昨天 23:50」算成 0 天前。
  */
-function formatLastPost(at?: number) {
+function formatLastPost(at: number | undefined, timeZone: string) {
   const ts = Number(at || 0);
   if (!ts) return '';
-  const days = Math.floor((Date.now() / 1000 - ts) / 86400);
+  const days = dayNumberInTimeZone(Date.now(), timeZone) - dayNumberInTimeZone(ts * 1000, timeZone);
   if (days < 0) return '';           // 对方 RSS 把日期写到未来了，不显示
   if (days === 0) return '今天';
   if (days === 1) return '昨天';
   if (days < 30) return `${days} 天前`;
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const { year, month, day } = datePartsInTimeZone(ts * 1000, timeZone);
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 type LinkGroupStyle = 'card' | 'compact';
@@ -104,6 +123,9 @@ function getFavicon(url: string) {
 }
 
 export default function LegacyLinksView({ initialLinks, initialOptions }: { initialLinks?: Link[]; initialOptions?: Record<string, string> } = {}) {
+  // 站点时区由服务端下发，SSR 与客户端同一个值 —— 时间格式化必须用它，
+  // 用 new Date() 的本地方法两边会算出不同日期，导致 hydration 失败。
+  const { timeZone } = useThemeContext();
   const hasInitialData = initialLinks !== undefined;
   const [links, setLinks] = useState<Link[]>(initialLinks || []);
   const [linkGroups, setLinkGroups] = useState<LinkGroupConfig[]>(parseLinkGroups(initialOptions?.link_groups));
@@ -270,7 +292,7 @@ export default function LegacyLinksView({ initialLinks, initialOptions }: { init
                     </span>
                     {/* 没填 RSS 或还没抓到条目的，这里留空 —— 显示「未知」会让人以为站挂了 */}
                     <span className="friend-link-row-time">
-                      {formatLastPost(link.last_post_at)}
+                      {formatLastPost(link.last_post_at, timeZone)}
                     </span>
                   </a>
                 ))}
