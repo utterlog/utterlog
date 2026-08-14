@@ -1205,6 +1205,37 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
 /* ========================================
    Animations
    ======================================== */
+/* ---- 马赛克揭示（MosaicReveal 组件）---- */
+
+.mosaic-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--mosaic-cols, 14), 1fr);
+  grid-template-rows: repeat(var(--mosaic-rows, 4), 1fr);
+  pointer-events: none;   /* 遮罩盖在图上，别挡住 hero 的点击 */
+}
+
+/* 动 opacity 而不是 background 的颜色值：opacity 走合成器，
+   几十个块同时动也不掉帧；颜色过渡每帧都要重绘。 */
+.mosaic-overlay span {
+  background: rgba(12, 14, 18, 0.92);
+  opacity: 1;
+  animation: mosaicReveal 0.42s ease-out forwards;
+  animation-delay: calc(var(--wave, 0) * 0.055s);
+}
+
+@keyframes mosaicReveal {
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 直接给清晰图，不做逐块揭示 */
+  .mosaic-overlay {
+    display: none;
+  }
+}
+
 /* ---- 块状区域的加载指示（LoadingBars 组件）----
 
    三条竖条依次起伏。原设计用 SMIL 的链式 begin

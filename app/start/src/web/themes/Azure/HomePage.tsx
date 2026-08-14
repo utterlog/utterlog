@@ -5,7 +5,7 @@ import Sidebar from './Sidebar';
 import VisitorWeather from './VisitorWeather';
 import Pagination from './Pagination';
 import FadeCover from '@/components/blog/FadeCover';
-import PixelateReveal from '@/components/blog/PixelateReveal';
+import MosaicReveal from '@/components/blog/MosaicReveal';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import Link from '@/components/AppLink';
@@ -144,13 +144,10 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 现在加一层「先预加载新图 + 显示 loading 蒙层 + 至少展示 700ms」的
   // 过场，新图加载完成且最短时间到了再切 displaySrc，配合 key 触发
   // 现有的 [data-blog-image][data-loaded] 淡入动画。
-  // 后台「图片显示效果」选了像素化时，hero 换图走马赛克消散。
-  //
-  // 时长不复用 image_display_duration —— 那个值（默认 500ms）是给正文小图
-  // 的淡入定的，套在整幅 banner 上太快，马赛克刚成形就没了。banner 是
-  // 首屏最大的一块，值得让它慢慢显影。取配置值的 2.5 倍，下限 1400ms。
-  const pixelate = options?.image_display_effect === 'pixel';
-  const heroPixelMs = Math.max(1400, (Number(options?.image_display_duration) || 500) * 2.5);
+  // 后台「图片显示效果」选了马赛克时，hero 换图走逐块揭示。
+  // 时长由 CSS 的 animation-delay 波次决定，不吃 image_display_duration ——
+  // 那个值是给正文小图淡入定的，跟这里的逐块节奏不是一回事。
+  const mosaic = options?.image_display_effect === 'mosaic';
 
   const [displaySrc, setDisplaySrc] = useState(heroSrc);
   const [heroLoading, setHeroLoading] = useState(false);
@@ -219,13 +216,12 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                   {/* 后台把「图片显示效果」设成 pixel 时，hero 换图走马赛克消散；
                       其余效果仍走 FadeCover 那套淡入。像素化只给 hero 用 ——
                       正文里几十张图各跑一条 rAF 不划算，而 hero 一次只有一张。 */}
-                  {pixelate ? (
-                    <PixelateReveal
+                  {mosaic ? (
+                    <MosaicReveal
                       key={displaySrc}
                       src={displaySrc}
                       alt={heroPost.title}
                       className="azure-hero-cover"
-                      durationMs={heroPixelMs}
                     />
                   ) : (
                     <FadeCover key={displaySrc} src={displaySrc} alt={heroPost.title} className="azure-hero-cover" />

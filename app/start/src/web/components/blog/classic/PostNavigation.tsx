@@ -28,7 +28,7 @@ function LazyCardImage({ src, alt }: { src: string; alt: string }) {
     <div ref={ref} style={{ position: 'absolute', inset: 0 }}>
       {inView && src && (
         // 上/下篇封面和相关文章缩略图固定用经典的 blur→sharp，不跟随
-        // 后台的 image_display_effect —— pixel / blinds 那类效果放在页脚
+        // 后台的 image_display_effect —— mosaic 那类效果放在页脚
         // 这几张小图上太吵。做法是内联 opacity + filter，内联优先级最高，
         // 盖住 globals.css 里按 data-img-effect 分支的规则。
         //

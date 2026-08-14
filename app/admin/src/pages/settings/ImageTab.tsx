@@ -79,7 +79,7 @@ export default function ImageTab({ t, register, watch, setValue }: {
             register={register('image_display_effect')}
             options={[
               { value: 'fade',  label: t('admin.settings.image.display.fade', '淡入'),    desc: t('admin.settings.image.display.fadeDesc', '模糊渐变透明') },
-              { value: 'pixel', label: t('admin.settings.image.display.pixel', '像素化'),  desc: t('admin.settings.image.display.pixelDesc', '马赛克块消散') },
+              { value: 'mosaic', label: t('admin.settings.image.display.mosaic', '马赛克'),  desc: t('admin.settings.image.display.mosaicDesc', '方块逐个化开') },
               { value: 'scale', label: t('admin.settings.image.display.scale', '缩放'),    desc: t('admin.settings.image.display.scaleDesc', '从小放到正常') },
               { value: 'none',  label: t('admin.settings.image.display.none', '无'),      desc: t('admin.settings.image.display.noneDesc', '直接显示') },
             ]}
