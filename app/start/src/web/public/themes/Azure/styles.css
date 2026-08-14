@@ -840,6 +840,37 @@
 [data-theme="Azure"] .azure-post-list-item {
   border-bottom: 1px solid var(--color-border);
 }
+/* ---- 分页换页：旧内容淡出、新内容淡入 ---- */
+
+/* 等新数据的这段时间：旧文章留在原地，只压暗一点并挡住点击，
+   让人看出「在换」但版面不塌。不做 display:none / 高度归零 ——
+   那等于整块消失，跟刷新页面一个观感。 */
+[data-theme="Azure"] .azure-page-swap[data-loading] {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+/* 新一页挂载时淡入。上移距离故意小，翻页是高频操作，
+   动作大了会显得比实际更慢。 */
+[data-theme="Azure"] .azure-page-swap {
+  animation: azurePageSwap 0.26s ease-out;
+}
+
+@keyframes azurePageSwap {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="Azure"] .azure-page-swap {
+    animation: none;
+  }
+  [data-theme="Azure"] .azure-page-swap[data-loading] {
+    transition: none;
+  }
+}
+
 [data-theme="Azure"] .azure-loading,
 [data-theme="Azure"] .azure-empty {
   padding: 80px 0;

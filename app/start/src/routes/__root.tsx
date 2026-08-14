@@ -101,10 +101,65 @@ function NavProgress() {
   );
 }
 
+/**
+ * 部署后旧 chunk 失效的兜底。
+ *
+ * 站点是 SPA：读者打开页面时拿到的 HTML 引用了一批带 hash 的 chunk，
+ * 之后的导航按需去取。一旦这期间发布了新版本，rsync --delete 会把旧
+ * chunk 删掉，读者再点导航就是
+ *   Failed to fetch dynamically imported module: /assets/Layout-xxx.js
+ * 页面卡死在那里，除非自己手动刷新 —— 而大多数人只会以为站点坏了。
+ *
+ * 这里监听两个信号：Vite 自己发的 vite:preloadError，以及动态 import
+ * 失败冒泡上来的 unhandledrejection。命中就整页重载一次，重载后拿到的
+ * 是新 HTML + 新 chunk，一切正常。
+ *
+ * 用 sessionStorage 做一次性闸门：万一是别的原因导致的加载失败（网络断了、
+ * 资源真的没了），重载解决不了问题，不能让它变成无限刷新。
+ */
+function ChunkReloadGuard() {
+  useEffect(() => {
+    const KEY = 'utterlog:chunk-reloaded';
+
+    const reloadOnce = () => {
+      if (sessionStorage.getItem(KEY)) return;   // 这一轮会话已经救过一次，不再重试
+      sessionStorage.setItem(KEY, '1');
+      window.location.reload();
+    };
+
+    const onPreloadError = (event: Event) => {
+      event.preventDefault();   // 阻止 Vite 默认抛出，避免控制台刷屏
+      reloadOnce();
+    };
+
+    const onRejection = (event: PromiseRejectionEvent) => {
+      const msg = String(event.reason?.message || event.reason || '');
+      if (/Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(msg)) {
+        reloadOnce();
+      }
+    };
+
+    window.addEventListener('vite:preloadError', onPreloadError);
+    window.addEventListener('unhandledrejection', onRejection);
+
+    // 页面能正常跑到这儿，说明当前这套 chunk 是好的，把闸门复位，
+    // 留给下一次发布用。
+    sessionStorage.removeItem(KEY);
+
+    return () => {
+      window.removeEventListener('vite:preloadError', onPreloadError);
+      window.removeEventListener('unhandledrejection', onRejection);
+    };
+  }, []);
+
+  return null;
+}
+
 function RootComponent() {
   const ctx = Route.useLoaderData();
   return (
     <RootDocument ctx={ctx}>
+      <ChunkReloadGuard />
       <NavProgress />
       <Outlet />
     </RootDocument>

@@ -146,15 +146,27 @@ EOF
 ok "依赖就绪"
 
 # ---- 3. 换代码（从这里开始进入新旧不一致窗口，到重启为止，要尽量短）----
+#
+# **assets/ 不参与 --delete。** 站点是 SPA：读者此刻打开着的页面，引用的是
+# 上一版那批带 hash 的 chunk，之后的每次导航都会按需去取。把旧 chunk 删掉，
+# 他们下一次点导航就是
+#   Failed to fetch dynamically imported module: /assets/Layout-xxx.js
+# 页面直接卡住。文件名带 hash，留着不会冲突，只是占点磁盘。
 log "rsync app/（含 dist，排除 node_modules）"
 rsync -az --delete -e "$RSYNC_SSH" --exclude node_modules --exclude .DS_Store \
+  --filter='protect /start/dist/client/assets/**' \
+  --filter='protect /admin/dist/client/assets/**' \
   app/ "${USER}@${HOST}:${REMOTE_PATH}/app/"
 "${SSH[@]}" bash -s <<EOF
 ${REMOTE_PRELUDE}
 chown -R "\$app_user:\$app_group" app
 run_app ${REMOTE_BUN} app/start/src/web/scripts/sync-theme-styles.mjs
+# 旧 chunk 留 3 天再清：足够覆盖长会话的读者，也不会无限堆积。
+# 按 mtime 而不是版本数 —— 一天发十次和十天发一次，要保的都是「最近这几天」。
+find app/start/dist/client/assets app/admin/dist/client/assets \\
+  -type f -mtime +3 -delete 2>/dev/null || true
 EOF
-ok "源码+dist 已同步"
+ok "源码+dist 已同步（旧 chunk 保留 3 天）"
 
 # ---- 4. 重启服务 + 健康检查 ----
 log "重启 ${SERVICE}"

@@ -46,6 +46,8 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const [currentPage, setCurrentPage] = useState(page);
   const [currentTotalPages, setCurrentTotalPages] = useState(totalPages);
   const [pageLoading, setPageLoading] = useState(false);
+  // 翻过页没有。翻页后的列表直接可见，不参与滚动显现（理由见渲染处）。
+  const pagedRef = useRef(false);
   // Preloaded cache: heroCache[catSlug][modeKey] = post
   const heroCacheRef = useRef<Record<string, Record<string, any>>>({});
 
@@ -102,6 +104,8 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
 
   // PJAX 分页切换
   const handlePageChange = useCallback(async (newPage: number) => {
+    // 一旦翻过页，后续列表就不再参与滚动显现（见渲染处注释）
+    pagedRef.current = true;
     setPageLoading(true);
     try {
       const r = await fetch(`${API}/posts?page=${newPage}&per_page=${perPage}&status=publish&order_by=published_at&order=desc`).then(r => r.json());
@@ -110,11 +114,10 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
       setCurrentPosts(items);
       setCurrentPage(newPage);
       setCurrentTotalPages(total);
-      // 更新 URL
       const url = newPage === 1 ? '/' : `/page/${newPage}`;
       window.history.pushState({ page: newPage }, '', url);
-      // 滚动到文章列表顶部
-      document.querySelector('.blog-main')?.scrollTo({ top: 0, behavior: 'smooth' });
+      // 不滚回顶部：既然翻页是原地换内容、不刷新，页面就不该跳。
+      // 分页控件本来就在列表底部，读者点完停在原处才接得上。
     } catch {}
     setPageLoading(false);
   }, []);
@@ -171,7 +174,9 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 早先是 max(280, 分类数 × 56) —— 因为要跟左侧 tabs 那列对齐，分类增减
   // 会让 banner 忽高忽低；tabs 删掉后那个约束就没了。
   const heroTitleH = 56;
-  // 文章卡片滚动显现，同批错开 60ms
+  // 文章卡片滚动显现，同批错开 60ms。只对首屏那批生效 —— 翻页后的文章
+  // 不带 data-reveal，直接可见（翻页时读者视线就在列表上，再让内容
+  // 从透明淡进来只会看着像没加载出来）。
   const listRevealRef = useScrollReveal<HTMLElement>('.azure-post-list-item', 60);
 
   const heroVars = {
@@ -275,16 +280,26 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
         </aside>
         {/* Right: Post list */}
         <section className="azure-post-list" ref={listRevealRef}>
-          {pageLoading ? (
+          {currentPosts.length > 0 ? (
+            // 翻页时不把列表整个换成「加载中」—— 那样内容整块消失再出现，
+            // 观感跟刷新页面没区别。旧文章原地留着、稍微变淡压住交互，
+            // 新数据到了再淡入替换。
+            //
+            // 不给 key：带 key 会让整个容器卸载重挂，页面高度瞬间塌掉，
+            // 浏览器把滚动位置钳回顶部 —— 那就又变成「像刷新」了。
+            // 淡出淡入交给下面 data-loading 的 opacity transition。
+            <div className="azure-page-swap" data-loading={pageLoading ? '1' : undefined}>
+              {currentPosts.map((post, idx) => (
+                <div key={post.id} className="azure-post-list-item" {...(pagedRef.current ? {} : { 'data-reveal': '' })}>
+                  <PostCard post={post} isNewest={currentPage === 1 && idx === 0} priority={currentPage === 1 && idx === 0} />
+                </div>
+              ))}
+            </div>
+          ) : pageLoading ? (
+            // 只有首次加载（列表还空着）才显示转圈
             <div className="azure-loading">
               <LoadingSpinner size={18} />加载中…
             </div>
-          ) : currentPosts.length > 0 ? (
-            currentPosts.map((post, idx) => (
-              <div key={post.id} className="azure-post-list-item" data-reveal>
-                <PostCard post={post} isNewest={currentPage === 1 && idx === 0} priority={currentPage === 1 && idx === 0} />
-              </div>
-            ))
           ) : (
             <div className="azure-empty">暂无文章</div>
           )}
