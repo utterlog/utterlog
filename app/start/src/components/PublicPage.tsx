@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Link, rootRouteId, useLoaderData } from '@tanstack/react-router';
+import { Link, rootRouteId, useLoaderData, useRouterState } from '@tanstack/react-router';
 import { getThemeComponents } from '@/lib/theme';
 import PageTitle from '@/components/blog/PageTitle';
 import PostLink from '@/components/blog/PostLink';
@@ -61,9 +61,15 @@ function RouteFallback() {
 }
 
 function Shell({ ctx, children }: { ctx: ThemeContextData | null; children: React.ReactNode }) {
+  // 路径当 key：占位换成真实内容时强制重新挂载这层，CSS 动画才会重新播。
+  // 不给 key 的话 React 会复用同一个 div，动画只在首屏播一次，之后每次
+  // 切页内容还是「啪」地出现。
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const content = (
     <Suspense fallback={<RouteFallback />}>
-      {children}
+      <div className="route-enter" key={pathname}>
+        {children}
+      </div>
       {ctx ? (
         <ImageEffects
           effect={ctx.options.image_display_effect}

@@ -2690,6 +2690,42 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   100% { transform: translateX(350%); }
 }
 
+/* ============ 页面切换过渡 ============
+
+   两段互补，各管一跳：
+
+     旧页面 ──①view transition──> 加载占位 ──②route-enter──> 真实内容
+
+   ① 浏览器原生的交叉淡化（router.tsx 的 defaultViewTransition）。
+      只在导航那一刻触发，同一次导航内的后续渲染不会再触发。
+   ② 占位换成内容时的淡入。这一跳 view transition 管不到，
+      不补的话内容还是「啪」地出现。
+
+   所以两者不会叠加成双重淡入。 */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  /* 默认 0.25s 偏慢，切页面这种高频操作压到 180ms 更跟手 */
+  animation-duration: 180ms;
+  animation-timing-function: ease;
+}
+
+.route-enter {
+  animation: routeEnter 260ms ease-out;
+}
+
+@keyframes routeEnter {
+  from {
+    opacity: 0;
+    /* 只上移 6px —— 位移太大会让人觉得「页面在飞」，反而慢 */
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* 页面组件加载中的占位（Suspense fallback） */
 .route-fallback {
   display: flex;
@@ -2732,6 +2768,16 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
      不显示（opacity 停在 0），占位就又变回一片空白了。 */
   .route-fallback-spinner {
     opacity: 0.5;
+    animation: none;
+  }
+
+  /* 页面切换的两段过渡一起关掉，直接瞬间切 */
+  .route-enter {
+    animation: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
     animation: none;
   }
 }
