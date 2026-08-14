@@ -136,19 +136,35 @@ const filmTabs = [
 ];
 
 /**
- * 页面组件加载时的占位。
+ * 页面组件加载时的占位 —— 骨架屏。
  *
- * 原来这里是个空的 60vh div —— 切页面时 loader 已经返回、旧内容已经撤掉，
- * 但页面组件还在路上，屏幕上就只剩主题外框那几条边框线，看着像卡住了。
+ * 演进过三版：一开始是个空的 60vh div（只剩主题外框那几条边框线，
+ * 看着像卡住），后来换成居中转圈（知道在加载了，但仍是「一个圈孤零零
+ * 转在空白里」），现在是骨架 —— 一眼能看出内容马上就来、版面长什么样，
+ * 而且高度稳定，内容顶上来时页脚不会跳。
  *
- * 转圈本身延迟 250ms 才淡入（CSS animation-delay 实现，不用 JS 计时）：
- * 大多数切换快过这个数，读者根本看不到它；只有真的慢下来才会出现，
- * 不会每次切页都闪一下。minHeight 跟原来保持一致，避免页脚上下跳。
+ * 整块延迟 200ms 才淡入（CSS animation-delay，不用 JS 计时）：多数切换
+ * 快过这个数，读者根本看不到骨架；只有真慢下来才浮出来，不会每次切页
+ * 都闪一下灰块。
  */
 function RouteFallback() {
   return (
-    <div className="route-fallback" style={{ minHeight: '60vh' }} role="status" aria-label="加载中">
-      <span className="route-fallback-spinner" />
+    <div className="route-skeleton" role="status" aria-label="加载中">
+      <div className="route-skeleton-head">
+        <span className="route-skeleton-bar" style={{ width: '38%', height: 26 }} />
+        <span className="route-skeleton-bar" style={{ width: '18%', height: 14 }} />
+      </div>
+      {/* 六行足够铺满一屏；再多也只是屏幕外的灰块，白占 DOM */}
+      {Array.from({ length: 6 }, (_, i) => (
+        <div className="route-skeleton-row" key={i}>
+          <span className="route-skeleton-thumb" />
+          <div className="route-skeleton-lines">
+            {/* 两行不等宽，比两条齐头的横线更像真实的标题 + 摘要 */}
+            <span className="route-skeleton-bar" style={{ width: '62%', height: 15 }} />
+            <span className="route-skeleton-bar" style={{ width: '88%', height: 12 }} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

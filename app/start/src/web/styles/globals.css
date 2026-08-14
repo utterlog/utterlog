@@ -2841,47 +2841,94 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   }
 }
 
-/* 页面组件加载中的占位（Suspense fallback） */
-.route-fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* ---- 页面加载骨架（Suspense fallback）----
 
-/* 两条动画叠着跑：一直转 + 延迟 0.25s 才淡入。
-   延迟交给 CSS 而不是 JS 计时器 —— 切得快的时候读者压根看不到它，
-   只有真慢下来才浮出来，避免每次切页都闪一下转圈。 */
-.route-fallback-spinner {
-  width: 26px;
-  height: 26px;
-  border: 2px solid var(--color-line, #e5e7eb);
-  border-top-color: var(--color-primary, #0052D9);
-  border-radius: 50%;
+   整块延迟 200ms 才淡入：多数切换快过这个数，读者根本看不到它；
+   只有真慢下来才浮出来，避免每次切页都闪一下灰块。
+   延迟交给 CSS animation-delay，不用 JS 计时器。 */
+
+.route-skeleton {
+  min-height: 60vh;      /* 跟内容区高度接近，内容顶上来时页脚不跳 */
+  padding: 28px 32px;
   opacity: 0;
-  animation:
-    routeFallbackSpin 0.7s linear infinite,
-    routeFallbackIn 0.2s ease 0.25s forwards;
+  animation: routeSkeletonIn 0.25s ease 0.2s forwards;
 }
 
-@keyframes routeFallbackSpin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes routeFallbackIn {
+@keyframes routeSkeletonIn {
   to { opacity: 1; }
+}
+
+.route-skeleton-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.route-skeleton-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-border, #eee);
+}
+
+.route-skeleton-thumb {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+}
+
+.route-skeleton-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+/* 灰底 + 一道扫光。背景比容器宽三倍，靠 background-position 平移，
+   动的是背景不是元素本身，不触发布局。 */
+.route-skeleton-bar,
+.route-skeleton-thumb {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-soft, #f0f1f3) 25%,
+    rgba(0, 0, 0, 0.045) 37%,
+    var(--color-bg-soft, #f0f1f3) 63%
+  );
+  background-size: 300% 100%;
+  animation: routeSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes routeSkeletonShimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (max-width: 640px) {
+  .route-skeleton { padding: 20px 16px; }
+  .route-skeleton-thumb { width: 48px; height: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 不扫光也不淡入，直接是一组静态灰块 —— 仍然表达「在加载」 */
+  .route-skeleton {
+    opacity: 1;
+    animation: none;
+  }
+  .route-skeleton-bar,
+  .route-skeleton-thumb {
+    background: var(--color-bg-soft, #f0f1f3);
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .route-pending-bar {
     /* 关掉动画时给一条静止的半宽指示，仍然表达「加载中」 */
     width: 100%;
-    opacity: 0.5;
-    animation: none;
-  }
-
-  /* 转圈停下，但要留着可见 —— 动画同时负责淡入，一律 none 会让它彻底
-     不显示（opacity 停在 0），占位就又变回一片空白了。 */
-  .route-fallback-spinner {
     opacity: 0.5;
     animation: none;
   }
