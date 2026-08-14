@@ -1240,6 +1240,44 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   }
 }
 
+/* ---- 全屏场合的加载指示（LoadingSquares 组件）----
+
+   四个方块顺时针依次外扩。原设计用 SMIL 的链式 begin
+   （begin="spinner_M16P.begin+0.15s"）串起四块的时间差，这里换成
+   animation-delay —— SMIL 在 React 19 hydration 边界会被冻住。
+
+   原动画同时动 x/y/width/height（9→11 且向外挪 1），等价于以自身中心
+   放大 11/9 ≈ 1.22 倍，所以用 transform: scale 代替：走合成器，
+   不像改几何属性那样每帧触发重排。
+
+   周期 1.2s 而不是单块的 0.6s —— 原 SMIL 里最后一块跑完（0.45+0.6）
+   再等 0.15s 才重启，整轮就是 1.2s。脉冲压在前半程，后半程静止等下一轮。 */
+
+.blog-squares rect {
+  transform-box: fill-box;      /* 让 transform-origin 相对方块自身，而非整个 SVG */
+  transform-origin: center;
+  animation: blogSquaresPulse 1.2s ease-in-out infinite;
+}
+
+.blog-squares rect:nth-of-type(2) { animation-delay: 0.15s; }
+.blog-squares rect:nth-of-type(3) { animation-delay: 0.3s; }
+.blog-squares rect:nth-of-type(4) { animation-delay: 0.45s; }
+
+@keyframes blogSquaresPulse {
+  0%   { transform: scale(1); }
+  10%  { transform: scale(1.22); }   /* 原 keyTimes 的 0.2 落在 0.6s 上，即整轮的 10% */
+  50%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-squares rect {
+    animation: none;
+    opacity: 0.6;
+  }
+  .blog-squares rect:nth-of-type(1) { opacity: 0.9; }
+}
+
 /* ---- 块状区域的加载指示（LoadingBars 组件）----
 
    三条竖条依次起伏。原设计用 SMIL 的链式 begin
@@ -2781,6 +2819,38 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
    不占布局、不盖住已渲染的 header，让读者知道「在加载」而不是「卡住了」。
    显示时机由 router 的 defaultPendingMs 控制（见 router.tsx）。 */
 
+/* ---- 切页面时的全屏磨砂层 + 顶部进度条 ----
+
+   两者由 __root.tsx 的 NavProgress 一起控制：常驻 DOM，靠 data-active
+   开关。**不做条件渲染** —— 元素刚插入就要过渡的话，浏览器往往把首帧
+   和目标帧合成一帧，淡入被跳过，看着是「啪」地盖上一层。 */
+
+.route-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;          /* 压在进度条(9999)下面，进度条要露在最上层 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 磨砂：旧页面还看得见轮廓，读者知道自己没被踢走，只是在切换。
+     **两条的顺序不能反。** 构建时的 CSS 压缩器会把它认为「重复」的那条
+     删掉，只留后写的那条 —— 先标准后 webkit 的写法，结果产物里只剩
+     -webkit-backdrop-filter，而 Chrome 只认标准属性，磨砂直接失效。
+     先写 webkit 再写标准，被删的就是前缀那条，现代浏览器照常生效。 */
+  -webkit-backdrop-filter: blur(10px) saturate(0.85);
+  backdrop-filter: blur(10px) saturate(0.85);
+  background: color-mix(in srgb, var(--color-bg, #fff) 55%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.route-veil[data-active] {
+  opacity: 1;
+  /* 盖上时吃掉点击：正在切页面还能连点导航的话，几次导航会互相打断 */
+  pointer-events: auto;
+}
+
 .route-pending {
   position: fixed;
   top: 0;
@@ -2790,7 +2860,13 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   height: 2px;
   overflow: hidden;
   background: transparent;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.route-pending[data-active] {
+  opacity: 1;
 }
 
 .route-pending-bar {
@@ -2931,6 +3007,13 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
     width: 100%;
     opacity: 0.5;
     animation: none;
+  }
+
+  /* 磨砂层保留 —— 它是状态指示不是装饰，去掉读者就不知道页面在切换了。
+     只把渐变去掉，直接显隐。 */
+  .route-veil,
+  .route-pending {
+    transition: none;
   }
 
   /* 页面切换的两段过渡一起关掉，直接瞬间切 */

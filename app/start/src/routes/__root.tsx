@@ -8,6 +8,7 @@ import {
   createRootRoute,
   useRouter,
 } from '@tanstack/react-router';
+import LoadingSquares from '@/components/blog/LoadingSquares';
 import { blogThemeAccentAttr } from '@shared/blog-theme';
 import { imageEffectAttrs } from '@/lib/blog-image';
 import type { ThemeContextData } from '@/lib/theme-context';
@@ -93,11 +94,18 @@ function NavProgress() {
     };
   }, [router]);
 
-  if (!visible) return null;
+  // 始终挂着，靠 data-active 控制显隐 —— 条件渲染的话元素刚插入就要开始
+  // 过渡，浏览器往往把首帧和目标帧合成一帧，淡入直接被跳过，看着是「啪」
+  // 地盖上一层。留在 DOM 里改属性才有真正的渐变。
   return (
-    <div className="route-pending" role="status" aria-label="加载中">
-      <div className="route-pending-bar" />
-    </div>
+    <>
+      <div className="route-veil" data-active={visible ? '1' : undefined} aria-hidden={!visible}>
+        <LoadingSquares size={44} color="var(--color-primary, #0052D9)" />
+      </div>
+      <div className="route-pending" data-active={visible ? '1' : undefined} role="status" aria-label="加载中">
+        <div className="route-pending-bar" />
+      </div>
+    </>
   );
 }
 
