@@ -1,10 +1,14 @@
 import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import RoutePending from './components/RoutePending';
+import { homePagePathRewrite } from './lib/home-pagination';
 
 export function getRouter() {
   return createRouter({
     routeTree,
+    // 首页分页：地址栏是 /page/2，router 内部仍是 '/' + ?page=2。
+    // 详见 lib/home-pagination.ts —— 这是「翻页不重挂布局」的全部机关。
+    rewrite: homePagePathRewrite,
     scrollRestoration: true,
     defaultPreload: 'intent',
     // 切页面时让浏览器原生做交叉淡化，动画跑在合成器上不占主线程。

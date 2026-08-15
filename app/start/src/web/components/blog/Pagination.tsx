@@ -40,9 +40,10 @@ export default function Pagination({ currentPage, totalPages, basePath = '', onP
 
   const getPageUrl = (page: number) => {
     if (page === 1) return basePath || '/';
-    // 首页分页走 search 参数，为的是翻页不换路由、只换右侧列表
-    // （详见 routes/index.tsx 的注释）。分类/标签等带 basePath 的列表
-    // 仍是各自的路径式分页，它们本来就是同一条路由内换参数。
+    // 首页分页在 router 内部走 search 参数，为的是翻页不换路由、只换右侧
+    // 列表；地址栏和这个 <a> 的 href 会由 router 的 rewrite 显示成 /page/N
+    // （见 lib/home-pagination.ts）。分类/标签等带 basePath 的列表仍是各自
+    // 的路径式分页，它们本来就在同一条路由内换参数。
     if (!basePath) return `/?page=${page}`;
     return `${basePath}/page/${page}`;
   };

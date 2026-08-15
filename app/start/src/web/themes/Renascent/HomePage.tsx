@@ -200,7 +200,8 @@ export default function HomePage({
 
       {totalPages > 1 && (
         <nav className="renascent-pagination" aria-label="分页">
-          {/* 页码走 search 参数，翻页不换路由、只换列表（见 routes/index.tsx） */}
+          {/* 内部走 search 参数（翻页不换路由、只换列表），地址栏由 router 的
+              rewrite 显示成 /page/N —— 见 lib/home-pagination.ts */}
           {page > 1 ? <Link href={page - 1 === 1 ? '/' : `/?page=${page - 1}`}>Previous</Link> : <span />}
           <span>{page} / {totalPages}</span>
           {page < totalPages ? <Link href={`/?page=${page + 1}`}>Next</Link> : <span />}

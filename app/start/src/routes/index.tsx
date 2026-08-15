@@ -5,18 +5,15 @@ import { loadPublicPage, publicPageHead } from '../lib/public-route';
 /**
  * 首页 + 分页。
  *
- * 页码走 search 参数（`/?page=2`）而不是路径（`/page/2`），是为了让翻页
- * 留在**同一条路由**里。
+ * 页码在 router **内部**走 search 参数（`'/' + ?page=2`），是为了让翻页留在
+ * 同一条路由里。起因是「翻页像整页刷新」：给 .blog-main 打记号翻一页，记号
+ * 连同元素本身一起从文档里消失了 —— `/` 和 `/page/2` 是两条路由，切过去
+ * 布局整个重挂，hero、侧栏、滚动位置全部重来。留在一条路由里就只是 loader
+ * 重跑、HomePage 收到新的 posts，React 就地更新右侧列表。
  *
- * 起因是「翻页像整页刷新」：给 .blog-main 打记号翻一页，记号连同元素本身
- * 一起从文档里消失了 —— `/` 和 `/page/2` 是两条路由，切过去布局整个重挂，
- * hero、侧栏、滚动位置全部重来。而 `/page/2` → `/page/3` 因为是同一条路由
- * 就好好的：只有右侧列表换，别的原地不动。
- *
- * 换成 search 之后每一跳都是后一种情形：loader 重跑、HomePage 收到新的
- * posts，React 就地更新右侧列表，其余部分连重渲染都不需要。
- *
- * `/page/$num` 那条路由保留着，重定向到这里，旧链接和搜索引擎的收录不断。
+ * 而地址栏和 `<a href>` 里出现的是 `/page/2`：router 装了一对 rewrite 做
+ * 双向翻译（见 lib/home-pagination.ts）。所以这里读到的 search.page，就是
+ * 用户地址栏 `/page/N` 里的那个 N。
  */
 export const Route = createFileRoute('/')({
   validateSearch: (search: Record<string, unknown>) => {

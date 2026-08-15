@@ -9,6 +9,7 @@ import NavigationProgress from '@/components/blog/NavigationProgress';
 import AIChatBubble from '@/components/blog/AIChatBubble';
 import { NavigationProvider } from '@/lib/navigation';
 import { useRouterState } from '@tanstack/react-router';
+import { homePublicPathname } from '../lib/home-pagination';
 
 export function StartThemeShell({
   ctx,
@@ -21,9 +22,15 @@ export function StartThemeShell({
   const ThemeLayout = theme.Layout;
   const location = useRouterState({ select: (state) => state.location });
   const searchParams = Object.fromEntries(new URLSearchParams(location.searchStr));
+  // 首页分页在 router 内部是 '/' + ?page=2，地址栏是 /page/2。usePathname 的
+  // 消费方（导航高亮、PageViewTracker、Azure Header 的点击态）看的应该是地址栏
+  // 那一个：Header 拿 <a> 的 pathname 跟它比对，两边口径不一致时点分页会把
+  // 右上角的 spinner 点亮，而重置它的 effect 依赖 pathname、永远等不到变化，
+  // 于是那个圈一直转到 8 秒兜底才停。
+  const pathname = homePublicPathname(location);
 
   return (
-    <NavigationProvider pathname={location.pathname} searchParams={searchParams}>
+    <NavigationProvider pathname={pathname} searchParams={searchParams}>
       <Providers>
         <ThemeProvider value={ctx}>
           <SlotHead options={ctx.options} />
