@@ -55,6 +55,38 @@ describe('第三方凭据测试', () => {
     }
   });
 
+  test('Mapbox 测的是真实 geocoding 接口，不是只验 token 存不存在', async () => {
+    // 线上出过：/tokens/v2 回 TokenValid、后台显示「有效」，而说说定位一直
+    // 失败 —— geocoding 回 403（scope 没勾 geocoding 或额度停用）。
+    // 只验 token 的测试会给出假阳性，比测试失败更难查。
+    const original = globalThis.fetch;
+    let hit = '';
+    globalThis.fetch = ((url: any) => {
+      hit = String(url);
+      return Promise.resolve(new Response(JSON.stringify({ features: [{ text: '北京市' }] }), { status: 200 }));
+    }) as typeof fetch;
+    try {
+      const result = await mod.testCredential({ field: 'mapbox_access_token', value: 'pk.test' });
+      expect(hit).toContain('/geocoding/');
+      expect(hit).not.toContain('/tokens/v2');
+      expect(result.ok).toBe(true);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  test('Mapbox 返回 403 时说清是权限/额度，别让人去怀疑 token 本身', async () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = (() => Promise.resolve(new Response('Forbidden', { status: 403 }))) as typeof fetch;
+    try {
+      const result = await mod.testCredential({ field: 'mapbox_access_token', value: 'pk.test' });
+      expect(result.ok).toBe(false);
+      expect(result.message).toMatch(/无权|权限/);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
   test('网络异常归类成连接问题，不会被误读成 key 无效', async () => {
     const original = globalThis.fetch;
     globalThis.fetch = (() => Promise.reject(new Error('The operation timed out'))) as typeof fetch;

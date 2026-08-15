@@ -29,15 +29,34 @@ function failure(message: string, detail?: string): CredentialTestResult {
 }
 
 async function testMapbox(token: string): Promise<CredentialTestResult> {
-  // Geocoding 的 /tokens/v2 端点专门用来验 token，不消耗地图加载配额
-  const res = await fetchWithTimeout(`https://api.mapbox.com/tokens/v2?access_token=${encodeURIComponent(token)}`);
+  // **必须打真正要用的 geocoding 接口，不能只验 token。**
+  //
+  // 原来这里打的是 /tokens/v2 —— 那个端点只回答「这个 token 存不存在」，
+  // 不管它有没有权限调具体服务。线上真出过：/tokens/v2 回 TokenValid、
+  // 后台显示「有效」，而说说定位一直失败，因为 geocoding 回的是 403
+  // （scope 没勾 geocoding，或账号额度用尽被停）。测试通过却用不了，
+  // 比测试失败更难查。
+  //
+  // 拿一个固定坐标做一次真实逆地理，额度消耗可以忽略。
+  const probe = '116.407400,39.904200';
+  const res = await fetchWithTimeout(
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${probe}.json`
+    + `?access_token=${encodeURIComponent(token)}&language=zh&types=place,region,country&limit=1`,
+  );
   if (res.ok) {
-    const body = await res.json().catch(() => ({})) as { code?: string };
-    return body.code === 'TokenValid'
-      ? { ok: true, message: 'Mapbox Token 有效' }
-      : failure('Mapbox 返回了非预期的校验结果', JSON.stringify(body).slice(0, 200));
+    const body = await res.json().catch(() => ({})) as { features?: unknown[] };
+    return Array.isArray(body.features) && body.features.length > 0
+      ? { ok: true, message: 'Mapbox 逆地理编码可用' }
+      : failure('Mapbox 能连通但没返回地名', '可能是坐标或参数问题，请重试');
   }
   if (res.status === 401) return failure('Token 无效或已被吊销', 'Mapbox 返回 401');
+  if (res.status === 403) {
+    return failure(
+      'Token 有效但无权调用地理编码',
+      'Mapbox 返回 403 —— 通常是该 Token 的 scope 没勾选 geocoding，或账号额度已用尽 / 欠费停用。请到 Mapbox 控制台检查 Token 权限与账单。',
+    );
+  }
+  if (res.status === 429) return failure('Mapbox 额度已用尽', '返回 429，请检查用量或升级套餐');
   return failure(`Mapbox 返回 ${res.status}`, (await res.text().catch(() => '')).slice(0, 200));
 }
 

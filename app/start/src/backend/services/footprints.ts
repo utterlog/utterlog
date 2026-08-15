@@ -260,13 +260,23 @@ export async function reverseLocation(lat: number, lng: number) {
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
     throw new FootprintServiceError(400, 'VALIDATION_ERROR', '无效的坐标');
   }
+  // 三家依次试，谁先给出城市名就用谁。没配 key 的会立刻抛错跳过。
+  //
+  // **失败原因必须记下来。** 原来这里的 catch 是空的，三家全挂就返回 {}，
+  // 前台只会说「未能识别城市」—— 服务端一行日志都没有，根本无从判断是
+  // key 没配、token 失效、还是对方接口下线。线上真出过：Mapbox token 本身
+  // 有效（tokens/v2 返回 TokenValid），但 geocoding 的 v5 / v6 都回 403，
+  // 排查只能靠手动 curl 才发现。
+  const failures: string[] = [];
   for (const lookup of [reverseGeocodeMapbox, reverseGeocodeAmap, reverseGeocodeTencent]) {
     try {
       const result = await lookup(lat, lng);
       if (String(result.location || '').trim()) return result;
-    } catch {
-      // Try the next configured provider.
+      failures.push(`${lookup.name}: 无匹配结果`);
+    } catch (error) {
+      failures.push(`${lookup.name}: ${(error as Error)?.message || error}`);
     }
   }
+  console.warn(`[geocode] 逆地理编码全部失败 (${lat.toFixed(4)},${lng.toFixed(4)}): ${failures.join(' | ')}`);
   return {};
 }
