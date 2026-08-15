@@ -200,9 +200,10 @@ export default function HomePage({
 
       {totalPages > 1 && (
         <nav className="renascent-pagination" aria-label="分页">
-          {page > 1 ? <Link prefetch={false} href={page - 1 === 1 ? '/' : `/page/${page - 1}`}>Previous</Link> : <span />}
+          {/* 页码走 search 参数，翻页不换路由、只换列表（见 routes/index.tsx） */}
+          {page > 1 ? <Link href={page - 1 === 1 ? '/' : `/?page=${page - 1}`}>Previous</Link> : <span />}
           <span>{page} / {totalPages}</span>
-          {page < totalPages ? <Link prefetch={false} href={`/page/${page + 1}`}>Next</Link> : <span />}
+          {page < totalPages ? <Link href={`/?page=${page + 1}`}>Next</Link> : <span />}
         </nav>
       )}
     </div>

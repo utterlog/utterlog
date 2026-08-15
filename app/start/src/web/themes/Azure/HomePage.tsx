@@ -12,7 +12,6 @@ import Link from '@/components/AppLink';
 import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
-import LoadingSpinner from '@/components/blog/LoadingSpinner';
 import LoadingBars from '@/components/blog/LoadingBars';
 import { getCategoryIcon } from './constants';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
@@ -50,13 +49,9 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // PJAX 分页状态
-  const [currentPosts, setCurrentPosts] = useState(posts);
-  const [currentPage, setCurrentPage] = useState(page);
-  const [currentTotalPages, setCurrentTotalPages] = useState(totalPages);
-  const [pageLoading, setPageLoading] = useState(false);
-  // 翻过页没有。翻页后的列表直接可见，不参与滚动显现（理由见渲染处）。
-  const pagedRef = useRef(false);
+  // 分页数据直接用 props —— 由路由 loader 给，翻页即换路由（见下面的注释）。
+  // 这里不留副本 state：page/2 → page/3 是同一条路由，组件不重挂，
+  // 用 useState 存副本的话 props 变了它不跟着变，第二次翻页就换不动内容。
   // Preloaded cache: heroCache[catSlug][modeKey] = post
   const heroCacheRef = useRef<Record<string, Record<string, any>>>({});
 
@@ -111,35 +106,24 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 但用户反馈这一行没人用，已改为渲染博主社交链接图标。
   // 自动轮播的开关仍然由 hero 区块本身的 hover 控制（onMouseEnter/Leave 改 paused 即可）。
 
-  // PJAX 分页切换
-  const handlePageChange = useCallback(async (newPage: number) => {
-    // 一旦翻过页，后续列表就不再参与滚动显现（见渲染处注释）
-    pagedRef.current = true;
-    setPageLoading(true);
-    try {
-      const r = await fetch(`${API}/posts?page=${newPage}&per_page=${perPage}&status=publish&order_by=published_at&order=desc`).then(r => r.json());
-      const items = r.data?.posts || r.data || [];
-      const total = r.meta?.total_pages || r.data?.total_pages || 1;
-      setCurrentPosts(items);
-      setCurrentPage(newPage);
-      setCurrentTotalPages(total);
-      const url = newPage === 1 ? '/' : `/page/${newPage}`;
-      window.history.pushState({ page: newPage }, '', url);
-      // 不滚回顶部：既然翻页是原地换内容、不刷新，页面就不该跳。
-      // 分页控件本来就在列表底部，读者点完停在原处才接得上。
-    } catch {}
-    setPageLoading(false);
-  }, []);
-
-  // 浏览器前进后退
-  useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const p = e.state?.page || 1;
-      handlePageChange(p);
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, [handlePageChange]);
+  // 分页交给路由，这里不再自己 fetch。
+  //
+  // 原来这儿有一整套手写 PJAX：fetch 新一页 → setState → pushState 换 URL，
+  // 意图是「原地换内容、不动滚动位置」。实测证明这个前提是错的：
+  //
+  //   页面上给 .blog-main 打记号 → 点第 2 页 → 记号没了、旧元素
+  //   document.contains() === false
+  //
+  // 也就是说 pushState 到 /page/2 之后，TanStack Router 监听到 URL 变化、
+  // 匹配到另一条路由，照样走了完整的路由切换，整个布局重新挂载。
+  // 手写的那份数据白取一遍（等于每次翻页发两份请求），而滚动位置是随
+  // 旧滚动容器一起没的 —— 不是谁把 scrollTop 设成了 0，是那个元素已经
+  // 不在文档里了。所以之前围着 scrollTop 打的补丁（继承 history key、
+  // 双 rAF、轮询、scroll 事件纠正）全都够不着病根。
+  //
+  // 现在页码改走 search 参数（`/?page=2`，见 routes/index.tsx），每一跳都
+  // 在同一条路由内：loader 重跑、这个组件收到新的 posts 就地更新右侧列表，
+  // hero、侧栏、滚动位置都不动 —— 真正的局部替换，而且只发一份请求。
 
   // 文章列表始终显示全部（分类标签只影响 hero 轮播）
 
@@ -304,31 +288,23 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
         </aside>
         {/* Right: Post list */}
         <section className="azure-post-list" ref={listRevealRef}>
-          {currentPosts.length > 0 ? (
-            // 翻页时不把列表整个换成「加载中」—— 那样内容整块消失再出现，
-            // 观感跟刷新页面没区别。旧文章原地留着、稍微变淡压住交互，
-            // 新数据到了再淡入替换。
-            //
-            // 不给 key：带 key 会让整个容器卸载重挂，页面高度瞬间塌掉，
-            // 浏览器把滚动位置钳回顶部 —— 那就又变成「像刷新」了。
-            // 淡出淡入交给下面 data-loading 的 opacity transition。
-            <div className="azure-page-swap" data-loading={pageLoading ? '1' : undefined}>
-              {currentPosts.map((post, idx) => (
-                <div key={post.id} className="azure-post-list-item" {...(pagedRef.current ? {} : { 'data-reveal': '' })}>
-                  <PostCard post={post} isNewest={currentPage === 1 && idx === 0} priority={currentPage === 1 && idx === 0} />
+          {posts.length > 0 ? (
+            <div className="azure-page-swap">
+              {posts.map((post, idx) => (
+                // 滚动显现只在第一页做。第 2 页往后是读者主动翻过来的，
+                // 落地就该看见内容，再让它逐条淡入等于凭空多等一拍。
+                <div key={post.id} className="azure-post-list-item" {...(page > 1 ? {} : { 'data-reveal': '' })}>
+                  <PostCard post={post} isNewest={page === 1 && idx === 0} priority={page === 1 && idx === 0} />
                 </div>
               ))}
-            </div>
-          ) : pageLoading ? (
-            // 只有首次加载（列表还空着）才显示转圈
-            <div className="azure-loading">
-              <LoadingSpinner size={18} />加载中…
             </div>
           ) : (
             <div className="azure-empty">暂无文章</div>
           )}
           <div className="azure-pagination-wrap">
-            <Pagination currentPage={currentPage} totalPages={currentTotalPages} onPageChange={handlePageChange} />
+            {/* 不传 onPageChange —— 让它渲染成真链接，由路由接管（见上面的注释）。
+                顺带白拿两样：中键 / 右键能开新标签页，爬虫也跟得下去。 */}
+            <Pagination currentPage={page} totalPages={totalPages} />
           </div>
         </section>
       </div>

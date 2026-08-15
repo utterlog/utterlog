@@ -36,11 +36,9 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // PJAX 分页状态
-  const [currentPosts, setCurrentPosts] = useState(posts);
-  const [currentPage, setCurrentPage] = useState(page);
-  const [currentTotalPages, setCurrentTotalPages] = useState(totalPages);
-  const [pageLoading, setPageLoading] = useState(false);
+  // 分页数据直接用 props，由路由 loader 给（见 routes/index.tsx）。
+  // 不留副本 state：翻页是同一条路由内换 search，组件不重挂，
+  // 副本不会跟着 props 变，第二次翻页就换不动内容。
   // Preloaded cache: heroCache[catSlug][modeKey] = post
   const heroCacheRef = useRef<Record<string, Record<string, any>>>({});
 
@@ -118,34 +116,9 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const goNext = () => advance();
   const goLast = () => { setActiveCatIdx(visibleCategories.length); setModeIdx(Math.floor(Math.random() * MODES.length)); };
 
-  // PJAX 分页切换
-  const handlePageChange = useCallback(async (newPage: number) => {
-    setPageLoading(true);
-    try {
-      const r = await fetch(`${API}/posts?page=${newPage}&per_page=${perPage}&status=publish&order_by=published_at&order=desc`).then(r => r.json());
-      const items = r.data?.posts || r.data || [];
-      const total = r.meta?.total_pages || r.data?.total_pages || 1;
-      setCurrentPosts(items);
-      setCurrentPage(newPage);
-      setCurrentTotalPages(total);
-      // 更新 URL
-      const url = newPage === 1 ? '/' : `/page/${newPage}`;
-      window.history.pushState({ page: newPage }, '', url);
-      // 滚动到文章列表顶部
-      document.querySelector('.blog-main')?.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {}
-    setPageLoading(false);
-  }, []);
-
-  // 浏览器前进后退
-  useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const p = e.state?.page || 1;
-      handlePageChange(p);
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, [handlePageChange]);
+  // 分页交给路由，不再自己 fetch —— 原来那套 pushState 到 /page/N 的写法
+  // 实测会被 router 当成跨路由导航，整个布局重挂（详见 Azure/HomePage.tsx
+  // 里的记录）。现在页码走 search 参数，只换列表。
 
   // 文章列表始终显示全部（分类标签只影响 hero 轮播）
 
@@ -256,21 +229,18 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
         </div>
         {/* Right: Post list */}
         <div style={{ minWidth: 0 }}>
-          {pageLoading ? (
-            <div style={{ textAlign: 'center', padding: '80px 0', color: '#999', fontSize: '14px' }}>
-              <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: 8 }} />加载中…
-            </div>
-          ) : currentPosts.length > 0 ? (
-            currentPosts.map((post, idx) => (
+          {posts.length > 0 ? (
+            posts.map((post, idx) => (
               <div key={post.id} style={{ borderBottom: '1px solid #e5e5e5' }}>
-                <PostCard post={post} isNewest={currentPage === 1 && idx === 0} priority={currentPage === 1 && idx === 0} />
+                <PostCard post={post} isNewest={page === 1 && idx === 0} priority={page === 1 && idx === 0} />
               </div>
             ))
           ) : (
             <div style={{ textAlign: 'center', padding: '80px 0', color: '#999', fontSize: '14px' }}>暂无文章</div>
           )}
           <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px' }}>
-            <Pagination currentPage={currentPage} totalPages={currentTotalPages} onPageChange={handlePageChange} />
+            {/* 不传 onPageChange：渲染成真链接交给路由（见 routes/index.tsx） */}
+            <Pagination currentPage={page} totalPages={totalPages} />
           </div>
         </div>
       </div>

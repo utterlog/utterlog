@@ -88,21 +88,31 @@
   top: 0;
   z-index: 50;
   padding-right: 10px;
-  /* 半透明 + 磨砂：往下滚时内容从这条栏底下穿过去，能透出颜色和轮廓，
-     有层次。原来是 0.97 —— 几乎全白，磨砂等于白设，滚动时看着就是
-     一条实心白板压在页面上。
-
-     0.62 是权衡出来的：再低文字对比度就不够了（导航是 13px 的细字，
-     底下滚过深色封面图时会发飘），配合 saturate 把透出的颜色提一点，
-     不至于灰蒙蒙。
+  /* 停在顶部时是实心白 —— 那会儿 header 跟页面顶端连成一片，
+     透明反而显得没边界。滚起来才转成半透明（见下面的 [data-scrolled]）。 */
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  /* 磨砂常驻，只让 background 过渡。
+     backdrop-filter 从 none 变到 blur() 是跳变、没法补间，滚动那一下会
+     「啪」地糊一层；让它一直挂着，不透明时本来也看不出效果，
+     变透明的瞬间磨砂就自然显形了。
 
      **先 webkit 后标准。** CSS 压缩器会把两条认作重复只留后写的那条，
-     反过来写产物里就只剩前缀版，而 Chrome 只认标准属性。主题 CSS 目前
-     是原样 copy 不压缩，但别人拿这份文件去打包时会踩到。 */
+     反过来写产物里就只剩前缀版，而 Chrome 只认标准属性。 */
   -webkit-backdrop-filter: blur(16px) saturate(1.6);
   backdrop-filter: blur(16px) saturate(1.6);
+  transition: background 0.28s ease, border-color 0.28s ease;
+}
+/* 滚动之后：透出底下的内容。
+   0.62 是权衡出来的 —— 再低文字对比度就不够了（导航是 13px 细字，
+   底下滚过深色封面图时会发飘），saturate 把透出的颜色提一点，
+   不至于灰蒙蒙。 */
+[data-theme="Azure"] .azure-header[data-scrolled] {
   background: rgba(255, 255, 255, 0.62);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="Azure"] .azure-header { transition: none; }
 }
 [data-theme="Azure"] .azure-header-inner {
   position: relative;
@@ -847,19 +857,12 @@
 [data-theme="Azure"] .azure-post-list-item {
   border-bottom: 1px solid var(--color-border);
 }
-/* ---- 分页换页：旧内容淡出、新内容淡入 ---- */
+/* ---- 分页换页：新一页淡入 ---- */
 
-/* 等新数据的这段时间：旧文章留在原地，只压暗一点并挡住点击，
-   让人看出「在换」但版面不塌。不做 display:none / 高度归零 ——
-   那等于整块消失，跟刷新页面一个观感。 */
-[data-theme="Azure"] .azure-page-swap[data-loading] {
-  opacity: 0.45;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-}
-
-/* 新一页挂载时淡入。上移距离故意小，翻页是高频操作，
-   动作大了会显得比实际更慢。 */
+/* 上移距离故意小，翻页是高频操作，动作大了会显得比实际更慢。
+   原来这里还有一条 [data-loading] 的「旧内容压暗」规则，配合的是手写
+   PJAX 的等待态；分页已改回路由导航，等待期间由全局磨砂层接管，
+   那条规则再没有来源了。 */
 [data-theme="Azure"] .azure-page-swap {
   animation: azurePageSwap 0.26s ease-out;
 }
@@ -873,22 +876,13 @@
   [data-theme="Azure"] .azure-page-swap {
     animation: none;
   }
-  [data-theme="Azure"] .azure-page-swap[data-loading] {
-    transition: none;
-  }
 }
 
-[data-theme="Azure"] .azure-loading,
 [data-theme="Azure"] .azure-empty {
   padding: 80px 0;
   color: var(--color-text-dim);
   font-size: 14px;
   text-align: center;
-}
-[data-theme="Azure"] .azure-loading i,
-[data-theme="Azure"] .azure-loading svg {
-  margin-right: 8px;
-  vertical-align: middle;
 }
 [data-theme="Azure"] .azure-pagination-wrap {
   display: flex;

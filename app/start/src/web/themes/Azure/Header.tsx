@@ -26,10 +26,26 @@ export default function Header() {
   const [navigating, setNavigating] = useState(false);
   const [randomLoading, setRandomLoading] = useState(false);
   const [tocAvailable, setTocAvailable] = useState(false);
+  // 页面滚起来之后 header 才转成半透明磨砂：停在顶部时它跟页面顶端连成一片，
+  // 透明反而显得没边界；一旦内容开始从底下穿过去，磨砂才有意义。
+  const [scrolled, setScrolled] = useState(false);
   const modalSearchRef = useRef<HTMLInputElement>(null);
   const headerSearchRef = useRef<HTMLInputElement>(null);
   const headerActionsRef = useRef<HTMLDivElement>(null);
   const { menus, site, options } = useThemeContext();
+
+  // 滚动容器是 .blog-main，不是 window —— 整个站的主体在那个元素里滚，
+  // 监听 window 的 scroll 一次都不会触发（Footer / TOC 也都是监听它）。
+  useEffect(() => {
+    const main = document.querySelector('.blog-main');
+    if (!main) return;
+    // 8px 的门槛：触控板的惯性回弹常在 0~3px 之间抖，
+    // 贴着 0 判断会让 header 在顶部反复切换背景。
+    const onScroll = () => setScrolled(main.scrollTop > 8);
+    onScroll();
+    main.addEventListener('scroll', onScroll, { passive: true });
+    return () => main.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     setNavigating(false);
@@ -262,7 +278,7 @@ export default function Header() {
   };
 
   return (
-    <header className="azure-header">
+    <header className="azure-header" data-scrolled={scrolled ? '1' : undefined}>
       <div className="azure-header-inner">
         {/* Logo / Brand lockup — 由 site_brand_mode 决定显示哪些 */}
         <Link href="/" prefetch={false} className="azure-brand" onClick={() => setMenuOpen(false)}>

@@ -40,6 +40,10 @@ export default function Pagination({ currentPage, totalPages, basePath = '', onP
 
   const getPageUrl = (page: number) => {
     if (page === 1) return basePath || '/';
+    // 首页分页走 search 参数，为的是翻页不换路由、只换右侧列表
+    // （详见 routes/index.tsx 的注释）。分类/标签等带 basePath 的列表
+    // 仍是各自的路径式分页，它们本来就是同一条路由内换参数。
+    if (!basePath) return `/?page=${page}`;
     return `${basePath}/page/${page}`;
   };
 
@@ -63,7 +67,9 @@ export default function Pagination({ currentPage, totalPages, basePath = '', onP
       );
     }
     return (
-      <Link href={getPageUrl(p)} prefetch={false} style={baseStyle}
+      // 开预取（AppLink 默认 intent）：鼠标搭上按钮就开始取下一页，
+      // 真正点下去时数据多半已经在手上了。原来这里是 prefetch={false}。
+      <Link href={getPageUrl(p)} style={baseStyle}
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary, #f53004)'; e.currentTarget.style.color = 'var(--color-primary, #f53004)'; }}
         onMouseLeave={e => { e.currentTarget.style.borderColor = '#d0d0d0'; e.currentTarget.style.color = '#333'; }}
       >{children}</Link>
