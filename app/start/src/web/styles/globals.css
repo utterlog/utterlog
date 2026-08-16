@@ -729,6 +729,13 @@ body {
 .comment-hint { transition: opacity 0.2s; }
 div:hover > .comment-hint { opacity: 0.75 !important; }
 
+/* ── 进 @layer blog-base（第二批：图片系统）──
+   图片的呈现方式该由主题定：有的想全宽、有的想圆角、有的想换宫格比例。
+   主题侧对 .blog-image / .image-grid* 零处 !important（已核实），本段
+   globals 侧那几处 grid-column: span 1 !important 只在窄屏 media query
+   里压自家的多列布局，分层后仍然有效且更稳。 */
+@layer blog-base {
+
 /* Blog image: lazy load with blur-fade effect.
    Single image = 80% width centered + 16:9. Multi-image grid images
    get their own aspect-ratio overrides below. */
@@ -955,6 +962,8 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   font-size: 13px;
 }
 
+} /* ── @layer blog-base 结束（图片系统）── */
+
 /* ────────────────────────────────────────────────────────────────
    顶部导航进度条 —— components/blog/NavigationProgress.tsx 渲染，
    点击站内链接后 router 跑 loader 的那段时间显示。宽度由组件用行内
@@ -990,6 +999,10 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
     transition: none;
   }
 }
+
+/* ── 进 @layer blog-base（第二批：灯箱）──
+   主题侧对 .vi-* 零处 !important（已核实），本段自身也无 !important。 */
+@layer blog-base {
 
 /* Lightbox — ViewImage-inspired layout: backdrop with soft frosted
    blur, image zone that slides in from above on open / down on close,
@@ -1164,6 +1177,8 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   color: #fff;
 }
 .vi-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+} /* ── @layer blog-base 结束（灯箱）── */
 
 /* ========================================
    Scrollbar
