@@ -1694,6 +1694,15 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   }
 }
 
+/* ── 进 @layer blog-base（第三批：足迹页）──
+   整页的版式、地图、时间线、卡片，都是主题该能改的东西。
+   主题侧对 .footprint-* 零处 !important（已核实）。
+
+   注意本段里的 `.footprint-page .blog-page-title-side` —— 它和已分层的
+   .blog-page-title-side 在同一层里，靠特异性 (0,2,0) > (0,1,0) 继续赢，
+   层内相对顺序不变，行为与分层前一致。 */
+@layer blog-base {
+
 .footprint-page {
   background: var(--color-bg-card, #fff);
 }
@@ -2069,6 +2078,8 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   }
 }
 
+} /* ── @layer blog-base 结束（足迹页）── */
+
 /* 评论表单的昵称 / 邮箱 / 网址三格。
    窄屏改成竖排：三格并排时每格只剩三分之一宽度，中文占位符加图标根本放不下，
    网址那格直接被挤出屏幕（原因是 flex 项默认 min-width:auto，撑不住就溢出而
@@ -2157,10 +2168,25 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   }
 }
 
-/* 评论里的「友链好友」标记。
-   四个主题的 CommentList 共用这一份 —— 主题各自的 styles.css 是运行时按需
-   加载的，写在那里换主题就会掉样式。tooltip 走 ::after + data-tip，纯 CSS，
-   不为一枚徽章拖进 tooltip 组件。 */
+/* ── 进 @layer blog-base（第三批：友链徽章 + 友链页）──
+
+   为什么这份共享默认值留在 globals 而不是搬进各主题：同一时刻浏览器只加载
+   **激活主题那一份** styles.css（见 lib/document.ts）。写进 Azure 的表里，
+   站点换到 Nebula 时这条规则根本不存在 —— 不是 FOUC，是永久没有。四份
+   CommentList 都要用它，逐个主题抄一份既重复又必然漏。
+
+   （原注释这里写的是「换主题就会掉样式」，措辞不准：不是切换的瞬间掉，是
+   没写那一份的主题从来就没有。结论没错，理由改准。）
+
+   分层解决的正是这个两难：默认值留在 globals 保证每个主题都有可用基线，但
+   放进 layer 之后，想改的主题直接写 `.friend-badge { ... }` 就能覆盖，不必
+   再靠 [data-theme] 前缀去拼特异性；不想改的自动继承这份。
+
+   主题侧对 .friend-* 零处 !important（已核实），本段自身也无 !important。
+
+   tooltip 走 ::after + data-tip，纯 CSS，不为一枚徽章拖进 tooltip 组件。 */
+@layer blog-base {
+
 .friend-badge {
   position: relative;
   width: 16px;
@@ -2362,6 +2388,8 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
     max-width: none;
   }
 }
+
+} /* ── @layer blog-base 结束（友链）── */
 
 .blog-prose .utter-moment-embed,
 .utter-moment-embed {
@@ -2718,6 +2746,13 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   display: none;
 }
 
+/* 友链网格的窄屏覆盖 —— 跟着上面的基础规则一起进 layer。
+   这两条原先和 github-repo-card 的窄屏覆盖挤在同一个 @media 块里；基础规则
+   分层而响应式覆盖留在层外的话，主题能改宽屏改不了窄屏，迁移只做了一半。
+   github-repo-card 那部分暂不动（它有一批「globals 用 !important 反压主题」
+   的规则，分层后语义会变强，要单独评估），所以这里把 @media 拆成两个。 */
+@layer blog-base {
+
 @media (max-width: 1200px) {
   .friend-link-compact-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2729,7 +2764,11 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   .friend-link-compact-grid {
     grid-template-columns: 1fr;
   }
+}
 
+} /* ── @layer blog-base 结束（友链响应式）── */
+
+@media (max-width: 720px) {
   .blog-prose .github-repo-card,
   .github-repo-card {
     grid-template-columns: 1fr;
