@@ -51,11 +51,6 @@ html.lightbox-active body {
   background: rgba(0,0,0,0.25);
 }
 
-/* Dashboard main area: always show scrollbar, no gutter gap */
-.dashboard-shell main.overflow-y-auto {
-  overflow-y: scroll !important;
-}
-
 /* Global scrollbar styling: thin, subtle, track matches background */
 * {
   scrollbar-width: thin;
@@ -75,25 +70,6 @@ html.lightbox-active body {
   background: rgba(0,0,0,0.3);
 }
 
-/* Dashboard main scrollbar: track matches dashboard background */
-.dashboard-shell main::-webkit-scrollbar {
-  width: 10px;
-}
-.dashboard-shell main::-webkit-scrollbar-track {
-  background: var(--color-bg-main, #F5F7FA);
-}
-.dashboard-shell main::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.12);
-  border-radius: 5px;
-  border: 2px solid var(--color-bg-main, #F5F7FA);
-}
-.dashboard-shell main::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.25);
-}
-/* Firefox */
-.dashboard-shell main {
-  scrollbar-color: rgba(0,0,0,0.12) var(--color-bg-main, #F5F7FA);
-}
 * {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
@@ -514,7 +490,19 @@ body {
 }
 
 /* ========================================
-   Admin Base Components
+   登录页控件（.btn / .input / .focus-ring）
+
+   **这不是后台样式。** 标题以前写的是「Admin Base Components」，那是
+   早年前后台同源时留下的，后来后台拆成独立 Vite 应用、把整段复制到了
+   app/admin/src/styles/globals.css，前台这份的注释没跟着改，于是被反复
+   误认成「该搬去后台的样式」。
+
+   实际唯一的使用者是前台 SSR 路由 /login 渲染的
+   web/components/pages/login/LoginPage.tsx（13 处 className）。它服务的
+   业务是「登录进后台」，但渲染方在前台，样式必须由这份表供给。
+
+   后台那份是**另一套独立定义**（取值也不同：这里 .card 圆角 4px，后台
+   是 0），两边互不引用，不要试图「同步」它们。
    ======================================== */
 .btn {
   display: inline-flex;
@@ -617,34 +605,17 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Action icon button — square with icon */
-.action-btn {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
-  max-width: 30px;
-  max-height: 30px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-bg-card);
-  cursor: pointer;
-  color: var(--color-text-sub);
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-.action-btn:hover {
-  background: var(--color-bg-soft);
-  color: var(--color-text-main);
-}
-.action-btn.danger { color: var(--color-error); }
-.action-btn.danger:hover { background: var(--color-error-bg); }
+/* Archive category card — background icon hover
 
-/* Archive category card — background icon hover */
+   **别删这段，也别当成后台样式搬走。** 使用者是前台的
+   components/blog/defaults/DefaultArchivePage.tsx，经 PublicPage 的
+   `theme.ArchivePage || DefaultArchivePage` 兜底渲染 —— 五个主题里只有
+   Nebula 自带 ArchivePage，其余四个全部落到这里。
+
+   而且 Nebula 和 Renascent 的主题 CSS 是**依赖这个基类**的拦截层，不是
+   独立实现：Nebula 那条 `.archive-cat-card::after { display: none }` 能
+   生效的前提，是下面 `content: ''` 把伪元素生成出来；基类没了，伪元素
+   根本不存在，那条覆盖变成空转（不报错，静默失效）。 */
 .archive-cat-card { transition: box-shadow 0.3s ease; }
 .archive-cat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .archive-cat-card:hover > i:first-child {
@@ -689,6 +660,20 @@ body {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 20%, transparent);
 }
 
+/* ---- 下面 .card / .card-hover / .badge / .table 四组：待废弃 ----
+
+   同属上面那段前后台同源时期的遗留。已核实：前台 .tsx 里 0 处使用，后台
+   在自己的 globals.css 里另有定义（取值不同，圆角是 0）。所以对两边都是
+   死代码，跟 .action-btn / .dashboard-shell 同批。
+
+   但没有跟着那两组一起删，因为存在一条查不实的可能：文章正文允许写
+   HTML，读者若在正文里手写过 <div class="card">，现在是这几条在给它样式。
+   grep 不到数据库内容，删了会静默变形，所以先留着标记。
+
+   注意 backend/services 里退订页和评论审核页那两个独立 HTML 各自带
+   inline <style> 自定义 .card，**不依赖这里**，已核实，不构成保留理由。
+
+   处理办法：确认历史文章正文里没有这几个 class 后即可整段删除。 */
 .card {
   background-color: var(--color-bg-card);
   border: 1px solid var(--color-border);

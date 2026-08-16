@@ -4305,15 +4305,6 @@
 /* 全部按 Nebula 调色板覆盖，确保独立主题不受其他主题/全局污染。     */
 /* ============================================================ */
 
-/* ---- danger 系（删除按钮等）---- */
-/* 原色：#dc2626 / #fef2f2 / #b91c1c — 全是浅色 UI 红，深色下闪眼  */
-[data-theme="Nebula"] .action-btn.danger {
-  color: #ff8b8b !important;
-}
-[data-theme="Nebula"] .action-btn.danger:hover {
-  background: rgba(178, 38, 30, 0.18) !important;
-}
-
 /* ---- 通用按钮 ---- */
 /* btn-primary 在 sky 蓝底上写 #fff 对比度差，改 navy-deep */
 [data-theme="Nebula"] .btn-primary {
