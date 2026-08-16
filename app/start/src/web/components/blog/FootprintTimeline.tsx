@@ -1,6 +1,7 @@
 'use client';
 
 import Link from '@/components/AppLink';
+import { coverProps } from '@/lib/blog-image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export type FootprintTimelineItem = {
@@ -164,7 +165,14 @@ export default function FootprintTimeline({ items }: { items: FootprintTimelineI
               onBlur={() => setActiveItemId(null)}
             >
               <Link href={item.href} prefetch={false} className="footprint-card-cover" onClick={(event) => event.stopPropagation()}>
-                <img src={item.cover} alt="" loading="lazy" onLoad={updateLines} />
+                {/* 走 coverProps 而不是裸 <img>：它带上 data-blog-image 与
+                    data-loaded="0"，这两个属性是接入全站淡入体系的钥匙 ——
+                    ImageEffects.tsx 靠事件委托把 data-loaded 翻成 "1"、进视口
+                    再翻 data-img-visible，globals 里 html[data-img-effect="fade"]
+                    的规则据此把 blur(20px) 解掉。原来这里是裸 img，属性不全，
+                    规则一条都匹配不上，图片是「啪」地出现而不是淡入。
+                    priority=false → loading="lazy"，懒加载仍然保留。 */}
+                <img {...coverProps({ src: item.cover, priority: false })} onLoad={updateLines} />
                 {item.id === activeItemId && (
                   <span className="footprint-card-pulse" aria-hidden="true">
                     <svg viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">

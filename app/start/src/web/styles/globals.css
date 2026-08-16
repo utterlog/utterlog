@@ -1707,8 +1707,16 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   background: var(--color-bg-card, #fff);
 }
 
+/* 间距由布局出，不由子元素各自的 margin 出 —— 原来地图靠自己的
+   margin-bottom: 24px 撑开与卡片网格的距离，占位符靠另一个 20px，
+   两个数还不一样；地图有 520px 高，24px 在它下面读起来就是「贴着」。
+   改成 flex 列 + gap，所有直接子元素（禁用提示 / 错误条 / 地图 /
+   时间线）拿到同一个间距，子元素那两处 margin-bottom 已相应删除。 */
 .footprint-page-body {
-  padding: 0 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 0 32px 40px;
 }
 
 .footprint-page .blog-page-title-side {
@@ -1755,7 +1763,6 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   justify-content: center;
   gap: 8px;
   min-height: 120px;
-  margin-bottom: 20px;
   border: 1px dashed var(--color-border, #ddd);
   color: var(--color-text-dim, #888);
   background: var(--color-bg-soft, #fafafa);
@@ -1766,7 +1773,6 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   width: 100%;
   height: min(56vh, 520px);
   min-height: 320px;
-  margin-bottom: 24px;
   border: 1px solid var(--color-border, #ddd);
 }
 
@@ -2068,7 +2074,9 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 
 @media (max-width: 720px) {
   .footprint-page-body {
-    padding: 0 18px 18px;
+    /* 窄屏 gap 收到 28px —— 地图在这里只有 360px 高，40px 会显得散 */
+    gap: 28px;
+    padding: 0 18px 28px;
   }
   .footprint-page .blog-page-title-side {
     width: 100%;
