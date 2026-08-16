@@ -31,6 +31,10 @@ export const Route = createRootRoute({
       },
     ],
     links: startDocumentLinks(loaderData),
+    // LiteZoom —— 正文图片灯箱（缩放 / 平移 / 缩略图条）。单文件零依赖 ~20KB。
+    // defer：不阻塞解析，且保证在 DOMContentLoaded 前执行完，React hydration
+    // 时通常已就绪。绑定与 SPA 导航后的 refresh 见 web/lib/litezoom.ts。
+    scripts: [{ src: 'https://litezoom.dev/litezoom.min.js', defer: true }],
   }),
   component: RootComponent,
   notFoundComponent: StartNotFound,

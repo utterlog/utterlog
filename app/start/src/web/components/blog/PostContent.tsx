@@ -16,7 +16,7 @@ import 'prismjs/themes/prism-tomorrow.css';
 import { siteFaviconUrl } from '@/lib/site-favicon';
 
 import LazyImage from './LazyImage';
-import Lightbox from './Lightbox';
+import { scheduleLiteZoomSync } from '@/lib/litezoom';
 import ImageGrid from './ImageGrid';
 import MomentEmbed from './MomentEmbed';
 import GitHubRepoCard from './GitHubRepoCard';
@@ -276,14 +276,6 @@ function processShortcodes(text: string): string {
 }
 
 export default function PostContent({ content }: PostContentProps) {
-  // originRect 记录"点击的那张缩略图在视口里的位置"，传给 Lightbox 做
-  // FLIP（First, Last, Invert, Play）动画 —— 灯箱图从这个 rect 平滑放
-  // 大到全屏，关闭时反向飞回。null 时 Lightbox 退化为中心呼吸动画。
-  const [lightbox, setLightbox] = useState<{
-    list: { src: string; alt: string }[];
-    index: number;
-    originRect: DOMRect | null;
-  } | null>(null);
   const [exifMap, setExifMap] = useState<Record<string, Record<string, string>>>({});
   // Mirror exifMap into a ref so the memoized components factory can
   // read the latest value without taking exifMap as a dep (which
@@ -312,38 +304,19 @@ export default function PostContent({ content }: PostContentProps) {
     revealRef.current = el;
   }, [revealRef]);
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    // Capture-phase listener + preventDefault kills the browser's
-    // default anchor-navigation when a markdown image is wrapped in
-    // a link (`[![alt](src)](href)`) — otherwise clicking an image
-    // inside an <a> would follow the href and skip the lightbox, which
-    // users were (rightly) describing as "the default behaviour
-    // coming back". The ExternalLink wrapper also calls window.open
-    // on mousedown via target=_blank, so we stop propagation too.
-    const handleClick = (e: MouseEvent) => {
-      const img = (e.target as HTMLElement).closest('.blog-image img') as HTMLImageElement;
-      if (!img) return;
-      // Honour Settings → 图片处理 → 启用灯箱. ImageEffects.tsx writes
-      // data-img-lightbox on <html> based on the admin's toggle; when
-      // disabled we let the browser's default click behaviour win
-      // (or the link-wrapped image follows its href).
-      if (document.documentElement.dataset.imgLightbox === '0') return;
-      e.preventDefault();
-      e.stopPropagation();
-      const nodeList = el.querySelectorAll<HTMLImageElement>('.blog-image img');
-      const all = Array.from(nodeList);
-      const list = all.map(el => ({ src: el.currentSrc || el.src, alt: el.alt || '' }));
-      const idx = all.indexOf(img);
-      // 抓被点击图的视口 rect —— 让 Lightbox FLIP 动画从这里开始/结束。
-      // 灯箱本身锁滚动，期间 rect 不会失效（无需再 listen scroll）。
-      const originRect = img.getBoundingClientRect();
-      setLightbox({ list, index: idx >= 0 ? idx : 0, originRect });
-    };
-    el.addEventListener('click', handleClick, true);
-    return () => el.removeEventListener('click', handleClick, true);
-  }, []);
+  // 正文图片灯箱交给 LiteZoom（缩放 / 平移 / 缩略图条），接入细节见
+  // web/lib/litezoom.ts。依赖 content：客户端切文章时正文是新节点，
+  // LiteZoom 没有事件委托也没有 MutationObserver，必须重新 refresh。
+  //
+  // 换掉的是原来这里的一段捕获阶段点击委托 + React 版 <Lightbox>。两处
+  // 行为差异，都是有意接受的：
+  //   1. 失去了「从被点缩略图原位放大到全屏」的 FLIP 动画，改用 LiteZoom
+  //      自带的打开动画。
+  //   2. 图片被 markdown 链接包住时（`[![alt](src)](href)`），原来是拦掉
+  //      导航强制开灯箱；LiteZoom 的规则是 —— href 指向图片就拿它当高清
+  //      原图（这是升级），href 是普通链接就放行跳转、不开灯箱。
+  // Moments 页仍然用 React 版 Lightbox，不受影响。
+  useEffect(() => scheduleLiteZoomSync(), [content]);
 
   // Fetch EXIF data for all images in the post
   useEffect(() => {
@@ -441,26 +414,19 @@ export default function PostContent({ content }: PostContentProps) {
     },
   }), []);
 
-  const inner = (
-    <>
-      <div className="blog-prose" ref={setProseRef}>
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[
-            rehypeRaw,
-            [rehypePrism, { showLineNumbers: true, ignoreMissing: true }] as any,
-            rehypeSlug,
-          ]}
-          components={components}
-        >
-          {processShortcodes(processImageGrids(content))}
-        </ReactMarkdown>
-      </div>
-      {lightbox && (
-        <Lightbox list={lightbox.list} index={lightbox.index} originRect={lightbox.originRect} onClose={() => setLightbox(null)} />
-      )}
-    </>
+  return (
+    <div className="blog-prose" ref={setProseRef}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[
+          rehypeRaw,
+          [rehypePrism, { showLineNumbers: true, ignoreMissing: true }] as any,
+          rehypeSlug,
+        ]}
+        components={components}
+      >
+        {processShortcodes(processImageGrids(content))}
+      </ReactMarkdown>
+    </div>
   );
-
-  return inner;
 }
