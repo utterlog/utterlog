@@ -5330,22 +5330,6 @@
   color: var(--color-text-main);
 }
 
-/* ---- 通用 .card / .card-hover ---- */
-[data-theme="Nebula"] .card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 15px;
-  color: var(--color-text-main);
-}
-
-
-/* ---- badge：globals 默认浅色 ---- */
-[data-theme="Nebula"] .badge {
-  background: rgba(128, 207, 255, 0.12);
-  color: var(--color-text-sub);
-  border-radius: 999px;
-}
-
 /* ============================================================ */
 /* Responsive                                                     */
 /* ============================================================ */

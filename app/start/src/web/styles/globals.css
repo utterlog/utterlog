@@ -660,60 +660,16 @@ body {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 20%, transparent);
 }
 
-/* ---- 下面 .card / .card-hover / .badge / .table 四组：待废弃 ----
+/* .card / .card-hover / .badge / .table 已于 2026-08-16 删除。
 
-   同属上面那段前后台同源时期的遗留。已核实：前台 .tsx 里 0 处使用，后台
-   在自己的 globals.css 里另有定义（取值不同，圆角是 0）。所以对两边都是
-   死代码，跟 .action-btn / .dashboard-shell 同批。
+   同属上面那段前后台同源时期的遗留，前台 .tsx 0 处使用、后台自有另一份。
+   保留过一轮是因为「正文允许写 HTML，读者可能手写过 <div class="card">」
+   这条查不实。后来查了生产库：35 篇文章 + 14 条动态 + 627 条评论里没有
+   任何一处这三个 class（唯一命中是正文里的英文词组 "Arrival Card"），
+   遂删除。
 
-   但没有跟着那两组一起删，因为存在一条查不实的可能：文章正文允许写
-   HTML，读者若在正文里手写过 <div class="card">，现在是这几条在给它样式。
-   grep 不到数据库内容，删了会静默变形，所以先留着标记。
-
-   注意 backend/services 里退订页和评论审核页那两个独立 HTML 各自带
-   inline <style> 自定义 .card，**不依赖这里**，已核实，不构成保留理由。
-
-   处理办法：确认历史文章正文里没有这几个 class 后即可整段删除。 */
-.card {
-  background-color: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-}
-
-.card-hover:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.125rem 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: 3px;
-}
-
-.table {
-  min-width: 100%;
-  border-collapse: collapse;
-}
-.table th {
-  padding: 0.625rem 0.75rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-text-sub);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--color-border);
-}
-.table td {
-  padding: 0.75rem;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  color: var(--color-text-main);
-  border-bottom: 1px solid var(--color-divider);
-}
+   backend/services 的退订页和评论审核页各自带 inline <style> 自定义
+   .card，不依赖这里。 */
 
 /* ========================================
    Blog Prose (Claude theme, independent)
