@@ -372,6 +372,35 @@ body {
 /* Logo font */
 .font-logo { font-family: "Ubuntu", "Fugaz One", sans-serif; }
 
+/* ┌─────────────────────────────────────────────────────────────────────┐
+   │ @layer blog-base —— 把控制权交给主题                                 │
+   └─────────────────────────────────────────────────────────────────────┘
+
+   为什么需要这一层：主题 CSS 的 <link> 排在 globals 之前（见 lib/document.ts
+   的 startDocumentLinks，主题那条在前、Vite 的 manifest CSS 在后），所以**等
+   特异性下 globals 恒赢**。主题想覆盖只能靠提特异性 —— 五套主题 1561 条顶层
+   选择器**全部**带 `[data-theme="X"]` 前缀，不是风格是被逼的。
+
+   CSS 层叠规则：**未分层的普通声明胜过任何分层的普通声明**，与特异性、与源码
+   顺序都无关。所以这一段进了 layer 之后，主题（未分层）自动压在它上面，新写
+   主题规则不必再套前缀去打特异性战争。
+
+   不写 `@layer blog-base;` 顺序声明：那条语句必须在所有规则之前，而本文件顶部
+   的 @import 会被内联展开，声明就落到几千行 CSS 后面成了非法位置，被构建丢弃
+   （实测）。改为靠 block 首次出现的位置定序 —— 本文件的内容恒在内联的 tailwind
+   之后，所以 blog-base 恒排最后 = 分层里优先级最高：对 Tailwind 工具类仍然赢
+   （与分层前行为一致），对主题让位。
+
+   ⚠️ 往这一层里加规则前先查 `!important`。分层后 important 的优先级是**反的**
+   （分层的 important 胜过未分层的），主题里同属性的 !important 会反被压住。
+   已知一处：Nebula 的 .comment-hint（globals:699 vs Nebula:2562），尚未处理，
+   所以评论区那段还没进这一层。
+
+   不该进这一层的：html/body reset、滚动条、.blog-main 滚动容器、CSS 变量 token、
+   路由过渡（.route-*）、滚动显现（[data-reveal]）、图片效果（[data-img-effect]）
+   —— 那些是跨主题基础设施，主题不该覆盖。 */
+@layer blog-base {
+
 /* Shared blog page title. Themes can override this shell without each
    route re-implementing the same icon/title/count layout. */
 .blog-page-title {
@@ -472,6 +501,8 @@ body {
                "PingFang SC", "Microsoft YaHei", sans-serif;
   font-feature-settings: "palt";
 }
+
+} /* ── @layer blog-base 结束 ── */
 
 /* Primary accent text (for links, active tabs) */
 .text-primary-themed { color: var(--color-primary); }
