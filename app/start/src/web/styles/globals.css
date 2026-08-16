@@ -332,9 +332,24 @@ html.lightbox-active body {
 /* ========================================
    Global Resets
    ======================================== */
-* {
-  padding: 0;
-  margin: 0;
+
+/* 这条 reset **必须待在 layer 里**，而且要在 blog-base 之前。
+
+   CSS 层叠规则：未分层的普通声明胜过任何分层的普通声明，与特异性无关。
+   这条选择器是 `*`（特异性 0,0,0），分层之前靠「谁写在后面」输给下面每一条
+   带 padding / margin 的规则；一旦 blog-base 分了层而它留在层外，它就反过来
+   把 layer 里所有的 padding / margin 全部压成 0 —— 页面颜色边框都在、间距
+   全塌，看起来像「样式混着加载」。2026-08-16 上线后线上就是这个样子，
+   .blog-page-title / .blog-image / .vi-tools / .footprint-page-body 一起中招。
+
+   放进 Tailwind 的 base 层：base 在 blog-base 之前（层序由首次出现位置定，
+   base 由 @import "tailwindcss" 在文件顶部展开），所以 blog-base 里的规则
+   照常压过它；而主题 CSS 未分层，仍然压过两者。 */
+@layer base {
+  * {
+    padding: 0;
+    margin: 0;
+  }
 }
 
 html {
