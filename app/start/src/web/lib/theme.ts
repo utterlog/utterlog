@@ -121,6 +121,75 @@ const Utterlog: ThemeComponents = {
   CommentSection: SharedCommentSection,
 };
 
+/* 首屏会用到的四个组件的**原始工厂函数**。lazy() 把工厂包起来后就取不到了，
+   所以单列一张表 —— 下面的预热和上面各主题的 lazy() 必须用同一个引用，
+   React 才会复用同一个 in-flight promise 而不是再发一次请求。
+   只列首屏这四个：PostPage / PostCard / CommentSection 要等路由或滚动才用得上，
+   提前抢带宽反而拖慢首屏。 */
+const themeChunkFactories: Record<string, Array<() => Promise<unknown>>> = {
+  Azure: [
+    () => import('@/themes/Azure/Layout'),
+    () => import('@/themes/Azure/Header'),
+    () => import('@/themes/Azure/Footer'),
+    () => import('@/themes/Azure/HomePage'),
+  ],
+  Flux: [
+    () => import('@/themes/Flux/Layout'),
+    () => import('@/themes/Flux/Header'),
+    () => import('@/themes/Flux/Footer'),
+    () => import('@/themes/Flux/HomePage'),
+  ],
+  Nebula: [
+    () => import('@/themes/Nebula/Layout'),
+    () => import('@/themes/Nebula/Header'),
+    () => import('@/themes/Nebula/Footer'),
+    () => import('@/themes/Nebula/HomePage'),
+  ],
+  Renascent: [
+    () => import('@/themes/Renascent/Layout'),
+    () => import('@/themes/Renascent/Header'),
+    () => import('@/themes/Renascent/Footer'),
+    () => import('@/themes/Renascent/HomePage'),
+  ],
+  Utterlog: [
+    () => import('@/themes/Utterlog/Layout'),
+    () => import('@/themes/Utterlog/Header'),
+    () => import('@/themes/Utterlog/Footer'),
+    () => import('@/themes/Utterlog/HomePage'),
+  ],
+};
+
+/* ── 首屏预热：让激活主题的 chunk 与主 bundle 并行下载 ──────────────
+
+   问题：Header / Footer / Layout / HomePage 都是 lazy()，而 SSR 的 HTML 里
+   **没有**给它们的 modulepreload（实测线上 HTML 里 modulepreload 共 6 条，
+   Layout/Header/Footer/HomePage 出现 0 次）。于是浏览器要等 React 渲染到这些
+   lazy 组件、发现模块没加载，才去发请求 —— 网络时序上，这几个 chunk 的请求
+   排在主 bundle **之后**。
+
+   后果是 hydration 那一刻它们必然还没到，React 挂起，渲染
+   StartThemeShell 里那个 `<main style={{minHeight:'100vh'}}/>` 的空白
+   fallback —— **SSR 已经画好的整页内容被一块空白盖掉**，等 chunk 到了再画
+   回来。用户看到的就是「首页初次加载，显示了又刷新」。
+
+   这里在模块求值时（主 bundle 一执行就发生，早于 hydration）就把激活主题的
+   四个首屏组件 import 掉。lazy() 与这里用的是**同一个工厂函数引用**，所以
+   React 渲染时会复用同一个 in-flight promise，不会重复请求。
+
+   主题名从 <html data-theme> 读 —— __root.tsx 在 SSR 时就写上了，模块求值
+   时一定拿得到。
+
+   ⚠️ 这是**缩短**而不是**消除**挂起窗口：如果 chunk 还是没赶在 hydration
+   之前到（弱网、大主题），照样会闪一下。要彻底消除得让 hydration 等这些
+   模块，或者在 SSR HTML 里发 modulepreload —— 后者需要先在 vite.config 里
+   打开 build.manifest 才拿得到带 hash 的文件名，是更大的改动。 */
+if (typeof document !== 'undefined') {
+  const active = normalizeThemeName(document.documentElement.dataset.theme || DEFAULT_BLOG_THEME);
+  const warm = themeChunkFactories[active] || themeChunkFactories[DEFAULT_BLOG_THEME];
+  // 发出去就不管了：失败不影响渲染，React 之后照常会自己再 import 一次。
+  warm?.forEach((load) => { void load().catch(() => {}); });
+}
+
 const themeRegistry: Record<string, ThemeComponents> = {
   Azure,
   Flux,
