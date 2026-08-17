@@ -1,3 +1,9 @@
+/* 引入主题基线（页面标题 / 图片系统 / 灯箱 / 友链 / 足迹页 / 嵌入卡片等）。
+   构建期由 sync-theme-styles.mjs 展开成真实内容，产出仍是单文件、零额外请求。
+   基线整包在 @layer blog-base 内，本文件后面任何未分层的规则都能直接覆盖它，
+   不需要 [data-theme="Renascent"] 前缀。不想要这套基线可以直接删掉这一行。 */
+@import "../_base/blog-components.css";
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap');
 
 [data-theme="Renascent"] {

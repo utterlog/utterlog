@@ -5,6 +5,1580 @@
 @import url('https://static.bluecdn.com/fonts/source-han-serif-cn.css');
 @import url('https://static.bluecdn.com/fonts/google-sans-code.css');
 @import url('https://static.bluecdn.com/fonts/tencentsans.css');
+/* 引入主题基线（页面标题 / 图片系统 / 灯箱 / 友链 / 足迹页 / 嵌入卡片等）。
+   构建期由 sync-theme-styles.mjs 展开成真实内容，产出仍是单文件、零额外请求。
+   基线整包在 @layer blog-base 内，本文件后面任何未分层的规则都能直接覆盖它，
+   不需要 [data-theme="Nebula"] 前缀。不想要这套基线可以直接删掉这一行。 */
+/* ↓↓ 构建期内联自 ../_base/blog-components.css ↓↓ */
+/* ═══════════════════════════════════════════════════════════════════
+   Utterlog 主题基线样式（blog base kit）
+   ═══════════════════════════════════════════════════════════════════
+
+   这是**给主题用的**共享博客组件样式：页面标题、图片系统与宫格、灯箱、
+   友链、足迹页、下载卡片、封面 hover、归档分类卡、动态与 X 嵌入卡。
+
+   ── 怎么用 ──────────────────────────────────────────────────────
+
+   在主题的 styles.css **最顶部**写：
+
+       ⟨在最顶部写⟩ @import "../_base/blog-components.css";
+
+   sync-theme-styles.mjs 会在**构建期**把它展开成真实内容，产出仍是单文件，
+   浏览器只看到一个 <link>、零额外请求。**不要**指望浏览器去解析这条
+   @import —— 主题样式表是运行时直接取的裸文件，不进 Vite 依赖图，真让
+   浏览器解析会退化成串行请求（globals.css 顶部记着实测数字：晚 630ms）。
+
+   ── 不想要可以不引 ──────────────────────────────────────────────
+
+   这是 opt-in 的。主题完全可以不写那条 @import，自己从零实现全部组件样式
+   —— 那正是「主题控制前端一切」的意思。引了之后想改哪条，直接在自己的
+   styles.css 里写同名选择器覆盖即可，见下面「为什么整包在 layer 里」。
+
+   ── 为什么整包裹在 @layer blog-base 里 ──────────────────────────
+
+   CSS 层叠规则：**未分层的普通声明胜过任何分层的普通声明**，与特异性、
+   与源码顺序都无关。基线整包在 layer 内，主题自己的规则（未分层）就自动
+   压在它上面 —— 主题写 `.blog-image { ... }` 就能覆盖，不必再套
+   `[data-theme="X"]` 前缀去拼特异性。
+
+   历史包袱说明：这套前缀不是风格洁癖，是被逼的。主题 CSS 的 <link> 排在
+   globals 之前（见 lib/document.ts），等特异性下 globals 恒赢，主题只能提
+   特异性去压。改造前五套主题 1561 条顶层选择器**全部**带前缀。
+
+   ── 下面这行 @layer 顺序声明不能删 ──────────────────────────────
+
+   层的优先级由**首次出现顺序**决定，后声明的赢。主题样式表加载在 globals
+   之前，如果不显式声明，blog-base 会注册在 Tailwind 各层（theme/base/
+   components/utilities，由 globals 里的 @import "tailwindcss" 展开）之前，
+   变成优先级**最低** —— 那样 @layer base 里那条 `* { padding:0; margin:0 }`
+   会把这里所有的 padding / margin 全部压平，页面颜色边框都在、间距全塌。
+   （2026-08-16 踩过一次一模一样的，当时是 reset 留在层外造成的。）
+
+   写死这一行，blog-base 恒排最后 = 分层里最高：压得过 Tailwind 工具类
+   （与改造前行为一致），又让位给主题自己的未分层规则。
+
+   ── !important 的方向是反的 ──────────────────────────────────────
+
+   分层后 important 的优先级反转：**分层的 important 胜过未分层的**。所以
+   往这里加带 !important 的规则前，要先查主题侧有没有同属性的 !important，
+   否则会反过来把主题压住。本文件现有的 !important 都已核实过无冲突。
+   ═══════════════════════════════════════════════════════════════════ */
+
+@layer theme, base, components, utilities, blog-base;
+
+/* ┌─────────────────────────────────────────────────────────────────────┐
+   │ @layer blog-base —— 把控制权交给主题                                 │
+   └─────────────────────────────────────────────────────────────────────┘
+
+   为什么需要这一层：主题 CSS 的 <link> 排在 globals 之前（见 lib/document.ts
+   的 startDocumentLinks，主题那条在前、Vite 的 manifest CSS 在后），所以**等
+   特异性下 globals 恒赢**。主题想覆盖只能靠提特异性 —— 五套主题 1561 条顶层
+   选择器**全部**带 `[data-theme="X"]` 前缀，不是风格是被逼的。
+
+   CSS 层叠规则：**未分层的普通声明胜过任何分层的普通声明**，与特异性、与源码
+   顺序都无关。所以这一段进了 layer 之后，主题（未分层）自动压在它上面，新写
+   主题规则不必再套前缀去打特异性战争。
+
+   不写 `@layer blog-base;` 顺序声明：那条语句必须在所有规则之前，而本文件顶部
+   的 @import 会被内联展开，声明就落到几千行 CSS 后面成了非法位置，被构建丢弃
+   （实测）。改为靠 block 首次出现的位置定序 —— 本文件的内容恒在内联的 tailwind
+   之后，所以 blog-base 恒排最后 = 分层里优先级最高：对 Tailwind 工具类仍然赢
+   （与分层前行为一致），对主题让位。
+
+   ⚠️ 往这一层里加规则前先查 `!important`。分层后 important 的优先级是**反的**
+   （分层的 important 胜过未分层的），主题里同属性的 !important 会反被压住。
+   已知一处：Nebula 的 .comment-hint（globals:699 vs Nebula:2562），尚未处理，
+   所以评论区那段还没进这一层。
+
+   不该进这一层的：html/body reset、滚动条、.blog-main 滚动容器、CSS 变量 token、
+   路由过渡（.route-*）、滚动显现（[data-reveal]）、图片效果（[data-img-effect]）
+   —— 那些是跨主题基础设施，主题不该覆盖。 */
+@layer blog-base {
+
+/* Shared blog page title. Themes can override this shell without each
+   route re-implementing the same icon/title/count layout. */
+.blog-page-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 24px;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--color-border, #e5e5e5);
+}
+.blog-page-title-rail {
+  display: none;
+}
+.blog-page-title-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.blog-page-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--color-primary, #0052D9);
+  font-size: 24px;
+}
+.blog-page-title-copy {
+  min-width: 0;
+}
+.blog-page-title-text {
+  margin: 0;
+  color: var(--color-text-main, #1a1a1a);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+.blog-page-title-subtitle {
+  margin-top: 4px;
+  color: var(--color-text-dim, #999);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.blog-page-title-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.blog-page-title-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border, #d9d9d9);
+  color: var(--color-text-sub, #666);
+  font-size: 13px;
+  line-height: 1.3;
+}
+.blog-page-title-meta strong {
+  color: var(--color-text-main, #1a1a1a);
+  font-weight: 600;
+}
+.blog-page-title-stat {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .blog-page-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 16px;
+  }
+  .blog-page-title-side {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .blog-page-title-meta {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Site title — display font for the header brand. Loads the variable
+   Alimama FangYuanTi from static.bluecdn.com (linked in layout.tsx);
+   falls back to Noto Sans SC + system if the woff2 slice for a given
+   character isn't there. Themes apply this class on their site-name
+   <span>; future v1.2.4+ may expose font choice in admin settings. */
+.site-title {
+  font-family: "Alimama FangYuanTi VF", "Noto Sans SC", "Ubuntu",
+               "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-feature-settings: "palt";
+}
+
+} /* ── @layer blog-base 结束 ── */
+
+/* Archive category card — background icon hover
+
+   **别删这段，也别当成后台样式搬走。** 使用者是前台的
+   components/blog/defaults/DefaultArchivePage.tsx，经 PublicPage 的
+   `theme.ArchivePage || DefaultArchivePage` 兜底渲染 —— 五个主题里只有
+   Nebula 自带 ArchivePage，其余四个全部落到这里。
+
+   而且 Nebula 和 Renascent 的主题 CSS 是**依赖这个基类**的拦截层，不是
+   独立实现：Nebula 那条 `.archive-cat-card::after { display: none }` 能
+   生效的前提，是下面 `content: ''` 把伪元素生成出来；基类没了，伪元素
+   根本不存在，那条覆盖变成空转（不报错，静默失效）。 */
+@layer blog-base {
+
+.archive-cat-card { transition: box-shadow 0.3s ease; }
+.archive-cat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.archive-cat-card:hover > i:first-child {
+  transform: translateY(-50%) scale(1.25);
+  opacity: 0.1;
+}
+.archive-cat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  backdrop-filter: blur(0px);
+  transition: backdrop-filter 0.3s ease, background 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.archive-cat-card:hover::after {
+  backdrop-filter: blur(1.5px);
+  background: rgba(255,255,255,0.15);
+}
+
+} /* ── @layer blog-base 结束（归档分类卡）── */
+
+/* ── 进 @layer blog-base（第二批：图片系统）──
+   图片的呈现方式该由主题定：有的想全宽、有的想圆角、有的想换宫格比例。
+   主题侧对 .blog-image / .image-grid* 零处 !important（已核实），本段
+   globals 侧那几处 grid-column: span 1 !important 只在窄屏 media query
+   里压自家的多列布局，分层后仍然有效且更稳。 */
+@layer blog-base {
+
+/* Blog image: lazy load with blur-fade effect.
+   Single image = 80% width centered + 16:9. Multi-image grid images
+   get their own aspect-ratio overrides below. */
+.blog-image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  border-radius: 0;
+  min-height: 80px;
+  cursor: zoom-in;
+  background: var(--color-bg-soft);
+}
+.blog-image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background-color: var(--color-bg-soft);
+  /* blur 与 transition 已不在这里硬写 —— 改由全局 html[data-img-effect="fade"]
+     的 `img[data-blog-image][data-loaded][data-img-visible]` 规则统一接管，
+     这样文章内图与封面/banner 都走同一条 fade 路径，能正确响应「视口外
+     的 lazy lookahead 不解模糊，进视口才淡入」的需求。`.blog-image.loaded`
+     类仍由 LazyImage 写入，但只用于控制 spinner / caption / EXIF 的显隐
+     （见下方对应规则），不再驱动图本身的模糊。 */
+}
+
+/* Loading spinner — stays mounted; opacity fades in sync with the
+   image's `filter` transition so the two visual states cross-fade
+   instead of the spinner snapping out a frame before the image
+   starts to un-blur (that one-frame gap read as a "double load"). */
+.blog-image-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: var(--color-text-dim);
+  opacity: 1;
+  transition: opacity 0.35s ease-out;
+  pointer-events: none;
+}
+.blog-image.loaded .blog-image-loader {
+  opacity: 0;
+}
+
+/* Post list hover — title changes to primary color */
+
+/* Image caption — bottom-right overlay inside image */
+.blog-image-caption {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 4px;
+  z-index: 5;
+  padding: 8px;
+  font-size: 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0;
+  cursor: default;
+  line-height: 1.4;
+  max-width: 70%;
+}
+
+/* ========================================
+   Image Grid Layout
+   ======================================== */
+.image-grid {
+  display: grid;
+  gap: 6px;
+  margin: 1.5rem 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+.image-grid .blog-image {
+  margin: 0;
+  border-radius: 0;
+  min-height: 0;
+  /* Grid children should fill their cell, not inherit the single-
+     image 80% width cap. */
+  width: 100%;
+}
+.image-grid .blog-image img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* 1 image: centered, natural aspect ratio */
+.image-grid-1 {
+  max-width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.image-grid-1 .blog-image img {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+/* 2 images: side by side, 4:3 each */
+.image-grid-2 { grid-template-columns: 1fr 1fr; }
+.image-grid-2 .blog-image img { aspect-ratio: 4 / 3; }
+
+/* 3 images: 3 columns, square each */
+.image-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.image-grid-3 .blog-image img { aspect-ratio: 1 / 1; }
+
+/* 4 images: single row */
+.image-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* 5 images: 2 on top (span 3 each) + 3 on bottom (span 2 each) */
+.image-grid-5 { grid-template-columns: repeat(6, 1fr); }
+.image-grid-5 .blog-image:nth-child(-n+2) { grid-column: span 3; }
+.image-grid-5 .blog-image:nth-child(n+3) { grid-column: span 2; }
+
+/* 6 images: 3 + 3 */
+.image-grid-6 { grid-template-columns: repeat(3, 1fr); }
+
+/* 7 images: 3 (top) + 4 (bottom) over 12-col LCM */
+.image-grid-7 { grid-template-columns: repeat(12, 1fr); }
+.image-grid-7 .blog-image:nth-child(-n+3) { grid-column: span 4; }
+.image-grid-7 .blog-image:nth-child(n+4) { grid-column: span 3; }
+
+/* 8 images: 4 + 4 */
+.image-grid-8 { grid-template-columns: repeat(4, 1fr); }
+
+/* 9 images: 3 x 3 */
+.image-grid-9 { grid-template-columns: repeat(3, 1fr); }
+
+/* 10 images: 3 + 3 + 4 over 12-col LCM */
+.image-grid-10 { grid-template-columns: repeat(12, 1fr); }
+.image-grid-10 .blog-image:nth-child(-n+6) { grid-column: span 4; }
+.image-grid-10 .blog-image:nth-child(n+7) { grid-column: span 3; }
+
+/* 11+ images: 3 columns flowing */
+.image-grid-overflow { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Responsive: mobile collapse — single-row layouts (2/3/4) wrap, and
+   the larger custom grids drop back to a plain 2-column flow. */
+@media (max-width: 640px) {
+  .image-grid-3,
+  .image-grid-4,
+  .image-grid-5,
+  .image-grid-6,
+  .image-grid-7,
+  .image-grid-8,
+  .image-grid-9,
+  .image-grid-10,
+  .image-grid-overflow {
+    grid-template-columns: 1fr 1fr;
+  }
+  .image-grid-5 .blog-image,
+  .image-grid-7 .blog-image,
+  .image-grid-10 .blog-image {
+    grid-column: span 1 !important;
+  }
+  .image-grid-1 { max-width: 100%; }
+}
+@media (max-width: 400px) {
+  .image-grid { grid-template-columns: 1fr !important; }
+  .image-grid .blog-image img { aspect-ratio: 16 / 9; }
+  .image-grid-5 .blog-image { grid-column: span 1 !important; }
+}
+
+/* ========================================
+   EXIF Info Overlay
+   ======================================== */
+.blog-image-exif-trigger {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 12px;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.blog-image:hover .blog-image-exif-trigger { opacity: 1; }
+
+.blog-image-exif-panel {
+  position: absolute;
+  bottom: 44px;
+  left: 8px;
+  z-index: 5;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.6;
+  border-radius: 0;
+  white-space: nowrap;
+}
+.blog-image-exif-panel .exif-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.blog-image-exif-panel .exif-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  min-width: 48px;
+}
+.blog-image-exif-panel .exif-params {
+  display: flex;
+  gap: 10px;
+  margin: 4px 0;
+  padding: 4px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+} /* ── @layer blog-base 结束（图片系统）── */
+
+/* ── 进 @layer blog-base（第二批：灯箱）──
+   主题侧对 .vi-* 零处 !important（已核实），本段自身也无 !important。 */
+@layer blog-base {
+
+/* Lightbox — ViewImage-inspired layout: backdrop with soft frosted
+   blur, image zone that slides in from above on open / down on close,
+   a bottom toolbar with prev/next/close + image counter, and a thin
+   horizontal loading bar. All corners sharp (border-radius: 0) per
+   the site's overall square-edge aesthetic. */
+.vi-overlay {
+  position: fixed;
+  inset: 0;
+  /* Above AI reader / floating previews, which use 9999-99999 inline z-index. */
+  z-index: 1000000;
+  padding: 5vh 1rem;
+  display: flex;
+  flex-direction: column;
+  /* Solid-ish dark backdrop instead of `backdrop-filter: blur()`.
+     The blur forced a new compositor layer that was re-rasterized
+     every frame of the opacity fade, producing a visible flicker on
+     Chrome + Safari. An almost-opaque color reads as "focused"
+     without any GPU cost. */
+  background: rgba(18, 20, 24, 0.96);
+  /* 开图：稍长的曲线 + spring-out 缓动（cubic-bezier 是 expo-out 的
+     近似），后段慢慢收住，比 linear 视觉重量更"软"。 */
+  animation: vi-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity;
+}
+.vi-overlay.vi-closing {
+  /* 关图：用加速曲线 (ease-in 风) 快收，"果断"感强；JS 端 closeSoft
+     的 setTimeout 与此处时长保持一致（240ms）。 */
+  animation: vi-out 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes vi-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vi-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* Main stage — fills the whole overlay; tools bar is absolutely
+   positioned over the bottom so the stage never loses room to it
+   and the image can always reach the overlay's full inner width. */
+.vi-stage {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.vi-stage .vi-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  border-radius: 0;
+  position: relative;
+  z-index: 1;
+  /* 开图：scale 呼吸 + spring-out 缓动 —— 从 0.92 弹到 1，配合 overlay
+     的 opacity 渐入形成"软弹出"。比原来的 translateY(-20→0) 更有
+     重量感，少了"从天而降"的方向感问题。 */
+  animation: vi-img-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+/* 关图：跟随 overlay 一起收缩 + 淡出（240ms 与 vi-out 同步收尾）。 */
+.vi-overlay.vi-closing .vi-img {
+  animation: vi-img-close 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+/* 翻页：保留原 300ms 节奏（与 JS step 函数里的 setTimeout 一致），
+   只把 translateY 换成 translateY + 轻微 scale，曲线收尾更软。 */
+.vi-stage.vi-img-out .vi-img {
+  animation: vi-img-out 300ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes vi-img-in   { from { opacity: 0; transform: scale(0.92); }              to { opacity: 1; transform: scale(1); } }
+@keyframes vi-img-close { from { opacity: 1; transform: scale(1); }                 to { opacity: 0; transform: scale(0.95); } }
+@keyframes vi-img-out  { from { opacity: 1; transform: translateY(0) scale(1); }    to { opacity: 0; transform: translateY(16px) scale(0.98); } }
+
+/* Click-outside catch layer — sits behind the image but above the
+   backdrop, so clicks miss the img and fire a close. */
+.vi-stage .vi-backstop {
+  position: absolute;
+  inset: 0;
+  cursor: zoom-out;
+  z-index: 0;
+}
+
+/* Lightbox loading bar — compact SVG strip shown while the next image
+   is decoding during prev/next navigation. */
+.vi-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin: -2px -20px;
+  color: rgba(255, 255, 255, 0.88);
+  overflow: visible;
+  z-index: 1;
+  pointer-events: none;
+}
+.vi-loading-react {
+  animation: vi-loading-moving 1s ease-in-out infinite;
+}
+@keyframes vi-loading-moving {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 100%;
+    transform: translate(0%, 0);
+  }
+  100% {
+    width: 0;
+    transform: translate(100%, 0);
+  }
+}
+
+/* Bottom toolbar — floats over the stage bottom so the image zone
+   keeps its full width. Capped at 600px and horizontally centered
+   within the viewport. */
+.vi-tools {
+  position: absolute;
+  bottom: calc(clamp(48px, 10vh, 120px) + env(safe-area-inset-bottom));
+  left: 1rem;
+  right: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.26);
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: 0;
+  /* No backdrop-filter here either — matches .vi-overlay removal;
+     keeps a single cheap compositing layer for the whole overlay. */
+  z-index: 2;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+.vi-tools:hover,
+.vi-tools:focus-within {
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+.vi-count {
+  min-width: 60px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.vi-nav {
+  display: flex;
+  gap: 10px;
+}
+.vi-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.68);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.vi-tools:hover .vi-btn,
+.vi-tools:focus-within .vi-btn {
+  color: rgba(255, 255, 255, 0.9);
+}
+.vi-btn:hover,
+.vi-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+.vi-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+} /* ── @layer blog-base 结束（灯箱）── */
+
+/* ── 进 @layer blog-base（下载卡片）──
+   注释里本来就写着「可由主题覆盖」，分层后主题不必再套 [data-theme] 前缀。
+   本段那两处 !important 是**故意**用来压主题的 .blog-prose a 链接样式的，
+   分层不影响它 —— important 永远胜过 normal，与层无关。 */
+@layer blog-base {
+
+.md-download-card {
+  /* 默认视觉：深色 panel + 橙色 accent，跟原 inline 视觉一致 */
+  --md-download-bg: #1a1a1a;
+  --md-download-accent: #f5a623;
+  --md-download-text: #fff;
+  margin: 16px 0;
+  padding: 16px 20px;
+  background: var(--md-download-bg);
+  color: var(--md-download-text);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.md-download-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--md-download-accent);
+  color: var(--md-download-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.md-download-info {
+  flex: 1;
+  min-width: 0;
+}
+.md-download-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  /* 标题过长时单行省略，避免破坏 layout */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.md-download-desc {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 2px;
+  line-height: 1.5;
+  /* 简介双行省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* `!important` 用于覆盖各主题的 .blog-prose a 链接样式（下划线、prose
+   primary color）。否则 a.md-download-btn 在 Azure / Nebula / Renascent
+   下都会被主题加上 text-decoration: underline + 主题色 —— 看上去像链接
+   不像按钮。这里是按钮自有视觉，不该被 prose 链接规则染色。 */
+.md-download-btn {
+  padding: 8px 20px;
+  background: var(--md-download-accent);
+  color: var(--md-download-bg) !important;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none !important;
+  border-radius: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+.md-download-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  color: var(--md-download-bg) !important;
+  text-decoration: none !important;
+}
+.md-download-btn:active {
+  transform: translateY(0);
+}
+/* 移动端窄屏：按钮换行避免挤压标题 */
+@media (max-width: 480px) {
+  .md-download-card {
+    flex-wrap: wrap;
+    padding: 14px;
+    gap: 12px;
+  }
+  .md-download-info {
+    flex-basis: calc(100% - 56px);
+  }
+  .md-download-btn {
+    flex-basis: 100%;
+    text-align: center;
+  }
+}
+
+} /* ── @layer blog-base 结束（下载卡片）── */
+
+/* ── 进 @layer blog-base（封面 hover 放大）──
+   注释里写着这是「theme-agnostic」的统一实现，取代了各主题原来那几个
+   私有类。分层让想改幅度/曲线的主题可以直接覆盖。 */
+@layer blog-base {
+
+.cover-zoom :where([data-blog-image] img, img[data-blog-image]) {
+  transform: translate3d(0, 0, 0) scale(1);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cover-zoom:hover :where([data-blog-image] img, img[data-blog-image]) {
+  transform: translate3d(0, 0, 0) scale(1.04);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cover-zoom :where([data-blog-image] img, img[data-blog-image]),
+  .cover-zoom:hover :where([data-blog-image] img, img[data-blog-image]) {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+} /* ── @layer blog-base 结束（封面 hover 放大）── */
+
+/* ── 进 @layer blog-base（第三批：足迹页）──
+   整页的版式、地图、时间线、卡片，都是主题该能改的东西。
+   主题侧对 .footprint-* 零处 !important（已核实）。
+
+   注意本段里的 `.footprint-page .blog-page-title-side` —— 它和已分层的
+   .blog-page-title-side 在同一层里，靠特异性 (0,2,0) > (0,1,0) 继续赢，
+   层内相对顺序不变，行为与分层前一致。 */
+@layer blog-base {
+
+.footprint-page {
+  background: var(--color-bg-card, #fff);
+}
+
+/* 间距由布局出，不由子元素各自的 margin 出 —— 原来地图靠自己的
+   margin-bottom: 24px 撑开与卡片网格的距离，占位符靠另一个 20px，
+   两个数还不一样；地图有 520px 高，24px 在它下面读起来就是「贴着」。
+   改成 flex 列 + gap，所有直接子元素（禁用提示 / 错误条 / 地图 /
+   时间线）拿到同一个间距，子元素那两处 margin-bottom 已相应删除。 */
+.footprint-page-body {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 0 32px 40px;
+}
+
+.footprint-page .blog-page-title-side {
+  width: min(420px, 42vw);
+  max-width: 100%;
+}
+
+.footprint-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(420px, 100%);
+  height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border, #ddd);
+  background: var(--color-bg-soft, #fafafa);
+}
+
+.footprint-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text-main, #111);
+  font-size: 14px;
+}
+
+.footprint-search button {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--color-primary, #0052d9);
+  color: #fff;
+  background: var(--color-primary, #0052d9);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.footprint-disabled,
+.footprint-empty,
+.footprint-map-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 120px;
+  border: 1px dashed var(--color-border, #ddd);
+  color: var(--color-text-dim, #888);
+  background: var(--color-bg-soft, #fafafa);
+  font-size: 13px;
+}
+
+.footprint-map {
+  width: 100%;
+  height: min(56vh, 520px);
+  min-height: 320px;
+  border: 1px solid var(--color-border, #ddd);
+}
+
+.footprint-map-marker {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary, #0052d9);
+  border: 3px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #0052d9) 28%, transparent), 0 8px 24px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+}
+
+.footprint-mapbox-popup {
+  max-width: min(360px, calc(100vw - 36px));
+}
+
+.footprint-mapbox-popup .mapboxgl-popup-content {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-border, #ddd) 78%, #fff);
+  border-radius: 4px;
+  color: var(--color-text-main, #111);
+  background: var(--color-bg-card, #fff);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
+}
+
+.footprint-mapbox-popup .mapboxgl-popup-close-button {
+  right: 8px;
+  top: 7px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: var(--color-text-dim, #888);
+  font-size: 18px;
+  line-height: 20px;
+}
+
+.footprint-mapbox-popup .mapboxgl-popup-close-button:hover {
+  color: var(--color-text-main, #111);
+  background: var(--color-bg-soft, #f5f5f5);
+}
+
+.footprint-map-popup {
+  min-width: 260px;
+}
+
+.footprint-map-popup-card {
+  display: block;
+  min-width: 0;
+  padding: 16px 18px 14px;
+  color: inherit;
+  text-decoration: none;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-bg-card, #fff);
+}
+
+.footprint-map-popup-card:first-child {
+  border-top: 0;
+}
+
+.footprint-map-popup-card:hover {
+  background: color-mix(in srgb, var(--color-primary, #0052d9) 5%, var(--color-bg-card, #fff));
+}
+
+.footprint-map-popup-title {
+  display: block;
+  overflow: hidden;
+  padding-right: 22px;
+  color: var(--color-text-main, #111);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footprint-map-popup-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  margin-top: 9px;
+  color: var(--color-text-sub, #666);
+  font-size: 13px;
+}
+
+.footprint-map-popup-location {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.footprint-map-popup-location img {
+  width: 24px;
+  height: 16px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+
+.footprint-map-popup-location span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footprint-map-popup-meta time {
+  flex: 0 0 auto;
+  color: var(--color-text-dim, #9ca3af);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.footprint-timeline-wrap {
+  position: relative;
+}
+
+.footprint-link-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  color: var(--color-primary, #0052d9);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.footprint-link-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  stroke-linecap: round;
+  opacity: 0.82;
+}
+
+.footprint-timeline {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.footprint-card {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--color-border, #ddd);
+  background: var(--color-bg-card, #fff);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.footprint-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.footprint-card.is-linkable {
+  cursor: pointer;
+}
+
+.footprint-card.is-active {
+  z-index: 4;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+.footprint-card-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 6;
+  width: 58px;
+  height: 58px;
+  color: var(--color-primary, #0052d9);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.footprint-card-pulse svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  filter: drop-shadow(0 2px 8px rgba(0, 82, 217, 0.2));
+}
+
+.footprint-card-cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-bg-soft, #f5f5f5);
+}
+
+.footprint-card-cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.footprint-card-order {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.footprint-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 16px;
+}
+
+.footprint-card-body strong {
+  display: block;
+  overflow: hidden;
+  color: var(--color-text-main, #111);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footprint-card-title {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+}
+
+.footprint-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.footprint-card-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-sub, #666);
+  font-size: 12px;
+  text-align: left;
+}
+
+.footprint-card-location span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footprint-card-location img {
+  width: 22px;
+  height: 15px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.footprint-card-location i {
+  color: var(--color-primary, #0052d9);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.footprint-card-meta time {
+  flex: 0 0 auto;
+  color: var(--color-text-dim, #999);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .footprint-page-body {
+    /* 窄屏 gap 收到 28px —— 地图在这里只有 360px 高，40px 会显得散 */
+    gap: 28px;
+    padding: 0 18px 28px;
+  }
+  .footprint-page .blog-page-title-side {
+    width: 100%;
+  }
+  .footprint-map {
+    height: 360px;
+  }
+}
+
+} /* ── @layer blog-base 结束（足迹页）── */
+
+/* ── 进 @layer blog-base（第三批：友链徽章 + 友链页）──
+
+   为什么这份共享默认值留在 globals 而不是搬进各主题：同一时刻浏览器只加载
+   **激活主题那一份** styles.css（见 lib/document.ts）。写进 Azure 的表里，
+   站点换到 Nebula 时这条规则根本不存在 —— 不是 FOUC，是永久没有。四份
+   CommentList 都要用它，逐个主题抄一份既重复又必然漏。
+
+   （原注释这里写的是「换主题就会掉样式」，措辞不准：不是切换的瞬间掉，是
+   没写那一份的主题从来就没有。结论没错，理由改准。）
+
+   分层解决的正是这个两难：默认值留在 globals 保证每个主题都有可用基线，但
+   放进 layer 之后，想改的主题直接写 `.friend-badge { ... }` 就能覆盖，不必
+   再靠 [data-theme] 前缀去拼特异性；不想改的自动继承这份。
+
+   主题侧对 .friend-* 零处 !important（已核实），本段自身也无 !important。
+
+   tooltip 走 ::after + data-tip，纯 CSS，不为一枚徽章拖进 tooltip 组件。 */
+@layer blog-base {
+
+.friend-badge {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary, #0052d9);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+  cursor: help;
+}
+
+.friend-badge::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 400;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.friend-badge:hover::after,
+.friend-badge:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.friend-link-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.friend-link-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.friend-link-card-item,
+.friend-link-compact-item {
+  min-width: 0;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.friend-link-card-item:hover,
+.friend-link-compact-item:hover {
+  border-color: var(--color-primary, #0052D9);
+  box-shadow: 0 2px 12px rgba(0, 82, 217, 0.08);
+}
+
+.friend-link-card-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+}
+
+.friend-link-compact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.friend-link-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: #f5f5f5;
+}
+
+.friend-link-compact-item .friend-link-logo {
+  width: 30px;
+  height: 30px;
+}
+
+.friend-link-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.friend-link-description {
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #888;
+  font-size: 12px;
+}
+
+.friend-link-external {
+  color: #ccc;
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+/* ---- 友链行式布局：一行一个（图标 · 站名 · 描述 · 最后更新）---- */
+
+.friend-link-row-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 用负 margin 折叠相邻边框，避免两行之间出现 2px 的双线 */
+.friend-link-row + .friend-link-row {
+  margin-top: -1px;
+}
+
+.friend-link-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.friend-link-row:hover {
+  z-index: 1;                        /* 边框变色时压住相邻行，否则被下一行的灰边盖掉 */
+  border-color: var(--color-primary, #0052D9);
+  background: #fbfcff;
+}
+
+.friend-link-row .friend-link-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.friend-link-row-name {
+  flex: 0 0 auto;
+  max-width: 30%;
+  overflow: hidden;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 描述吃掉剩余空间并负责收缩 —— min-width:0 不能少，
+   否则 flex 子项按内容撑开，长描述会把时间挤出行外 */
+.friend-link-row-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #888;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-link-row-time {
+  flex: 0 0 auto;
+  color: #aaa;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;  /* 日期右侧对齐成一列 */
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  /* 窄屏描述先让位，站名和时间是主信息 */
+  .friend-link-row-desc {
+    display: none;
+  }
+  .friend-link-row-name {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+}
+
+} /* ── @layer blog-base 结束（友链）── */
+
+/* ── 进 @layer blog-base（动态嵌入卡）──
+   主题侧对 .utter-moment-embed* 零处 !important（已核实）。Nebula 有一组
+   [data-theme] 覆盖，分层后它照旧赢（未分层胜分层），行为不变。 */
+@layer blog-base {
+
+.blog-prose .utter-moment-embed,
+.utter-moment-embed {
+  --moment-accent: var(--color-primary, #0052d9);
+  margin: 22px 0;
+  padding: 18px 20px;
+  border: 1px solid rgba(0, 82, 217, 0.18);
+  border-left: 4px solid var(--moment-accent);
+  background: linear-gradient(135deg, rgba(0, 82, 217, 0.06), rgba(255, 255, 255, 0.95));
+  color: inherit;
+  overflow: hidden;
+}
+
+.utter-moment-embed__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.utter-moment-embed__head:hover {
+  color: var(--moment-accent);
+}
+
+.utter-moment-embed__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--moment-accent);
+  color: #fff;
+  font-size: 13px;
+}
+
+.utter-moment-embed__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.utter-moment-embed__meta {
+  margin-left: auto;
+  color: #8a94a6;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.utter-moment-embed__content {
+  margin-top: 14px;
+  color: #1f2937;
+  font-size: 15px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.utter-moment-embed__images {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.utter-moment-embed__images--1 {
+  grid-template-columns: 1fr;
+}
+
+.utter-moment-embed__images--2,
+.utter-moment-embed__images--3,
+.utter-moment-embed__images--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.utter-moment-embed__images img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.utter-moment-embed__more {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 8px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 12px;
+}
+
+.utter-moment-embed__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.utter-moment-embed__footer span {
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.utter-moment-embed--loading,
+.utter-moment-embed--missing {
+  background: #f8fafc;
+  border-left-color: #94a3b8;
+}
+
+} /* ── @layer blog-base 结束（动态嵌入卡）── */
+
+/* ── 进 @layer blog-base（X 帖子嵌入）──
+   主题侧零处 !important。注意本段那两条 text-decoration 的 !important 在
+   globals 侧，是压 .blog-prose a 下划线用的，分层不影响（important 胜过
+   normal 与层无关）。 */
+@layer blog-base {
+
+.blog-prose .x-post-embed,
+.x-post-embed {
+  margin: 24px 0;
+}
+
+.x-post-embed :where(.twitter-tweet) {
+  margin: 0 auto !important;
+}
+
+.blog-prose .x-post-embed__fallback,
+.x-post-embed__fallback {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #fff;
+  color: #0f172a;
+  text-decoration: none !important;
+}
+
+.x-post-embed__fallback span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #111827;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.x-post-embed__fallback strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.x-post-embed.is-loaded .x-post-embed__fallback {
+  display: none;
+}
+
+} /* ── @layer blog-base 结束（X 帖子嵌入）── */
+
+/* 友链网格的窄屏覆盖 —— 跟着上面的基础规则一起进 layer。
+   这两条原先和 github-repo-card 的窄屏覆盖挤在同一个 @media 块里；基础规则
+   分层而响应式覆盖留在层外的话，主题能改宽屏改不了窄屏，迁移只做了一半。
+   github-repo-card 那部分暂不动（它有一批「globals 用 !important 反压主题」
+   的规则，分层后语义会变强，要单独评估），所以这里把 @media 拆成两个。 */
+@layer blog-base {
+
+@media (max-width: 1200px) {
+  .friend-link-compact-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .friend-link-card-grid,
+  .friend-link-compact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+} /* ── @layer blog-base 结束（友链响应式）── */
+
+/* ↑↑ ../_base/blog-components.css 结束 ↑↑ */
+
 
 /* ============================================================ */
 /* Nebula — 暗色科技风（Code Wiki 风格）                         */
