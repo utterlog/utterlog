@@ -365,11 +365,14 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel, com
         </div>
 
         {/* 评论礼仪提示 */}
+        {/* opacity 与 transition 已挪进 CSS（themes/_base/blog-components.css 的
+            .comment-hint）。留在这里的话是行内样式，只有 !important 压得住，
+            而分层之后 important 的优先级会反转、把主题的覆盖顶掉。 */}
         <span className="comment-hint" style={{
           position: 'absolute', right: '34px', bottom: '8px',
-          fontSize: '11px', color: 'var(--color-text-dim, #999)', opacity: 0.55,
+          fontSize: '11px', color: 'var(--color-text-dim, #999)',
           display: 'inline-flex', alignItems: 'center', gap: '4px',
-          pointerEvents: 'none', userSelect: 'none', transition: 'opacity 0.2s',
+          pointerEvents: 'none', userSelect: 'none',
         }}>
           <i className="fa-regular fa-circle-exclamation" style={{ fontSize: '11px' }} />
           请理性讨论，禁止广告及无关内容

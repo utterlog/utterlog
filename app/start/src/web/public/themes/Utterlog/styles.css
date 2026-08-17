@@ -1570,6 +1570,365 @@
 
 } /* ── @layer blog-base 结束（友链响应式）── */
 
+
+/* ── GitHub 仓库卡片 ──
+   带 !important 的那组是**有意**压主题的 .blog-prose a 链接样式（卡片是个
+   <a>，被主题的正文链接规则套上下划线会很难看）。进 layer 后这个意图**加强**
+   了：分层的 important 胜过未分层的 important，也胜过一切 normal。
+
+   ⚠️ 代价要说清楚：主题**无法**用普通规则改掉这两条 text-decoration，写
+   !important 也压不过。这是本基线里唯一一处「主题控制不了」的地方，属于
+   组件完整性而非风格选择。真要放开，得把 !important 去掉、改由组件不落在
+   .blog-prose a 的匹配面里解决。 */
+@layer blog-base {
+
+.blog-prose .github-repo-card,
+.github-repo-card {
+  --github-card-height: 176px;
+  --github-language-color: #94a3b8;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--github-card-height);
+  gap: 0;
+  height: var(--github-card-height);
+  margin: 24px 0;
+  padding: 0;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #0f172a;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* 这里原本还并列着三条 [data-theme] 前缀的同义选择器，纯粹是为了提特异性
+   压过主题的 .blog-prose a 下划线 —— 军备竞赛的痕迹。进 @layer 之后不需要了：
+   分层的 !important 胜过一切未分层声明，普通选择器已经够。2026-08-17 删。 */
+.blog-prose a.github-repo-card,
+.blog-prose a.github-repo-card:hover,
+.blog-prose a.github-repo-card * {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+.blog-prose .github-repo-card:hover,
+.github-repo-card:hover {
+  border-color: rgba(0, 82, 217, 0.32);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+}
+
+.github-repo-card__content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+}
+
+.github-repo-card__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin-bottom: 10px;
+  color: #0052d9;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.github-repo-card__title {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 750;
+  line-height: 1.28;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.github-repo-card__desc {
+  margin: 10px 0 14px;
+  overflow: hidden;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.65;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.github-repo-card__meta {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: auto;
+  overflow: hidden;
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+.github-repo-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.github-repo-card__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: auto 0;
+  padding: 5px 10px;
+  border: 1px solid rgba(0, 82, 217, 0.16);
+  background: rgba(0, 82, 217, 0.05);
+  color: #0052d9;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.github-repo-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin: auto 0;
+  padding: 5px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.github-repo-card__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 82, 217, 0.18);
+  border-top-color: #0052d9;
+  border-radius: 999px;
+  animation: github-repo-card-spin 0.75s linear infinite;
+}
+
+@keyframes github-repo-card-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.github-repo-card__visual {
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
+  background: #f8fafc;
+}
+
+.github-repo-card__avatar-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 78px;
+  width: 78px;
+  height: 78px;
+  margin: auto;
+  color: #0f172a;
+  font-size: 38px;
+  overflow: hidden;
+}
+
+.blog-prose .github-repo-card__avatar,
+.github-repo-card__avatar {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  object-fit: cover;
+}
+
+.github-repo-card__language-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  display: flex;
+  overflow: hidden;
+  background: var(--github-language-color);
+  z-index: 2;
+}
+
+.github-repo-card__language-bar span {
+  display: block;
+  height: 100%;
+  min-width: 1px;
+}
+
+
+@media (max-width: 720px) {
+  .blog-prose .github-repo-card,
+  .github-repo-card {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 14px;
+    padding: 0;
+  }
+
+  .github-repo-card__title {
+    font-size: 17px;
+    white-space: normal;
+  }
+
+  .github-repo-card__visual {
+    width: 100%;
+    height: 96px;
+    aspect-ratio: auto;
+    min-height: 0;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+  }
+
+  .github-repo-card__avatar-shell {
+    width: 54px;
+    height: 54px;
+    font-size: 28px;
+  }
+
+}
+
+} /* ── @layer blog-base 结束（GitHub 卡片）── */
+
+
+@layer blog-base {
+
+/* 评论 @昵称 悬浮卡片。
+   这里的 !important 不是用来压主题的，是用来压**行内样式**的 ——
+   CommentList.tsx 在元素上直接写了 display:'none'，只有 !important 盖得住。
+   已核实五个主题都不设这个元素的 display（Nebula 只改配色），无冲突。 */
+.reply-mention:hover .reply-mention-card { display: block !important; }
+
+/* 评论区礼仪提示 hover 提亮。
+   **不再需要 !important。** 原来那条 `opacity: .75 !important` 存在的唯一
+   理由是 CommentForm.tsx 把 opacity: 0.55 写在了 style 属性上，行内样式
+   压过一切普通规则。现在把默认值收进这里、组件那行删掉，两边都不用
+   !important 了 —— 这也解开了本基线搬迁的最后一处卡点：分层后 important
+   的优先级是反的（分层的胜过未分层的），globals 那条会反压 Nebula 的
+   `opacity: 1 !important`，让 Nebula 的悬停态静默失效。
+   现在 Nebula 那条（未分层 important）照旧赢，行为不变。 */
+.comment-hint {
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+div:hover > .comment-hint { opacity: 0.75; }
+
+/* 评论表单的昵称 / 邮箱 / 网址三格。
+   窄屏改成竖排：三格并排时每格只剩三分之一宽度，中文占位符加图标根本放不下，
+   网址那格直接被挤出屏幕（原因是 flex 项默认 min-width:auto，撑不住就溢出而
+   不是收缩）。布局写在这里而不是内联 style，内联样式没法带媒体查询，
+   优先级还压过类选择器。 */
+.comment-info-fields {
+  display: flex;
+  border-bottom: 1px solid var(--color-border, #eee);
+}
+
+.comment-info-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 50px;
+  border-right: 1px solid var(--color-border, #eee);
+}
+
+.comment-info-field:last-child {
+  border-right: none;
+}
+
+/* 输入控件的字号单独拎出来：窄屏下必须 >= 16px。
+   iOS Safari 只要输入框字号小于 16px，聚焦时就会强制放大整个页面，放大后
+   版心被推出视口、要手动缩回去 —— 表单「尺寸不对」多半是这个而不是真的样式写错。
+   桌面端不受影响，仍用 13/14px。 */
+.comment-field-input {
+  font-size: 13px;
+}
+
+.comment-textarea-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 12px 12px 16px;
+  min-height: 250px;
+}
+
+.comment-textarea {
+  font-size: 14px;
+  min-height: 220px;
+}
+
+/* 点「回复」弹出的紧凑表单。字号比完整版还小（12/13px），iOS 上放大得更狠，
+   而移动端恰恰是回复用得最多的地方。 */
+.comment-compact-input {
+  font-size: 12px;
+}
+
+.comment-compact-textarea {
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .comment-info-fields {
+    flex-direction: column;
+  }
+  /* 竖排后格与格之间要横线，右侧竖线反而多余 */
+  .comment-info-field {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border, #eee);
+    height: 46px;
+  }
+  .comment-info-field:last-child {
+    border-bottom: none;
+  }
+
+  .comment-field-input,
+  .comment-textarea,
+  .comment-compact-input,
+  .comment-compact-textarea {
+    font-size: 16px;
+  }
+
+  /* 三格竖排已经吃掉 138px，输入区再占 250px 的话小屏上整个表单要 460px 起，
+     一屏基本只剩表单。缩到 160px，够写几行又不至于挤掉下面的提交按钮。 */
+  .comment-textarea-row {
+    padding: 12px;
+    min-height: 160px;
+  }
+  .comment-textarea {
+    min-height: 130px;
+  }
+}
+
+} /* ── @layer blog-base 结束（评论）── */
+
 /* ↑↑ ../_base/blog-components.css 结束 ↑↑ */
 
 /* Utterlog Theme Styles */
