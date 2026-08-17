@@ -32,6 +32,15 @@ export default function Footer() {
     cancel2FA: storeCancel2FA,
     checkAuth,
   } = useAuthStore();
+
+  // 首帧必须按「未登录」渲染 —— 与 Azure/Footer.tsx 同一个坑，详细缘由见那边
+  // 的长注释。要点：useAuthStore 的 persist 没有 skipHydration（lib/store.ts），
+  // 客户端模块求值时就同步从 localStorage 注水，首帧即有 user；SSR 端恒为 null。
+  // 而下面 JSX 里是 <img> vs <i> 的元素类型差异，属结构性失配，会让 React 丢弃
+  // 整棵 SSR 树重渲（StartThemeShell 只有一层 Suspense 包住整个 Layout）。
+  const [authReady, setAuthReady] = useState(false);
+  useEffect(() => { setAuthReady(true); }, []);
+  const shownUser = authReady ? user : null;
   useEffect(() => { checkAuth().catch(() => {}); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showLogin, setShowLogin] = useState(false);
@@ -162,7 +171,7 @@ export default function Footer() {
     }
   };
 
-  const avatarUrl = user?.avatar || (user ? 'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp' : null);
+  const avatarUrl = shownUser?.avatar || (shownUser ? 'https://gravatar.bluecdn.com/avatar/0?s=256&d=mp' : null);
 
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const [onlineEnabled, setOnlineEnabled] = useState(true);
@@ -327,11 +336,11 @@ export default function Footer() {
               <button
                 type="button"
                 className="nebula-footer-auth-btn"
-                title={user ? user.nickname || user.username : '管理员登录'}
-                aria-label={user ? '账号' : '登录'}
+                title={shownUser ? shownUser.nickname || shownUser.username : '管理员登录'}
+                aria-label={shownUser ? '账号' : '登录'}
                 onClick={() => setShowLogin(v => !v)}
               >
-                {user && avatarUrl ? (
+                {shownUser && avatarUrl ? (
                   <img src={avatarUrl} alt="" className="nebula-footer-auth-avatar" />
                 ) : (
                   <i className="fa-solid fa-user" aria-hidden="true" />
@@ -339,7 +348,7 @@ export default function Footer() {
               </button>
 
               {/* 登录弹窗（未登录） */}
-              {showLogin && !user && (
+              {showLogin && !shownUser && (
                 <div className="nebula-footer-login">
                   <h3 className="nebula-footer-login-title">
                     <i className={needTotp ? 'fa-solid fa-shield-halved' : 'fa-solid fa-lock'} aria-hidden="true" />
@@ -409,7 +418,7 @@ export default function Footer() {
               )}
 
               {/* 已登录菜单 */}
-              {showLogin && user && (
+              {showLogin && shownUser && (
                 <div className="nebula-footer-login nebula-footer-login-menu">
                   <Link href="/admin" prefetch={false} className="nebula-footer-login-menu-item">
                     <i className="fa-light fa-gauge" aria-hidden="true" /> 控制台

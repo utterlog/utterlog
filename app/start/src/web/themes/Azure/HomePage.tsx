@@ -52,8 +52,27 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 分页数据直接用 props —— 由路由 loader 给，翻页即换路由（见下面的注释）。
   // 这里不留副本 state：page/2 → page/3 是同一条路由，组件不重挂，
   // 用 useState 存副本的话 props 变了它不跟着变，第二次翻页就换不动内容。
-  // Preloaded cache: heroCache[catSlug][modeKey] = post
-  const heroCacheRef = useRef<Record<string, Record<string, any>>>({});
+  // Preloaded cache: heroCache[modeKey] = post
+  //
+  // **用 SSR 已经挑好的那篇预置 'hot' 这一格。** 不预置的话，挂载后那个
+  // effect 必然发一次 `?order_by=view_count` 请求，而它返回的是**全站**最热，
+  // 跟 SSR 从「当前这页文章」里挑出来的通常不是同一篇 → heroSrc 变 →
+  // 整块 hero 盖上模糊 + spinner，至少 hold 500ms → displaySrc 变 →
+  // key={displaySrc} 让 MosaicReveal 重挂、揭示动画重播。
+  //
+  // 效果就是：**每次打开首页，最大的那块视觉元素都会在一秒内重来一次**，
+  // 这正是「显示出来又加载一次」的观感，而且对匿名读者也一样发生。
+  //
+  // 预置之后走 cached 分支，setHeroPost 传的是同一个对象引用，Object.is 相等，
+  // React 不重渲、heroSrc === displaySrc、换图 effect 直接 return —— 一次请求、
+  // 一次 loading、一次动画重播全省掉。5 秒后正常轮到「热评」再换，那是设计
+  // 内的轮播，不是这里要修的东西。
+  //
+  // （更正的做法是让首页 loader 直接下发全站最热那篇，SSR 与客户端选出同一篇；
+  //   那要动 server 端的首页数据源，改动面大得多，先不做。）
+  const heroCacheRef = useRef<Record<string, any>>(
+    heroPost ? { [MODES[0].key]: heroPost } : {},
+  );
 
   useEffect(() => {
     if (!momentLazy.visible || latestMoment) return;

@@ -13,6 +13,31 @@ export default function Footer() {
   const pathname = usePathname();
   const { user, login: storeLogin, logout: storeLogout, isAuthenticated, validate2FA: storeValidate2FA, cancel2FA: storeCancel2FA, checkAuth } = useAuthStore();
 
+  // ── 首帧必须按「未登录」渲染，否则整页 hydration 失败 ──
+  //
+  // useAuthStore 的 persist 配置没有 skipHydration（见 lib/store.ts，对照同文件
+  // 的 useThemeStore 是显式写了的），所以 zustand 在模块求值时就同步从
+  // localStorage 注水 —— 客户端**第一次渲染**就拿得到 user。而 SSR 端没有
+  // localStorage，user 恒为 null。
+  //
+  // 下面 JSX 里 user 的分支不只是文案差异，还有元素类型差异（<img> vs <i>），
+  // 那是结构性失配。而 StartThemeShell 只有一层 <Suspense> 包住整个 ThemeLayout
+  // （Header + children + Footer），所以 footer 里一个图标的差异，代价是 React
+  // 丢弃整棵 SSR 树重新客户端渲染 —— 页面上所有图片重建、mosaic / fade 动画
+  // 全部重播，看起来就是「显示出来又整个重新加载一次」。
+  // router.tsx 开着 defaultViewTransition，还会把这一下放大成可见的交叉淡化。
+  //
+  // 只有登录过的人（localStorage 里有 auth-storage）会撞上，匿名读者两端都是
+  // 未登录分支，不失配 —— 所以站长自己看得见、读者不报。
+  //
+  // 这里只网住**渲染**：hydration 比对的是第一次客户端渲染的输出，authReady
+  // 初值 false 在两端都成立，首帧逐字节对齐；setAuthReady(true) 发生在 commit
+  // 之后，走正常 re-render（React 直接 patch DOM，不再校验 hydration）。
+  // 上面那些 store 方法和下面的 effect 拿到的仍是真实 user，逻辑不受影响。
+  const [authReady, setAuthReady] = useState(false);
+  useEffect(() => { setAuthReady(true); }, []);
+  const shownUser = authReady ? user : null;
+
   // Refresh persisted user (avatar, nickname, etc.) once on mount so
   // localStorage stale data (e.g. old avatar URL) is replaced with the
   // server's current response. No-op when not logged in.
@@ -274,7 +299,7 @@ export default function Footer() {
   }
   const iconLinks: Array<{ icon: string; label: string; href?: string; copy?: string }> = [fixedRssIcon, ...customIconLinks];
 
-  const avatarUrl = user?.avatar || (user ? `https://gravatar.bluecdn.com/avatar/0?s=256&d=mp` : null);
+  const avatarUrl = shownUser?.avatar || (shownUser ? `https://gravatar.bluecdn.com/avatar/0?s=256&d=mp` : null);
 
   // 复制成功后把图标换成绿色对号，2 秒还原。toast 一闪就没，鼠标还停在按钮上时
   // 图标本身给个持续状态，"到底复制上没有"一眼可见。
@@ -465,11 +490,11 @@ export default function Footer() {
                 color: '#bbb', transition: 'all 0.15s',
                 overflow: 'hidden',
               }}
-              title={user ? user.nickname || user.username : '管理员登录'}
+              title={shownUser ? shownUser.nickname || shownUser.username : '管理员登录'}
               onMouseEnter={e => { e.currentTarget.style.color = '#0052D9'; e.currentTarget.style.borderColor = '#0052D9'; }}
               onMouseLeave={e => { e.currentTarget.style.color = '#bbb'; e.currentTarget.style.borderColor = '#ddd'; }}
             >
-              {user ? (
+              {shownUser ? (
                 avatarUrl ? <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null
               ) : (
                 <i className="fa-light fa-user" style={{ fontSize: '15px' }} />
@@ -477,7 +502,7 @@ export default function Footer() {
             </button>
 
             {/* Login popup */}
-            {showLogin && !user && (
+            {showLogin && !shownUser && (
               <div ref={loginRef} className="azure-footer-login-popover" style={{
                 position: 'absolute', bottom: '40px', right: 0, zIndex: 100,
                 width: '280px', background: '#fff', border: '1px solid #e0e0e0',
@@ -618,7 +643,7 @@ export default function Footer() {
             )}
 
             {/* Logged in: click avatar shows menu */}
-            {user && showLogin && (
+            {shownUser && showLogin && (
               <div ref={loginRef} className="azure-footer-login-popover" style={{
                 position: 'absolute', bottom: '36px', right: 0, zIndex: 100,
                 background: '#fff', border: '1px solid #e0e0e0', boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
