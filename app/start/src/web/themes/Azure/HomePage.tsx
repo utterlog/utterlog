@@ -11,7 +11,6 @@ import type { CSSProperties } from 'react';
 import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
-import LoadingBars from '@/components/blog/LoadingBars';
 import { getCategoryIcon } from './constants';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
@@ -62,9 +61,13 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   // 这正是「显示出来又加载一次」的观感，而且对匿名读者也一样发生。
   //
   // 预置之后走 cached 分支，setHeroPost 传的是同一个对象引用，Object.is 相等，
-  // React 不重渲、heroSrc === displaySrc、换图 effect 直接 return —— 一次请求、
-  // 一次 loading、一次动画重播全省掉。5 秒后正常轮到「热评」再换，那是设计
-  // 内的轮播，不是这里要修的东西。
+  // React 不重渲、heroSrc === displaySrc、换图 effect 直接 return —— 挂载时那
+  // 一次多余的请求和换图全省掉。
+  //
+  // 但这只解决了「挂载那一下」。5 秒后轮到「热评」、10 秒后「随机」，照样会
+  // 换图 —— 当时把那个归成「设计内的轮播，不是要修的东西」，判断错了：换图
+  // 本身没问题，问题是换图时盖的那层模糊 + spinner 让它看起来像页面在重载。
+  // 蒙层已在下面的换图 effect 里删掉。
   //
   // （更正的做法是让首页 loader 直接下发全站最热那篇，SSR 与客户端选出同一篇；
   //   那要动 server 端的首页数据源，改动面大得多，先不做。）
@@ -146,41 +149,42 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
 
   const heroSrc = heroPost?.cover_url || (heroPost ? randomCoverUrl(heroPost.id, options) : '');
 
-  // ── Hero 切换过渡 ──
-  // 之前点分类 tab → heroSrc 直接换 → <img src> 立刻替换，浏览器加载完
-  // 才显示新图，看起来像「啪一下硬切」。
-  // 现在加一层「先预加载新图 + 显示 loading 蒙层 + 至少展示 700ms」的
-  // 过场，新图加载完成且最短时间到了再切 displaySrc，配合 key 触发
-  // 现有的 [data-blog-image][data-loaded] 淡入动画。
-  // 后台「图片显示效果」选了马赛克时，hero 换图走逐块揭示。
-  // 时长由 CSS 的 animation-delay 波次决定，不吃 image_display_duration ——
-  // 那个值是给正文小图淡入定的，跟这里的逐块节奏不是一回事。
+  // ── Hero 换图：静默预载，载好再换 ──
+  //
+  // **这里原来会盖一层模糊 + spinner，至少 hold 500ms。删掉了。**
+  //
+  // 那层蒙层是给「用户点分类 tab 主动切换」设计的：主动操作需要即时反馈，
+  // 否则点了没动静。但那排 tab 早就删了（见上面轮播那段注释），现在 hero
+  // 的每一次换图都是**自动**的 —— 读者没做任何操作，却看到首屏最大的一块
+  // 盖上模糊 + 转圈 + 至少半秒，然后图片重新揭示一遍。每 5 秒来一次。
+  //
+  // 实测这就是「首页打开后又刷新两次」的真身：网络日志里文档只请求了一次
+  // （不是真刷新），但同一次加载里多出 order_by=comment_count 与
+  // order_by=random 两个请求 —— 轮播跑了两轮，对应看到的「两次」。
+  //
+  // 自动切换的正确做法是不打扰：后台把新图下完，切上去，让图片自己的淡入 /
+  // 马赛克揭示演一遍就够了。没有主动操作，就不需要加载反馈。
+  //
+  // 顺带修掉一个真 bug：原来清除蒙层的 setHeroLoading(false) 套在两层
+  // requestAnimationFrame 里，而 **rAF 在隐藏标签页里不触发** —— 后台打开
+  // 首页（cmd+点击、「在新标签页打开」）时 hero 会一直卡在模糊 + spinner 下，
+  // 直到用户切过去才恢复。现在没有蒙层，这条路径不存在了。
+  //
+  // 后台「图片显示效果」选马赛克时，hero 换图走逐块揭示；时长由 CSS 的
+  // animation-delay 波次决定，不吃 image_display_duration —— 那个值是给正文
+  // 小图淡入定的，跟这里的逐块节奏不是一回事。
   const mosaic = options?.image_display_effect === 'mosaic';
 
   const [displaySrc, setDisplaySrc] = useState(heroSrc);
-  const [heroLoading, setHeroLoading] = useState(false);
   useEffect(() => {
     if (!heroSrc || heroSrc === displaySrc) return;
-    setHeroLoading(true);
-    const start = Date.now();
     const img = new window.Image();
     let cancelled = false;
-    const finish = () => {
-      if (cancelled) return;
-      const elapsed = Date.now() - start;
-      const minHold = 500; // 至少展示 500ms 的 loading 圆圈
-      setTimeout(() => {
-        if (cancelled) return;
-        setDisplaySrc(heroSrc);
-        // 给浏览器一帧切 src + key，再淡出 spinner，否则 spinner 消失
-        // 时新 img 还没贴上 dom 会闪一下旧图
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => setHeroLoading(false));
-        });
-      }, Math.max(0, minHold - elapsed));
-    };
+    // 载完（或失败）才换。失败也换：让 <img> 自己去显示它的 alt / 破图，
+    // 总好过永远停在旧图上、下一轮又被新的 heroSrc 顶掉。
+    const finish = () => { if (!cancelled) setDisplaySrc(heroSrc); };
     img.onload = finish;
-    img.onerror = finish; // 加载失败也退出 loading 态，避免卡死
+    img.onerror = finish;
     img.src = heroSrc;
     return () => { cancelled = true; };
   }, [heroSrc, displaySrc]);
@@ -234,18 +238,6 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                   ) : (
                     <FadeCover key={displaySrc} src={displaySrc} alt={heroPost.title} className="azure-hero-cover" />
                   )}
-                  {/* Loading overlay —— 切分类时盖在旧图上，模糊 + 半透黑底
-                      + 中央旋转环 spinner。淡出由 transition 0.4s 控制，跟新图
-                      淡入并行，整体过渡总长 ≈ 500ms（最短展示）+ 0.4s（淡出）。 */}
-                  <div
-                    aria-hidden={!heroLoading}
-                    className={`azure-hero-loading${heroLoading ? ' active' : ''}`}
-                  >
-                    {/* banner 是块状区域，用三条竖条比圆环压得住；小尺寸的
-                        行内位置仍用 LoadingSpinner。动画同样是 CSS 而非 SMIL ——
-                        SMIL 在 hydration 边界会被冻住，这里原本就是为此换过一次。 */}
-                    <LoadingBars size={34} color="#fff" />
-                  </div>
                   {/* Title strip: same height as one left-sidebar tab
                       so the baseline lines up with the last tab. No
                       background overlay — readability comes entirely

@@ -3137,24 +3137,11 @@ div:hover > .comment-hint { opacity: 0.75; }
   object-fit: cover;
   object-position: center;
 }
-[data-theme="Azure"] .azure-hero-loading {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.32);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-[data-theme="Azure"] .azure-hero-loading.active {
-  opacity: 1;
-  pointer-events: auto;
-}
+/* .azure-hero-loading 已删（2026-08-18）：hero 换图的加载蒙层（半透黑 +
+   blur(6px)）随组件一起摘掉了。它是给「用户点分类 tab 主动切换」设计的，
+   而那排 tab 早已删除 —— 现在每次换图都是自动轮播，读者没做任何操作却看到
+   首屏最大的一块盖上模糊转圈半秒再重新揭示，这正是「首页打开后又刷新两次」
+   的观感来源。改为静默预载、载好再换。 */
 [data-theme="Azure"] .azure-hero-titlebar {
   position: absolute;
   right: 0;
