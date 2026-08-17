@@ -652,6 +652,8 @@ body {
    独立实现：Nebula 那条 `.archive-cat-card::after { display: none }` 能
    生效的前提，是下面 `content: ''` 把伪元素生成出来；基类没了，伪元素
    根本不存在，那条覆盖变成空转（不报错，静默失效）。 */
+@layer blog-base {
+
 .archive-cat-card { transition: box-shadow 0.3s ease; }
 .archive-cat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .archive-cat-card:hover > i:first-child {
@@ -672,6 +674,8 @@ body {
   backdrop-filter: blur(1.5px);
   background: rgba(255,255,255,0.15);
 }
+
+} /* ── @layer blog-base 结束（归档分类卡）── */
 
 /* (已删除旧 dashboard sidebar 的 nav a:hover 全局背景规则，
    blog header 的导航不需要灰色 hover 背景，admin SPA 有自己的样式作用域) */
@@ -1427,6 +1431,12 @@ img[data-blog-image][data-loaded="0"] {
    themes/<T>/styles.css 里 override `--md-download-bg`、`--md-download-accent`、
    `--md-download-text` 调成跟主题协调的视觉。
    ──────────────────────────────────────────────────────────────── */
+/* ── 进 @layer blog-base（下载卡片）──
+   注释里本来就写着「可由主题覆盖」，分层后主题不必再套 [data-theme] 前缀。
+   本段那两处 !important 是**故意**用来压主题的 .blog-prose a 链接样式的，
+   分层不影响它 —— important 永远胜过 normal，与层无关。 */
+@layer blog-base {
+
 .md-download-card {
   /* 默认视觉：深色 panel + 橙色 accent，跟原 inline 视觉一致 */
   --md-download-bg: #1a1a1a;
@@ -1518,6 +1528,8 @@ img[data-blog-image][data-loaded="0"] {
   }
 }
 
+} /* ── @layer blog-base 结束（下载卡片）── */
+
 /* ────────────────────────────────────────────────────────────────
    .cover-zoom — single, theme-agnostic hover-scale wrapper.
    Apply to any <a> / <div> wrapping a <img data-blog-image> (PostCard,
@@ -1525,6 +1537,11 @@ img[data-blog-image][data-loaded="0"] {
    per-theme classes (.azure-img-hover-wrap, .post-prev-next-link
    hover rule etc.) so every cover shares one transition.
    ──────────────────────────────────────────────────────────────── */
+/* ── 进 @layer blog-base（封面 hover 放大）──
+   注释里写着这是「theme-agnostic」的统一实现，取代了各主题原来那几个
+   私有类。分层让想改幅度/曲线的主题可以直接覆盖。 */
+@layer blog-base {
+
 .cover-zoom :where([data-blog-image] img, img[data-blog-image]) {
   transform: translate3d(0, 0, 0) scale(1);
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1539,6 +1556,8 @@ img[data-blog-image][data-loaded="0"] {
     transition: none !important;
   }
 }
+
+} /* ── @layer blog-base 结束（封面 hover 放大）── */
 
 /* 1. fade — reverts to the original LazyImage behaviour: pre-load
       we show a blurred, transparent placeholder; the real image fades
@@ -2402,6 +2421,11 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 
 } /* ── @layer blog-base 结束（友链）── */
 
+/* ── 进 @layer blog-base（动态嵌入卡）──
+   主题侧对 .utter-moment-embed* 零处 !important（已核实）。Nebula 有一组
+   [data-theme] 覆盖，分层后它照旧赢（未分层胜分层），行为不变。 */
+@layer blog-base {
+
 .blog-prose .utter-moment-embed,
 .utter-moment-embed {
   --moment-accent: var(--color-primary, #0052d9);
@@ -2514,6 +2538,8 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   background: #f8fafc;
   border-left-color: #94a3b8;
 }
+
+} /* ── @layer blog-base 结束（动态嵌入卡）── */
 
 .blog-prose .github-repo-card,
 .github-repo-card {
@@ -2717,6 +2743,12 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   min-width: 1px;
 }
 
+/* ── 进 @layer blog-base（X 帖子嵌入）──
+   主题侧零处 !important。注意本段那两条 text-decoration 的 !important 在
+   globals 侧，是压 .blog-prose a 下划线用的，分层不影响（important 胜过
+   normal 与层无关）。 */
+@layer blog-base {
+
 .blog-prose .x-post-embed,
 .x-post-embed {
   margin: 24px 0;
@@ -2756,6 +2788,8 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 .x-post-embed.is-loaded .x-post-embed__fallback {
   display: none;
 }
+
+} /* ── @layer blog-base 结束（X 帖子嵌入）── */
 
 /* 友链网格的窄屏覆盖 —— 跟着上面的基础规则一起进 layer。
    这两条原先和 github-repo-card 的窄屏覆盖挤在同一个 @media 块里；基础规则
