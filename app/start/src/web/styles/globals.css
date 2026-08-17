@@ -3,8 +3,10 @@
    开始下载，页面会先用系统字体渲染再闪一下换过来。
    改由 lib/document.ts 的 startDocumentLinks 以 <link> 注入，与其余样式并行。 */
 @import "tailwindcss";
-@import "./video-post.css";
-@import "../components/pages/about/about-content.css";
+/* video-post.css 与 about-content.css 的 @import 已移走（2026-08-17）：
+   它们是**前台页面级**样式（视频文章正文、关于页），按「globals 只留后台与
+   硬性基础设施」的原则应归主题。现在由 themes/_base/blog-components.css
+   引入，构建期内联进各主题的样式表。 */
 
 /* Scrollbar: reserve space, track matches background, thumb hidden until scroll */
 /* ===== Scrollbar: prevent layout shift ===== */
@@ -545,23 +547,9 @@ body {
    backend/services 的退订页和评论审核页各自带 inline <style> 自定义
    .card，不依赖这里。 */
 
-/* ========================================
-   Blog Prose (Claude theme, independent)
-   ======================================== */
-:root {
-  --claude-bg: #FAF9F6;
-  --claude-surface: #FFFFFF;
-  --claude-primary: #DA7756;
-  --claude-primary-light: #E8956F;
-  --claude-primary-dark: #C4633F;
-  --claude-text: #1A1410;
-  --claude-text-secondary: #6B5B52;
-  --claude-text-muted: #9B8E85;
-  --claude-border: #E8E0D8;
-  --claude-tag: #F5F0EB;
-  --claude-code: #F8F5F1;
-  --claude-hover: #F2EDE7;
-}
+/* 这里原有一组 --claude-* 变量（12 个，标题写着 "Blog Prose (Claude theme)"）。
+   全仓 0 引用 —— app/start 与 app/admin 里没有任何 var(--claude-*)。
+   2026-08-17 删。 */
 
 
 /* ────────────────────────────────────────────────────────────────
