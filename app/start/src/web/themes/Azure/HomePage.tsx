@@ -176,13 +176,16 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const mosaic = options?.image_display_effect === 'mosaic';
 
   const [displaySrc, setDisplaySrc] = useState(heroSrc);
+  // 首图之后就不再演马赛克了 —— 见下面渲染处的注释。SSR 与客户端首帧都是
+  // false，不会引起 hydration 失配。
+  const [heroSwapped, setHeroSwapped] = useState(false);
   useEffect(() => {
     if (!heroSrc || heroSrc === displaySrc) return;
     const img = new window.Image();
     let cancelled = false;
     // 载完（或失败）才换。失败也换：让 <img> 自己去显示它的 alt / 破图，
     // 总好过永远停在旧图上、下一轮又被新的 heroSrc 顶掉。
-    const finish = () => { if (!cancelled) setDisplaySrc(heroSrc); };
+    const finish = () => { if (!cancelled) { setDisplaySrc(heroSrc); setHeroSwapped(true); } };
     img.onload = finish;
     img.onerror = finish;
     img.src = heroSrc;
@@ -228,7 +231,17 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
                   {/* 后台把「图片显示效果」设成 pixel 时，hero 换图走马赛克消散；
                       其余效果仍走 FadeCover 那套淡入。像素化只给 hero 用 ——
                       正文里几十张图各跑一条 rAF 不划算，而 hero 一次只有一张。 */}
-                  {mosaic ? (
+                  {/* **马赛克只演首图。**
+                      MosaicReveal 会铺 30×6 = 180 个格子做逐块揭示。放在
+                      key={displaySrc} 上意味着每次换图都重挂、整套 180 格重播
+                      —— 而 hero 是 5 秒一轮的自动轮播，于是首屏最大的一块每
+                      5 秒抖一次。这正是「首页强制刷新后还是多次闪烁」的来源：
+                      加载时揭示一遍、5 秒一遍、10 秒一遍。
+
+                      首次出现时演一遍是有价值的（那是这个主题的入场效果，
+                      而且此刻读者刚落地、本来就在等内容）；之后的自动切换
+                      读者没做任何操作，用 FadeCover 的淡入就够，不该再抖。 */}
+                  {mosaic && !heroSwapped ? (
                     <MosaicReveal
                       key={displaySrc}
                       src={displaySrc}
