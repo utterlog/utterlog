@@ -24,7 +24,10 @@ async function sha256(message: string): Promise<string> {
 }
 
 // PoW solver
-async function solvePoW(challenge: string, difficulty: number, onProgress?: (attempts: number) => void): Promise<string> {
+// onProgress 参数已删（2026-08-17）：唯一的实参是 CommentCaptcha 里那个
+// attempts state，而它 set 了从不读 —— 界面上没有任何地方显示尝试次数。
+// 连带这里每 1000 次迭代一回的回调也省了。
+async function solvePoW(challenge: string, difficulty: number): Promise<string> {
   const prefix = '0'.repeat(difficulty);
   let nonce = 0;
   const batchSize = 1000;
@@ -35,7 +38,6 @@ async function solvePoW(challenge: string, difficulty: number, onProgress?: (att
       if (hash.startsWith(prefix)) return n;
       nonce++;
     }
-    onProgress?.(nonce);
     await new Promise(r => setTimeout(r, 0));
   }
 }
@@ -44,7 +46,6 @@ export default function CommentCaptcha({ onVerified, onReset }: CommentCaptchaPr
   const [mode, setMode] = useState<'pow' | 'image' | 'off' | null>(null);
   // PoW state
   const [powState, setPowState] = useState<'idle' | 'loading' | 'solving' | 'verified' | 'hidden'>('idle');
-  const [attempts, setAttempts] = useState(0);
   const challengeRef = useRef<string>('');
   const timerRef = useRef<NodeJS.Timeout>(undefined);
   // Image captcha state
@@ -85,7 +86,7 @@ export default function CommentCaptcha({ onVerified, onReset }: CommentCaptchaPr
       setPowState('solving');
       const expiresIn = (expires - Math.floor(Date.now() / 1000)) * 1000;
       timerRef.current = setTimeout(() => { setPowState('idle'); onReset?.(); }, expiresIn);
-      const nonce = await solvePoW(challenge, difficulty, setAttempts);
+      const nonce = await solvePoW(challenge, difficulty);
       setPowState('verified');
       onVerified({ challenge, nonce });
       setTimeout(() => setPowState('hidden'), 2000);

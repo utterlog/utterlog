@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { table } from './config';
-import { exec, intParam, many, nowUnix, one } from './db/helpers';
+import { intParam, many, nowUnix, one } from './db/helpers';
 import { optionValue } from './db/options';
 import { parsePermalinkPath } from './services/permalink';
 import { readOptionMap } from './services/options';

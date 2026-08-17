@@ -1,7 +1,7 @@
 'use client';
 
 import '@/components/blog/toc-styles.css';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface TocItem {
   id: string;

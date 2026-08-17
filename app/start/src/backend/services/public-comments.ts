@@ -18,10 +18,6 @@ export type PublicCommentRequest = {
   userId: number;
 };
 
-function htmlEscape(value: string) {
-  return value.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
-}
-
 async function validPassportToken(token: string) {
   const value = token.trim();
   if (!value) return false;

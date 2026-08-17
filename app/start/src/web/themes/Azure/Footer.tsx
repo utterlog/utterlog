@@ -55,15 +55,10 @@ export default function Footer() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [onlineEnabled, setOnlineEnabled] = useState(true);
 
-  // Scroll to top visibility — 超过 2 倍视口高度才显示
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  useEffect(() => {
-    const main = document.querySelector('.blog-main');
-    if (!main) return;
-    const onScroll = () => setShowScrollTop(main.scrollTop > 300);
-    main.addEventListener('scroll', onScroll, { passive: true });
-    return () => main.removeEventListener('scroll', onScroll);
-  }, []);
+  // 这里原有 showScrollTop state + 一个 .blog-main 的 scroll 监听，用来控制
+  // 「回到顶部」按钮的显隐。但那个按钮早已改成常驻渲染（固定 opacity 0.18、
+  // absolute 定位在 footer 内），从不读这个 state —— 滚到 footer 才看得见它，
+  // 本来就不需要门控。2026-08-17 删，顺带摘掉一个全站的 scroll 监听。
 
   // Login state
   const [showLogin, setShowLogin] = useState(false);

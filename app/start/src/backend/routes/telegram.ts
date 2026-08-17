@@ -1,6 +1,6 @@
 import { extname } from 'node:path';
 import { config, table } from '../config';
-import { exec, intParam, many, nowUnix, one } from '../db/helpers';
+import { exec, intParam, nowUnix, one } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
 import { sendConfiguredEmail } from '../email';
 import {
@@ -14,10 +14,6 @@ import { callAiText } from './ai';
 
 function parseJsonOption<T>(value: string, fallback: T): T {
   try { return JSON.parse(value) as T; } catch { return fallback; }
-}
-
-function htmlEscape(value: string) {
-  return value.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
 }
 
 async function telegramApi(method: string, token: string, payload?: Record<string, unknown>) {

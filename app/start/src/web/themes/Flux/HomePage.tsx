@@ -7,7 +7,6 @@ import FadeCover from '@/components/blog/FadeCover';
 import { randomCoverUrl } from '@/lib/blog-image';
 import { useThemeContext } from '@/lib/theme-context';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from '@/components/AppLink';
 import { getCategoryIcon } from './constants';
 import PostLink from '@/components/blog/PostLink';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
@@ -34,7 +33,6 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const [totalPostCount, setTotalPostCount] = useState(serverStats.post_count || 0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // 分页数据直接用 props，由路由 loader 给（见 routes/index.tsx）。
   // 不留副本 state：翻页是同一条路由内换 search，组件不重挂，

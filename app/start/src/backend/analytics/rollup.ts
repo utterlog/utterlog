@@ -1,5 +1,5 @@
-import { config, table } from '../config';
-import { exec, many, nowUnix, one } from '../db/helpers';
+import { table } from '../config';
+import { exec, many, nowUnix } from '../db/helpers';
 import { optionValue } from '../db/options';
 
 const retentionDays = 90;

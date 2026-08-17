@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Link from '@/components/AppLink';
 import PostLink from '@/components/blog/PostLink';
 import SharedFadeCover from '@/components/blog/FadeCover';
 import { randomCoverUrl } from '@/lib/blog-image';

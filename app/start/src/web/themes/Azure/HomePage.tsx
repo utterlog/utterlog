@@ -8,7 +8,6 @@ import FadeCover from '@/components/blog/FadeCover';
 import MosaicReveal from '@/components/blog/MosaicReveal';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
-import Link from '@/components/AppLink';
 import { useThemeContext } from '@/lib/theme-context';
 import { randomCoverUrl } from '@/lib/blog-image';
 import PostLink from '@/components/blog/PostLink';
@@ -47,7 +46,6 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
   const momentLazy = useLazyVisible<HTMLDivElement>();
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // 分页数据直接用 props —— 由路由 loader 给，翻页即换路由（见下面的注释）。
   // 这里不留副本 state：page/2 → page/3 是同一条路由，组件不重挂，

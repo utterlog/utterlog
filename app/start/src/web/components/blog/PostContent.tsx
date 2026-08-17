@@ -1,7 +1,7 @@
 'use client';
 
 import './code-highlight-styles.css';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 // 用 /common 而不是全量：全量带 200 多种语言的语法定义，实测把文章页的

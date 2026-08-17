@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { mkdirSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { config, table } from '../config';
 import { exec, intParam, many, nowUnix, one, pageParams } from '../db/helpers';
