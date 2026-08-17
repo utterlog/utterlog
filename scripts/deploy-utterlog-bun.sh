@@ -136,6 +136,25 @@ log "rsync 根依赖清单文件"
 rsync -az -e "$RSYNC_SSH" package.json bun.lock bunfig.toml tsconfig.json "${USER}@${HOST}:${REMOTE_PATH}/"
 rsync -az -e "$RSYNC_SSH" scripts/update-bun.sh "${USER}@${HOST}:${REMOTE_PATH}/scripts/"
 
+# workspace 成员的 package.json 也要在 install 之前就位。
+#
+# 这是个 bun workspace（根 package.json 的 workspaces 指向 app/*），
+# --frozen-lockfile 会校验 **每个成员**的 package.json 与 bun.lock 是否一致。
+# 上面只传了根清单，而 app/ 要等第 3 步才同步 —— 于是改动任何一个
+# app/*/package.json（加减依赖）都会让服务器在 install 那一刻拿到
+# 「新 bun.lock + 旧成员 package.json」，直接报：
+#     error: lockfile had changes, but lockfile is frozen
+# 2026-08-17 摘掉 app/admin 的 motion 依赖时踩到，部署在这里中断
+# （好在这一步在换代码之前，线上仍是旧版本、服务正常）。
+#
+# 只传 package.json，不传其余源码 —— 第 3 步「换代码」的窗口该多短还是多短。
+log "rsync workspace 成员的 package.json"
+for wsdir in app/*/; do
+  [ -f "${wsdir}package.json" ] || continue
+  "${SSH[@]}" "mkdir -p '${REMOTE_PATH}/${wsdir}'"
+  rsync -az -e "$RSYNC_SSH" "${wsdir}package.json" "${USER}@${HOST}:${REMOTE_PATH}/${wsdir}"
+done
+
 log "服务器: bun install --frozen-lockfile（此时线上仍是旧版本，服务正常）"
 "${SSH[@]}" bash -s <<EOF
 ${REMOTE_PRELUDE}
