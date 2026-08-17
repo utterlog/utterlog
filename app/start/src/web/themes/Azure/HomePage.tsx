@@ -181,9 +181,16 @@ export default function HomePage({ posts, page, totalPages, categories: serverCa
         // 下，直到用户切过去才恢复。实测确认过：隐藏标签页里图片
         // complete === true、naturalWidth 1920（早就下完了），
         // .azure-hero-loading 却始终带 active。
-        // 两条路谁先到谁生效，clearedRef 保证只跑一次。
+        // 两条路谁先到谁生效，cleared 标志保证只跑一次。
+        //
+        // ⚠️ **这里绝对不能再检查 cancelled。** 上一行的 setDisplaySrc 改的
+        // 正是本 effect 的依赖之一（deps 是 [heroSrc, displaySrc]），React 会
+        // 先执行清理把 cancelled 置 true 再重跑 effect —— 等 rAF / timeout
+        // 触发时 cancelled 必然已经是 true，加了这个守卫就等于永远不清除，
+        // banner 永久卡在 loading。2026-08-18 这么写过一次，线上直接坏掉。
+        // 清除 loading 是幂等的收尾动作，晚一点执行也无害，不需要防重入。
         let cleared = false;
-        const clear = () => { if (!cleared && !cancelled) { cleared = true; setHeroLoading(false); } };
+        const clear = () => { if (!cleared) { cleared = true; setHeroLoading(false); } };
         requestAnimationFrame(() => { requestAnimationFrame(clear); });
         setTimeout(clear, 120);
       }, Math.max(0, minHold - elapsed));
