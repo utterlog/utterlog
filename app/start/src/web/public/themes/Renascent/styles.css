@@ -2224,7 +2224,8 @@
 }
 
 /* 评论区直角化 */
-[data-theme="Renascent"] .renascent-comments .comment-item,
+/* 逗号组里原本还有一支 .renascent-comments .comment-item —— 全站没有这个类，
+   而且下面那支 [class*="comment"] 本来就把它整个覆盖了，2026-08-17 删。 */
 [data-theme="Renascent"] .renascent-comments [class*="comment"] {
   border-radius: 0 !important;
 }

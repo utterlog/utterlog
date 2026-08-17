@@ -1161,15 +1161,9 @@
   color: var(--color-focus-ring);
 }
 
-[data-theme="Nebula"] .nebula-card-kicker .nebula-card-category {
-  color: var(--color-text-sub);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-[data-theme="Nebula"] .nebula-card-kicker .nebula-card-category:hover {
-  color: var(--color-focus-ring);
-}
+/* .nebula-card-category 已删（2026-08-17）：选择器要求它在 .nebula-card-kicker
+   里，而 PostCard.tsx 的 kicker 里只有 <time> 和两个 -kicker-stat，分类只进了
+   arrow 的 aria-label/title。结构上不可能被正文 HTML 误命中。 */
 
 [data-theme="Nebula"] .nebula-card-title {
   margin: 0;
@@ -2243,11 +2237,9 @@
   border-color: var(--nebula-border-blue-soft);
 }
 
-[data-theme="Nebula"] .post-related-tab-count {
-  font-family: var(--nebula-font-mono);
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-}
+/* .post-related-tab-count 已删（2026-08-17）：三份 PostNavigation 实现的 tab
+   按钮 children 只有 {tab.label}，count 仅用于 disabled={tab.count === 0}，
+   从来没渲染成元素。Utterlog 那份同时删。 */
 
 [data-theme="Nebula"] .post-related-refresh {
   width: 32px;

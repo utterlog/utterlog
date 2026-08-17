@@ -372,8 +372,13 @@ body {
 .bg-card { background-color: var(--color-bg-card); }
 .bg-soft { background-color: var(--color-bg-soft); }
 .bg-primary { background-color: var(--color-primary); }
-.hover\:bg-primary-hover:hover { background-color: var(--color-primary-hover); }
-.bg-primary-active { background-color: var(--color-primary-active); }
+/* .hover\:bg-primary-hover:hover 与 .bg-primary-active 已于 2026-08-17 删除，
+   前台 0 处使用。**只删了这两个工具类，CSS 变量全部保留** ——
+   --color-primary-hover 还有 .btn-primary:hover 等 3 处在用，
+   --color-primary-active 还有 2 处。
+   注意别连坐下面 .text-* 区块里的 .hover\:text-primary-themed:hover：
+   那条是活的（DefaultTagsPage / DefaultArchivePage / DefaultCategoriesPage /
+   LoginPage 都在用），和上面那条一样是转义选择器，很容易一起误删。 */
 
 /* Text */
 .text-main { color: var(--color-text-main); }
@@ -382,7 +387,8 @@ body {
 
 /* Border */
 .border-line { border-color: var(--color-border); }
-.border-divider { border-color: var(--color-divider); }
+/* .border-divider 已于 2026-08-17 删除（前台 0 处使用；Tailwind 那边对应的是
+   divide-*，不撞名）。变量 --color-divider 保留，.btn-secondary:hover 等在用。 */
 
 /* Logo font */
 .font-logo { font-family: "Ubuntu", "Fugaz One", sans-serif; }
@@ -630,26 +636,10 @@ body {
   gap: 0.625rem;
 }
 
-/* ---------- Loading state ----------
-   data-loading="true" 把按钮锁住并在文本前插入一个旋转 spinner。配合
-   <Button loading> 一起用 —— 组件层把 children 替换成 spinner，class
-   只负责暗化和禁交互（disabled 也会被设上，所以视觉/交互都到位）。 */
-.btn[data-loading="true"] {
-  cursor: wait;
-}
-.btn .btn-spinner {
-  width: 1em;
-  height: 1em;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: btn-spin 0.7s linear infinite;
-  display: inline-block;
-  vertical-align: -0.15em;
-}
-@keyframes btn-spin {
-  to { transform: rotate(360deg); }
-}
+/* Loading state（.btn[data-loading] / .btn .btn-spinner / @keyframes btn-spin）
+   已于 2026-08-17 删除。它们服务的那个 <Button loading> 组件早就不存在了
+   （find app/start/src -iname '*utton*' 为空），注释是化石。前台唯一的 .btn
+   消费者 LoginPage.tsx 的 loading 态走的是 Font Awesome 的 fa-spinner。 */
 
 /* Archive category card — background icon hover
 
@@ -1357,12 +1347,10 @@ div:hover > .comment-hint { opacity: 0.75 !important; }
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
+/* 手写的 .animate-spin + @keyframes spin 已于 2026-08-17 删除：前台 tsx 里
+   0 处使用，而且它跟 Tailwind v4 内置的 animate-spin 同名 —— 文件顶部
+   @import "tailwindcss"，将来真有组件写上 animate-spin，Tailwind 会自动生成，
+   不需要这份手写兜底。admin 侧在 v2.3.1 做过同样的清理。 */
 
 @keyframes vinyl-spin {
   from { transform: rotate(0deg); }
@@ -2932,38 +2920,19 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
 
 /* ============ 页面切换过渡 ============
 
-   两段互补，各管一跳：
+   只剩浏览器原生的交叉淡化（router.tsx 的 defaultViewTransition），
+   在导航那一刻触发，同一次导航内的后续渲染不会再触发。
 
-     旧页面 ──①view transition──> 加载占位 ──②route-enter──> 真实内容
-
-   ① 浏览器原生的交叉淡化（router.tsx 的 defaultViewTransition）。
-      只在导航那一刻触发，同一次导航内的后续渲染不会再触发。
-   ② 占位换成内容时的淡入。这一跳 view transition 管不到，
-      不补的话内容还是「啪」地出现。
-
-   所以两者不会叠加成双重淡入。 */
+   原来还有第二跳：占位换成内容时用 .route-enter 做淡入。那层包装在
+   cac68f1「回滚页面切换的 View Transition，修复 /links 无限闪烁」里
+   已经从 JSX 删掉了，CSS 忘了跟，于是 .route-enter 和 @keyframes
+   routeEnter 在文件里躺了很久没人用。2026-08-17 一并清掉。 */
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
   /* 默认 0.25s 偏慢，切页面这种高频操作压到 180ms 更跟手 */
   animation-duration: 180ms;
   animation-timing-function: ease;
-}
-
-.route-enter {
-  animation: routeEnter 260ms ease-out;
-}
-
-@keyframes routeEnter {
-  from {
-    opacity: 0;
-    /* 只上移 6px —— 位移太大会让人觉得「页面在飞」，反而慢 */
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 /* ---- 页面加载骨架（Suspense fallback）----
@@ -3063,11 +3032,6 @@ html[data-img-effect="none"] :where([data-blog-image] img, img[data-blog-image])
   .route-veil,
   .route-pending {
     transition: none;
-  }
-
-  /* 页面切换的两段过渡一起关掉，直接瞬间切 */
-  .route-enter {
-    animation: none;
   }
 
   ::view-transition-old(root),

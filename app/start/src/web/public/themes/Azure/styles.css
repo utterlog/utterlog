@@ -1535,15 +1535,12 @@
   [data-theme="Azure"] .azure-footer-scroll-top {
     display: none !important;
   }
-  [data-theme="Azure"] .azure-footer-online-popover,
+  /* .azure-footer-online-popover 已删（2026-08-17）：Footer.tsx:404-411 的注释
+     写明这个在线访客弹层是出于隐私考虑主动砍掉的（不再展示访客头像/城市），
+     组件已经不渲染它了。.azure-footer-login-popover 是活的，保留。 */
   [data-theme="Azure"] .azure-footer-login-popover {
     width: min(280px, calc(100vw - 40px)) !important;
     max-width: calc(100vw - 40px) !important;
-  }
-  [data-theme="Azure"] .azure-footer-online-popover {
-    right: auto !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
   }
   [data-theme="Azure"] .azure-footer-login-popover {
     position: fixed !important;
@@ -1810,7 +1807,9 @@
 }
 [data-theme="Azure"] .blog-prose a:not(h1 a):not(h2 a):not(h3 a):not(h4 a):hover { color: var(--color-primary-active); }
 
-[data-theme="Azure"] .blog-external-link:hover .blog-link-icon { opacity: 1; }
+/* .blog-link-icon 已删（2026-08-17）：全前台没有这个类的任何生产者，
+   PostContent.tsx:119 的外链里只有 favicon <img> 和一个 fa 图标，透明度改内联控制了。
+   下面 .blog-external-link 是活的，别一起删。 */
 
 /* Mshots preview bubble tooltip */
 [data-theme="Azure"] .blog-external-link { position: relative; }

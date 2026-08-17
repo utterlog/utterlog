@@ -85,7 +85,8 @@
 }
 [data-theme="Utterlog"] .blog-prose a:not(h1 a):not(h2 a):not(h3 a):not(h4 a):hover { color: var(--color-primary-active); }
 
-[data-theme="Utterlog"] .blog-external-link:hover .blog-link-icon { opacity: 1; }
+/* .blog-link-icon 已删（2026-08-17），同 Azure —— 无任何生产者。
+   下面 .blog-external-link 是活的。 */
 
 /* Mshots preview bubble tooltip */
 [data-theme="Utterlog"] .blog-external-link { position: relative; }
@@ -247,15 +248,7 @@
   font-weight: 600;
   border-bottom-color: var(--color-primary);
 }
-[data-theme="Utterlog"] .post-related-tab-count {
-  font-size: 11px;
-  padding: 0 5px;
-  border-radius: 4px;
-  background: var(--color-bg-soft);
-  color: var(--color-text-dim);
-  font-weight: 500;
-  line-height: 1.5;
-}
+/* .post-related-tab-count 已删（2026-08-17），同 Nebula —— count 从不渲染成元素。 */
 
 /* Related posts — 卡片网格。
    PostNavigation.tsx 的渲染从老的"标题 + 阅读量"列表升级到了带封面

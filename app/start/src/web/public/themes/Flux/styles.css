@@ -102,9 +102,9 @@
   letter-spacing: 0;
 }
 
-[data-theme="Flux"] .flux-nav {
-  display: flex; align-items: center; gap: 24px;
-}
+/* .flux-nav 已删（2026-08-17）：Header.tsx:86 那个 <nav> 没有 className，
+   只有和这条内容一字不差的 inline style，是改内联时忘了清。
+   注意 .flux-nav-link 是活的（Header.tsx:91），别按前缀批删。 */
 [data-theme="Flux"] .flux-nav-link {
   font-size: 14px; font-weight: 500;
   color: var(--color-brand-black);
