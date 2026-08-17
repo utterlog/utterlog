@@ -32,9 +32,18 @@ export const Route = createRootRoute({
     ],
     links: startDocumentLinks(loaderData),
     // LiteZoom —— 正文图片灯箱（缩放 / 平移 / 缩略图条）。单文件零依赖 ~20KB。
-    // defer：不阻塞解析，且保证在 DOMContentLoaded 前执行完，React hydration
-    // 时通常已就绪。绑定与 SPA 导航后的 refresh 见 web/lib/litezoom.ts。
-    scripts: [{ src: 'https://litezoom.dev/litezoom.min.js', defer: true }],
+    // defer：不阻塞解析，且保证在 DOMContentLoaded 前执行完。绑定与 SPA 导航后
+    // 的 refresh 见 web/lib/litezoom.ts。
+    //
+    // **必须用 headScripts，不能用 scripts。** 两个键走完全不同的通道：
+    //   headScripts → <HeadContent /> 渲染，落在 <head>，服务端客户端一致
+    //   scripts     → <Scripts /> 渲染，落在 <body> 末尾
+    // 用 scripts 会「加载两次」：服务端渲染出 <script>（React 19 提升进 head），
+    // hydration 完成后 Asset.js 的 Script 组件 `return null` 把这个元素从 DOM
+    // 摘掉，随后它内部那个 useEffect 按 src 查不到脚本了，又 createElement +
+    // appendChild 重新插一遍 —— 浏览器于是二次下载并执行，页面看起来像整个
+    // 重新加载了一次（首页的 MosaicReveal 揭示动画会跟着重播，尤其明显）。
+    headScripts: [{ src: 'https://litezoom.dev/litezoom.min.js', defer: true }],
   }),
   component: RootComponent,
   notFoundComponent: StartNotFound,
