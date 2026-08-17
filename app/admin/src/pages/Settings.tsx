@@ -314,9 +314,11 @@ export default function SettingsPage() {
         utterlog_share_posts: s.utterlog_share_posts ?? true,
         utterlog_share_moments: s.utterlog_share_moments ?? false,
         utterlog_share_comments: s.utterlog_share_comments ?? false,
-        // 安全（require_login / rate_limit 随安全中心一并下线，中间件已移除）
-        two_factor_enabled: s.two_factor_enabled ?? false,
-        two_factor_code: '',
+        // 安全（require_login / rate_limit 随安全中心一并下线，中间件已移除；
+        // two_factor_enabled / two_factor_code 也在 2026-08-17 一并摘掉 ——
+        // 只往表单 state 里塞，页面上没有任何控件渲染它们，后端也不读。
+        // 真正的 2FA 是活的，但它存在 users.totp_enabled **列**上，
+        // 走 backend/services/auth-security.ts，跟这两个同名 option 无关。）
       });
       try {
         const sr: any = await api.get('/media/stats');

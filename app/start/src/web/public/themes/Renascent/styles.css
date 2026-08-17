@@ -1302,15 +1302,20 @@
    （文章头部的 <p>{description}</p> 取的就是 excerpt || ai_summary，内容重复）。
    其余四个主题仍在用这个组件，它们的样式各自在自己的 styles.css 里。 */
 
-[data-theme="Renascent"] .renascent-article-toc .blog-toc {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  padding: 0;
-  border: 0;
-  border-top: 2px solid var(--renascent-black);
-  background: transparent;
-  box-shadow: none;
-}
+/* 这里原有一条 `.renascent-article-toc .blog-toc` 规则，**从来没有生效过**：
+   祖先类名漏了 -wrap 后缀 —— PostPage.tsx:112 渲染的是
+   `renascent-article-toc-wrap`，本文件另外两处（1022、1864）也都写的 -wrap，
+   只有这条漏了。2026-08-17 删。
+
+   它想做的事记在这里，免得连意图一起丢：用
+   `opacity: 1 !important; pointer-events: auto !important` 压过
+   TableOfContents.tsx:143 的行内 `opacity: visible ? 1 : 0`，让 Renascent 的
+   目录**常显**（而不是滚动到一定位置才淡入），再去掉四周边框、只留一条
+   2px 的黑色顶边，配合这个主题的报纸风格。
+
+   **没有顺手改成 -wrap**：那不是修死代码，那是改渲染 —— 目录会从「滚动才出现」
+   变成常显、并多一条顶边。要不要这个效果得先看一眼再定，不该由一次死代码
+   清理顺带决定。 */
 
 [data-theme="Renascent"] .blog-toc-header {
   margin: 0;

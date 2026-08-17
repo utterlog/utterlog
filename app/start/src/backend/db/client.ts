@@ -453,6 +453,27 @@ export async function runCoreMigrations() {
       // 一条脏数据不该把整个启动流程挡住。
     }
   }
+
+  // 2026-08-17 死代码普查扫出来的 option 残留：代码里既没有写入方、也没有
+  // 读取方，只是躺在表里。每一条都在 app/start/src 与 app/admin/src 全量
+  // grep 过，确认 0 命中才列进来。
+  await sql.unsafe(`delete from ${table('options')} where name in (
+    -- coding 页下线时漏掉的一条。上面那段删了 coding_* 五个专属配置，
+    -- 但 page_coding 属于 page_* 那组页面开关（page_albums / page_books /
+    -- page_movies ...），当时没跟着一起清。
+    'page_coding',
+    -- 评论限流（cc = comment control）。限流后来改成走 comment_rate_limits
+    -- 队列表，这三个阈值再没人读过。
+    'cc_enabled', 'cc_limit_5s', 'cc_limit_60s',
+    -- 按国家做访问限制。中间件随安全中心一并下线，配置留着没人看。
+    'geo_enabled', 'geo_mode', 'geo_countries',
+    -- 后台 Settings 表单里塞过这两个键，但页面上没有控件渲染它们、后端也不读。
+    -- **注意真正的 2FA 是活的**，它存在 users.totp_enabled 列上，
+    -- 走 services/auth-security.ts，跟这两个同名 option 无关。
+    'two_factor_enabled', 'two_factor_code',
+    -- 早已迁到 SEO 标签页的 seo_default_keywords，旧键空着没人用。
+    'site_keywords'
+  )`);
 }
 
 export async function initDb() {
