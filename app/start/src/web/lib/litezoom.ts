@@ -105,10 +105,3 @@ export function scheduleLiteZoomSync(): () => void {
     window.clearTimeout(timer);
   };
 }
-
-/** 测试用：重置模块级绑定标记 */
-export function __resetLiteZoomForTest(): void {
-  bound = false;
-}
-
-export const LITEZOOM_SELECTOR = SELECTOR;
