@@ -2768,7 +2768,9 @@ div:hover > .comment-hint { opacity: 0.75; }
   overflow: hidden;
   color: var(--color-primary);
   font-size: 20px;
-  font-weight: 700;
+  /* 400 = 常规字重。阿里妈妈方圆体是可变字体，权重轴 200–700，这里取哪个
+     值它就渲染哪档 —— 原来是 700，也就是这个字体的上限。 */
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: 0;
   text-overflow: ellipsis;
