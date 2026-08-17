@@ -35,15 +35,14 @@ export const Route = createRootRoute({
     // defer：不阻塞解析，且保证在 DOMContentLoaded 前执行完。绑定与 SPA 导航后
     // 的 refresh 见 web/lib/litezoom.ts。
     //
-    // **必须用 headScripts，不能用 scripts。** 两个键走完全不同的通道：
-    //   headScripts → <HeadContent /> 渲染，落在 <head>，服务端客户端一致
-    //   scripts     → <Scripts /> 渲染，落在 <body> 末尾
-    // 用 scripts 会「加载两次」：服务端渲染出 <script>（React 19 提升进 head），
-    // hydration 完成后 Asset.js 的 Script 组件 `return null` 把这个元素从 DOM
-    // 摘掉，随后它内部那个 useEffect 按 src 查不到脚本了，又 createElement +
-    // appendChild 重新插一遍 —— 浏览器于是二次下载并执行，页面看起来像整个
-    // 重新加载了一次（首页的 MosaicReveal 揭示动画会跟着重播，尤其明显）。
-    headScripts: [{ src: 'https://litezoom.dev/litezoom.min.js', defer: true }],
+    // 这里的 `scripts` 是 **head 配置内**的键，router-core 的 route.d.ts 里写着
+    // `head?: () => { scripts?: AnyRouteMatch['headScripts'] }` —— 它映射到
+    // match.headScripts，由 <HeadContent /> 渲染进 <head>。
+    //
+    // 别跟**与 head 平级**的那个路由级 `scripts?: () => ...` 选项搞混：那个映射到
+    // match.scripts，由 <Scripts /> 渲染在 <body> 末尾。我一度以为这里用错了键、
+    // 改成 `headScripts:` —— 那不是合法键，整段被静默丢弃，脚本从 HTML 里消失。
+    scripts: [{ src: 'https://litezoom.dev/litezoom.min.js', defer: true }],
   }),
   component: RootComponent,
   notFoundComponent: StartNotFound,
