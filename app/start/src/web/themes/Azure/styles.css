@@ -1677,9 +1677,18 @@
   [data-theme="Azure"] .blog-prose h1 {
     font-size: 1.6rem;
   }
+  /* 移动端标题字号梯度。原来 h2 是 1.22rem（19.52px），而 h3 没有移动端覆盖、
+     一直用桌面的 1.1875rem（19px）—— **两级只差 0.5px，手机上几乎分不出来**。
+     所以不能只调小 h2，那会直接跌到 h3 以下、层级倒挂；两个一起往下压。
+
+     压后的梯度：h1 25.6 → h2 18.4 → h3 17 → 正文 16px。
+     h3 与正文只差 1px，靠字重拉开（h3 600 / 正文 400），h2 是 700。 */
   [data-theme="Azure"] .blog-prose h2 {
-    font-size: 1.22rem;
+    font-size: 1.15rem;
     padding-left: 0.625rem;
+  }
+  [data-theme="Azure"] .blog-prose h3 {
+    font-size: 1.0625rem;
   }
   [data-theme="Azure"] .blog-prose h2::before {
     left: -16px;
