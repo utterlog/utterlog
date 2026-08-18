@@ -1906,7 +1906,11 @@ div:hover > .comment-hint { opacity: 0.75; }
   .comment-info-field {
     border-right: none;
     border-bottom: 1px solid var(--color-border, #eee);
-    height: 46px;
+    /* 54px：原来是 46px，**比桌面端的 50px 还矮** —— 方向反了，触屏上这三格
+       是要用手指点的，理应比鼠标端更高。46px 也压在 44px 触控目标下限的边上，
+       加上 16px 的字（iOS 必须 ≥16px 否则聚焦时整页会被强制放大），行高几乎
+       贴着边框，看起来就是挤。 */
+    height: 54px;
   }
   .comment-info-field:last-child {
     border-bottom: none;
@@ -1919,8 +1923,9 @@ div:hover > .comment-hint { opacity: 0.75; }
     font-size: 16px;
   }
 
-  /* 三格竖排已经吃掉 138px，输入区再占 250px 的话小屏上整个表单要 460px 起，
-     一屏基本只剩表单。缩到 160px，够写几行又不至于挤掉下面的提交按钮。 */
+  /* 三格竖排吃掉 162px（3 × 54），输入区再占 250px 的话小屏上整个表单要
+     410px 起，一屏基本只剩表单。缩到 160px，够写几行又不至于挤掉下面的
+     提交按钮。 */
   .comment-textarea-row {
     padding: 12px;
     min-height: 160px;
