@@ -24,6 +24,12 @@ describe('TanStack Start document assets', () => {
       '/apple-touch-icon.png',
       '/site.webmanifest',
       'https://static.bluecdn.com',
+      // FontAwesome 的 @font-face 全是 font-display: block —— 字体到齐前图标
+      // 完全不可见，到齐那一刻整批显形。首页 49 个图标散在顶栏/卡片/侧栏/页脚，
+      // 6 个字族各自到达，就成了「打开后又闪一下」。这两条 preload 抢在
+      // render-blocking 样式表（实测 1.3s 才齐）之前开始下，覆盖 49 个里的 43 个。
+      'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-solid-900.woff2',
+      'https://static.bluecdn.com/libs/fontawesome/7.3.1/webfonts/fa-light-300.woff2',
       'https://static.bluecdn.com/libs/fontawesome/7.3.1/css/all.min.css',
       'https://static.bluecdn.com/fonts/noto-sans-sc.css',
       'https://static.bluecdn.com/fonts/alimama-fangyuanti.css',
