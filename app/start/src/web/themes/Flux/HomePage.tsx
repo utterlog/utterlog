@@ -23,7 +23,7 @@ const MODES = [
 
 let latestMomentCache: any | null = null;
 
-export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, latestMoment: serverLatestMoment = null, latestComments: serverLatestComments = [], perPage = 8 }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; latestMoment?: any; latestComments?: any[]; perPage?: number }) {
+export default function HomePage({ posts, page, totalPages, categories: serverCategories = [], archiveStats: serverStats = {}, latestMoment: serverLatestMoment = null, latestComments: serverLatestComments = [] }: { posts: any[]; page: number; totalPages: number; categories?: any[]; archiveStats?: any; latestMoment?: any; latestComments?: any[]; perPage?: number }) {
   const [categories, setCategories] = useState<any[]>(serverCategories);
   const [activeCatIdx, setActiveCatIdx] = useState(0);
   const [modeIdx, setModeIdx] = useState(0);

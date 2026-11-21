@@ -379,11 +379,6 @@ export const themesApi = {
   list: () => api.get<{ themes: ExtensionManifest[]; active: string; azure_accent?: 'blue' | 'red'; requested?: string }>('/themes'),
   activate: (id: string, body?: { accent?: 'blue' | 'red' }) => api.post(`/themes/${id}/activate`, body || {}),
   remove: (id: string) => api.delete(`/themes/${id}`),
-  upload: (file: File) => {
-    const fd = new FormData();
-    fd.append('file', file);
-    return api.post('/themes/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-  },
 };
 
 export const pluginsApi = {
@@ -391,11 +386,6 @@ export const pluginsApi = {
   activate: (id: string) => api.post(`/plugins/${id}/activate`),
   deactivate: (id: string) => api.post(`/plugins/${id}/deactivate`),
   remove: (id: string) => api.delete(`/plugins/${id}`),
-  upload: (file: File) => {
-    const fd = new FormData();
-    fd.append('file', file);
-    return api.post('/plugins/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-  },
 };
 
 export default api;

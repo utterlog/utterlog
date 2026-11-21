@@ -3,7 +3,6 @@
 import Link from '@/components/AppLink';
 import { useEffect, useState } from 'react';
 import { momentsApi } from '@/lib/api';
-import { useThemeContext } from '@/lib/theme-context';
 import { useLazyVisible } from '@/lib/use-lazy-visible';
 
 let momentBubbleCache: any | null = null;
@@ -46,7 +45,6 @@ function stripText(s: string) {
 }
 
 export default function MomentBubble({ initialMoment = null }: { initialMoment?: any | null }) {
-  const { owner, site } = useThemeContext();
   const [moment, setMoment] = useState<any | null>(momentBubbleCache || initialMoment);
   const [loaded, setLoaded] = useState(Boolean(momentBubbleCache || initialMoment));
   const bubbleLazy = useLazyVisible<HTMLDivElement>();
@@ -66,8 +64,6 @@ export default function MomentBubble({ initialMoment = null }: { initialMoment?:
 
   if (!loaded || !moment) return <div ref={bubbleLazy.ref} className="nebula-moment-bubble" aria-hidden="true" />;
 
-  const author = owner?.nickname || site?.title || 'Utterlog';
-  const avatar = owner?.avatar;
   const content = stripText(moment.content || '');
   const time = relativeTime(moment.created_at);
   const images = parseImages(moment);

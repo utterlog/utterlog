@@ -18,7 +18,7 @@ function catIconClass(icon?: string) {
   return 'fa-solid fa-folder';
 }
 
-export default function PostCard({ post, index = 1 }: { post: any; index?: number }) {
+export default function PostCard({ post }: { post: any }) {
   const { timeZone } = useThemeContext();
   if (!post?.title) return null;
 

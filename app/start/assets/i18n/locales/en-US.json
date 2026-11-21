@@ -1386,6 +1386,7 @@
     "admin.tools.toast.importFailed": "Import failed",
     "admin.tools.toast.backupCreated": "Backup created successfully",
     "admin.tools.toast.backupFailed": "Backup failed",
+    "admin.tools.toast.downloadFailed": "Could not download the backup",
     "admin.tools.confirm.deleteBackup": "Are you sure you want to delete this backup?",
     "admin.tools.toast.backupSettingsSaved": "Backup settings saved",
     "admin.tools.confirm.backupImport": "Importing the backup will overwrite the current data. Are you sure you want to continue?",

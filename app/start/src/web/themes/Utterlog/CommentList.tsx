@@ -560,15 +560,15 @@ function CommentRow({ comment, postId, depth, floor, parentComment, onReplySucce
 /* 将嵌套回复扁平化，保留各自的 parentComment */
 function flattenReplies(comment: Comment): { child: Comment; parent: Comment }[] {
   const result: { child: Comment; parent: Comment }[] = [];
-  function walk(node: Comment, parent: Comment) {
+  function walk(node: Comment) {
     if (node.children) {
       for (const child of node.children) {
         result.push({ child, parent: node });
-        walk(child, node);
+        walk(child);
       }
     }
   }
-  walk(comment, comment);
+  walk(comment);
   return result;
 }
 

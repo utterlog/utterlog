@@ -68,7 +68,7 @@ node_modules/
 
 ```bash
 bun run check        # 类型检查（注意：只覆盖 app/start，不含 admin）
-bun run build        # build:admin + build:web + start:build
+bun run build        # build:admin + start:build（前台构建前同步主题）
 bun run test:server  # app/start/test/
 bun run audit:api    # 前后端接口覆盖核对
 bun run verify       # check + build + test
@@ -209,17 +209,11 @@ checkout 直接跑 dev，那个文件不存在，Bun.serve 会对所有请求返
 ### 注册与切换
 
 - **枚举真源**：`app/shared/blog-theme.ts` 的 `BLOG_THEME_NAMES`。
-- **组件映射**：`web/lib/theme.ts`。注意 `ThemeComponents` 声明了 12 个槽位，
-  实际被消费的只有 `Layout` / `HomePage` / `PostPage` / `ArchivePage`。
-  **`CommentSection` 是死映射** —— 五个主题的 PostPage 都自己
-  `import { CommentSection } from './PostInteractive'`。照 theme.ts 判断
-  「Azure 用的是共享评论列表」会判断错、改错文件。
+- **组件映射**在 `web/lib/theme.ts`。主题布局直接引用头部与页脚，文章页直接引用评论组件。
 - `backend/blog-themes.ts` 只是从 `@shared/blog-theme` 原样 re-export，加主题不用碰。
 - **切换**：POST `/themes/<id>/activate` 只写 `options.active_theme`（Azure 另写
   `azure_accent`），**需要刷新前台**才生效，这条路径不调 `/api/revalidate`。
-- 上传 zip 解压到 `content/themes/<name>/`，但 `extensions.ts` 有
-  `SUPPORTED_BLOG_THEMES` 白名单，非内置 id 一律 400 —— **第三方主题装得上、
-  列得出，但永远激活不了**，目前实质只支持内置五套。
+- 后台管理页提供内置主题切换和已有扩展管理。旧上传 API 保留，第三方主题仍受内置主题白名单限制。
 - `:root` 默认 CSS 变量固定为 Azure 蓝，`[data-color="steel"]` 兜底映射到 Azure。
   `data-theme` 承载主题名，`data-color` 承载配色，两者不要混。
 

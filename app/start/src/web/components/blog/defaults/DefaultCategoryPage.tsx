@@ -3,7 +3,7 @@ import PageTitle from '@/components/blog/PageTitle';
 import { datePartsInTimeZone, formatMonthDayInTimeZone } from '@/lib/timezone';
 import { postDateInput } from '@/lib/post-date';
 
-function getCatIcon(name: string, icon?: string) {
+function getCatIcon(icon?: string) {
   if (icon && icon.startsWith('fa')) return icon;
   return 'fa-sharp fa-light fa-folder';
 }
@@ -36,7 +36,7 @@ interface DefaultCategoryPageProps {
 
 export default function DefaultCategoryPage({ category, posts, timeZone = 'UTC' }: DefaultCategoryPageProps) {
   const yearGroups = groupByYear(posts, timeZone);
-  const icon = getCatIcon(category.name, category.icon);
+  const icon = getCatIcon(category.icon);
 
   return (
     <div>

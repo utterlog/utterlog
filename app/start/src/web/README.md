@@ -31,7 +31,7 @@
 
 ```bash
 bun run start:dev
-bun run start:check
+bun run check
 bun run start:build
 ```
 

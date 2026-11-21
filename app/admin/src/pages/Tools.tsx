@@ -15,12 +15,13 @@ import SyncSitesPanel from '@/components/SyncSitesPanel';
 import RebuildStatsPanel from '@/components/RebuildStatsPanel';
 import { useI18n } from '@/lib/i18n';
 
-export default function ToolsPage() {
+export type ToolsTab = 'backup' | 'wp-sync' | 'typecho-sync';
+
+export default function ToolsPage({ activeTab, onTabChange }: {
+  activeTab: ToolsTab;
+  onTabChange: (tab: ToolsTab) => void;
+}) {
   const { t } = useI18n();
-  // 2026-05: 移除「导入工具」tab —— 历史 WordPress XML 导入只是初版临时
-  // 入口，已被「WordPress 同步」插件 + 推送流程完全取代。Typecho 走同样
-  // 的同步插件，没必要再保留 XML 上传那个分支。
-  const [activeTab, setActiveTab] = useState<'backup' | 'wp-sync' | 'typecho-sync'>('wp-sync');
 
   // Backup state
   const [stats, setStats] = useState<any>(null);
@@ -65,6 +66,22 @@ export default function ToolsPage() {
       fetchBackupData();
     } catch (e: any) {
       toast.error(e?.response?.data?.error?.message || e?.response?.data?.message || t('admin.common.deleteFailed', '删除失败'));
+    }
+  };
+
+  const downloadBackup = async (filename: string) => {
+    try {
+      const file = await api.get<Blob, Blob>(`/backup/download/${encodeURIComponent(filename)}`, { responseType: 'blob' });
+      const url = URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch {
+      toast.error(t('admin.tools.toast.downloadFailed', '下载备份失败'));
     }
   };
 
@@ -134,7 +151,7 @@ export default function ToolsPage() {
         {tabs.map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => onTabChange(tab.key)}
             className={cn(
               'border-b-2 px-5 py-2.5 text-sm transition-colors',
               activeTab === tab.key
@@ -231,7 +248,7 @@ export default function ToolsPage() {
             {(backupDest === 's3' || backupDest === 'r2') && !s3Configured && (
               <p className="mt-2.5 flex items-center gap-1.5 text-xs text-destructive">
                 <AlertTriangle className="size-4" />
-                {t('admin.tools.backup.configureStoragePrefix', '请先在')} <a href="/settings" className="font-medium text-primary">{t('admin.tools.backup.storageSettingsLink', '系统设置 > 存储')}</a> {t('admin.tools.backup.configureStorageSuffix', '中配置 {driver} 连接信息', { driver: backupDest === 'r2' ? 'R2' : 'S3' })}
+                {t('admin.tools.backup.configureStoragePrefix', '请先在')} <a href="/admin/settings#media" className="font-medium text-primary">{t('admin.tools.backup.storageSettingsLink', '系统设置 > 存储')}</a> {t('admin.tools.backup.configureStorageSuffix', '中配置 {driver} 连接信息', { driver: backupDest === 'r2' ? 'R2' : 'S3' })}
               </p>
             )}
             <div className="mt-3.5 flex items-center justify-between">
@@ -282,7 +299,9 @@ export default function ToolsPage() {
                       <TableCell className="text-muted-foreground">{b.created}</TableCell>
                       <TableCell>
                         <div className="flex gap-1.5">
-                          <a href={b.url} download className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'h-7 px-2 text-2xs')}>{t('admin.common.download', '下载')}</a>
+                          <Button variant="outline" size="sm" className="h-7 px-2 text-2xs" onClick={() => downloadBackup(b.filename)}>
+                            {t('admin.common.download', '下载')}
+                          </Button>
                           <RowActions onDelete={() => setDeleteBackupName(b.filename)} />
                         </div>
                       </TableCell>

@@ -17,7 +17,6 @@ import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
 import { Route as AuthenticatedAiSettingsRouteImport } from './routes/_authenticated/ai-settings'
 import { Route as AuthenticatedAlbumsRouteImport } from './routes/_authenticated/albums'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
-import { Route as AuthenticatedBackupRouteImport } from './routes/_authenticated/backup'
 import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
 import { Route as AuthenticatedCommentsRouteImport } from './routes/_authenticated/comments'
 import { Route as AuthenticatedFilmsRouteImport } from './routes/_authenticated/films'
@@ -93,11 +92,6 @@ const AuthenticatedAlbumsRoute = AuthenticatedAlbumsRouteImport.update({
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedBackupRoute = AuthenticatedBackupRouteImport.update({
-  id: '/backup',
-  path: '/backup',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedBooksRoute = AuthenticatedBooksRouteImport.update({
@@ -304,7 +298,6 @@ export interface FileRoutesByFullPath {
   '/ai-settings': typeof AuthenticatedAiSettingsRoute
   '/albums': typeof AuthenticatedAlbumsRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/backup': typeof AuthenticatedBackupRoute
   '/books': typeof AuthenticatedBooksRoute
   '/comments': typeof AuthenticatedCommentsRoute
   '/films': typeof AuthenticatedFilmsRoute
@@ -350,7 +343,6 @@ export interface FileRoutesByTo {
   '/ai-settings': typeof AuthenticatedAiSettingsRoute
   '/albums': typeof AuthenticatedAlbumsRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/backup': typeof AuthenticatedBackupRoute
   '/books': typeof AuthenticatedBooksRoute
   '/comments': typeof AuthenticatedCommentsRoute
   '/films': typeof AuthenticatedFilmsRoute
@@ -398,7 +390,6 @@ export interface FileRoutesById {
   '/_authenticated/ai-settings': typeof AuthenticatedAiSettingsRoute
   '/_authenticated/albums': typeof AuthenticatedAlbumsRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
-  '/_authenticated/backup': typeof AuthenticatedBackupRoute
   '/_authenticated/books': typeof AuthenticatedBooksRoute
   '/_authenticated/comments': typeof AuthenticatedCommentsRoute
   '/_authenticated/films': typeof AuthenticatedFilmsRoute
@@ -448,7 +439,6 @@ export interface FileRouteTypes {
     | '/ai-settings'
     | '/albums'
     | '/analytics'
-    | '/backup'
     | '/books'
     | '/comments'
     | '/films'
@@ -494,7 +484,6 @@ export interface FileRouteTypes {
     | '/ai-settings'
     | '/albums'
     | '/analytics'
-    | '/backup'
     | '/books'
     | '/comments'
     | '/films'
@@ -541,7 +530,6 @@ export interface FileRouteTypes {
     | '/_authenticated/ai-settings'
     | '/_authenticated/albums'
     | '/_authenticated/analytics'
-    | '/_authenticated/backup'
     | '/_authenticated/books'
     | '/_authenticated/comments'
     | '/_authenticated/films'
@@ -644,13 +632,6 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/backup': {
-      id: '/_authenticated/backup'
-      path: '/backup'
-      fullPath: '/backup'
-      preLoaderRoute: typeof AuthenticatedBackupRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/books': {
@@ -935,7 +916,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAiSettingsRoute: typeof AuthenticatedAiSettingsRoute
   AuthenticatedAlbumsRoute: typeof AuthenticatedAlbumsRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
-  AuthenticatedBackupRoute: typeof AuthenticatedBackupRoute
   AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
   AuthenticatedCommentsRoute: typeof AuthenticatedCommentsRoute
   AuthenticatedFilmsRoute: typeof AuthenticatedFilmsRoute
@@ -978,7 +958,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAiSettingsRoute: AuthenticatedAiSettingsRoute,
   AuthenticatedAlbumsRoute: AuthenticatedAlbumsRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
-  AuthenticatedBackupRoute: AuthenticatedBackupRoute,
   AuthenticatedBooksRoute: AuthenticatedBooksRoute,
   AuthenticatedCommentsRoute: AuthenticatedCommentsRoute,
   AuthenticatedFilmsRoute: AuthenticatedFilmsRoute,

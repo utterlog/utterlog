@@ -14,9 +14,8 @@ The full-stack cutover is complete.
 
 ## Verification Gates
 
-- `bun run server:check`
+- `bun run check`
 - `bun run start:build`
-- `bun run start:check`
 - `bun test`
 - Preview smoke tests must confirm `x-utterlog-renderer: tanstack-start` on API and SSR responses.
 - Unknown API paths must return a Start-owned JSON `404`.

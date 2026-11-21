@@ -85,11 +85,10 @@ log "部署目标: ${USER}@${HOST}:${REMOTE_PATH}  服务: ${SERVICE}"
 # ---- 1. 本地构建（纯 JS dist，可跨平台传输；backend 直接跑 TS 源码不需构建）----
 if [ "$BUILD" -eq 1 ]; then
   log "本地: bun install --frozen-lockfile"; bun install --frozen-lockfile
-  log "本地: server typecheck";              bun run server:check
-  log "本地: admin 构建 (Vite)";             (cd app/admin && bun run build)
-  log "本地: start(web) 构建";               bun run start:build
+  log "本地: 类型检查";                      bun run check
+  log "本地: 构建前台与后台";                bun run build
   if [ "$SKIP_TESTS" -eq 0 ]; then
-    log "本地: server tests"; JWT_SECRET=test-secret-for-server-tests bun test app/start/test
+    log "本地: 服务端测试"; bun run test:server
   else warn "跳过 server tests（--skip-tests）"; fi
 else
   warn "跳过本地构建（--no-build），复用现有 dist"

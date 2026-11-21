@@ -11,7 +11,7 @@ const API = '/api/v1';
 
 export default function Footer() {
   const pathname = usePathname();
-  const { user, login: storeLogin, logout: storeLogout, isAuthenticated, validate2FA: storeValidate2FA, cancel2FA: storeCancel2FA, checkAuth } = useAuthStore();
+  const { user, login: storeLogin, logout: storeLogout, validate2FA: storeValidate2FA, cancel2FA: storeCancel2FA, checkAuth } = useAuthStore();
 
   // ── 首帧必须按「未登录」渲染，否则整页 hydration 失败 ──
   //

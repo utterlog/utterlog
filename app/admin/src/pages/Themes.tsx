@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  RefreshCw, Upload, Loader2, TriangleAlert, Lightbulb, Palette, Check,
+  RefreshCw, TriangleAlert, Palette, Check,
   ExternalLink, Trash2, List, IdCard, AppWindow, LayoutGrid, Share2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -18,11 +18,9 @@ export default function Themes() {
   const [active, setActive] = useState<string>('');
   const [requestedTheme, setRequestedTheme] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activating, setActivating] = useState<string | null>(null);
   const [azureAccent, setAzureAccent] = useState<'blue' | 'red'>('blue');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 当前 active 主题在 manifest 里声明了哪些自定义 admin panel —— tabs
   // 据此动态显示，避免给"用不到这个面板"的主题展示无效设置入口。
@@ -53,25 +51,6 @@ export default function Themes() {
   };
 
   useEffect(() => { fetchList(); }, []);
-
-  const handleUpload = async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.zip')) {
-      toast.error('请上传 .zip 格式的主题包');
-      return;
-    }
-    setUploading(true);
-    const tid = toast.loading('正在上传…');
-    try {
-      const r: any = await themesApi.upload(file);
-      toast.success(`主题「${r.data?.name || r.name || '未命名'}」已安装`, { id: tid });
-      fetchList();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error?.message || '上传失败', { id: tid });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
 
   const handleActivate = async (id: string, accent?: 'blue' | 'red') => {
     if (id === active && id !== 'Azure') return;
@@ -193,32 +172,16 @@ export default function Themes() {
             </>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={fetchList} disabled={loading} title="刷新列表">
-            <RefreshCw className="size-4" />
-          </Button>
-          <Button size="icon" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传主题 .zip'}>
-            {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".zip"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
-          />
-        </div>
+        <Button variant="outline" size="icon" onClick={fetchList} disabled={loading} title="刷新列表">
+          <RefreshCw className="size-4" />
+        </Button>
       </div>
 
-      {/* Upload hint */}
       {requestedTheme && (
         <Callout tone="warning" icon={<TriangleAlert className="text-amber-600 dark:text-amber-400" />} className="mb-4">
           数据库记录的主题为 <strong>{requestedTheme}</strong>，但当前运行时不支持，前台实际渲染 <strong>{active}</strong>。请重新启用内置主题。
         </Callout>
       )}
-      <Callout tone="info" icon={<Lightbulb className="text-primary" />} className="mb-5">
-        主题包为 <code className="bg-background px-1.5 py-0.5 text-2xs">.zip</code> 格式，根目录包含 <code className="bg-background px-1.5 py-0.5 text-2xs">manifest.json</code>（含 <code>id / name / version</code>）。上传后自动解压到 <code className="bg-background px-1.5 py-0.5 text-2xs">content/themes/&lt;id&gt;/</code>。
-      </Callout>
 
       {/* Grid */}
       {loading ? (
@@ -226,7 +189,7 @@ export default function Themes() {
       ) : themes.length === 0 ? (
         <Card className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <Palette className="size-8 text-muted-foreground" />
-          <p className="m-0 text-sm text-muted-foreground">暂无主题，点「上传主题」安装第一个</p>
+          <p className="m-0 text-sm text-muted-foreground">暂无主题</p>
         </Card>
       ) : (
         <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>

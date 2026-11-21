@@ -2,7 +2,6 @@
 
 import Link from '@/components/AppLink';
 import { useState } from 'react';
-import PostLink from '@/components/blog/PostLink';
 import { getPosts } from '@/lib/blog-api';
 import { useThemeContext } from '@/lib/theme-context';
 import PostCard from './PostCard';
@@ -148,8 +147,6 @@ export default function HomePage({
   const [page, setPage] = useState<number>(initialPage);
   const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const [loading, setLoading] = useState(false);
-  // featured 始终来自 SSR 第一篇（不随筛选变），跟"最新文章"区独立
-  const featured = initialPosts[0];
 
   const fetchPage = async (pageNum: number, categoryId: number | null) => {
     setLoading(true);
@@ -294,13 +291,7 @@ export default function HomePage({
             // 屏蔽点击 —— 旧卡片留在原位避免视觉跳动；新数据一回来，
             // React 用新 post.id 作为 key 自动 re-mount，stagger fade-in
             // 动画会跑一遍（CSS 里 nebulaListItemIn）
-            posts.map((post, index) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                index={(page - 1) * perPage + index + 1}
-              />
-            ))
+            posts.map((post) => <PostCard key={post.id} post={post} />)
           ) : loading ? (
             // 仅初始首屏 + 切到完全没数据的分类时才显示 spinner
             <div className="nebula-empty">

@@ -1386,6 +1386,7 @@
     "admin.tools.toast.importFailed": "Импорт не удался",
     "admin.tools.toast.backupCreated": "Резервная копия успешно создана",
     "admin.tools.toast.backupFailed": "Резервное копирование не выполнено",
+    "admin.tools.toast.downloadFailed": "Не удалось скачать резервную копию",
     "admin.tools.confirm.deleteBackup": "Вы уверены, что хотите удалить эту резервную копию?",
     "admin.tools.toast.backupSettingsSaved": "Настройки резервной копии сохранены.",
     "admin.tools.confirm.backupImport": "Импорт резервной копии перезапишет текущие данные. Вы уверены, что хотите продолжить?",

@@ -50,7 +50,7 @@ const SPAM_WORDS_ZH = [
 ];
 const SPAM_EN_RE = new RegExp(`\\b(${SPAM_WORDS_EN.map((w) => w.replace(/ /g, '\\s+')).join('|')})\\b`, 'i');
 
-async function isSpamComment(content: string, email: string, url: string, ip: string) {
+async function isSpamComment(content: string, email: string, ip: string) {
   const lower = content.toLowerCase();
   if ((lower.match(/https?:\/\//g) || []).length > 2) return true;
   if (SPAM_EN_RE.test(content)) return true;
@@ -119,7 +119,7 @@ export async function createPublicComment(input: unknown, request: PublicComment
   if (status === 'pending' && !(await verifyCommentCaptcha(body))) {
     throw new PublicWriteError(400, 'CAPTCHA_INVALID', '验证码错误或已过期');
   }
-  if (status === 'pending' && await isSpamComment(content, authorEmail, authorUrl, request.ip)) status = 'spam';
+  if (status === 'pending' && await isSpamComment(content, authorEmail, request.ip)) status = 'spam';
   if (status === 'pending' && (await optionValue('comment_trust_returning', 'true')) !== 'false') {
     const previous = await one<{ count: string }>(
       `select count(*)::text as count from ${table('comments')}
@@ -218,7 +218,6 @@ export async function createPublicComment(input: unknown, request: PublicComment
     const admin = await one<{ email: string }>(
       `select email from ${table('users')} where role = 'admin' order by id asc limit 1`,
     ).catch(() => null);
-    const siteTitle = await optionValue('site_title', 'Utterlog');
     const siteUrl = (await optionValue('site_url', config.appUrl)).replace(/\/+$/, '');
     if (admin?.email) {
       const site = await emailSite();

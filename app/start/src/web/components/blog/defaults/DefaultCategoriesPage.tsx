@@ -1,7 +1,7 @@
 import Link from '@/components/AppLink';
 import PageTitle from '@/components/blog/PageTitle';
 
-function getCatIcon(name: string, icon?: string) {
+function getCatIcon(icon?: string) {
   if (icon && (icon.startsWith('fa-') || icon.startsWith('fa '))) return icon;
   return 'fa-sharp fa-light fa-folder';
 }
@@ -31,7 +31,7 @@ export default function DefaultCategoriesPage({ categories }: DefaultCategoriesP
               style={{ borderRadius: 0 }}
             >
               <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className={getCatIcon(cat.name, cat.icon)} style={{ fontSize: '20px', color: 'var(--color-primary)' }} />
+                <i className={getCatIcon(cat.icon)} style={{ fontSize: '20px', color: 'var(--color-primary)' }} />
               </div>
               <div className="flex-1">
                 <h2 className="font-medium text-main group-hover:text-primary-themed transition-colors">{cat.name}</h2>

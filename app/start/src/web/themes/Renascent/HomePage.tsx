@@ -32,9 +32,6 @@ export default function HomePage({
   const categories = serverCategories.length ? serverCategories : contextCategories;
   const stats = archiveStats?.post_count ? archiveStats : contextStats;
   const featured = posts[0];
-  const featuredDate = featured
-    ? formatDateInTimeZone(postDateInput(featured), 'en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }, timeZone).replace(/\//g, '.')
-    : '';
   const totalWords = stats?.word_count ? Number(stats.word_count).toLocaleString() : '0';
   const totalPosts = stats?.post_count || posts.length || 0;
   const totalComments = stats?.comment_count || 0;

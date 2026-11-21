@@ -51,12 +51,8 @@ import UtterlogManifest from '@/themes/Utterlog/theme.json';
 type ThemeComponent<Props = any> = ComponentType<Props> | LazyExoticComponent<ComponentType<Props>>;
 
 export interface ThemeComponents {
-  Header: ThemeComponent;
-  Footer: ThemeComponent;
   HomePage: ThemeComponent;
   PostPage: ThemeComponent<{ post: any; options?: Record<string, string> }>;
-  PostCard: ThemeComponent<{ post: any }>;
-  CommentSection: ThemeComponent<{ postId: number }>;
   Layout: ThemeComponent<{ children: ReactNode }>;
   ArchivePage?: ThemeComponent;
   CategoryPage?: ThemeComponent;
@@ -66,65 +62,43 @@ export interface ThemeComponents {
   NotFoundPage?: ThemeComponent;
 }
 
-const SharedCommentSection = lazy(() => import('@/components/blog/CommentList'));
-
 // Keep theme modules out of the common hydration bundle. Only the selected
 // theme and current page type are downloaded by the browser.
 const Azure: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Azure/Header')),
-  Footer: lazy(() => import('@/themes/Azure/Footer')),
   Layout: lazy(() => import('@/themes/Azure/Layout')),
   HomePage: lazy(() => import('@/themes/Azure/HomePage')),
   PostPage: lazy(() => import('@/themes/Azure/PostPage')),
-  PostCard: lazy(() => import('@/themes/Azure/PostCard')),
-  CommentSection: SharedCommentSection,
 };
 
 const Flux: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Flux/Header')),
-  Footer: lazy(() => import('@/themes/Flux/Footer')),
   Layout: lazy(() => import('@/themes/Flux/Layout')),
   HomePage: lazy(() => import('@/themes/Flux/HomePage')),
   PostPage: lazy(() => import('@/themes/Flux/PostPage')),
-  PostCard: lazy(() => import('@/themes/Flux/PostCard')),
-  CommentSection: SharedCommentSection,
 };
 
 const Nebula: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Nebula/Header')),
-  Footer: lazy(() => import('@/themes/Nebula/Footer')),
   Layout: lazy(() => import('@/themes/Nebula/Layout')),
   HomePage: lazy(() => import('@/themes/Nebula/HomePage')),
   PostPage: lazy(() => import('@/themes/Nebula/PostPage')),
-  PostCard: lazy(() => import('@/themes/Nebula/PostCard')),
-  CommentSection: lazy(() => import('@/themes/Nebula/PostInteractive').then((module) => ({ default: module.CommentSection }))),
   ArchivePage: lazy(() => import('@/themes/Nebula/ArchivePage')),
 };
 
 const Renascent: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Renascent/Header')),
-  Footer: lazy(() => import('@/themes/Renascent/Footer')),
   Layout: lazy(() => import('@/themes/Renascent/Layout')),
   HomePage: lazy(() => import('@/themes/Renascent/HomePage')),
   PostPage: lazy(() => import('@/themes/Renascent/PostPage')),
-  PostCard: lazy(() => import('@/themes/Renascent/PostCard')),
-  CommentSection: lazy(() => import('@/themes/Renascent/PostInteractive').then((module) => ({ default: module.CommentSection }))),
 };
 
 const Utterlog: ThemeComponents = {
-  Header: lazy(() => import('@/themes/Utterlog/Header')),
-  Footer: lazy(() => import('@/themes/Utterlog/Footer')),
   Layout: lazy(() => import('@/themes/Utterlog/Layout')),
   HomePage: lazy(() => import('@/themes/Utterlog/HomePage')),
   PostPage: lazy(() => import('@/themes/Utterlog/PostPage')),
-  PostCard: lazy(() => import('@/themes/Utterlog/PostCard')),
-  CommentSection: SharedCommentSection,
 };
 
 /* 首屏会用到的四个组件的**原始工厂函数**。lazy() 把工厂包起来后就取不到了，
    所以单列一张表 —— 下面的预热和上面各主题的 lazy() 必须用同一个引用，
    React 才会复用同一个 in-flight promise 而不是再发一次请求。
-   只列首屏这四个：PostPage / PostCard / CommentSection 要等路由或滚动才用得上，
+   只列首屏这四个：PostPage 等组件到对应页面时再加载，
    提前抢带宽反而拖慢首屏。 */
 const themeChunkFactories: Record<string, Array<() => Promise<unknown>>> = {
   Azure: [

@@ -1,5 +1,5 @@
-import { RefreshCw, Check, Lightbulb, Plug, Trash2, ExternalLink, Upload, Loader2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { RefreshCw, Check, Plug, Trash2, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { pluginsApi, type ExtensionManifest } from '@/lib/api';
 import {
@@ -12,10 +12,8 @@ export default function Plugins() {
   const [plugins, setPlugins] = useState<ExtensionManifest[]>([]);
   const [active, setActive] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchList = async () => {
     setLoading(true);
@@ -32,25 +30,6 @@ export default function Plugins() {
   };
 
   useEffect(() => { fetchList(); }, []);
-
-  const handleUpload = async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.zip')) {
-      toast.error('请上传 .zip 格式的插件包');
-      return;
-    }
-    setUploading(true);
-    const tid = toast.loading('正在上传…');
-    try {
-      const r: any = await pluginsApi.upload(file);
-      toast.success(`插件「${r.data?.name || r.name || '未命名'}」已安装`, { id: tid });
-      fetchList();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error?.message || '上传失败', { id: tid });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
 
   const handleToggle = async (id: string, enabled: boolean) => {
     setToggling(id);
@@ -89,39 +68,15 @@ export default function Plugins() {
         <div className="text-sm text-muted-foreground">
           共 {plugins.length} 个插件 · 启用中 <span className="font-semibold text-primary">{active.length}</span>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={fetchList} disabled={loading} title="刷新列表">
-            <RefreshCw className="size-4" />
-          </Button>
-          <Button size="icon" onClick={() => fileInputRef.current?.click()} disabled={uploading} title={uploading ? '上传中…' : '上传插件 .zip'}>
-            {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".zip"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
-          />
-        </div>
-      </div>
-
-      <div className="mb-5 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-        <Lightbulb className="mt-0.5 size-4 shrink-0" />
-        <p className="m-0">
-          插件包为 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">.zip</code> 格式，根目录包含 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">manifest.json</code>。上传后解压到 <code className="rounded bg-background px-1.5 py-0.5 text-2xs">content/plugins/&lt;id&gt;/</code>，默认**不自动启用**，需手动开启。
-        </p>
+        <Button variant="outline" size="icon" onClick={fetchList} disabled={loading} title="刷新列表">
+          <RefreshCw className="size-4" />
+        </Button>
       </div>
 
       {loading ? (
         <LoadingState />
       ) : plugins.length === 0 ? (
-        <EmptyState
-          title="暂无插件，点「上传插件」安装第一个"
-          actionText="上传插件"
-          onAction={() => fileInputRef.current?.click()}
-          icon={<Plug />}
-        />
+        <EmptyState title="暂无插件" icon={<Plug />} />
       ) : (
         <Card className="overflow-hidden p-0">
           {plugins.map((plugin, idx) => {

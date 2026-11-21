@@ -17,7 +17,7 @@ function timeAgo(ts: number | string): string {
   return `${Math.floor(diff / 31536000)} 年前`;
 }
 
-function getCatIcon(name: string, icon?: string) {
+function getCatIcon(icon?: string) {
   if (icon && (icon.startsWith('fa-') || icon.startsWith('fa '))) return icon;
   return 'fa-sharp fa-light fa-folder';
 }
@@ -114,10 +114,10 @@ export default function DefaultArchivePage({ posts, categories, tags, stats, tim
           <span style={{ fontSize: '12px', color: 'var(--color-text-dim)' }}>{categories.length} 个</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-          {categories.map((cat: any, idx: number) => {
+          {categories.map((cat: any) => {
             const keywords = cat.seo_keywords ? cat.seo_keywords.split(',').map((k: string) => k.trim()).filter(Boolean) : [];
             const latest = latestPosts[cat.id];
-            const iconCls = getCatIcon(cat.name, cat.icon);
+            const iconCls = getCatIcon(cat.icon);
 
             return (
               <div key={cat.id} className="archive-cat-card" style={{
@@ -230,7 +230,7 @@ export default function DefaultArchivePage({ posts, categories, tags, stats, tim
                   textDecoration: 'none', transition: 'background 0.1s',
                 }} className="hover:bg-soft">
                   <span style={{ fontSize: '13px', color: 'var(--color-text-dim)', width: '50px', flexShrink: 0 }}>{formatDate(postDateInput(post), timeZone)}</span>
-                  <i className={`${getCatIcon(post.categories?.[0]?.name, post.categories?.[0]?.icon)} fa-fw`} style={{ color: 'var(--color-primary)', fontSize: '13px', flexShrink: 0 }} />
+                  <i className={`${getCatIcon(post.categories?.[0]?.icon)} fa-fw`} style={{ color: 'var(--color-primary)', fontSize: '13px', flexShrink: 0 }} />
                   <span style={{ flex: 1, fontSize: '14px', fontWeight: 500, color: 'var(--color-text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'var(--color-text-dim)', flexShrink: 0 }}>
                     <span><i className="fa-regular fa-comment fa-fw" style={{ fontSize: '11px' }} /> {post.comment_count || 0}</span>
