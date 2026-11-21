@@ -9,56 +9,55 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
-import { Route as AuthenticatedUtterlogRouteImport } from './routes/_authenticated/utterlog'
-import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
-import { Route as AuthenticatedThemesRouteImport } from './routes/_authenticated/themes'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedPostsRouteImport } from './routes/_authenticated/posts'
-import { Route as AuthenticatedPluginsRouteImport } from './routes/_authenticated/plugins'
-import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated/playlists'
-import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/pages'
-import { Route as AuthenticatedMusicRouteImport } from './routes/_authenticated/music'
-import { Route as AuthenticatedMoviesRouteImport } from './routes/_authenticated/movies'
-import { Route as AuthenticatedMomentsRouteImport } from './routes/_authenticated/moments'
-import { Route as AuthenticatedMenusRouteImport } from './routes/_authenticated/menus'
-import { Route as AuthenticatedMediaRouteImport } from './routes/_authenticated/media'
-import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
-import { Route as AuthenticatedGoodsRouteImport } from './routes/_authenticated/goods'
-import { Route as AuthenticatedGamesRouteImport } from './routes/_authenticated/games'
-import { Route as AuthenticatedFootprintsRouteImport } from './routes/_authenticated/footprints'
-import { Route as AuthenticatedFollowsRouteImport } from './routes/_authenticated/follows'
-import { Route as AuthenticatedFilmsRouteImport } from './routes/_authenticated/films'
-import { Route as AuthenticatedCommentsRouteImport } from './routes/_authenticated/comments'
-import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
-import { Route as AuthenticatedBackupRouteImport } from './routes/_authenticated/backup'
-import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
-import { Route as AuthenticatedAlbumsRouteImport } from './routes/_authenticated/albums'
-import { Route as AuthenticatedAiSettingsRouteImport } from './routes/_authenticated/ai-settings'
 import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
-import { Route as AuthenticatedPostsIndexRouteImport } from './routes/_authenticated/posts/index'
-import { Route as AuthenticatedSystemUpdateRouteImport } from './routes/_authenticated/system_.update'
-import { Route as AuthenticatedPostsCreateRouteImport } from './routes/_authenticated/posts_.create'
-import { Route as AuthenticatedPostsTagsRouteImport } from './routes/_authenticated/posts/tags'
-import { Route as AuthenticatedPostsCategoriesRouteImport } from './routes/_authenticated/posts/categories'
-import { Route as AuthenticatedPagesCreateRouteImport } from './routes/_authenticated/pages_.create'
-import { Route as AuthenticatedMusicPlaylistsRouteImport } from './routes/_authenticated/music_.playlists'
-import { Route as AuthenticatedFilmsCreateRouteImport } from './routes/_authenticated/films_.create'
-import { Route as AuthenticatedCommentsAiRouteImport } from './routes/_authenticated/comments_.ai'
-import { Route as AuthenticatedCommentsStatusRouteImport } from './routes/_authenticated/comments_.$status'
+import { Route as AuthenticatedAiSettingsRouteImport } from './routes/_authenticated/ai-settings'
+import { Route as AuthenticatedAlbumsRouteImport } from './routes/_authenticated/albums'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedBackupRouteImport } from './routes/_authenticated/backup'
+import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
+import { Route as AuthenticatedCommentsRouteImport } from './routes/_authenticated/comments'
+import { Route as AuthenticatedFilmsRouteImport } from './routes/_authenticated/films'
+import { Route as AuthenticatedFollowsRouteImport } from './routes/_authenticated/follows'
+import { Route as AuthenticatedFootprintsRouteImport } from './routes/_authenticated/footprints'
+import { Route as AuthenticatedGamesRouteImport } from './routes/_authenticated/games'
+import { Route as AuthenticatedGoodsRouteImport } from './routes/_authenticated/goods'
+import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
+import { Route as AuthenticatedMediaRouteImport } from './routes/_authenticated/media'
+import { Route as AuthenticatedMenusRouteImport } from './routes/_authenticated/menus'
+import { Route as AuthenticatedMomentsRouteImport } from './routes/_authenticated/moments'
+import { Route as AuthenticatedMoviesRouteImport } from './routes/_authenticated/movies'
+import { Route as AuthenticatedMusicRouteImport } from './routes/_authenticated/music'
+import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/pages'
+import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated/playlists'
+import { Route as AuthenticatedPluginsRouteImport } from './routes/_authenticated/plugins'
+import { Route as AuthenticatedPostsRouteImport } from './routes/_authenticated/posts'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedThemesRouteImport } from './routes/_authenticated/themes'
+import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
+import { Route as AuthenticatedUtterlogRouteImport } from './routes/_authenticated/utterlog'
+import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 import { Route as AuthenticatedAiLogsRouteImport } from './routes/_authenticated/ai_.logs'
-import { Route as AuthenticatedPostsEditIdRouteImport } from './routes/_authenticated/posts_.edit.$id'
-import { Route as AuthenticatedPagesEditIdRouteImport } from './routes/_authenticated/pages_.edit.$id'
+import { Route as AuthenticatedCommentsStatusRouteImport } from './routes/_authenticated/comments_.$status'
+import { Route as AuthenticatedCommentsAiRouteImport } from './routes/_authenticated/comments_.ai'
+import { Route as AuthenticatedFilmsCreateRouteImport } from './routes/_authenticated/films_.create'
+import { Route as AuthenticatedMusicPlaylistsRouteImport } from './routes/_authenticated/music_.playlists'
+import { Route as AuthenticatedPagesCreateRouteImport } from './routes/_authenticated/pages_.create'
+import { Route as AuthenticatedPostsIndexRouteImport } from './routes/_authenticated/posts/index'
+import { Route as AuthenticatedPostsCategoriesRouteImport } from './routes/_authenticated/posts/categories'
+import { Route as AuthenticatedPostsTagsRouteImport } from './routes/_authenticated/posts/tags'
+import { Route as AuthenticatedPostsCreateRouteImport } from './routes/_authenticated/posts_.create'
+import { Route as AuthenticatedSystemUpdateRouteImport } from './routes/_authenticated/system_.update'
 import { Route as AuthenticatedFilmsEditIdRouteImport } from './routes/_authenticated/films_.edit.$id'
+import { Route as AuthenticatedPagesEditIdRouteImport } from './routes/_authenticated/pages_.edit.$id'
+import { Route as AuthenticatedPostsEditIdRouteImport } from './routes/_authenticated/posts_.edit.$id'
 
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -66,8 +65,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -75,134 +75,9 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
-  id: '/videos',
-  path: '/videos',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedUtterlogRoute = AuthenticatedUtterlogRouteImport.update({
-  id: '/utterlog',
-  path: '/utterlog',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedToolsRoute = AuthenticatedToolsRouteImport.update({
-  id: '/tools',
-  path: '/tools',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedThemesRoute = AuthenticatedThemesRouteImport.update({
-  id: '/themes',
-  path: '/themes',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedPostsRoute = AuthenticatedPostsRouteImport.update({
-  id: '/posts',
-  path: '/posts',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedPluginsRoute = AuthenticatedPluginsRouteImport.update({
-  id: '/plugins',
-  path: '/plugins',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedPlaylistsRoute = AuthenticatedPlaylistsRouteImport.update({
-  id: '/playlists',
-  path: '/playlists',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedPagesRoute = AuthenticatedPagesRouteImport.update({
-  id: '/pages',
-  path: '/pages',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedMusicRoute = AuthenticatedMusicRouteImport.update({
-  id: '/music',
-  path: '/music',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedMoviesRoute = AuthenticatedMoviesRouteImport.update({
-  id: '/movies',
-  path: '/movies',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedMomentsRoute = AuthenticatedMomentsRouteImport.update({
-  id: '/moments',
-  path: '/moments',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedMenusRoute = AuthenticatedMenusRouteImport.update({
-  id: '/menus',
-  path: '/menus',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedMediaRoute = AuthenticatedMediaRouteImport.update({
-  id: '/media',
-  path: '/media',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
-  id: '/links',
-  path: '/links',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedGoodsRoute = AuthenticatedGoodsRouteImport.update({
-  id: '/goods',
-  path: '/goods',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedGamesRoute = AuthenticatedGamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedFootprintsRoute = AuthenticatedFootprintsRouteImport.update({
-  id: '/footprints',
-  path: '/footprints',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedFollowsRoute = AuthenticatedFollowsRouteImport.update({
-  id: '/follows',
-  path: '/follows',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedFilmsRoute = AuthenticatedFilmsRouteImport.update({
-  id: '/films',
-  path: '/films',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedCommentsRoute = AuthenticatedCommentsRouteImport.update({
-  id: '/comments',
-  path: '/comments',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedBooksRoute = AuthenticatedBooksRouteImport.update({
-  id: '/books',
-  path: '/books',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedBackupRoute = AuthenticatedBackupRouteImport.update({
-  id: '/backup',
-  path: '/backup',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAlbumsRoute = AuthenticatedAlbumsRouteImport.update({
-  id: '/albums',
-  path: '/albums',
+const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAiSettingsRoute = AuthenticatedAiSettingsRouteImport.update({
@@ -210,60 +85,139 @@ const AuthenticatedAiSettingsRoute = AuthenticatedAiSettingsRouteImport.update({
   path: '/ai-settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
+const AuthenticatedAlbumsRoute = AuthenticatedAlbumsRouteImport.update({
+  id: '/albums',
+  path: '/albums',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPostsIndexRoute = AuthenticatedPostsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedPostsRoute,
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedSystemUpdateRoute =
-  AuthenticatedSystemUpdateRouteImport.update({
-    id: '/system_/update',
-    path: '/system/update',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedPostsCreateRoute =
-  AuthenticatedPostsCreateRouteImport.update({
-    id: '/posts_/create',
-    path: '/posts/create',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedPostsTagsRoute = AuthenticatedPostsTagsRouteImport.update({
-  id: '/tags',
-  path: '/tags',
-  getParentRoute: () => AuthenticatedPostsRoute,
+const AuthenticatedBackupRoute = AuthenticatedBackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPostsCategoriesRoute =
-  AuthenticatedPostsCategoriesRouteImport.update({
-    id: '/categories',
-    path: '/categories',
-    getParentRoute: () => AuthenticatedPostsRoute,
-  } as any)
-const AuthenticatedPagesCreateRoute =
-  AuthenticatedPagesCreateRouteImport.update({
-    id: '/pages_/create',
-    path: '/pages/create',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedMusicPlaylistsRoute =
-  AuthenticatedMusicPlaylistsRouteImport.update({
-    id: '/music_/playlists',
-    path: '/music/playlists',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedFilmsCreateRoute =
-  AuthenticatedFilmsCreateRouteImport.update({
-    id: '/films_/create',
-    path: '/films/create',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedCommentsAiRoute = AuthenticatedCommentsAiRouteImport.update({
-  id: '/comments_/ai',
-  path: '/comments/ai',
+const AuthenticatedBooksRoute = AuthenticatedBooksRouteImport.update({
+  id: '/books',
+  path: '/books',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCommentsRoute = AuthenticatedCommentsRouteImport.update({
+  id: '/comments',
+  path: '/comments',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFilmsRoute = AuthenticatedFilmsRouteImport.update({
+  id: '/films',
+  path: '/films',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFollowsRoute = AuthenticatedFollowsRouteImport.update({
+  id: '/follows',
+  path: '/follows',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFootprintsRoute = AuthenticatedFootprintsRouteImport.update({
+  id: '/footprints',
+  path: '/footprints',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedGamesRoute = AuthenticatedGamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedGoodsRoute = AuthenticatedGoodsRouteImport.update({
+  id: '/goods',
+  path: '/goods',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMediaRoute = AuthenticatedMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMenusRoute = AuthenticatedMenusRouteImport.update({
+  id: '/menus',
+  path: '/menus',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMomentsRoute = AuthenticatedMomentsRouteImport.update({
+  id: '/moments',
+  path: '/moments',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMoviesRoute = AuthenticatedMoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMusicRoute = AuthenticatedMusicRouteImport.update({
+  id: '/music',
+  path: '/music',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPagesRoute = AuthenticatedPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlaylistsRoute = AuthenticatedPlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPluginsRoute = AuthenticatedPluginsRouteImport.update({
+  id: '/plugins',
+  path: '/plugins',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPostsRoute = AuthenticatedPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedThemesRoute = AuthenticatedThemesRouteImport.update({
+  id: '/themes',
+  path: '/themes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedToolsRoute = AuthenticatedToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedUtterlogRoute = AuthenticatedUtterlogRouteImport.update({
+  id: '/utterlog',
+  path: '/utterlog',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAiLogsRoute = AuthenticatedAiLogsRouteImport.update({
+  id: '/ai_/logs',
+  path: '/ai/logs',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCommentsStatusRoute =
@@ -272,15 +226,61 @@ const AuthenticatedCommentsStatusRoute =
     path: '/comments/$status',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedAiLogsRoute = AuthenticatedAiLogsRouteImport.update({
-  id: '/ai_/logs',
-  path: '/ai/logs',
+const AuthenticatedCommentsAiRoute = AuthenticatedCommentsAiRouteImport.update({
+  id: '/comments_/ai',
+  path: '/comments/ai',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPostsEditIdRoute =
-  AuthenticatedPostsEditIdRouteImport.update({
-    id: '/posts_/edit/$id',
-    path: '/posts/edit/$id',
+const AuthenticatedFilmsCreateRoute =
+  AuthenticatedFilmsCreateRouteImport.update({
+    id: '/films_/create',
+    path: '/films/create',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMusicPlaylistsRoute =
+  AuthenticatedMusicPlaylistsRouteImport.update({
+    id: '/music_/playlists',
+    path: '/music/playlists',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPagesCreateRoute =
+  AuthenticatedPagesCreateRouteImport.update({
+    id: '/pages_/create',
+    path: '/pages/create',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPostsIndexRoute = AuthenticatedPostsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedPostsRoute,
+} as any)
+const AuthenticatedPostsCategoriesRoute =
+  AuthenticatedPostsCategoriesRouteImport.update({
+    id: '/categories',
+    path: '/categories',
+    getParentRoute: () => AuthenticatedPostsRoute,
+  } as any)
+const AuthenticatedPostsTagsRoute = AuthenticatedPostsTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => AuthenticatedPostsRoute,
+} as any)
+const AuthenticatedPostsCreateRoute =
+  AuthenticatedPostsCreateRouteImport.update({
+    id: '/posts_/create',
+    path: '/posts/create',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSystemUpdateRoute =
+  AuthenticatedSystemUpdateRouteImport.update({
+    id: '/system_/update',
+    path: '/system/update',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedFilmsEditIdRoute =
+  AuthenticatedFilmsEditIdRouteImport.update({
+    id: '/films_/edit/$id',
+    path: '/films/edit/$id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedPagesEditIdRoute =
@@ -289,10 +289,10 @@ const AuthenticatedPagesEditIdRoute =
     path: '/pages/edit/$id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedFilmsEditIdRoute =
-  AuthenticatedFilmsEditIdRouteImport.update({
-    id: '/films_/edit/$id',
-    path: '/films/edit/$id',
+const AuthenticatedPostsEditIdRoute =
+  AuthenticatedPostsEditIdRouteImport.update({
+    id: '/posts_/edit/$id',
+    path: '/posts/edit/$id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -590,11 +590,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -604,11 +604,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -618,186 +618,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/videos': {
-      id: '/_authenticated/videos'
-      path: '/videos'
-      fullPath: '/videos'
-      preLoaderRoute: typeof AuthenticatedVideosRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/utterlog': {
-      id: '/_authenticated/utterlog'
-      path: '/utterlog'
-      fullPath: '/utterlog'
-      preLoaderRoute: typeof AuthenticatedUtterlogRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/tools': {
-      id: '/_authenticated/tools'
-      path: '/tools'
-      fullPath: '/tools'
-      preLoaderRoute: typeof AuthenticatedToolsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/themes': {
-      id: '/_authenticated/themes'
-      path: '/themes'
-      fullPath: '/themes'
-      preLoaderRoute: typeof AuthenticatedThemesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/posts': {
-      id: '/_authenticated/posts'
-      path: '/posts'
-      fullPath: '/posts'
-      preLoaderRoute: typeof AuthenticatedPostsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/plugins': {
-      id: '/_authenticated/plugins'
-      path: '/plugins'
-      fullPath: '/plugins'
-      preLoaderRoute: typeof AuthenticatedPluginsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/playlists': {
-      id: '/_authenticated/playlists'
-      path: '/playlists'
-      fullPath: '/playlists'
-      preLoaderRoute: typeof AuthenticatedPlaylistsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/pages': {
-      id: '/_authenticated/pages'
-      path: '/pages'
-      fullPath: '/pages'
-      preLoaderRoute: typeof AuthenticatedPagesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/music': {
-      id: '/_authenticated/music'
-      path: '/music'
-      fullPath: '/music'
-      preLoaderRoute: typeof AuthenticatedMusicRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/movies': {
-      id: '/_authenticated/movies'
-      path: '/movies'
-      fullPath: '/movies'
-      preLoaderRoute: typeof AuthenticatedMoviesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/moments': {
-      id: '/_authenticated/moments'
-      path: '/moments'
-      fullPath: '/moments'
-      preLoaderRoute: typeof AuthenticatedMomentsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/menus': {
-      id: '/_authenticated/menus'
-      path: '/menus'
-      fullPath: '/menus'
-      preLoaderRoute: typeof AuthenticatedMenusRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/media': {
-      id: '/_authenticated/media'
-      path: '/media'
-      fullPath: '/media'
-      preLoaderRoute: typeof AuthenticatedMediaRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/links': {
-      id: '/_authenticated/links'
-      path: '/links'
-      fullPath: '/links'
-      preLoaderRoute: typeof AuthenticatedLinksRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/goods': {
-      id: '/_authenticated/goods'
-      path: '/goods'
-      fullPath: '/goods'
-      preLoaderRoute: typeof AuthenticatedGoodsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/games': {
-      id: '/_authenticated/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof AuthenticatedGamesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/footprints': {
-      id: '/_authenticated/footprints'
-      path: '/footprints'
-      fullPath: '/footprints'
-      preLoaderRoute: typeof AuthenticatedFootprintsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/follows': {
-      id: '/_authenticated/follows'
-      path: '/follows'
-      fullPath: '/follows'
-      preLoaderRoute: typeof AuthenticatedFollowsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/films': {
-      id: '/_authenticated/films'
-      path: '/films'
-      fullPath: '/films'
-      preLoaderRoute: typeof AuthenticatedFilmsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/comments': {
-      id: '/_authenticated/comments'
-      path: '/comments'
-      fullPath: '/comments'
-      preLoaderRoute: typeof AuthenticatedCommentsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/books': {
-      id: '/_authenticated/books'
-      path: '/books'
-      fullPath: '/books'
-      preLoaderRoute: typeof AuthenticatedBooksRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/backup': {
-      id: '/_authenticated/backup'
-      path: '/backup'
-      fullPath: '/backup'
-      preLoaderRoute: typeof AuthenticatedBackupRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/analytics': {
-      id: '/_authenticated/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/albums': {
-      id: '/_authenticated/albums'
-      path: '/albums'
-      fullPath: '/albums'
-      preLoaderRoute: typeof AuthenticatedAlbumsRouteImport
+    '/_authenticated/ai': {
+      id: '/_authenticated/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AuthenticatedAiRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/ai-settings': {
@@ -807,81 +632,186 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/ai': {
-      id: '/_authenticated/ai'
-      path: '/ai'
-      fullPath: '/ai'
-      preLoaderRoute: typeof AuthenticatedAiRouteImport
+    '/_authenticated/albums': {
+      id: '/_authenticated/albums'
+      path: '/albums'
+      fullPath: '/albums'
+      preLoaderRoute: typeof AuthenticatedAlbumsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/posts/': {
-      id: '/_authenticated/posts/'
-      path: '/'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof AuthenticatedPostsIndexRouteImport
-      parentRoute: typeof AuthenticatedPostsRoute
-    }
-    '/_authenticated/system_/update': {
-      id: '/_authenticated/system_/update'
-      path: '/system/update'
-      fullPath: '/system/update'
-      preLoaderRoute: typeof AuthenticatedSystemUpdateRouteImport
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/posts_/create': {
-      id: '/_authenticated/posts_/create'
-      path: '/posts/create'
-      fullPath: '/posts/create'
-      preLoaderRoute: typeof AuthenticatedPostsCreateRouteImport
+    '/_authenticated/backup': {
+      id: '/_authenticated/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof AuthenticatedBackupRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/posts/tags': {
-      id: '/_authenticated/posts/tags'
-      path: '/tags'
-      fullPath: '/posts/tags'
-      preLoaderRoute: typeof AuthenticatedPostsTagsRouteImport
-      parentRoute: typeof AuthenticatedPostsRoute
-    }
-    '/_authenticated/posts/categories': {
-      id: '/_authenticated/posts/categories'
-      path: '/categories'
-      fullPath: '/posts/categories'
-      preLoaderRoute: typeof AuthenticatedPostsCategoriesRouteImport
-      parentRoute: typeof AuthenticatedPostsRoute
-    }
-    '/_authenticated/pages_/create': {
-      id: '/_authenticated/pages_/create'
-      path: '/pages/create'
-      fullPath: '/pages/create'
-      preLoaderRoute: typeof AuthenticatedPagesCreateRouteImport
+    '/_authenticated/books': {
+      id: '/_authenticated/books'
+      path: '/books'
+      fullPath: '/books'
+      preLoaderRoute: typeof AuthenticatedBooksRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/music_/playlists': {
-      id: '/_authenticated/music_/playlists'
-      path: '/music/playlists'
-      fullPath: '/music/playlists'
-      preLoaderRoute: typeof AuthenticatedMusicPlaylistsRouteImport
+    '/_authenticated/comments': {
+      id: '/_authenticated/comments'
+      path: '/comments'
+      fullPath: '/comments'
+      preLoaderRoute: typeof AuthenticatedCommentsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/films_/create': {
-      id: '/_authenticated/films_/create'
-      path: '/films/create'
-      fullPath: '/films/create'
-      preLoaderRoute: typeof AuthenticatedFilmsCreateRouteImport
+    '/_authenticated/films': {
+      id: '/_authenticated/films'
+      path: '/films'
+      fullPath: '/films'
+      preLoaderRoute: typeof AuthenticatedFilmsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/comments_/ai': {
-      id: '/_authenticated/comments_/ai'
-      path: '/comments/ai'
-      fullPath: '/comments/ai'
-      preLoaderRoute: typeof AuthenticatedCommentsAiRouteImport
+    '/_authenticated/follows': {
+      id: '/_authenticated/follows'
+      path: '/follows'
+      fullPath: '/follows'
+      preLoaderRoute: typeof AuthenticatedFollowsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/comments_/$status': {
-      id: '/_authenticated/comments_/$status'
-      path: '/comments/$status'
-      fullPath: '/comments/$status'
-      preLoaderRoute: typeof AuthenticatedCommentsStatusRouteImport
+    '/_authenticated/footprints': {
+      id: '/_authenticated/footprints'
+      path: '/footprints'
+      fullPath: '/footprints'
+      preLoaderRoute: typeof AuthenticatedFootprintsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/games': {
+      id: '/_authenticated/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof AuthenticatedGamesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/goods': {
+      id: '/_authenticated/goods'
+      path: '/goods'
+      fullPath: '/goods'
+      preLoaderRoute: typeof AuthenticatedGoodsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/links': {
+      id: '/_authenticated/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof AuthenticatedLinksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/media': {
+      id: '/_authenticated/media'
+      path: '/media'
+      fullPath: '/media'
+      preLoaderRoute: typeof AuthenticatedMediaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/menus': {
+      id: '/_authenticated/menus'
+      path: '/menus'
+      fullPath: '/menus'
+      preLoaderRoute: typeof AuthenticatedMenusRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/moments': {
+      id: '/_authenticated/moments'
+      path: '/moments'
+      fullPath: '/moments'
+      preLoaderRoute: typeof AuthenticatedMomentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/movies': {
+      id: '/_authenticated/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof AuthenticatedMoviesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/music': {
+      id: '/_authenticated/music'
+      path: '/music'
+      fullPath: '/music'
+      preLoaderRoute: typeof AuthenticatedMusicRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pages': {
+      id: '/_authenticated/pages'
+      path: '/pages'
+      fullPath: '/pages'
+      preLoaderRoute: typeof AuthenticatedPagesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/playlists': {
+      id: '/_authenticated/playlists'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof AuthenticatedPlaylistsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/plugins': {
+      id: '/_authenticated/plugins'
+      path: '/plugins'
+      fullPath: '/plugins'
+      preLoaderRoute: typeof AuthenticatedPluginsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/posts': {
+      id: '/_authenticated/posts'
+      path: '/posts'
+      fullPath: '/posts'
+      preLoaderRoute: typeof AuthenticatedPostsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/themes': {
+      id: '/_authenticated/themes'
+      path: '/themes'
+      fullPath: '/themes'
+      preLoaderRoute: typeof AuthenticatedThemesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tools': {
+      id: '/_authenticated/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof AuthenticatedToolsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/utterlog': {
+      id: '/_authenticated/utterlog'
+      path: '/utterlog'
+      fullPath: '/utterlog'
+      preLoaderRoute: typeof AuthenticatedUtterlogRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/videos': {
+      id: '/_authenticated/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof AuthenticatedVideosRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/ai_/logs': {
@@ -891,11 +821,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiLogsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/posts_/edit/$id': {
-      id: '/_authenticated/posts_/edit/$id'
-      path: '/posts/edit/$id'
-      fullPath: '/posts/edit/$id'
-      preLoaderRoute: typeof AuthenticatedPostsEditIdRouteImport
+    '/_authenticated/comments_/$status': {
+      id: '/_authenticated/comments_/$status'
+      path: '/comments/$status'
+      fullPath: '/comments/$status'
+      preLoaderRoute: typeof AuthenticatedCommentsStatusRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/comments_/ai': {
+      id: '/_authenticated/comments_/ai'
+      path: '/comments/ai'
+      fullPath: '/comments/ai'
+      preLoaderRoute: typeof AuthenticatedCommentsAiRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/films_/create': {
+      id: '/_authenticated/films_/create'
+      path: '/films/create'
+      fullPath: '/films/create'
+      preLoaderRoute: typeof AuthenticatedFilmsCreateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/music_/playlists': {
+      id: '/_authenticated/music_/playlists'
+      path: '/music/playlists'
+      fullPath: '/music/playlists'
+      preLoaderRoute: typeof AuthenticatedMusicPlaylistsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pages_/create': {
+      id: '/_authenticated/pages_/create'
+      path: '/pages/create'
+      fullPath: '/pages/create'
+      preLoaderRoute: typeof AuthenticatedPagesCreateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/posts/': {
+      id: '/_authenticated/posts/'
+      path: '/'
+      fullPath: '/posts/'
+      preLoaderRoute: typeof AuthenticatedPostsIndexRouteImport
+      parentRoute: typeof AuthenticatedPostsRoute
+    }
+    '/_authenticated/posts/categories': {
+      id: '/_authenticated/posts/categories'
+      path: '/categories'
+      fullPath: '/posts/categories'
+      preLoaderRoute: typeof AuthenticatedPostsCategoriesRouteImport
+      parentRoute: typeof AuthenticatedPostsRoute
+    }
+    '/_authenticated/posts/tags': {
+      id: '/_authenticated/posts/tags'
+      path: '/tags'
+      fullPath: '/posts/tags'
+      preLoaderRoute: typeof AuthenticatedPostsTagsRouteImport
+      parentRoute: typeof AuthenticatedPostsRoute
+    }
+    '/_authenticated/posts_/create': {
+      id: '/_authenticated/posts_/create'
+      path: '/posts/create'
+      fullPath: '/posts/create'
+      preLoaderRoute: typeof AuthenticatedPostsCreateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/system_/update': {
+      id: '/_authenticated/system_/update'
+      path: '/system/update'
+      fullPath: '/system/update'
+      preLoaderRoute: typeof AuthenticatedSystemUpdateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/films_/edit/$id': {
+      id: '/_authenticated/films_/edit/$id'
+      path: '/films/edit/$id'
+      fullPath: '/films/edit/$id'
+      preLoaderRoute: typeof AuthenticatedFilmsEditIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/pages_/edit/$id': {
@@ -905,11 +905,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPagesEditIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/films_/edit/$id': {
-      id: '/_authenticated/films_/edit/$id'
-      path: '/films/edit/$id'
-      fullPath: '/films/edit/$id'
-      preLoaderRoute: typeof AuthenticatedFilmsEditIdRouteImport
+    '/_authenticated/posts_/edit/$id': {
+      id: '/_authenticated/posts_/edit/$id'
+      path: '/posts/edit/$id'
+      fullPath: '/posts/edit/$id'
+      preLoaderRoute: typeof AuthenticatedPostsEditIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }

@@ -15,7 +15,7 @@ import { describe, expect, test } from 'bun:test';
  * 不如直接钉住「不许在这个函数里用本地时区 API」这条约束。
  */
 // 相对本测试文件定位，不依赖跑测试时的工作目录
-const SRC = new URL('../src/web/components/pages/links/LegacyLinksView.tsx', import.meta.url).pathname;
+const SRC = new URL('../src/web/components/pages/links/LegacyLinksView.tsx', import.meta.url);
 
 async function source() {
   return Bun.file(SRC).text();

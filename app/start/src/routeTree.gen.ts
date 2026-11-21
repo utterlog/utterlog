@@ -9,348 +9,213 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
-import { Route as RssRouteImport } from './routes/rss'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as MusicRouteImport } from './routes/music'
-import { Route as MoviesRouteImport } from './routes/movies'
-import { Route as MomentsRouteImport } from './routes/moments'
-import { Route as LogoDotextRouteImport } from './routes/logo[.]$ext'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
-import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
-import { Route as LinksRouteImport } from './routes/links'
-import { Route as InstallRouteImport } from './routes/install'
-import { Route as GoodsRouteImport } from './routes/goods'
-import { Route as GamesRouteImport } from './routes/games'
-import { Route as FootprintsRouteImport } from './routes/footprints'
-import { Route as FeedsRouteImport } from './routes/feeds'
-import { Route as FeedRouteImport } from './routes/feed'
-import { Route as FaviconDoticoRouteImport } from './routes/favicon[.]ico'
-import { Route as FaviconDotextRouteImport } from './routes/favicon[.]$ext'
-import { Route as DarkLogoDotextRouteImport } from './routes/dark-logo[.]$ext'
-import { Route as BooksRouteImport } from './routes/books'
-import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
-import { Route as ArchivesRouteImport } from './routes/archives'
-import { Route as AlbumsRouteImport } from './routes/albums'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TagsIndexRouteImport } from './routes/tags/index'
-import { Route as FilmsIndexRouteImport } from './routes/films/index'
-import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
-import { Route as UploadsSplatRouteImport } from './routes/uploads/$'
-import { Route as ThemesSplatRouteImport } from './routes/themes/$'
-import { Route as TagsSlugRouteImport } from './routes/tags/$slug'
-import { Route as StylesSplatRouteImport } from './routes/styles/$'
-import { Route as StaticSplatRouteImport } from './routes/static/$'
-import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
-import { Route as PageNumRouteImport } from './routes/page/$num'
-import { Route as ImagesSplatRouteImport } from './routes/images/$'
-import { Route as IconsSplatRouteImport } from './routes/icons/$'
-import { Route as FilmsSlugRouteImport } from './routes/films/$slug'
-import { Route as EmojiSplatRouteImport } from './routes/emoji/$'
-import { Route as DateYearRouteImport } from './routes/date/$year'
-import { Route as CategoriesSlugRouteImport } from './routes/categories/$slug'
-import { Route as AssetsSplatRouteImport } from './routes/assets/$'
-import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AlbumsRouteImport } from './routes/albums'
+import { Route as ArchivesRouteImport } from './routes/archives'
+import { Route as AtomDotxmlRouteImport } from './routes/atom[.]xml'
+import { Route as BooksRouteImport } from './routes/books'
+import { Route as DarkLogoDotextRouteImport } from './routes/dark-logo[.]$ext'
+import { Route as FaviconDotextRouteImport } from './routes/favicon[.]$ext'
+import { Route as FaviconDoticoRouteImport } from './routes/favicon[.]ico'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as FeedsRouteImport } from './routes/feeds'
+import { Route as FootprintsRouteImport } from './routes/footprints'
+import { Route as GamesRouteImport } from './routes/games'
+import { Route as GoodsRouteImport } from './routes/goods'
+import { Route as InstallRouteImport } from './routes/install'
+import { Route as LinksRouteImport } from './routes/links'
+import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LogoDotextRouteImport } from './routes/logo[.]$ext'
+import { Route as MomentsRouteImport } from './routes/moments'
+import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as MusicRouteImport } from './routes/music'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as RssRouteImport } from './routes/rss'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdminSplatRouteImport } from './routes/admin/$'
-import { Route as DateYearMonthRouteImport } from './routes/date/$year/$month'
-import { Route as ApiV1VisitorRouteImport } from './routes/api/v1/visitor'
-import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
-import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
-import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
-import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
-import { Route as ApiV1OwnerRouteImport } from './routes/api/v1/owner'
-import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
-import { Route as ApiV1OnlineRouteImport } from './routes/api/v1/online'
-import { Route as ApiV1HealthRouteImport } from './routes/api/v1/health'
-import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
-import { Route as ApiV1FeedRouteImport } from './routes/api/v1/feed'
-import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
+import { Route as ApiRevalidateRouteImport } from './routes/api/revalidate'
+import { Route as AssetsSplatRouteImport } from './routes/assets/$'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as CategoriesSlugRouteImport } from './routes/categories/$slug'
+import { Route as DateYearRouteImport } from './routes/date/$year'
+import { Route as EmojiSplatRouteImport } from './routes/emoji/$'
+import { Route as FilmsIndexRouteImport } from './routes/films/index'
+import { Route as FilmsSlugRouteImport } from './routes/films/$slug'
+import { Route as IconsSplatRouteImport } from './routes/icons/$'
+import { Route as ImagesSplatRouteImport } from './routes/images/$'
+import { Route as PageNumRouteImport } from './routes/page/$num'
+import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
+import { Route as StaticSplatRouteImport } from './routes/static/$'
+import { Route as StylesSplatRouteImport } from './routes/styles/$'
+import { Route as TagsIndexRouteImport } from './routes/tags/index'
+import { Route as TagsSlugRouteImport } from './routes/tags/$slug'
+import { Route as ThemesSplatRouteImport } from './routes/themes/$'
+import { Route as UploadsSplatRouteImport } from './routes/uploads/$'
 import { Route as ApiV1ResourceRouteImport } from './routes/api/v1/$resource'
-import { Route as ApiV1ThemesIndexRouteImport } from './routes/api/v1/themes/index'
-import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
-import { Route as ApiV1PluginsIndexRouteImport } from './routes/api/v1/plugins/index'
-import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
-import { Route as ApiV1NotificationsIndexRouteImport } from './routes/api/v1/notifications/index'
-import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
-import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index'
-import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
-import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
-import { Route as DateYearMonthDayRouteImport } from './routes/date/$year/$month/$day'
-import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
-import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
-import { Route as ApiV1UnsubscribeCommentReplyRouteImport } from './routes/api/v1/unsubscribe/comment-reply'
-import { Route as ApiV1TrackDurationRouteImport } from './routes/api/v1/track/duration'
-import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/upload'
-import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
-import { Route as ApiV1TelegramWebhookRouteImport } from './routes/api/v1/telegram/webhook'
-import { Route as ApiV1TelegramTestRouteImport } from './routes/api/v1/telegram/test'
-import { Route as ApiV1TelegramSetupWebhookRouteImport } from './routes/api/v1/telegram/setup-webhook'
-import { Route as ApiV1TelegramGetChatIdRouteImport } from './routes/api/v1/telegram/get-chat-id'
-import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
-import { Route as ApiV1SystemUpdateCheckRouteImport } from './routes/api/v1/system/update-check'
-import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
-import { Route as ApiV1SocialFetchFeedsRouteImport } from './routes/api/v1/social/fetch-feeds'
-import { Route as ApiV1SocialFeedTimelineRouteImport } from './routes/api/v1/social/feed-timeline'
-import { Route as ApiV1SocialFeedStatsRouteImport } from './routes/api/v1/social/feed-stats'
-import { Route as ApiV1SocialActionRouteImport } from './routes/api/v1/social/$action'
-import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
-import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
-import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
-import { Route as ApiV1SearchRebuildRouteImport } from './routes/api/v1/search/rebuild'
-import { Route as ApiV1RssParseRouteImport } from './routes/api/v1/rss/parse'
-import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
-import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
-import { Route as ApiV1PluginsUploadRouteImport } from './routes/api/v1/plugins/upload'
-import { Route as ApiV1PluginsIdRouteImport } from './routes/api/v1/plugins/$id'
-import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playlists/import'
-import { Route as ApiV1PassportIdentifyRouteImport } from './routes/api/v1/passport/identify'
-import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
-import { Route as ApiV1OptionsTestEmailRouteImport } from './routes/api/v1/options/test-email'
-import { Route as ApiV1OptionsTestCredentialRouteImport } from './routes/api/v1/options/test-credential'
-import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/v1/notifications/unread-count'
-import { Route as ApiV1NotificationsStreamRouteImport } from './routes/api/v1/notifications/stream'
-import { Route as ApiV1NotificationsReadAllRouteImport } from './routes/api/v1/notifications/read-all'
-import { Route as ApiV1NotificationsIdRouteImport } from './routes/api/v1/notifications/$id'
-import { Route as ApiV1NetworkActionRouteImport } from './routes/api/v1/network/$action'
-import { Route as ApiV1MusicSearchRouteImport } from './routes/api/v1/music/search'
-import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
-import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
-import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
-import { Route as ApiV1MediaUploadRouteImport } from './routes/api/v1/media/upload'
-import { Route as ApiV1MediaTestConnectionRouteImport } from './routes/api/v1/media/test-connection'
-import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats'
-import { Route as ApiV1MediaParseRouteImport } from './routes/api/v1/media/parse'
-import { Route as ApiV1MediaExifRouteImport } from './routes/api/v1/media/exif'
-import { Route as ApiV1MediaDownloadUrlRouteImport } from './routes/api/v1/media/download-url'
-import { Route as ApiV1MediaDoubanImportRouteImport } from './routes/api/v1/media/douban-import'
-import { Route as ApiV1MediaIdRouteImport } from './routes/api/v1/media/$id'
-import { Route as ApiV1LocationReverseRouteImport } from './routes/api/v1/location/reverse'
-import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
-import { Route as ApiV1InstallStatusRouteImport } from './routes/api/v1/install/status'
-import { Route as ApiV1InstallFinishRouteImport } from './routes/api/v1/install/finish'
-import { Route as ApiV1InstallCreateAdminRouteImport } from './routes/api/v1/install/create-admin'
-import { Route as ApiV1ImportPlatformRouteImport } from './routes/api/v1/import/$platform'
-import { Route as ApiV1I18nLocalesRouteImport } from './routes/api/v1/i18n/locales'
-import { Route as ApiV1I18nCurrentRouteImport } from './routes/api/v1/i18n/current'
-import { Route as ApiV1I18nLocaleRouteImport } from './routes/api/v1/i18n/$locale'
-import { Route as ApiV1FederationWebhookRouteImport } from './routes/api/v1/federation/webhook'
-import { Route as ApiV1FederationVerifyRouteImport } from './routes/api/v1/federation/verify'
-import { Route as ApiV1FederationTokenRouteImport } from './routes/api/v1/federation/token'
-import { Route as ApiV1FederationMetadataRouteImport } from './routes/api/v1/federation/metadata'
-import { Route as ApiV1FederationFollowRouteImport } from './routes/api/v1/federation/follow'
-import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
-import { Route as ApiV1CommentsModerateRouteImport } from './routes/api/v1/comments/moderate'
-import { Route as ApiV1CommentsFederatedRouteImport } from './routes/api/v1/comments/federated'
-import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
-import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
-import { Route as ApiV1CategoriesIdRouteImport } from './routes/api/v1/categories/$id'
-import { Route as ApiV1CaptchaImageRouteImport } from './routes/api/v1/captcha/image'
-import { Route as ApiV1CaptchaChallengeRouteImport } from './routes/api/v1/captcha/challenge'
-import { Route as ApiV1BackupActionRouteImport } from './routes/api/v1/backup/$action'
-import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
-import { Route as ApiV1AuthRefreshRouteImport } from './routes/api/v1/auth/refresh'
-import { Route as ApiV1AuthPasswordRouteImport } from './routes/api/v1/auth/password'
-import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth/me'
-import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth/logout'
-import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
-import { Route as ApiV1AuthForgotPasswordRouteImport } from './routes/api/v1/auth/forgot-password'
-import { Route as ApiV1ArchiveStatsRouteImport } from './routes/api/v1/archive/stats'
-import { Route as ApiV1AnalyticsActionRouteImport } from './routes/api/v1/analytics/$action'
-import { Route as ApiV1AiProvidersRouteImport } from './routes/api/v1/ai/providers'
-import { Route as ApiV1AiActionRouteImport } from './routes/api/v1/ai/$action'
-import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats'
-import { Route as ApiV1AdminLinkIconsRouteImport } from './routes/api/v1/admin/link-icons'
-import { Route as ApiV1AdminLinkEmailsRouteImport } from './routes/api/v1/admin/link-emails'
-import { Route as ApiV1AdminHeaderCountsRouteImport } from './routes/api/v1/admin/header-counts'
-import { Route as ApiV1AdminBootstrapRouteImport } from './routes/api/v1/admin/bootstrap'
+import { Route as ApiV1CategoriesRouteImport } from './routes/api/v1/categories'
+import { Route as ApiV1FeedRouteImport } from './routes/api/v1/feed'
+import { Route as ApiV1FootprintsRouteImport } from './routes/api/v1/footprints'
+import { Route as ApiV1HealthRouteImport } from './routes/api/v1/health'
+import { Route as ApiV1OnlineRouteImport } from './routes/api/v1/online'
+import { Route as ApiV1OptionsRouteImport } from './routes/api/v1/options'
+import { Route as ApiV1OwnerRouteImport } from './routes/api/v1/owner'
+import { Route as ApiV1PostsRouteImport } from './routes/api/v1/posts'
+import { Route as ApiV1SearchRouteImport } from './routes/api/v1/search'
+import { Route as ApiV1TagsRouteImport } from './routes/api/v1/tags'
+import { Route as ApiV1TrackRouteImport } from './routes/api/v1/track'
+import { Route as ApiV1VisitorRouteImport } from './routes/api/v1/visitor'
+import { Route as DateYearMonthRouteImport } from './routes/date/$year/$month'
 import { Route as ApiV1ResourceIdRouteImport } from './routes/api/v1/$resource/$id'
-import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
-import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
+import { Route as ApiV1AdminBootstrapRouteImport } from './routes/api/v1/admin/bootstrap'
+import { Route as ApiV1AdminHeaderCountsRouteImport } from './routes/api/v1/admin/header-counts'
+import { Route as ApiV1AdminLinkEmailsRouteImport } from './routes/api/v1/admin/link-emails'
+import { Route as ApiV1AdminLinkIconsRouteImport } from './routes/api/v1/admin/link-icons'
+import { Route as ApiV1AdminStatsRouteImport } from './routes/api/v1/admin/stats'
+import { Route as ApiV1AiActionRouteImport } from './routes/api/v1/ai/$action'
+import { Route as ApiV1AiProvidersRouteImport } from './routes/api/v1/ai/providers'
+import { Route as ApiV1AnalyticsIndexRouteImport } from './routes/api/v1/analytics/index'
+import { Route as ApiV1AnalyticsActionRouteImport } from './routes/api/v1/analytics/$action'
+import { Route as ApiV1ArchiveStatsRouteImport } from './routes/api/v1/archive/stats'
+import { Route as ApiV1AuthForgotPasswordRouteImport } from './routes/api/v1/auth/forgot-password'
+import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth/login'
+import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth/logout'
+import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth/me'
+import { Route as ApiV1AuthPasswordRouteImport } from './routes/api/v1/auth/password'
+import { Route as ApiV1AuthRefreshRouteImport } from './routes/api/v1/auth/refresh'
+import { Route as ApiV1AuthResetPasswordRouteImport } from './routes/api/v1/auth/reset-password'
+import { Route as ApiV1BackupActionRouteImport } from './routes/api/v1/backup/$action'
+import { Route as ApiV1CaptchaChallengeRouteImport } from './routes/api/v1/captcha/challenge'
+import { Route as ApiV1CaptchaImageRouteImport } from './routes/api/v1/captcha/image'
+import { Route as ApiV1CategoriesIdRouteImport } from './routes/api/v1/categories/$id'
+import { Route as ApiV1CommentsIndexRouteImport } from './routes/api/v1/comments/index'
+import { Route as ApiV1CommentsIdRouteImport } from './routes/api/v1/comments/$id'
+import { Route as ApiV1CommentsBatchRouteImport } from './routes/api/v1/comments/batch'
+import { Route as ApiV1CommentsFederatedRouteImport } from './routes/api/v1/comments/federated'
+import { Route as ApiV1CommentsModerateRouteImport } from './routes/api/v1/comments/moderate'
+import { Route as ApiV1CommentsPendingCountRouteImport } from './routes/api/v1/comments/pending-count'
+import { Route as ApiV1FederationFollowRouteImport } from './routes/api/v1/federation/follow'
+import { Route as ApiV1FederationMetadataRouteImport } from './routes/api/v1/federation/metadata'
+import { Route as ApiV1FederationTokenRouteImport } from './routes/api/v1/federation/token'
+import { Route as ApiV1FederationVerifyRouteImport } from './routes/api/v1/federation/verify'
+import { Route as ApiV1FederationWebhookRouteImport } from './routes/api/v1/federation/webhook'
+import { Route as ApiV1I18nLocaleRouteImport } from './routes/api/v1/i18n/$locale'
+import { Route as ApiV1I18nCurrentRouteImport } from './routes/api/v1/i18n/current'
+import { Route as ApiV1I18nLocalesRouteImport } from './routes/api/v1/i18n/locales'
+import { Route as ApiV1ImportPlatformRouteImport } from './routes/api/v1/import/$platform'
+import { Route as ApiV1InstallCreateAdminRouteImport } from './routes/api/v1/install/create-admin'
+import { Route as ApiV1InstallFinishRouteImport } from './routes/api/v1/install/finish'
+import { Route as ApiV1InstallStatusRouteImport } from './routes/api/v1/install/status'
+import { Route as ApiV1LinksApplyRouteImport } from './routes/api/v1/links/apply'
+import { Route as ApiV1LocationReverseRouteImport } from './routes/api/v1/location/reverse'
+import { Route as ApiV1MediaIndexRouteImport } from './routes/api/v1/media/index'
+import { Route as ApiV1MediaIdRouteImport } from './routes/api/v1/media/$id'
+import { Route as ApiV1MediaDoubanImportRouteImport } from './routes/api/v1/media/douban-import'
+import { Route as ApiV1MediaDownloadUrlRouteImport } from './routes/api/v1/media/download-url'
+import { Route as ApiV1MediaExifRouteImport } from './routes/api/v1/media/exif'
+import { Route as ApiV1MediaParseRouteImport } from './routes/api/v1/media/parse'
+import { Route as ApiV1MediaStatsRouteImport } from './routes/api/v1/media/stats'
+import { Route as ApiV1MediaTestConnectionRouteImport } from './routes/api/v1/media/test-connection'
+import { Route as ApiV1MediaUploadRouteImport } from './routes/api/v1/media/upload'
+import { Route as ApiV1MediaUploadBrandingRouteImport } from './routes/api/v1/media/upload-branding'
+import { Route as ApiV1MomentsIndexRouteImport } from './routes/api/v1/moments/index'
+import { Route as ApiV1MomentsIdRouteImport } from './routes/api/v1/moments/$id'
+import { Route as ApiV1MomentsRecentTagsRouteImport } from './routes/api/v1/moments/recent-tags'
+import { Route as ApiV1MusicSearchRouteImport } from './routes/api/v1/music/search'
+import { Route as ApiV1NetworkActionRouteImport } from './routes/api/v1/network/$action'
+import { Route as ApiV1NotificationsIndexRouteImport } from './routes/api/v1/notifications/index'
+import { Route as ApiV1NotificationsIdRouteImport } from './routes/api/v1/notifications/$id'
+import { Route as ApiV1NotificationsReadAllRouteImport } from './routes/api/v1/notifications/read-all'
+import { Route as ApiV1NotificationsStreamRouteImport } from './routes/api/v1/notifications/stream'
+import { Route as ApiV1NotificationsUnreadCountRouteImport } from './routes/api/v1/notifications/unread-count'
+import { Route as ApiV1OptionsTestCredentialRouteImport } from './routes/api/v1/options/test-credential'
+import { Route as ApiV1OptionsTestEmailRouteImport } from './routes/api/v1/options/test-email'
+import { Route as ApiV1PasskeysIndexRouteImport } from './routes/api/v1/passkeys/index'
+import { Route as ApiV1PasskeysIdRouteImport } from './routes/api/v1/passkeys/$id'
+import { Route as ApiV1PassportIdentifyRouteImport } from './routes/api/v1/passport/identify'
+import { Route as ApiV1PlaylistsImportRouteImport } from './routes/api/v1/playlists/import'
+import { Route as ApiV1PluginsIndexRouteImport } from './routes/api/v1/plugins/index'
+import { Route as ApiV1PluginsIdRouteImport } from './routes/api/v1/plugins/$id'
+import { Route as ApiV1PluginsUploadRouteImport } from './routes/api/v1/plugins/upload'
+import { Route as ApiV1PostsIdRouteImport } from './routes/api/v1/posts/$id'
+import { Route as ApiV1ProfileIndexRouteImport } from './routes/api/v1/profile/index'
+import { Route as ApiV1ProfileSendCodeRouteImport } from './routes/api/v1/profile/send-code'
+import { Route as ApiV1RssParseRouteImport } from './routes/api/v1/rss/parse'
+import { Route as ApiV1SearchRebuildRouteImport } from './routes/api/v1/search/rebuild'
+import { Route as ApiV1SetupSaveRouteImport } from './routes/api/v1/setup/save'
+import { Route as ApiV1SetupStatusRouteImport } from './routes/api/v1/setup/status'
+import { Route as ApiV1SetupTestDbRouteImport } from './routes/api/v1/setup/test-db'
+import { Route as ApiV1SocialActionRouteImport } from './routes/api/v1/social/$action'
+import { Route as ApiV1SocialFeedStatsRouteImport } from './routes/api/v1/social/feed-stats'
+import { Route as ApiV1SocialFeedTimelineRouteImport } from './routes/api/v1/social/feed-timeline'
+import { Route as ApiV1SocialFetchFeedsRouteImport } from './routes/api/v1/social/fetch-feeds'
+import { Route as ApiV1SystemStatusRouteImport } from './routes/api/v1/system/status'
+import { Route as ApiV1SystemUpdateCheckRouteImport } from './routes/api/v1/system/update-check'
+import { Route as ApiV1TagsIdRouteImport } from './routes/api/v1/tags/$id'
+import { Route as ApiV1TelegramGetChatIdRouteImport } from './routes/api/v1/telegram/get-chat-id'
+import { Route as ApiV1TelegramSetupWebhookRouteImport } from './routes/api/v1/telegram/setup-webhook'
+import { Route as ApiV1TelegramTestRouteImport } from './routes/api/v1/telegram/test'
+import { Route as ApiV1TelegramWebhookRouteImport } from './routes/api/v1/telegram/webhook'
+import { Route as ApiV1ThemesIndexRouteImport } from './routes/api/v1/themes/index'
+import { Route as ApiV1ThemesIdRouteImport } from './routes/api/v1/themes/$id'
+import { Route as ApiV1ThemesUploadRouteImport } from './routes/api/v1/themes/upload'
+import { Route as ApiV1TrackDurationRouteImport } from './routes/api/v1/track/duration'
+import { Route as ApiV1UnsubscribeCommentReplyRouteImport } from './routes/api/v1/unsubscribe/comment-reply'
+import { Route as ApiV1VisitorGeoRouteImport } from './routes/api/v1/visitor/geo'
+import { Route as ApiV1VisitorWeatherRouteImport } from './routes/api/v1/visitor/weather'
+import { Route as DateYearMonthDayRouteImport } from './routes/date/$year/$month/$day'
 import { Route as ApiV1AdminAiCommentsIndexRouteImport } from './routes/api/v1/admin/ai-comments/index'
-import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
-import { Route as ApiV1SyncPlatformActionRouteImport } from './routes/api/v1/sync/$platform/$action'
-import { Route as ApiV1SocialFetchFeedsStatusRouteImport } from './routes/api/v1/social/fetch-feeds/status'
-import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
-import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
-import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api/v1/posts/by-display-id/$displayId'
-import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/posts/$id/navigation'
-import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
-import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
-import { Route as ApiV1PluginsIdActionRouteImport } from './routes/api/v1/plugins/$id/$action'
-import { Route as ApiV1PlaylistsIdSongsRouteImport } from './routes/api/v1/playlists/$id/songs'
-import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/notifications/$id/read'
-import { Route as ApiV1NetworkOauthActionRouteImport } from './routes/api/v1/network/oauth/$action'
-import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
-import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
-import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
-import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1/backup/download/$filename'
-import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
-import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
-import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
-import { Route as ApiV1AiProvidersIdRouteImport } from './routes/api/v1/ai/providers/$id'
-import { Route as ApiV1AiConversationsIdRouteImport } from './routes/api/v1/ai/conversations/$id'
-import { Route as ApiV1AdminSystemActionRouteImport } from './routes/api/v1/admin/system/$action'
-import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
-import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
-import { Route as ApiV1AdminFootprintsIdRouteImport } from './routes/api/v1/admin/footprints/$id'
-import { Route as ApiV1AdminAnalyticsStatsRouteImport } from './routes/api/v1/admin/analytics/stats'
-import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/admin/analytics/purge'
 import { Route as ApiV1AdminAiCommentsIdRouteImport } from './routes/api/v1/admin/ai-comments/$id'
-import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
-import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
-import { Route as ApiV1AdminSystemUpgradeStatusRouteImport } from './routes/api/v1/admin/system/upgrade/status'
-import { Route as ApiV1AdminSyncPlatformSitesRouteImport } from './routes/api/v1/admin/sync/$platform/sites'
-import { Route as ApiV1AdminSyncPlatformJobsRouteImport } from './routes/api/v1/admin/sync/$platform/jobs'
+import { Route as ApiV1AdminAnalyticsPurgeRouteImport } from './routes/api/v1/admin/analytics/purge'
+import { Route as ApiV1AdminAnalyticsStatsRouteImport } from './routes/api/v1/admin/analytics/stats'
+import { Route as ApiV1AdminFootprintsIndexRouteImport } from './routes/api/v1/admin/footprints/index'
+import { Route as ApiV1AdminFootprintsIdRouteImport } from './routes/api/v1/admin/footprints/$id'
+import { Route as ApiV1AdminFootprintsGeocodeRouteImport } from './routes/api/v1/admin/footprints/geocode'
+import { Route as ApiV1AdminFootprintsPlacesRouteImport } from './routes/api/v1/admin/footprints/places'
+import { Route as ApiV1AdminSystemActionRouteImport } from './routes/api/v1/admin/system/$action'
+import { Route as ApiV1AiConversationsIdRouteImport } from './routes/api/v1/ai/conversations/$id'
+import { Route as ApiV1AiProvidersIdRouteImport } from './routes/api/v1/ai/providers/$id'
+import { Route as ApiV1AlbumsIdPhotosRouteImport } from './routes/api/v1/albums/$id/photos'
+import { Route as ApiV1AuthPasskeyAvailableRouteImport } from './routes/api/v1/auth/passkey/available'
+import { Route as ApiV1AuthTotpActionRouteImport } from './routes/api/v1/auth/totp/$action'
+import { Route as ApiV1BackupDownloadFilenameRouteImport } from './routes/api/v1/backup/download/$filename'
+import { Route as ApiV1CommentsIdApproveRouteImport } from './routes/api/v1/comments/$id/approve'
+import { Route as ApiV1CommentsIdEditRouteImport } from './routes/api/v1/comments/$id/edit'
+import { Route as ApiV1CommentsIdReplyRouteImport } from './routes/api/v1/comments/$id/reply'
+import { Route as ApiV1NetworkOauthActionRouteImport } from './routes/api/v1/network/oauth/$action'
+import { Route as ApiV1NotificationsIdReadRouteImport } from './routes/api/v1/notifications/$id/read'
+import { Route as ApiV1PlaylistsIdSongsRouteImport } from './routes/api/v1/playlists/$id/songs'
+import { Route as ApiV1PluginsIdActionRouteImport } from './routes/api/v1/plugins/$id/$action'
+import { Route as ApiV1PostsIdCommentsRouteImport } from './routes/api/v1/posts/$id/comments'
+import { Route as ApiV1PostsIdEpisodesRouteImport } from './routes/api/v1/posts/$id/episodes'
+import { Route as ApiV1PostsIdNavigationRouteImport } from './routes/api/v1/posts/$id/navigation'
+import { Route as ApiV1PostsByDisplayIdDisplayIdRouteImport } from './routes/api/v1/posts/by-display-id/$displayId'
+import { Route as ApiV1PostsSlugSlugRouteImport } from './routes/api/v1/posts/slug/$slug'
+import { Route as ApiV1PublicAlbumsIndexRouteImport } from './routes/api/v1/public/albums/index'
+import { Route as ApiV1PublicAlbumsIdRouteImport } from './routes/api/v1/public/albums/$id'
+import { Route as ApiV1SocialFetchFeedsStatusRouteImport } from './routes/api/v1/social/fetch-feeds/status'
+import { Route as ApiV1SyncPlatformActionRouteImport } from './routes/api/v1/sync/$platform/$action'
+import { Route as ApiV1ThemesIdActivateRouteImport } from './routes/api/v1/themes/$id/activate'
 import { Route as ApiV1AdminAiCommentsIdActionRouteImport } from './routes/api/v1/admin/ai-comments/$id/$action'
-import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v1/sync/$platform/job/$id/status'
+import { Route as ApiV1AdminSyncPlatformJobsRouteImport } from './routes/api/v1/admin/sync/$platform/jobs'
+import { Route as ApiV1AdminSyncPlatformSitesRouteImport } from './routes/api/v1/admin/sync/$platform/sites'
+import { Route as ApiV1AdminSystemUpgradeStatusRouteImport } from './routes/api/v1/admin/system/upgrade/status'
+import { Route as ApiV1AlbumsIdPhotosMediaIdRouteImport } from './routes/api/v1/albums/$id/photos/$mediaId'
+import { Route as ApiV1AuthPasskeyFlowActionRouteImport } from './routes/api/v1/auth/passkey/$flow/$action'
 import { Route as ApiV1AdminSyncPlatformSitesUuidRouteImport } from './routes/api/v1/admin/sync/$platform/sites/$uuid'
+import { Route as ApiV1SyncPlatformJobIdStatusRouteImport } from './routes/api/v1/sync/$platform/job/$id/status'
 import { Route as ApiV1MusicProxyPlatformSongsIdAssetRouteImport } from './routes/api/v1/music/proxy/$platform/songs/$id/$asset'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RssDotxmlRoute = RssDotxmlRouteImport.update({
-  id: '/rss.xml',
-  path: '/rss.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RssRoute = RssRouteImport.update({
-  id: '/rss',
-  path: '/rss',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MusicRoute = MusicRouteImport.update({
-  id: '/music',
-  path: '/music',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MoviesRoute = MoviesRouteImport.update({
-  id: '/movies',
-  path: '/movies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MomentsRoute = MomentsRouteImport.update({
-  id: '/moments',
-  path: '/moments',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LogoDotextRoute = LogoDotextRouteImport.update({
-  id: '/logo.$ext',
-  path: '/logo.$ext',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
-  id: '/llms.txt',
-  path: '/llms.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
-  id: '/llms-full.txt',
-  path: '/llms-full.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LinksRoute = LinksRouteImport.update({
-  id: '/links',
-  path: '/links',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InstallRoute = InstallRouteImport.update({
-  id: '/install',
-  path: '/install',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GoodsRoute = GoodsRouteImport.update({
-  id: '/goods',
-  path: '/goods',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesRoute = GamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FootprintsRoute = FootprintsRouteImport.update({
-  id: '/footprints',
-  path: '/footprints',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedsRoute = FeedsRouteImport.update({
-  id: '/feeds',
-  path: '/feeds',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedRoute = FeedRouteImport.update({
-  id: '/feed',
-  path: '/feed',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaviconDoticoRoute = FaviconDoticoRouteImport.update({
-  id: '/favicon.ico',
-  path: '/favicon.ico',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaviconDotextRoute = FaviconDotextRouteImport.update({
-  id: '/favicon.$ext',
-  path: '/favicon.$ext',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DarkLogoDotextRoute = DarkLogoDotextRouteImport.update({
-  id: '/dark-logo.$ext',
-  path: '/dark-logo.$ext',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BooksRoute = BooksRouteImport.update({
-  id: '/books',
-  path: '/books',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtomDotxmlRoute = AtomDotxmlRouteImport.update({
-  id: '/atom.xml',
-  path: '/atom.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArchivesRoute = ArchivesRouteImport.update({
-  id: '/archives',
-  path: '/archives',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlbumsRoute = AlbumsRouteImport.update({
-  id: '/albums',
-  path: '/albums',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -358,104 +223,144 @@ const SplatRoute = SplatRouteImport.update({
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TagsIndexRoute = TagsIndexRouteImport.update({
-  id: '/tags/',
-  path: '/tags/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FilmsIndexRoute = FilmsIndexRouteImport.update({
-  id: '/films/',
-  path: '/films/',
+const AlbumsRoute = AlbumsRouteImport.update({
+  id: '/albums',
+  path: '/albums',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
-  id: '/categories/',
-  path: '/categories/',
+const ArchivesRoute = ArchivesRouteImport.update({
+  id: '/archives',
+  path: '/archives',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UploadsSplatRoute = UploadsSplatRouteImport.update({
-  id: '/uploads/$',
-  path: '/uploads/$',
+const AtomDotxmlRoute = AtomDotxmlRouteImport.update({
+  id: '/atom.xml',
+  path: '/atom.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ThemesSplatRoute = ThemesSplatRouteImport.update({
-  id: '/themes/$',
-  path: '/themes/$',
+const BooksRoute = BooksRouteImport.update({
+  id: '/books',
+  path: '/books',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TagsSlugRoute = TagsSlugRouteImport.update({
-  id: '/tags/$slug',
-  path: '/tags/$slug',
+const DarkLogoDotextRoute = DarkLogoDotextRouteImport.update({
+  id: '/dark-logo.$ext',
+  path: '/dark-logo.$ext',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StylesSplatRoute = StylesSplatRouteImport.update({
-  id: '/styles/$',
-  path: '/styles/$',
+const FaviconDotextRoute = FaviconDotextRouteImport.update({
+  id: '/favicon.$ext',
+  path: '/favicon.$ext',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StaticSplatRoute = StaticSplatRouteImport.update({
-  id: '/static/$',
-  path: '/static/$',
+const FaviconDoticoRoute = FaviconDoticoRouteImport.update({
+  id: '/favicon.ico',
+  path: '/favicon.ico',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsSlugRoute = PostsSlugRouteImport.update({
-  id: '/posts/$slug',
-  path: '/posts/$slug',
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PageNumRoute = PageNumRouteImport.update({
-  id: '/page/$num',
-  path: '/page/$num',
+const FeedsRoute = FeedsRouteImport.update({
+  id: '/feeds',
+  path: '/feeds',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ImagesSplatRoute = ImagesSplatRouteImport.update({
-  id: '/images/$',
-  path: '/images/$',
+const FootprintsRoute = FootprintsRouteImport.update({
+  id: '/footprints',
+  path: '/footprints',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IconsSplatRoute = IconsSplatRouteImport.update({
-  id: '/icons/$',
-  path: '/icons/$',
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FilmsSlugRoute = FilmsSlugRouteImport.update({
-  id: '/films/$slug',
-  path: '/films/$slug',
+const GoodsRoute = GoodsRouteImport.update({
+  id: '/goods',
+  path: '/goods',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmojiSplatRoute = EmojiSplatRouteImport.update({
-  id: '/emoji/$',
-  path: '/emoji/$',
+const InstallRoute = InstallRouteImport.update({
+  id: '/install',
+  path: '/install',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DateYearRoute = DateYearRouteImport.update({
-  id: '/date/$year',
-  path: '/date/$year',
+const LinksRoute = LinksRouteImport.update({
+  id: '/links',
+  path: '/links',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
-  id: '/categories/$slug',
-  path: '/categories/$slug',
+const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
+  id: '/llms-full.txt',
+  path: '/llms-full.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AssetsSplatRoute = AssetsSplatRouteImport.update({
-  id: '/assets/$',
-  path: '/assets/$',
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
-  id: '/api/revalidate',
-  path: '/api/revalidate',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
+const LogoDotextRoute = LogoDotextRouteImport.update({
+  id: '/logo.$ext',
+  path: '/logo.$ext',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MomentsRoute = MomentsRouteImport.update({
+  id: '/moments',
+  path: '/moments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MusicRoute = MusicRouteImport.update({
+  id: '/music',
+  path: '/music',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssRoute = RssRouteImport.update({
+  id: '/rss',
+  path: '/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSplatRoute = AdminSplatRouteImport.update({
@@ -463,69 +368,99 @@ const AdminSplatRoute = AdminSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => AdminRoute,
 } as any)
-const DateYearMonthRoute = DateYearMonthRouteImport.update({
-  id: '/$month',
-  path: '/$month',
-  getParentRoute: () => DateYearRoute,
-} as any)
-const ApiV1VisitorRoute = ApiV1VisitorRouteImport.update({
-  id: '/api/v1/visitor',
-  path: '/api/v1/visitor',
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1TrackRoute = ApiV1TrackRouteImport.update({
-  id: '/api/v1/track',
-  path: '/api/v1/track',
+const ApiRevalidateRoute = ApiRevalidateRouteImport.update({
+  id: '/api/revalidate',
+  path: '/api/revalidate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1TagsRoute = ApiV1TagsRouteImport.update({
-  id: '/api/v1/tags',
-  path: '/api/v1/tags',
+const AssetsSplatRoute = AssetsSplatRouteImport.update({
+  id: '/assets/$',
+  path: '/assets/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SearchRoute = ApiV1SearchRouteImport.update({
-  id: '/api/v1/search',
-  path: '/api/v1/search',
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1PostsRoute = ApiV1PostsRouteImport.update({
-  id: '/api/v1/posts',
-  path: '/api/v1/posts',
+const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
+  id: '/categories/$slug',
+  path: '/categories/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1OwnerRoute = ApiV1OwnerRouteImport.update({
-  id: '/api/v1/owner',
-  path: '/api/v1/owner',
+const DateYearRoute = DateYearRouteImport.update({
+  id: '/date/$year',
+  path: '/date/$year',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1OptionsRoute = ApiV1OptionsRouteImport.update({
-  id: '/api/v1/options',
-  path: '/api/v1/options',
+const EmojiSplatRoute = EmojiSplatRouteImport.update({
+  id: '/emoji/$',
+  path: '/emoji/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1OnlineRoute = ApiV1OnlineRouteImport.update({
-  id: '/api/v1/online',
-  path: '/api/v1/online',
+const FilmsIndexRoute = FilmsIndexRouteImport.update({
+  id: '/films/',
+  path: '/films/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1HealthRoute = ApiV1HealthRouteImport.update({
-  id: '/api/v1/health',
-  path: '/api/v1/health',
+const FilmsSlugRoute = FilmsSlugRouteImport.update({
+  id: '/films/$slug',
+  path: '/films/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1FootprintsRoute = ApiV1FootprintsRouteImport.update({
-  id: '/api/v1/footprints',
-  path: '/api/v1/footprints',
+const IconsSplatRoute = IconsSplatRouteImport.update({
+  id: '/icons/$',
+  path: '/icons/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1FeedRoute = ApiV1FeedRouteImport.update({
-  id: '/api/v1/feed',
-  path: '/api/v1/feed',
+const ImagesSplatRoute = ImagesSplatRouteImport.update({
+  id: '/images/$',
+  path: '/images/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CategoriesRoute = ApiV1CategoriesRouteImport.update({
-  id: '/api/v1/categories',
-  path: '/api/v1/categories',
+const PageNumRoute = PageNumRouteImport.update({
+  id: '/page/$num',
+  path: '/page/$num',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsSlugRoute = PostsSlugRouteImport.update({
+  id: '/posts/$slug',
+  path: '/posts/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaticSplatRoute = StaticSplatRouteImport.update({
+  id: '/static/$',
+  path: '/static/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StylesSplatRoute = StylesSplatRouteImport.update({
+  id: '/styles/$',
+  path: '/styles/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TagsIndexRoute = TagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TagsSlugRoute = TagsSlugRouteImport.update({
+  id: '/tags/$slug',
+  path: '/tags/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThemesSplatRoute = ThemesSplatRouteImport.update({
+  id: '/themes/$',
+  path: '/themes/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadsSplatRoute = UploadsSplatRouteImport.update({
+  id: '/uploads/$',
+  path: '/uploads/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1ResourceRoute = ApiV1ResourceRouteImport.update({
@@ -533,44 +468,109 @@ const ApiV1ResourceRoute = ApiV1ResourceRouteImport.update({
   path: '/api/v1/$resource',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1ThemesIndexRoute = ApiV1ThemesIndexRouteImport.update({
-  id: '/api/v1/themes/',
-  path: '/api/v1/themes/',
+const ApiV1CategoriesRoute = ApiV1CategoriesRouteImport.update({
+  id: '/api/v1/categories',
+  path: '/api/v1/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
-  id: '/api/v1/profile/',
-  path: '/api/v1/profile/',
+const ApiV1FeedRoute = ApiV1FeedRouteImport.update({
+  id: '/api/v1/feed',
+  path: '/api/v1/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1PluginsIndexRoute = ApiV1PluginsIndexRouteImport.update({
-  id: '/api/v1/plugins/',
-  path: '/api/v1/plugins/',
+const ApiV1FootprintsRoute = ApiV1FootprintsRouteImport.update({
+  id: '/api/v1/footprints',
+  path: '/api/v1/footprints',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1PasskeysIndexRoute = ApiV1PasskeysIndexRouteImport.update({
-  id: '/api/v1/passkeys/',
-  path: '/api/v1/passkeys/',
+const ApiV1HealthRoute = ApiV1HealthRouteImport.update({
+  id: '/api/v1/health',
+  path: '/api/v1/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1NotificationsIndexRoute = ApiV1NotificationsIndexRouteImport.update({
-  id: '/api/v1/notifications/',
-  path: '/api/v1/notifications/',
+const ApiV1OnlineRoute = ApiV1OnlineRouteImport.update({
+  id: '/api/v1/online',
+  path: '/api/v1/online',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1MomentsIndexRoute = ApiV1MomentsIndexRouteImport.update({
-  id: '/api/v1/moments/',
-  path: '/api/v1/moments/',
+const ApiV1OptionsRoute = ApiV1OptionsRouteImport.update({
+  id: '/api/v1/options',
+  path: '/api/v1/options',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1MediaIndexRoute = ApiV1MediaIndexRouteImport.update({
-  id: '/api/v1/media/',
-  path: '/api/v1/media/',
+const ApiV1OwnerRoute = ApiV1OwnerRouteImport.update({
+  id: '/api/v1/owner',
+  path: '/api/v1/owner',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CommentsIndexRoute = ApiV1CommentsIndexRouteImport.update({
-  id: '/api/v1/comments/',
-  path: '/api/v1/comments/',
+const ApiV1PostsRoute = ApiV1PostsRouteImport.update({
+  id: '/api/v1/posts',
+  path: '/api/v1/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SearchRoute = ApiV1SearchRouteImport.update({
+  id: '/api/v1/search',
+  path: '/api/v1/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TagsRoute = ApiV1TagsRouteImport.update({
+  id: '/api/v1/tags',
+  path: '/api/v1/tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TrackRoute = ApiV1TrackRouteImport.update({
+  id: '/api/v1/track',
+  path: '/api/v1/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1VisitorRoute = ApiV1VisitorRouteImport.update({
+  id: '/api/v1/visitor',
+  path: '/api/v1/visitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DateYearMonthRoute = DateYearMonthRouteImport.update({
+  id: '/$month',
+  path: '/$month',
+  getParentRoute: () => DateYearRoute,
+} as any)
+const ApiV1ResourceIdRoute = ApiV1ResourceIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1ResourceRoute,
+} as any)
+const ApiV1AdminBootstrapRoute = ApiV1AdminBootstrapRouteImport.update({
+  id: '/api/v1/admin/bootstrap',
+  path: '/api/v1/admin/bootstrap',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AdminHeaderCountsRoute = ApiV1AdminHeaderCountsRouteImport.update({
+  id: '/api/v1/admin/header-counts',
+  path: '/api/v1/admin/header-counts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AdminLinkEmailsRoute = ApiV1AdminLinkEmailsRouteImport.update({
+  id: '/api/v1/admin/link-emails',
+  path: '/api/v1/admin/link-emails',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AdminLinkIconsRoute = ApiV1AdminLinkIconsRouteImport.update({
+  id: '/api/v1/admin/link-icons',
+  path: '/api/v1/admin/link-icons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AdminStatsRoute = ApiV1AdminStatsRouteImport.update({
+  id: '/api/v1/admin/stats',
+  path: '/api/v1/admin/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AiActionRoute = ApiV1AiActionRouteImport.update({
+  id: '/api/v1/ai/$action',
+  path: '/api/v1/ai/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AiProvidersRoute = ApiV1AiProvidersRouteImport.update({
+  id: '/api/v1/ai/providers',
+  path: '/api/v1/ai/providers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1AnalyticsIndexRoute = ApiV1AnalyticsIndexRouteImport.update({
@@ -578,327 +578,94 @@ const ApiV1AnalyticsIndexRoute = ApiV1AnalyticsIndexRouteImport.update({
   path: '/api/v1/analytics/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DateYearMonthDayRoute = DateYearMonthDayRouteImport.update({
-  id: '/$day',
-  path: '/$day',
-  getParentRoute: () => DateYearMonthRoute,
-} as any)
-const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
-  id: '/weather',
-  path: '/weather',
-  getParentRoute: () => ApiV1VisitorRoute,
-} as any)
-const ApiV1VisitorGeoRoute = ApiV1VisitorGeoRouteImport.update({
-  id: '/geo',
-  path: '/geo',
-  getParentRoute: () => ApiV1VisitorRoute,
-} as any)
-const ApiV1UnsubscribeCommentReplyRoute =
-  ApiV1UnsubscribeCommentReplyRouteImport.update({
-    id: '/api/v1/unsubscribe/comment-reply',
-    path: '/api/v1/unsubscribe/comment-reply',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1TrackDurationRoute = ApiV1TrackDurationRouteImport.update({
-  id: '/duration',
-  path: '/duration',
-  getParentRoute: () => ApiV1TrackRoute,
-} as any)
-const ApiV1ThemesUploadRoute = ApiV1ThemesUploadRouteImport.update({
-  id: '/api/v1/themes/upload',
-  path: '/api/v1/themes/upload',
+const ApiV1AnalyticsActionRoute = ApiV1AnalyticsActionRouteImport.update({
+  id: '/api/v1/analytics/$action',
+  path: '/api/v1/analytics/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1ThemesIdRoute = ApiV1ThemesIdRouteImport.update({
-  id: '/api/v1/themes/$id',
-  path: '/api/v1/themes/$id',
+const ApiV1ArchiveStatsRoute = ApiV1ArchiveStatsRouteImport.update({
+  id: '/api/v1/archive/stats',
+  path: '/api/v1/archive/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1TelegramWebhookRoute = ApiV1TelegramWebhookRouteImport.update({
-  id: '/api/v1/telegram/webhook',
-  path: '/api/v1/telegram/webhook',
+const ApiV1AuthForgotPasswordRoute = ApiV1AuthForgotPasswordRouteImport.update({
+  id: '/api/v1/auth/forgot-password',
+  path: '/api/v1/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1TelegramTestRoute = ApiV1TelegramTestRouteImport.update({
-  id: '/api/v1/telegram/test',
-  path: '/api/v1/telegram/test',
+const ApiV1AuthLoginRoute = ApiV1AuthLoginRouteImport.update({
+  id: '/api/v1/auth/login',
+  path: '/api/v1/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1TelegramSetupWebhookRoute =
-  ApiV1TelegramSetupWebhookRouteImport.update({
-    id: '/api/v1/telegram/setup-webhook',
-    path: '/api/v1/telegram/setup-webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1TelegramGetChatIdRoute = ApiV1TelegramGetChatIdRouteImport.update({
-  id: '/api/v1/telegram/get-chat-id',
-  path: '/api/v1/telegram/get-chat-id',
+const ApiV1AuthLogoutRoute = ApiV1AuthLogoutRouteImport.update({
+  id: '/api/v1/auth/logout',
+  path: '/api/v1/auth/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1TagsIdRoute = ApiV1TagsIdRouteImport.update({
+const ApiV1AuthMeRoute = ApiV1AuthMeRouteImport.update({
+  id: '/api/v1/auth/me',
+  path: '/api/v1/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthPasswordRoute = ApiV1AuthPasswordRouteImport.update({
+  id: '/api/v1/auth/password',
+  path: '/api/v1/auth/password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthRefreshRoute = ApiV1AuthRefreshRouteImport.update({
+  id: '/api/v1/auth/refresh',
+  path: '/api/v1/auth/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthResetPasswordRoute = ApiV1AuthResetPasswordRouteImport.update({
+  id: '/api/v1/auth/reset-password',
+  path: '/api/v1/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1BackupActionRoute = ApiV1BackupActionRouteImport.update({
+  id: '/api/v1/backup/$action',
+  path: '/api/v1/backup/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CaptchaChallengeRoute = ApiV1CaptchaChallengeRouteImport.update({
+  id: '/api/v1/captcha/challenge',
+  path: '/api/v1/captcha/challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CaptchaImageRoute = ApiV1CaptchaImageRouteImport.update({
+  id: '/api/v1/captcha/image',
+  path: '/api/v1/captcha/image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1CategoriesIdRoute = ApiV1CategoriesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => ApiV1TagsRoute,
+  getParentRoute: () => ApiV1CategoriesRoute,
 } as any)
-const ApiV1SystemUpdateCheckRoute = ApiV1SystemUpdateCheckRouteImport.update({
-  id: '/api/v1/system/update-check',
-  path: '/api/v1/system/update-check',
+const ApiV1CommentsIndexRoute = ApiV1CommentsIndexRouteImport.update({
+  id: '/api/v1/comments/',
+  path: '/api/v1/comments/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SystemStatusRoute = ApiV1SystemStatusRouteImport.update({
-  id: '/api/v1/system/status',
-  path: '/api/v1/system/status',
+const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
+  id: '/api/v1/comments/$id',
+  path: '/api/v1/comments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SocialFetchFeedsRoute = ApiV1SocialFetchFeedsRouteImport.update({
-  id: '/api/v1/social/fetch-feeds',
-  path: '/api/v1/social/fetch-feeds',
+const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
+  id: '/api/v1/comments/batch',
+  path: '/api/v1/comments/batch',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SocialFeedTimelineRoute = ApiV1SocialFeedTimelineRouteImport.update({
-  id: '/api/v1/social/feed-timeline',
-  path: '/api/v1/social/feed-timeline',
+const ApiV1CommentsFederatedRoute = ApiV1CommentsFederatedRouteImport.update({
+  id: '/api/v1/comments/federated',
+  path: '/api/v1/comments/federated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SocialFeedStatsRoute = ApiV1SocialFeedStatsRouteImport.update({
-  id: '/api/v1/social/feed-stats',
-  path: '/api/v1/social/feed-stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1SocialActionRoute = ApiV1SocialActionRouteImport.update({
-  id: '/api/v1/social/$action',
-  path: '/api/v1/social/$action',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1SetupTestDbRoute = ApiV1SetupTestDbRouteImport.update({
-  id: '/api/v1/setup/test-db',
-  path: '/api/v1/setup/test-db',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1SetupStatusRoute = ApiV1SetupStatusRouteImport.update({
-  id: '/api/v1/setup/status',
-  path: '/api/v1/setup/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1SetupSaveRoute = ApiV1SetupSaveRouteImport.update({
-  id: '/api/v1/setup/save',
-  path: '/api/v1/setup/save',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1SearchRebuildRoute = ApiV1SearchRebuildRouteImport.update({
-  id: '/rebuild',
-  path: '/rebuild',
-  getParentRoute: () => ApiV1SearchRoute,
-} as any)
-const ApiV1RssParseRoute = ApiV1RssParseRouteImport.update({
-  id: '/api/v1/rss/parse',
-  path: '/api/v1/rss/parse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
-  id: '/api/v1/profile/send-code',
-  path: '/api/v1/profile/send-code',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1PostsIdRoute = ApiV1PostsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ApiV1PostsRoute,
-} as any)
-const ApiV1PluginsUploadRoute = ApiV1PluginsUploadRouteImport.update({
-  id: '/api/v1/plugins/upload',
-  path: '/api/v1/plugins/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1PluginsIdRoute = ApiV1PluginsIdRouteImport.update({
-  id: '/api/v1/plugins/$id',
-  path: '/api/v1/plugins/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1PlaylistsImportRoute = ApiV1PlaylistsImportRouteImport.update({
-  id: '/api/v1/playlists/import',
-  path: '/api/v1/playlists/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1PassportIdentifyRoute = ApiV1PassportIdentifyRouteImport.update({
-  id: '/api/v1/passport/identify',
-  path: '/api/v1/passport/identify',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
-  id: '/api/v1/passkeys/$id',
-  path: '/api/v1/passkeys/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1OptionsTestEmailRoute = ApiV1OptionsTestEmailRouteImport.update({
-  id: '/test-email',
-  path: '/test-email',
-  getParentRoute: () => ApiV1OptionsRoute,
-} as any)
-const ApiV1OptionsTestCredentialRoute =
-  ApiV1OptionsTestCredentialRouteImport.update({
-    id: '/test-credential',
-    path: '/test-credential',
-    getParentRoute: () => ApiV1OptionsRoute,
-  } as any)
-const ApiV1NotificationsUnreadCountRoute =
-  ApiV1NotificationsUnreadCountRouteImport.update({
-    id: '/api/v1/notifications/unread-count',
-    path: '/api/v1/notifications/unread-count',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1NotificationsStreamRoute =
-  ApiV1NotificationsStreamRouteImport.update({
-    id: '/api/v1/notifications/stream',
-    path: '/api/v1/notifications/stream',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1NotificationsReadAllRoute =
-  ApiV1NotificationsReadAllRouteImport.update({
-    id: '/api/v1/notifications/read-all',
-    path: '/api/v1/notifications/read-all',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1NotificationsIdRoute = ApiV1NotificationsIdRouteImport.update({
-  id: '/api/v1/notifications/$id',
-  path: '/api/v1/notifications/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1NetworkActionRoute = ApiV1NetworkActionRouteImport.update({
-  id: '/api/v1/network/$action',
-  path: '/api/v1/network/$action',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MusicSearchRoute = ApiV1MusicSearchRouteImport.update({
-  id: '/api/v1/music/search',
-  path: '/api/v1/music/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
-  id: '/api/v1/moments/recent-tags',
-  path: '/api/v1/moments/recent-tags',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MomentsIdRoute = ApiV1MomentsIdRouteImport.update({
-  id: '/api/v1/moments/$id',
-  path: '/api/v1/moments/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaUploadBrandingRoute =
-  ApiV1MediaUploadBrandingRouteImport.update({
-    id: '/api/v1/media/upload-branding',
-    path: '/api/v1/media/upload-branding',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1MediaUploadRoute = ApiV1MediaUploadRouteImport.update({
-  id: '/api/v1/media/upload',
-  path: '/api/v1/media/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaTestConnectionRoute =
-  ApiV1MediaTestConnectionRouteImport.update({
-    id: '/api/v1/media/test-connection',
-    path: '/api/v1/media/test-connection',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1MediaStatsRoute = ApiV1MediaStatsRouteImport.update({
-  id: '/api/v1/media/stats',
-  path: '/api/v1/media/stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaParseRoute = ApiV1MediaParseRouteImport.update({
-  id: '/api/v1/media/parse',
-  path: '/api/v1/media/parse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaExifRoute = ApiV1MediaExifRouteImport.update({
-  id: '/api/v1/media/exif',
-  path: '/api/v1/media/exif',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaDownloadUrlRoute = ApiV1MediaDownloadUrlRouteImport.update({
-  id: '/api/v1/media/download-url',
-  path: '/api/v1/media/download-url',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaDoubanImportRoute = ApiV1MediaDoubanImportRouteImport.update({
-  id: '/api/v1/media/douban-import',
-  path: '/api/v1/media/douban-import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1MediaIdRoute = ApiV1MediaIdRouteImport.update({
-  id: '/api/v1/media/$id',
-  path: '/api/v1/media/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1LocationReverseRoute = ApiV1LocationReverseRouteImport.update({
-  id: '/api/v1/location/reverse',
-  path: '/api/v1/location/reverse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
-  id: '/api/v1/links/apply',
-  path: '/api/v1/links/apply',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1InstallStatusRoute = ApiV1InstallStatusRouteImport.update({
-  id: '/api/v1/install/status',
-  path: '/api/v1/install/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1InstallFinishRoute = ApiV1InstallFinishRouteImport.update({
-  id: '/api/v1/install/finish',
-  path: '/api/v1/install/finish',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1InstallCreateAdminRoute = ApiV1InstallCreateAdminRouteImport.update({
-  id: '/api/v1/install/create-admin',
-  path: '/api/v1/install/create-admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1ImportPlatformRoute = ApiV1ImportPlatformRouteImport.update({
-  id: '/api/v1/import/$platform',
-  path: '/api/v1/import/$platform',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1I18nLocalesRoute = ApiV1I18nLocalesRouteImport.update({
-  id: '/api/v1/i18n/locales',
-  path: '/api/v1/i18n/locales',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1I18nCurrentRoute = ApiV1I18nCurrentRouteImport.update({
-  id: '/api/v1/i18n/current',
-  path: '/api/v1/i18n/current',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1I18nLocaleRoute = ApiV1I18nLocaleRouteImport.update({
-  id: '/api/v1/i18n/$locale',
-  path: '/api/v1/i18n/$locale',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1FederationWebhookRoute = ApiV1FederationWebhookRouteImport.update({
-  id: '/api/v1/federation/webhook',
-  path: '/api/v1/federation/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1FederationVerifyRoute = ApiV1FederationVerifyRouteImport.update({
-  id: '/api/v1/federation/verify',
-  path: '/api/v1/federation/verify',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1FederationTokenRoute = ApiV1FederationTokenRouteImport.update({
-  id: '/api/v1/federation/token',
-  path: '/api/v1/federation/token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1FederationMetadataRoute = ApiV1FederationMetadataRouteImport.update({
-  id: '/api/v1/federation/metadata',
-  path: '/api/v1/federation/metadata',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1FederationFollowRoute = ApiV1FederationFollowRouteImport.update({
-  id: '/api/v1/federation/follow',
-  path: '/api/v1/federation/follow',
+const ApiV1CommentsModerateRoute = ApiV1CommentsModerateRouteImport.update({
+  id: '/api/v1/comments/moderate',
+  path: '/api/v1/comments/moderate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1CommentsPendingCountRoute =
@@ -907,240 +674,428 @@ const ApiV1CommentsPendingCountRoute =
     path: '/api/v1/comments/pending-count',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiV1CommentsModerateRoute = ApiV1CommentsModerateRouteImport.update({
-  id: '/api/v1/comments/moderate',
-  path: '/api/v1/comments/moderate',
+const ApiV1FederationFollowRoute = ApiV1FederationFollowRouteImport.update({
+  id: '/api/v1/federation/follow',
+  path: '/api/v1/federation/follow',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CommentsFederatedRoute = ApiV1CommentsFederatedRouteImport.update({
-  id: '/api/v1/comments/federated',
-  path: '/api/v1/comments/federated',
+const ApiV1FederationMetadataRoute = ApiV1FederationMetadataRouteImport.update({
+  id: '/api/v1/federation/metadata',
+  path: '/api/v1/federation/metadata',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CommentsBatchRoute = ApiV1CommentsBatchRouteImport.update({
-  id: '/api/v1/comments/batch',
-  path: '/api/v1/comments/batch',
+const ApiV1FederationTokenRoute = ApiV1FederationTokenRouteImport.update({
+  id: '/api/v1/federation/token',
+  path: '/api/v1/federation/token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CommentsIdRoute = ApiV1CommentsIdRouteImport.update({
-  id: '/api/v1/comments/$id',
-  path: '/api/v1/comments/$id',
+const ApiV1FederationVerifyRoute = ApiV1FederationVerifyRouteImport.update({
+  id: '/api/v1/federation/verify',
+  path: '/api/v1/federation/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CategoriesIdRoute = ApiV1CategoriesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ApiV1CategoriesRoute,
-} as any)
-const ApiV1CaptchaImageRoute = ApiV1CaptchaImageRouteImport.update({
-  id: '/api/v1/captcha/image',
-  path: '/api/v1/captcha/image',
+const ApiV1FederationWebhookRoute = ApiV1FederationWebhookRouteImport.update({
+  id: '/api/v1/federation/webhook',
+  path: '/api/v1/federation/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1CaptchaChallengeRoute = ApiV1CaptchaChallengeRouteImport.update({
-  id: '/api/v1/captcha/challenge',
-  path: '/api/v1/captcha/challenge',
+const ApiV1I18nLocaleRoute = ApiV1I18nLocaleRouteImport.update({
+  id: '/api/v1/i18n/$locale',
+  path: '/api/v1/i18n/$locale',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1BackupActionRoute = ApiV1BackupActionRouteImport.update({
-  id: '/api/v1/backup/$action',
-  path: '/api/v1/backup/$action',
+const ApiV1I18nCurrentRoute = ApiV1I18nCurrentRouteImport.update({
+  id: '/api/v1/i18n/current',
+  path: '/api/v1/i18n/current',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthResetPasswordRoute = ApiV1AuthResetPasswordRouteImport.update({
-  id: '/api/v1/auth/reset-password',
-  path: '/api/v1/auth/reset-password',
+const ApiV1I18nLocalesRoute = ApiV1I18nLocalesRouteImport.update({
+  id: '/api/v1/i18n/locales',
+  path: '/api/v1/i18n/locales',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthRefreshRoute = ApiV1AuthRefreshRouteImport.update({
-  id: '/api/v1/auth/refresh',
-  path: '/api/v1/auth/refresh',
+const ApiV1ImportPlatformRoute = ApiV1ImportPlatformRouteImport.update({
+  id: '/api/v1/import/$platform',
+  path: '/api/v1/import/$platform',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthPasswordRoute = ApiV1AuthPasswordRouteImport.update({
-  id: '/api/v1/auth/password',
-  path: '/api/v1/auth/password',
+const ApiV1InstallCreateAdminRoute = ApiV1InstallCreateAdminRouteImport.update({
+  id: '/api/v1/install/create-admin',
+  path: '/api/v1/install/create-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthMeRoute = ApiV1AuthMeRouteImport.update({
-  id: '/api/v1/auth/me',
-  path: '/api/v1/auth/me',
+const ApiV1InstallFinishRoute = ApiV1InstallFinishRouteImport.update({
+  id: '/api/v1/install/finish',
+  path: '/api/v1/install/finish',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthLogoutRoute = ApiV1AuthLogoutRouteImport.update({
-  id: '/api/v1/auth/logout',
-  path: '/api/v1/auth/logout',
+const ApiV1InstallStatusRoute = ApiV1InstallStatusRouteImport.update({
+  id: '/api/v1/install/status',
+  path: '/api/v1/install/status',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthLoginRoute = ApiV1AuthLoginRouteImport.update({
-  id: '/api/v1/auth/login',
-  path: '/api/v1/auth/login',
+const ApiV1LinksApplyRoute = ApiV1LinksApplyRouteImport.update({
+  id: '/api/v1/links/apply',
+  path: '/api/v1/links/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthForgotPasswordRoute = ApiV1AuthForgotPasswordRouteImport.update({
-  id: '/api/v1/auth/forgot-password',
-  path: '/api/v1/auth/forgot-password',
+const ApiV1LocationReverseRoute = ApiV1LocationReverseRouteImport.update({
+  id: '/api/v1/location/reverse',
+  path: '/api/v1/location/reverse',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1ArchiveStatsRoute = ApiV1ArchiveStatsRouteImport.update({
-  id: '/api/v1/archive/stats',
-  path: '/api/v1/archive/stats',
+const ApiV1MediaIndexRoute = ApiV1MediaIndexRouteImport.update({
+  id: '/api/v1/media/',
+  path: '/api/v1/media/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AnalyticsActionRoute = ApiV1AnalyticsActionRouteImport.update({
-  id: '/api/v1/analytics/$action',
-  path: '/api/v1/analytics/$action',
+const ApiV1MediaIdRoute = ApiV1MediaIdRouteImport.update({
+  id: '/api/v1/media/$id',
+  path: '/api/v1/media/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AiProvidersRoute = ApiV1AiProvidersRouteImport.update({
-  id: '/api/v1/ai/providers',
-  path: '/api/v1/ai/providers',
+const ApiV1MediaDoubanImportRoute = ApiV1MediaDoubanImportRouteImport.update({
+  id: '/api/v1/media/douban-import',
+  path: '/api/v1/media/douban-import',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AiActionRoute = ApiV1AiActionRouteImport.update({
-  id: '/api/v1/ai/$action',
-  path: '/api/v1/ai/$action',
+const ApiV1MediaDownloadUrlRoute = ApiV1MediaDownloadUrlRouteImport.update({
+  id: '/api/v1/media/download-url',
+  path: '/api/v1/media/download-url',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminStatsRoute = ApiV1AdminStatsRouteImport.update({
-  id: '/api/v1/admin/stats',
-  path: '/api/v1/admin/stats',
+const ApiV1MediaExifRoute = ApiV1MediaExifRouteImport.update({
+  id: '/api/v1/media/exif',
+  path: '/api/v1/media/exif',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminLinkIconsRoute = ApiV1AdminLinkIconsRouteImport.update({
-  id: '/api/v1/admin/link-icons',
-  path: '/api/v1/admin/link-icons',
+const ApiV1MediaParseRoute = ApiV1MediaParseRouteImport.update({
+  id: '/api/v1/media/parse',
+  path: '/api/v1/media/parse',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminLinkEmailsRoute = ApiV1AdminLinkEmailsRouteImport.update({
-  id: '/api/v1/admin/link-emails',
-  path: '/api/v1/admin/link-emails',
+const ApiV1MediaStatsRoute = ApiV1MediaStatsRouteImport.update({
+  id: '/api/v1/media/stats',
+  path: '/api/v1/media/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminHeaderCountsRoute = ApiV1AdminHeaderCountsRouteImport.update({
-  id: '/api/v1/admin/header-counts',
-  path: '/api/v1/admin/header-counts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1AdminBootstrapRoute = ApiV1AdminBootstrapRouteImport.update({
-  id: '/api/v1/admin/bootstrap',
-  path: '/api/v1/admin/bootstrap',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1ResourceIdRoute = ApiV1ResourceIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ApiV1ResourceRoute,
-} as any)
-const ApiV1PublicAlbumsIndexRoute = ApiV1PublicAlbumsIndexRouteImport.update({
-  id: '/api/v1/public/albums/',
-  path: '/api/v1/public/albums/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1AdminFootprintsIndexRoute =
-  ApiV1AdminFootprintsIndexRouteImport.update({
-    id: '/api/v1/admin/footprints/',
-    path: '/api/v1/admin/footprints/',
+const ApiV1MediaTestConnectionRoute =
+  ApiV1MediaTestConnectionRouteImport.update({
+    id: '/api/v1/media/test-connection',
+    path: '/api/v1/media/test-connection',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1MediaUploadRoute = ApiV1MediaUploadRouteImport.update({
+  id: '/api/v1/media/upload',
+  path: '/api/v1/media/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MediaUploadBrandingRoute =
+  ApiV1MediaUploadBrandingRouteImport.update({
+    id: '/api/v1/media/upload-branding',
+    path: '/api/v1/media/upload-branding',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1MomentsIndexRoute = ApiV1MomentsIndexRouteImport.update({
+  id: '/api/v1/moments/',
+  path: '/api/v1/moments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MomentsIdRoute = ApiV1MomentsIdRouteImport.update({
+  id: '/api/v1/moments/$id',
+  path: '/api/v1/moments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MomentsRecentTagsRoute = ApiV1MomentsRecentTagsRouteImport.update({
+  id: '/api/v1/moments/recent-tags',
+  path: '/api/v1/moments/recent-tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1MusicSearchRoute = ApiV1MusicSearchRouteImport.update({
+  id: '/api/v1/music/search',
+  path: '/api/v1/music/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1NetworkActionRoute = ApiV1NetworkActionRouteImport.update({
+  id: '/api/v1/network/$action',
+  path: '/api/v1/network/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1NotificationsIndexRoute = ApiV1NotificationsIndexRouteImport.update({
+  id: '/api/v1/notifications/',
+  path: '/api/v1/notifications/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1NotificationsIdRoute = ApiV1NotificationsIdRouteImport.update({
+  id: '/api/v1/notifications/$id',
+  path: '/api/v1/notifications/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1NotificationsReadAllRoute =
+  ApiV1NotificationsReadAllRouteImport.update({
+    id: '/api/v1/notifications/read-all',
+    path: '/api/v1/notifications/read-all',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1NotificationsStreamRoute =
+  ApiV1NotificationsStreamRouteImport.update({
+    id: '/api/v1/notifications/stream',
+    path: '/api/v1/notifications/stream',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1NotificationsUnreadCountRoute =
+  ApiV1NotificationsUnreadCountRouteImport.update({
+    id: '/api/v1/notifications/unread-count',
+    path: '/api/v1/notifications/unread-count',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1OptionsTestCredentialRoute =
+  ApiV1OptionsTestCredentialRouteImport.update({
+    id: '/test-credential',
+    path: '/test-credential',
+    getParentRoute: () => ApiV1OptionsRoute,
+  } as any)
+const ApiV1OptionsTestEmailRoute = ApiV1OptionsTestEmailRouteImport.update({
+  id: '/test-email',
+  path: '/test-email',
+  getParentRoute: () => ApiV1OptionsRoute,
+} as any)
+const ApiV1PasskeysIndexRoute = ApiV1PasskeysIndexRouteImport.update({
+  id: '/api/v1/passkeys/',
+  path: '/api/v1/passkeys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PasskeysIdRoute = ApiV1PasskeysIdRouteImport.update({
+  id: '/api/v1/passkeys/$id',
+  path: '/api/v1/passkeys/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PassportIdentifyRoute = ApiV1PassportIdentifyRouteImport.update({
+  id: '/api/v1/passport/identify',
+  path: '/api/v1/passport/identify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PlaylistsImportRoute = ApiV1PlaylistsImportRouteImport.update({
+  id: '/api/v1/playlists/import',
+  path: '/api/v1/playlists/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PluginsIndexRoute = ApiV1PluginsIndexRouteImport.update({
+  id: '/api/v1/plugins/',
+  path: '/api/v1/plugins/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PluginsIdRoute = ApiV1PluginsIdRouteImport.update({
+  id: '/api/v1/plugins/$id',
+  path: '/api/v1/plugins/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PluginsUploadRoute = ApiV1PluginsUploadRouteImport.update({
+  id: '/api/v1/plugins/upload',
+  path: '/api/v1/plugins/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1PostsIdRoute = ApiV1PostsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1PostsRoute,
+} as any)
+const ApiV1ProfileIndexRoute = ApiV1ProfileIndexRouteImport.update({
+  id: '/api/v1/profile/',
+  path: '/api/v1/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ProfileSendCodeRoute = ApiV1ProfileSendCodeRouteImport.update({
+  id: '/api/v1/profile/send-code',
+  path: '/api/v1/profile/send-code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1RssParseRoute = ApiV1RssParseRouteImport.update({
+  id: '/api/v1/rss/parse',
+  path: '/api/v1/rss/parse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SearchRebuildRoute = ApiV1SearchRebuildRouteImport.update({
+  id: '/rebuild',
+  path: '/rebuild',
+  getParentRoute: () => ApiV1SearchRoute,
+} as any)
+const ApiV1SetupSaveRoute = ApiV1SetupSaveRouteImport.update({
+  id: '/api/v1/setup/save',
+  path: '/api/v1/setup/save',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SetupStatusRoute = ApiV1SetupStatusRouteImport.update({
+  id: '/api/v1/setup/status',
+  path: '/api/v1/setup/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SetupTestDbRoute = ApiV1SetupTestDbRouteImport.update({
+  id: '/api/v1/setup/test-db',
+  path: '/api/v1/setup/test-db',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialActionRoute = ApiV1SocialActionRouteImport.update({
+  id: '/api/v1/social/$action',
+  path: '/api/v1/social/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialFeedStatsRoute = ApiV1SocialFeedStatsRouteImport.update({
+  id: '/api/v1/social/feed-stats',
+  path: '/api/v1/social/feed-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialFeedTimelineRoute = ApiV1SocialFeedTimelineRouteImport.update({
+  id: '/api/v1/social/feed-timeline',
+  path: '/api/v1/social/feed-timeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SocialFetchFeedsRoute = ApiV1SocialFetchFeedsRouteImport.update({
+  id: '/api/v1/social/fetch-feeds',
+  path: '/api/v1/social/fetch-feeds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SystemStatusRoute = ApiV1SystemStatusRouteImport.update({
+  id: '/api/v1/system/status',
+  path: '/api/v1/system/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SystemUpdateCheckRoute = ApiV1SystemUpdateCheckRouteImport.update({
+  id: '/api/v1/system/update-check',
+  path: '/api/v1/system/update-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TagsIdRoute = ApiV1TagsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1TagsRoute,
+} as any)
+const ApiV1TelegramGetChatIdRoute = ApiV1TelegramGetChatIdRouteImport.update({
+  id: '/api/v1/telegram/get-chat-id',
+  path: '/api/v1/telegram/get-chat-id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TelegramSetupWebhookRoute =
+  ApiV1TelegramSetupWebhookRouteImport.update({
+    id: '/api/v1/telegram/setup-webhook',
+    path: '/api/v1/telegram/setup-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1TelegramTestRoute = ApiV1TelegramTestRouteImport.update({
+  id: '/api/v1/telegram/test',
+  path: '/api/v1/telegram/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TelegramWebhookRoute = ApiV1TelegramWebhookRouteImport.update({
+  id: '/api/v1/telegram/webhook',
+  path: '/api/v1/telegram/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ThemesIndexRoute = ApiV1ThemesIndexRouteImport.update({
+  id: '/api/v1/themes/',
+  path: '/api/v1/themes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ThemesIdRoute = ApiV1ThemesIdRouteImport.update({
+  id: '/api/v1/themes/$id',
+  path: '/api/v1/themes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ThemesUploadRoute = ApiV1ThemesUploadRouteImport.update({
+  id: '/api/v1/themes/upload',
+  path: '/api/v1/themes/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1TrackDurationRoute = ApiV1TrackDurationRouteImport.update({
+  id: '/duration',
+  path: '/duration',
+  getParentRoute: () => ApiV1TrackRoute,
+} as any)
+const ApiV1UnsubscribeCommentReplyRoute =
+  ApiV1UnsubscribeCommentReplyRouteImport.update({
+    id: '/api/v1/unsubscribe/comment-reply',
+    path: '/api/v1/unsubscribe/comment-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1VisitorGeoRoute = ApiV1VisitorGeoRouteImport.update({
+  id: '/geo',
+  path: '/geo',
+  getParentRoute: () => ApiV1VisitorRoute,
+} as any)
+const ApiV1VisitorWeatherRoute = ApiV1VisitorWeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => ApiV1VisitorRoute,
+} as any)
+const DateYearMonthDayRoute = DateYearMonthDayRouteImport.update({
+  id: '/$day',
+  path: '/$day',
+  getParentRoute: () => DateYearMonthRoute,
+} as any)
 const ApiV1AdminAiCommentsIndexRoute =
   ApiV1AdminAiCommentsIndexRouteImport.update({
     id: '/api/v1/admin/ai-comments/',
     path: '/api/v1/admin/ai-comments/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
-  id: '/activate',
-  path: '/activate',
-  getParentRoute: () => ApiV1ThemesIdRoute,
-} as any)
-const ApiV1SyncPlatformActionRoute = ApiV1SyncPlatformActionRouteImport.update({
-  id: '/api/v1/sync/$platform/$action',
-  path: '/api/v1/sync/$platform/$action',
+const ApiV1AdminAiCommentsIdRoute = ApiV1AdminAiCommentsIdRouteImport.update({
+  id: '/api/v1/admin/ai-comments/$id',
+  path: '/api/v1/admin/ai-comments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SocialFetchFeedsStatusRoute =
-  ApiV1SocialFetchFeedsStatusRouteImport.update({
-    id: '/status',
-    path: '/status',
-    getParentRoute: () => ApiV1SocialFetchFeedsRoute,
-  } as any)
-const ApiV1PublicAlbumsIdRoute = ApiV1PublicAlbumsIdRouteImport.update({
-  id: '/api/v1/public/albums/$id',
-  path: '/api/v1/public/albums/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1PostsSlugSlugRoute = ApiV1PostsSlugSlugRouteImport.update({
-  id: '/slug/$slug',
-  path: '/slug/$slug',
-  getParentRoute: () => ApiV1PostsRoute,
-} as any)
-const ApiV1PostsByDisplayIdDisplayIdRoute =
-  ApiV1PostsByDisplayIdDisplayIdRouteImport.update({
-    id: '/by-display-id/$displayId',
-    path: '/by-display-id/$displayId',
-    getParentRoute: () => ApiV1PostsRoute,
-  } as any)
-const ApiV1PostsIdNavigationRoute = ApiV1PostsIdNavigationRouteImport.update({
-  id: '/navigation',
-  path: '/navigation',
-  getParentRoute: () => ApiV1PostsIdRoute,
-} as any)
-const ApiV1PostsIdEpisodesRoute = ApiV1PostsIdEpisodesRouteImport.update({
-  id: '/episodes',
-  path: '/episodes',
-  getParentRoute: () => ApiV1PostsIdRoute,
-} as any)
-const ApiV1PostsIdCommentsRoute = ApiV1PostsIdCommentsRouteImport.update({
-  id: '/comments',
-  path: '/comments',
-  getParentRoute: () => ApiV1PostsIdRoute,
-} as any)
-const ApiV1PluginsIdActionRoute = ApiV1PluginsIdActionRouteImport.update({
-  id: '/$action',
-  path: '/$action',
-  getParentRoute: () => ApiV1PluginsIdRoute,
-} as any)
-const ApiV1PlaylistsIdSongsRoute = ApiV1PlaylistsIdSongsRouteImport.update({
-  id: '/api/v1/playlists/$id/songs',
-  path: '/api/v1/playlists/$id/songs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1NotificationsIdReadRoute =
-  ApiV1NotificationsIdReadRouteImport.update({
-    id: '/read',
-    path: '/read',
-    getParentRoute: () => ApiV1NotificationsIdRoute,
-  } as any)
-const ApiV1NetworkOauthActionRoute = ApiV1NetworkOauthActionRouteImport.update({
-  id: '/api/v1/network/oauth/$action',
-  path: '/api/v1/network/oauth/$action',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
-  id: '/reply',
-  path: '/reply',
-  getParentRoute: () => ApiV1CommentsIdRoute,
-} as any)
-const ApiV1CommentsIdEditRoute = ApiV1CommentsIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => ApiV1CommentsIdRoute,
-} as any)
-const ApiV1CommentsIdApproveRoute = ApiV1CommentsIdApproveRouteImport.update({
-  id: '/approve',
-  path: '/approve',
-  getParentRoute: () => ApiV1CommentsIdRoute,
-} as any)
-const ApiV1BackupDownloadFilenameRoute =
-  ApiV1BackupDownloadFilenameRouteImport.update({
-    id: '/api/v1/backup/download/$filename',
-    path: '/api/v1/backup/download/$filename',
+const ApiV1AdminAnalyticsPurgeRoute =
+  ApiV1AdminAnalyticsPurgeRouteImport.update({
+    id: '/api/v1/admin/analytics/purge',
+    path: '/api/v1/admin/analytics/purge',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiV1AuthTotpActionRoute = ApiV1AuthTotpActionRouteImport.update({
-  id: '/api/v1/auth/totp/$action',
-  path: '/api/v1/auth/totp/$action',
+const ApiV1AdminAnalyticsStatsRoute =
+  ApiV1AdminAnalyticsStatsRouteImport.update({
+    id: '/api/v1/admin/analytics/stats',
+    path: '/api/v1/admin/analytics/stats',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminFootprintsIndexRoute =
+  ApiV1AdminFootprintsIndexRouteImport.update({
+    id: '/api/v1/admin/footprints/',
+    path: '/api/v1/admin/footprints/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminFootprintsIdRoute = ApiV1AdminFootprintsIdRouteImport.update({
+  id: '/api/v1/admin/footprints/$id',
+  path: '/api/v1/admin/footprints/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AdminFootprintsGeocodeRoute =
+  ApiV1AdminFootprintsGeocodeRouteImport.update({
+    id: '/api/v1/admin/footprints/geocode',
+    path: '/api/v1/admin/footprints/geocode',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminFootprintsPlacesRoute =
+  ApiV1AdminFootprintsPlacesRouteImport.update({
+    id: '/api/v1/admin/footprints/places',
+    path: '/api/v1/admin/footprints/places',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1AdminSystemActionRoute = ApiV1AdminSystemActionRouteImport.update({
+  id: '/api/v1/admin/system/$action',
+  path: '/api/v1/admin/system/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AiConversationsIdRoute = ApiV1AiConversationsIdRouteImport.update({
+  id: '/api/v1/ai/conversations/$id',
+  path: '/api/v1/ai/conversations/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AiProvidersIdRoute = ApiV1AiProvidersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiV1AiProvidersRoute,
+} as any)
+const ApiV1AlbumsIdPhotosRoute = ApiV1AlbumsIdPhotosRouteImport.update({
+  id: '/api/v1/albums/$id/photos',
+  path: '/api/v1/albums/$id/photos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1AuthPasskeyAvailableRoute =
@@ -1149,76 +1104,115 @@ const ApiV1AuthPasskeyAvailableRoute =
     path: '/api/v1/auth/passkey/available',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiV1AlbumsIdPhotosRoute = ApiV1AlbumsIdPhotosRouteImport.update({
-  id: '/api/v1/albums/$id/photos',
-  path: '/api/v1/albums/$id/photos',
+const ApiV1AuthTotpActionRoute = ApiV1AuthTotpActionRouteImport.update({
+  id: '/api/v1/auth/totp/$action',
+  path: '/api/v1/auth/totp/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AiProvidersIdRoute = ApiV1AiProvidersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ApiV1AiProvidersRoute,
+const ApiV1BackupDownloadFilenameRoute =
+  ApiV1BackupDownloadFilenameRouteImport.update({
+    id: '/api/v1/backup/download/$filename',
+    path: '/api/v1/backup/download/$filename',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1CommentsIdApproveRoute = ApiV1CommentsIdApproveRouteImport.update({
+  id: '/approve',
+  path: '/approve',
+  getParentRoute: () => ApiV1CommentsIdRoute,
 } as any)
-const ApiV1AiConversationsIdRoute = ApiV1AiConversationsIdRouteImport.update({
-  id: '/api/v1/ai/conversations/$id',
-  path: '/api/v1/ai/conversations/$id',
+const ApiV1CommentsIdEditRoute = ApiV1CommentsIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => ApiV1CommentsIdRoute,
+} as any)
+const ApiV1CommentsIdReplyRoute = ApiV1CommentsIdReplyRouteImport.update({
+  id: '/reply',
+  path: '/reply',
+  getParentRoute: () => ApiV1CommentsIdRoute,
+} as any)
+const ApiV1NetworkOauthActionRoute = ApiV1NetworkOauthActionRouteImport.update({
+  id: '/api/v1/network/oauth/$action',
+  path: '/api/v1/network/oauth/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminSystemActionRoute = ApiV1AdminSystemActionRouteImport.update({
-  id: '/api/v1/admin/system/$action',
-  path: '/api/v1/admin/system/$action',
+const ApiV1NotificationsIdReadRoute =
+  ApiV1NotificationsIdReadRouteImport.update({
+    id: '/read',
+    path: '/read',
+    getParentRoute: () => ApiV1NotificationsIdRoute,
+  } as any)
+const ApiV1PlaylistsIdSongsRoute = ApiV1PlaylistsIdSongsRouteImport.update({
+  id: '/api/v1/playlists/$id/songs',
+  path: '/api/v1/playlists/$id/songs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminFootprintsPlacesRoute =
-  ApiV1AdminFootprintsPlacesRouteImport.update({
-    id: '/api/v1/admin/footprints/places',
-    path: '/api/v1/admin/footprints/places',
-    getParentRoute: () => rootRouteImport,
+const ApiV1PluginsIdActionRoute = ApiV1PluginsIdActionRouteImport.update({
+  id: '/$action',
+  path: '/$action',
+  getParentRoute: () => ApiV1PluginsIdRoute,
+} as any)
+const ApiV1PostsIdCommentsRoute = ApiV1PostsIdCommentsRouteImport.update({
+  id: '/comments',
+  path: '/comments',
+  getParentRoute: () => ApiV1PostsIdRoute,
+} as any)
+const ApiV1PostsIdEpisodesRoute = ApiV1PostsIdEpisodesRouteImport.update({
+  id: '/episodes',
+  path: '/episodes',
+  getParentRoute: () => ApiV1PostsIdRoute,
+} as any)
+const ApiV1PostsIdNavigationRoute = ApiV1PostsIdNavigationRouteImport.update({
+  id: '/navigation',
+  path: '/navigation',
+  getParentRoute: () => ApiV1PostsIdRoute,
+} as any)
+const ApiV1PostsByDisplayIdDisplayIdRoute =
+  ApiV1PostsByDisplayIdDisplayIdRouteImport.update({
+    id: '/by-display-id/$displayId',
+    path: '/by-display-id/$displayId',
+    getParentRoute: () => ApiV1PostsRoute,
   } as any)
-const ApiV1AdminFootprintsGeocodeRoute =
-  ApiV1AdminFootprintsGeocodeRouteImport.update({
-    id: '/api/v1/admin/footprints/geocode',
-    path: '/api/v1/admin/footprints/geocode',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1AdminFootprintsIdRoute = ApiV1AdminFootprintsIdRouteImport.update({
-  id: '/api/v1/admin/footprints/$id',
-  path: '/api/v1/admin/footprints/$id',
+const ApiV1PostsSlugSlugRoute = ApiV1PostsSlugSlugRouteImport.update({
+  id: '/slug/$slug',
+  path: '/slug/$slug',
+  getParentRoute: () => ApiV1PostsRoute,
+} as any)
+const ApiV1PublicAlbumsIndexRoute = ApiV1PublicAlbumsIndexRouteImport.update({
+  id: '/api/v1/public/albums/',
+  path: '/api/v1/public/albums/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AdminAnalyticsStatsRoute =
-  ApiV1AdminAnalyticsStatsRouteImport.update({
-    id: '/api/v1/admin/analytics/stats',
-    path: '/api/v1/admin/analytics/stats',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1AdminAnalyticsPurgeRoute =
-  ApiV1AdminAnalyticsPurgeRouteImport.update({
-    id: '/api/v1/admin/analytics/purge',
-    path: '/api/v1/admin/analytics/purge',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiV1AdminAiCommentsIdRoute = ApiV1AdminAiCommentsIdRouteImport.update({
-  id: '/api/v1/admin/ai-comments/$id',
-  path: '/api/v1/admin/ai-comments/$id',
+const ApiV1PublicAlbumsIdRoute = ApiV1PublicAlbumsIdRouteImport.update({
+  id: '/api/v1/public/albums/$id',
+  path: '/api/v1/public/albums/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1AuthPasskeyFlowActionRoute =
-  ApiV1AuthPasskeyFlowActionRouteImport.update({
-    id: '/api/v1/auth/passkey/$flow/$action',
-    path: '/api/v1/auth/passkey/$flow/$action',
-    getParentRoute: () => rootRouteImport,
+const ApiV1SocialFetchFeedsStatusRoute =
+  ApiV1SocialFetchFeedsStatusRouteImport.update({
+    id: '/status',
+    path: '/status',
+    getParentRoute: () => ApiV1SocialFetchFeedsRoute,
   } as any)
-const ApiV1AlbumsIdPhotosMediaIdRoute =
-  ApiV1AlbumsIdPhotosMediaIdRouteImport.update({
-    id: '/$mediaId',
-    path: '/$mediaId',
-    getParentRoute: () => ApiV1AlbumsIdPhotosRoute,
+const ApiV1SyncPlatformActionRoute = ApiV1SyncPlatformActionRouteImport.update({
+  id: '/api/v1/sync/$platform/$action',
+  path: '/api/v1/sync/$platform/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1ThemesIdActivateRoute = ApiV1ThemesIdActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
+  getParentRoute: () => ApiV1ThemesIdRoute,
+} as any)
+const ApiV1AdminAiCommentsIdActionRoute =
+  ApiV1AdminAiCommentsIdActionRouteImport.update({
+    id: '/$action',
+    path: '/$action',
+    getParentRoute: () => ApiV1AdminAiCommentsIdRoute,
   } as any)
-const ApiV1AdminSystemUpgradeStatusRoute =
-  ApiV1AdminSystemUpgradeStatusRouteImport.update({
-    id: '/api/v1/admin/system/upgrade/status',
-    path: '/api/v1/admin/system/upgrade/status',
+const ApiV1AdminSyncPlatformJobsRoute =
+  ApiV1AdminSyncPlatformJobsRouteImport.update({
+    id: '/api/v1/admin/sync/$platform/jobs',
+    path: '/api/v1/admin/sync/$platform/jobs',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiV1AdminSyncPlatformSitesRoute =
@@ -1227,22 +1221,22 @@ const ApiV1AdminSyncPlatformSitesRoute =
     path: '/api/v1/admin/sync/$platform/sites',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiV1AdminSyncPlatformJobsRoute =
-  ApiV1AdminSyncPlatformJobsRouteImport.update({
-    id: '/api/v1/admin/sync/$platform/jobs',
-    path: '/api/v1/admin/sync/$platform/jobs',
+const ApiV1AdminSystemUpgradeStatusRoute =
+  ApiV1AdminSystemUpgradeStatusRouteImport.update({
+    id: '/api/v1/admin/system/upgrade/status',
+    path: '/api/v1/admin/system/upgrade/status',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiV1AdminAiCommentsIdActionRoute =
-  ApiV1AdminAiCommentsIdActionRouteImport.update({
-    id: '/$action',
-    path: '/$action',
-    getParentRoute: () => ApiV1AdminAiCommentsIdRoute,
+const ApiV1AlbumsIdPhotosMediaIdRoute =
+  ApiV1AlbumsIdPhotosMediaIdRouteImport.update({
+    id: '/$mediaId',
+    path: '/$mediaId',
+    getParentRoute: () => ApiV1AlbumsIdPhotosRoute,
   } as any)
-const ApiV1SyncPlatformJobIdStatusRoute =
-  ApiV1SyncPlatformJobIdStatusRouteImport.update({
-    id: '/api/v1/sync/$platform/job/$id/status',
-    path: '/api/v1/sync/$platform/job/$id/status',
+const ApiV1AuthPasskeyFlowActionRoute =
+  ApiV1AuthPasskeyFlowActionRouteImport.update({
+    id: '/api/v1/auth/passkey/$flow/$action',
+    path: '/api/v1/auth/passkey/$flow/$action',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiV1AdminSyncPlatformSitesUuidRoute =
@@ -1250,6 +1244,12 @@ const ApiV1AdminSyncPlatformSitesUuidRoute =
     id: '/$uuid',
     path: '/$uuid',
     getParentRoute: () => ApiV1AdminSyncPlatformSitesRoute,
+  } as any)
+const ApiV1SyncPlatformJobIdStatusRoute =
+  ApiV1SyncPlatformJobIdStatusRouteImport.update({
+    id: '/api/v1/sync/$platform/job/$id/status',
+    path: '/api/v1/sync/$platform/job/$id/status',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ApiV1MusicProxyPlatformSongsIdAssetRoute =
   ApiV1MusicProxyPlatformSongsIdAssetRouteImport.update({
@@ -2671,200 +2671,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rss.xml': {
-      id: '/rss.xml'
-      path: '/rss.xml'
-      fullPath: '/rss.xml'
-      preLoaderRoute: typeof RssDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rss': {
-      id: '/rss'
-      path: '/rss'
-      fullPath: '/rss'
-      preLoaderRoute: typeof RssRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/music': {
-      id: '/music'
-      path: '/music'
-      fullPath: '/music'
-      preLoaderRoute: typeof MusicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/movies': {
-      id: '/movies'
-      path: '/movies'
-      fullPath: '/movies'
-      preLoaderRoute: typeof MoviesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/moments': {
-      id: '/moments'
-      path: '/moments'
-      fullPath: '/moments'
-      preLoaderRoute: typeof MomentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/logo.$ext': {
-      id: '/logo.$ext'
-      path: '/logo.$ext'
-      fullPath: '/logo.$ext'
-      preLoaderRoute: typeof LogoDotextRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llms.txt': {
-      id: '/llms.txt'
-      path: '/llms.txt'
-      fullPath: '/llms.txt'
-      preLoaderRoute: typeof LlmsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llms-full.txt': {
-      id: '/llms-full.txt'
-      path: '/llms-full.txt'
-      fullPath: '/llms-full.txt'
-      preLoaderRoute: typeof LlmsFullDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/links': {
-      id: '/links'
-      path: '/links'
-      fullPath: '/links'
-      preLoaderRoute: typeof LinksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/install': {
-      id: '/install'
-      path: '/install'
-      fullPath: '/install'
-      preLoaderRoute: typeof InstallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/goods': {
-      id: '/goods'
-      path: '/goods'
-      fullPath: '/goods'
-      preLoaderRoute: typeof GoodsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games': {
-      id: '/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof GamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/footprints': {
-      id: '/footprints'
-      path: '/footprints'
-      fullPath: '/footprints'
-      preLoaderRoute: typeof FootprintsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feeds': {
-      id: '/feeds'
-      path: '/feeds'
-      fullPath: '/feeds'
-      preLoaderRoute: typeof FeedsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feed': {
-      id: '/feed'
-      path: '/feed'
-      fullPath: '/feed'
-      preLoaderRoute: typeof FeedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favicon.ico': {
-      id: '/favicon.ico'
-      path: '/favicon.ico'
-      fullPath: '/favicon.ico'
-      preLoaderRoute: typeof FaviconDoticoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favicon.$ext': {
-      id: '/favicon.$ext'
-      path: '/favicon.$ext'
-      fullPath: '/favicon.$ext'
-      preLoaderRoute: typeof FaviconDotextRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dark-logo.$ext': {
-      id: '/dark-logo.$ext'
-      path: '/dark-logo.$ext'
-      fullPath: '/dark-logo.$ext'
-      preLoaderRoute: typeof DarkLogoDotextRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/books': {
-      id: '/books'
-      path: '/books'
-      fullPath: '/books'
-      preLoaderRoute: typeof BooksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atom.xml': {
-      id: '/atom.xml'
-      path: '/atom.xml'
-      fullPath: '/atom.xml'
-      preLoaderRoute: typeof AtomDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/archives': {
-      id: '/archives'
-      path: '/archives'
-      fullPath: '/archives'
-      preLoaderRoute: typeof ArchivesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/albums': {
-      id: '/albums'
-      path: '/albums'
-      fullPath: '/albums'
-      preLoaderRoute: typeof AlbumsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -2874,144 +2685,200 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tags/': {
-      id: '/tags/'
-      path: '/tags'
-      fullPath: '/tags/'
-      preLoaderRoute: typeof TagsIndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/films/': {
-      id: '/films/'
-      path: '/films'
-      fullPath: '/films/'
-      preLoaderRoute: typeof FilmsIndexRouteImport
+    '/albums': {
+      id: '/albums'
+      path: '/albums'
+      fullPath: '/albums'
+      preLoaderRoute: typeof AlbumsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/categories/': {
-      id: '/categories/'
-      path: '/categories'
-      fullPath: '/categories/'
-      preLoaderRoute: typeof CategoriesIndexRouteImport
+    '/archives': {
+      id: '/archives'
+      path: '/archives'
+      fullPath: '/archives'
+      preLoaderRoute: typeof ArchivesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/uploads/$': {
-      id: '/uploads/$'
-      path: '/uploads/$'
-      fullPath: '/uploads/$'
-      preLoaderRoute: typeof UploadsSplatRouteImport
+    '/atom.xml': {
+      id: '/atom.xml'
+      path: '/atom.xml'
+      fullPath: '/atom.xml'
+      preLoaderRoute: typeof AtomDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/themes/$': {
-      id: '/themes/$'
-      path: '/themes/$'
-      fullPath: '/themes/$'
-      preLoaderRoute: typeof ThemesSplatRouteImport
+    '/books': {
+      id: '/books'
+      path: '/books'
+      fullPath: '/books'
+      preLoaderRoute: typeof BooksRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tags/$slug': {
-      id: '/tags/$slug'
-      path: '/tags/$slug'
-      fullPath: '/tags/$slug'
-      preLoaderRoute: typeof TagsSlugRouteImport
+    '/dark-logo.$ext': {
+      id: '/dark-logo.$ext'
+      path: '/dark-logo.$ext'
+      fullPath: '/dark-logo.$ext'
+      preLoaderRoute: typeof DarkLogoDotextRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/styles/$': {
-      id: '/styles/$'
-      path: '/styles/$'
-      fullPath: '/styles/$'
-      preLoaderRoute: typeof StylesSplatRouteImport
+    '/favicon.$ext': {
+      id: '/favicon.$ext'
+      path: '/favicon.$ext'
+      fullPath: '/favicon.$ext'
+      preLoaderRoute: typeof FaviconDotextRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/static/$': {
-      id: '/static/$'
-      path: '/static/$'
-      fullPath: '/static/$'
-      preLoaderRoute: typeof StaticSplatRouteImport
+    '/favicon.ico': {
+      id: '/favicon.ico'
+      path: '/favicon.ico'
+      fullPath: '/favicon.ico'
+      preLoaderRoute: typeof FaviconDoticoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/$slug': {
-      id: '/posts/$slug'
-      path: '/posts/$slug'
-      fullPath: '/posts/$slug'
-      preLoaderRoute: typeof PostsSlugRouteImport
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/page/$num': {
-      id: '/page/$num'
-      path: '/page/$num'
-      fullPath: '/page/$num'
-      preLoaderRoute: typeof PageNumRouteImport
+    '/feeds': {
+      id: '/feeds'
+      path: '/feeds'
+      fullPath: '/feeds'
+      preLoaderRoute: typeof FeedsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/images/$': {
-      id: '/images/$'
-      path: '/images/$'
-      fullPath: '/images/$'
-      preLoaderRoute: typeof ImagesSplatRouteImport
+    '/footprints': {
+      id: '/footprints'
+      path: '/footprints'
+      fullPath: '/footprints'
+      preLoaderRoute: typeof FootprintsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/icons/$': {
-      id: '/icons/$'
-      path: '/icons/$'
-      fullPath: '/icons/$'
-      preLoaderRoute: typeof IconsSplatRouteImport
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/films/$slug': {
-      id: '/films/$slug'
-      path: '/films/$slug'
-      fullPath: '/films/$slug'
-      preLoaderRoute: typeof FilmsSlugRouteImport
+    '/goods': {
+      id: '/goods'
+      path: '/goods'
+      fullPath: '/goods'
+      preLoaderRoute: typeof GoodsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/emoji/$': {
-      id: '/emoji/$'
-      path: '/emoji/$'
-      fullPath: '/emoji/$'
-      preLoaderRoute: typeof EmojiSplatRouteImport
+    '/install': {
+      id: '/install'
+      path: '/install'
+      fullPath: '/install'
+      preLoaderRoute: typeof InstallRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/date/$year': {
-      id: '/date/$year'
-      path: '/date/$year'
-      fullPath: '/date/$year'
-      preLoaderRoute: typeof DateYearRouteImport
+    '/links': {
+      id: '/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof LinksRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/categories/$slug': {
-      id: '/categories/$slug'
-      path: '/categories/$slug'
-      fullPath: '/categories/$slug'
-      preLoaderRoute: typeof CategoriesSlugRouteImport
+    '/llms-full.txt': {
+      id: '/llms-full.txt'
+      path: '/llms-full.txt'
+      fullPath: '/llms-full.txt'
+      preLoaderRoute: typeof LlmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/assets/$': {
-      id: '/assets/$'
-      path: '/assets/$'
-      fullPath: '/assets/$'
-      preLoaderRoute: typeof AssetsSplatRouteImport
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/revalidate': {
-      id: '/api/revalidate'
-      path: '/api/revalidate'
-      fullPath: '/api/revalidate'
-      preLoaderRoute: typeof ApiRevalidateRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
+    '/logo.$ext': {
+      id: '/logo.$ext'
+      path: '/logo.$ext'
+      fullPath: '/logo.$ext'
+      preLoaderRoute: typeof LogoDotextRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moments': {
+      id: '/moments'
+      path: '/moments'
+      fullPath: '/moments'
+      preLoaderRoute: typeof MomentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/music': {
+      id: '/music'
+      path: '/music'
+      fullPath: '/music'
+      preLoaderRoute: typeof MusicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss': {
+      id: '/rss'
+      path: '/rss'
+      fullPath: '/rss'
+      preLoaderRoute: typeof RssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/$': {
@@ -3021,95 +2888,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/date/$year/$month': {
-      id: '/date/$year/$month'
-      path: '/$month'
-      fullPath: '/date/$year/$month'
-      preLoaderRoute: typeof DateYearMonthRouteImport
-      parentRoute: typeof DateYearRoute
-    }
-    '/api/v1/visitor': {
-      id: '/api/v1/visitor'
-      path: '/api/v1/visitor'
-      fullPath: '/api/v1/visitor'
-      preLoaderRoute: typeof ApiV1VisitorRouteImport
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/track': {
-      id: '/api/v1/track'
-      path: '/api/v1/track'
-      fullPath: '/api/v1/track'
-      preLoaderRoute: typeof ApiV1TrackRouteImport
+    '/api/revalidate': {
+      id: '/api/revalidate'
+      path: '/api/revalidate'
+      fullPath: '/api/revalidate'
+      preLoaderRoute: typeof ApiRevalidateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/tags': {
-      id: '/api/v1/tags'
-      path: '/api/v1/tags'
-      fullPath: '/api/v1/tags'
-      preLoaderRoute: typeof ApiV1TagsRouteImport
+    '/assets/$': {
+      id: '/assets/$'
+      path: '/assets/$'
+      fullPath: '/assets/$'
+      preLoaderRoute: typeof AssetsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/search': {
-      id: '/api/v1/search'
-      path: '/api/v1/search'
-      fullPath: '/api/v1/search'
-      preLoaderRoute: typeof ApiV1SearchRouteImport
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/posts': {
-      id: '/api/v1/posts'
-      path: '/api/v1/posts'
-      fullPath: '/api/v1/posts'
-      preLoaderRoute: typeof ApiV1PostsRouteImport
+    '/categories/$slug': {
+      id: '/categories/$slug'
+      path: '/categories/$slug'
+      fullPath: '/categories/$slug'
+      preLoaderRoute: typeof CategoriesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/owner': {
-      id: '/api/v1/owner'
-      path: '/api/v1/owner'
-      fullPath: '/api/v1/owner'
-      preLoaderRoute: typeof ApiV1OwnerRouteImport
+    '/date/$year': {
+      id: '/date/$year'
+      path: '/date/$year'
+      fullPath: '/date/$year'
+      preLoaderRoute: typeof DateYearRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/options': {
-      id: '/api/v1/options'
-      path: '/api/v1/options'
-      fullPath: '/api/v1/options'
-      preLoaderRoute: typeof ApiV1OptionsRouteImport
+    '/emoji/$': {
+      id: '/emoji/$'
+      path: '/emoji/$'
+      fullPath: '/emoji/$'
+      preLoaderRoute: typeof EmojiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/online': {
-      id: '/api/v1/online'
-      path: '/api/v1/online'
-      fullPath: '/api/v1/online'
-      preLoaderRoute: typeof ApiV1OnlineRouteImport
+    '/films/': {
+      id: '/films/'
+      path: '/films'
+      fullPath: '/films/'
+      preLoaderRoute: typeof FilmsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/health': {
-      id: '/api/v1/health'
-      path: '/api/v1/health'
-      fullPath: '/api/v1/health'
-      preLoaderRoute: typeof ApiV1HealthRouteImport
+    '/films/$slug': {
+      id: '/films/$slug'
+      path: '/films/$slug'
+      fullPath: '/films/$slug'
+      preLoaderRoute: typeof FilmsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/footprints': {
-      id: '/api/v1/footprints'
-      path: '/api/v1/footprints'
-      fullPath: '/api/v1/footprints'
-      preLoaderRoute: typeof ApiV1FootprintsRouteImport
+    '/icons/$': {
+      id: '/icons/$'
+      path: '/icons/$'
+      fullPath: '/icons/$'
+      preLoaderRoute: typeof IconsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/feed': {
-      id: '/api/v1/feed'
-      path: '/api/v1/feed'
-      fullPath: '/api/v1/feed'
-      preLoaderRoute: typeof ApiV1FeedRouteImport
+    '/images/$': {
+      id: '/images/$'
+      path: '/images/$'
+      fullPath: '/images/$'
+      preLoaderRoute: typeof ImagesSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/categories': {
-      id: '/api/v1/categories'
-      path: '/api/v1/categories'
-      fullPath: '/api/v1/categories'
-      preLoaderRoute: typeof ApiV1CategoriesRouteImport
+    '/page/$num': {
+      id: '/page/$num'
+      path: '/page/$num'
+      fullPath: '/page/$num'
+      preLoaderRoute: typeof PageNumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/$slug': {
+      id: '/posts/$slug'
+      path: '/posts/$slug'
+      fullPath: '/posts/$slug'
+      preLoaderRoute: typeof PostsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/static/$': {
+      id: '/static/$'
+      path: '/static/$'
+      fullPath: '/static/$'
+      preLoaderRoute: typeof StaticSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/styles/$': {
+      id: '/styles/$'
+      path: '/styles/$'
+      fullPath: '/styles/$'
+      preLoaderRoute: typeof StylesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tags/': {
+      id: '/tags/'
+      path: '/tags'
+      fullPath: '/tags/'
+      preLoaderRoute: typeof TagsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tags/$slug': {
+      id: '/tags/$slug'
+      path: '/tags/$slug'
+      fullPath: '/tags/$slug'
+      preLoaderRoute: typeof TagsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/themes/$': {
+      id: '/themes/$'
+      path: '/themes/$'
+      fullPath: '/themes/$'
+      preLoaderRoute: typeof ThemesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/uploads/$': {
+      id: '/uploads/$'
+      path: '/uploads/$'
+      fullPath: '/uploads/$'
+      preLoaderRoute: typeof UploadsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/$resource': {
@@ -3119,669 +3028,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1ResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/themes/': {
-      id: '/api/v1/themes/'
-      path: '/api/v1/themes'
-      fullPath: '/api/v1/themes/'
-      preLoaderRoute: typeof ApiV1ThemesIndexRouteImport
+    '/api/v1/categories': {
+      id: '/api/v1/categories'
+      path: '/api/v1/categories'
+      fullPath: '/api/v1/categories'
+      preLoaderRoute: typeof ApiV1CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/profile/': {
-      id: '/api/v1/profile/'
-      path: '/api/v1/profile'
-      fullPath: '/api/v1/profile/'
-      preLoaderRoute: typeof ApiV1ProfileIndexRouteImport
+    '/api/v1/feed': {
+      id: '/api/v1/feed'
+      path: '/api/v1/feed'
+      fullPath: '/api/v1/feed'
+      preLoaderRoute: typeof ApiV1FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/plugins/': {
-      id: '/api/v1/plugins/'
-      path: '/api/v1/plugins'
-      fullPath: '/api/v1/plugins/'
-      preLoaderRoute: typeof ApiV1PluginsIndexRouteImport
+    '/api/v1/footprints': {
+      id: '/api/v1/footprints'
+      path: '/api/v1/footprints'
+      fullPath: '/api/v1/footprints'
+      preLoaderRoute: typeof ApiV1FootprintsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/passkeys/': {
-      id: '/api/v1/passkeys/'
-      path: '/api/v1/passkeys'
-      fullPath: '/api/v1/passkeys/'
-      preLoaderRoute: typeof ApiV1PasskeysIndexRouteImport
+    '/api/v1/health': {
+      id: '/api/v1/health'
+      path: '/api/v1/health'
+      fullPath: '/api/v1/health'
+      preLoaderRoute: typeof ApiV1HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/notifications/': {
-      id: '/api/v1/notifications/'
-      path: '/api/v1/notifications'
-      fullPath: '/api/v1/notifications/'
-      preLoaderRoute: typeof ApiV1NotificationsIndexRouteImport
+    '/api/v1/online': {
+      id: '/api/v1/online'
+      path: '/api/v1/online'
+      fullPath: '/api/v1/online'
+      preLoaderRoute: typeof ApiV1OnlineRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/moments/': {
-      id: '/api/v1/moments/'
-      path: '/api/v1/moments'
-      fullPath: '/api/v1/moments/'
-      preLoaderRoute: typeof ApiV1MomentsIndexRouteImport
+    '/api/v1/options': {
+      id: '/api/v1/options'
+      path: '/api/v1/options'
+      fullPath: '/api/v1/options'
+      preLoaderRoute: typeof ApiV1OptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/media/': {
-      id: '/api/v1/media/'
-      path: '/api/v1/media'
-      fullPath: '/api/v1/media/'
-      preLoaderRoute: typeof ApiV1MediaIndexRouteImport
+    '/api/v1/owner': {
+      id: '/api/v1/owner'
+      path: '/api/v1/owner'
+      fullPath: '/api/v1/owner'
+      preLoaderRoute: typeof ApiV1OwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/comments/': {
-      id: '/api/v1/comments/'
-      path: '/api/v1/comments'
-      fullPath: '/api/v1/comments/'
-      preLoaderRoute: typeof ApiV1CommentsIndexRouteImport
+    '/api/v1/posts': {
+      id: '/api/v1/posts'
+      path: '/api/v1/posts'
+      fullPath: '/api/v1/posts'
+      preLoaderRoute: typeof ApiV1PostsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/analytics/': {
-      id: '/api/v1/analytics/'
-      path: '/api/v1/analytics'
-      fullPath: '/api/v1/analytics/'
-      preLoaderRoute: typeof ApiV1AnalyticsIndexRouteImport
+    '/api/v1/search': {
+      id: '/api/v1/search'
+      path: '/api/v1/search'
+      fullPath: '/api/v1/search'
+      preLoaderRoute: typeof ApiV1SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/date/$year/$month/$day': {
-      id: '/date/$year/$month/$day'
-      path: '/$day'
-      fullPath: '/date/$year/$month/$day'
-      preLoaderRoute: typeof DateYearMonthDayRouteImport
-      parentRoute: typeof DateYearMonthRoute
-    }
-    '/api/v1/visitor/weather': {
-      id: '/api/v1/visitor/weather'
-      path: '/weather'
-      fullPath: '/api/v1/visitor/weather'
-      preLoaderRoute: typeof ApiV1VisitorWeatherRouteImport
-      parentRoute: typeof ApiV1VisitorRoute
-    }
-    '/api/v1/visitor/geo': {
-      id: '/api/v1/visitor/geo'
-      path: '/geo'
-      fullPath: '/api/v1/visitor/geo'
-      preLoaderRoute: typeof ApiV1VisitorGeoRouteImport
-      parentRoute: typeof ApiV1VisitorRoute
-    }
-    '/api/v1/unsubscribe/comment-reply': {
-      id: '/api/v1/unsubscribe/comment-reply'
-      path: '/api/v1/unsubscribe/comment-reply'
-      fullPath: '/api/v1/unsubscribe/comment-reply'
-      preLoaderRoute: typeof ApiV1UnsubscribeCommentReplyRouteImport
+    '/api/v1/tags': {
+      id: '/api/v1/tags'
+      path: '/api/v1/tags'
+      fullPath: '/api/v1/tags'
+      preLoaderRoute: typeof ApiV1TagsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/track/duration': {
-      id: '/api/v1/track/duration'
-      path: '/duration'
-      fullPath: '/api/v1/track/duration'
-      preLoaderRoute: typeof ApiV1TrackDurationRouteImport
-      parentRoute: typeof ApiV1TrackRoute
-    }
-    '/api/v1/themes/upload': {
-      id: '/api/v1/themes/upload'
-      path: '/api/v1/themes/upload'
-      fullPath: '/api/v1/themes/upload'
-      preLoaderRoute: typeof ApiV1ThemesUploadRouteImport
+    '/api/v1/track': {
+      id: '/api/v1/track'
+      path: '/api/v1/track'
+      fullPath: '/api/v1/track'
+      preLoaderRoute: typeof ApiV1TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/themes/$id': {
-      id: '/api/v1/themes/$id'
-      path: '/api/v1/themes/$id'
-      fullPath: '/api/v1/themes/$id'
-      preLoaderRoute: typeof ApiV1ThemesIdRouteImport
+    '/api/v1/visitor': {
+      id: '/api/v1/visitor'
+      path: '/api/v1/visitor'
+      fullPath: '/api/v1/visitor'
+      preLoaderRoute: typeof ApiV1VisitorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/telegram/webhook': {
-      id: '/api/v1/telegram/webhook'
-      path: '/api/v1/telegram/webhook'
-      fullPath: '/api/v1/telegram/webhook'
-      preLoaderRoute: typeof ApiV1TelegramWebhookRouteImport
-      parentRoute: typeof rootRouteImport
+    '/date/$year/$month': {
+      id: '/date/$year/$month'
+      path: '/$month'
+      fullPath: '/date/$year/$month'
+      preLoaderRoute: typeof DateYearMonthRouteImport
+      parentRoute: typeof DateYearRoute
     }
-    '/api/v1/telegram/test': {
-      id: '/api/v1/telegram/test'
-      path: '/api/v1/telegram/test'
-      fullPath: '/api/v1/telegram/test'
-      preLoaderRoute: typeof ApiV1TelegramTestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/telegram/setup-webhook': {
-      id: '/api/v1/telegram/setup-webhook'
-      path: '/api/v1/telegram/setup-webhook'
-      fullPath: '/api/v1/telegram/setup-webhook'
-      preLoaderRoute: typeof ApiV1TelegramSetupWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/telegram/get-chat-id': {
-      id: '/api/v1/telegram/get-chat-id'
-      path: '/api/v1/telegram/get-chat-id'
-      fullPath: '/api/v1/telegram/get-chat-id'
-      preLoaderRoute: typeof ApiV1TelegramGetChatIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/tags/$id': {
-      id: '/api/v1/tags/$id'
+    '/api/v1/$resource/$id': {
+      id: '/api/v1/$resource/$id'
       path: '/$id'
-      fullPath: '/api/v1/tags/$id'
-      preLoaderRoute: typeof ApiV1TagsIdRouteImport
-      parentRoute: typeof ApiV1TagsRoute
-    }
-    '/api/v1/system/update-check': {
-      id: '/api/v1/system/update-check'
-      path: '/api/v1/system/update-check'
-      fullPath: '/api/v1/system/update-check'
-      preLoaderRoute: typeof ApiV1SystemUpdateCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/system/status': {
-      id: '/api/v1/system/status'
-      path: '/api/v1/system/status'
-      fullPath: '/api/v1/system/status'
-      preLoaderRoute: typeof ApiV1SystemStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/social/fetch-feeds': {
-      id: '/api/v1/social/fetch-feeds'
-      path: '/api/v1/social/fetch-feeds'
-      fullPath: '/api/v1/social/fetch-feeds'
-      preLoaderRoute: typeof ApiV1SocialFetchFeedsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/social/feed-timeline': {
-      id: '/api/v1/social/feed-timeline'
-      path: '/api/v1/social/feed-timeline'
-      fullPath: '/api/v1/social/feed-timeline'
-      preLoaderRoute: typeof ApiV1SocialFeedTimelineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/social/feed-stats': {
-      id: '/api/v1/social/feed-stats'
-      path: '/api/v1/social/feed-stats'
-      fullPath: '/api/v1/social/feed-stats'
-      preLoaderRoute: typeof ApiV1SocialFeedStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/social/$action': {
-      id: '/api/v1/social/$action'
-      path: '/api/v1/social/$action'
-      fullPath: '/api/v1/social/$action'
-      preLoaderRoute: typeof ApiV1SocialActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/setup/test-db': {
-      id: '/api/v1/setup/test-db'
-      path: '/api/v1/setup/test-db'
-      fullPath: '/api/v1/setup/test-db'
-      preLoaderRoute: typeof ApiV1SetupTestDbRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/setup/status': {
-      id: '/api/v1/setup/status'
-      path: '/api/v1/setup/status'
-      fullPath: '/api/v1/setup/status'
-      preLoaderRoute: typeof ApiV1SetupStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/setup/save': {
-      id: '/api/v1/setup/save'
-      path: '/api/v1/setup/save'
-      fullPath: '/api/v1/setup/save'
-      preLoaderRoute: typeof ApiV1SetupSaveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/search/rebuild': {
-      id: '/api/v1/search/rebuild'
-      path: '/rebuild'
-      fullPath: '/api/v1/search/rebuild'
-      preLoaderRoute: typeof ApiV1SearchRebuildRouteImport
-      parentRoute: typeof ApiV1SearchRoute
-    }
-    '/api/v1/rss/parse': {
-      id: '/api/v1/rss/parse'
-      path: '/api/v1/rss/parse'
-      fullPath: '/api/v1/rss/parse'
-      preLoaderRoute: typeof ApiV1RssParseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/profile/send-code': {
-      id: '/api/v1/profile/send-code'
-      path: '/api/v1/profile/send-code'
-      fullPath: '/api/v1/profile/send-code'
-      preLoaderRoute: typeof ApiV1ProfileSendCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/posts/$id': {
-      id: '/api/v1/posts/$id'
-      path: '/$id'
-      fullPath: '/api/v1/posts/$id'
-      preLoaderRoute: typeof ApiV1PostsIdRouteImport
-      parentRoute: typeof ApiV1PostsRoute
-    }
-    '/api/v1/plugins/upload': {
-      id: '/api/v1/plugins/upload'
-      path: '/api/v1/plugins/upload'
-      fullPath: '/api/v1/plugins/upload'
-      preLoaderRoute: typeof ApiV1PluginsUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/plugins/$id': {
-      id: '/api/v1/plugins/$id'
-      path: '/api/v1/plugins/$id'
-      fullPath: '/api/v1/plugins/$id'
-      preLoaderRoute: typeof ApiV1PluginsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/playlists/import': {
-      id: '/api/v1/playlists/import'
-      path: '/api/v1/playlists/import'
-      fullPath: '/api/v1/playlists/import'
-      preLoaderRoute: typeof ApiV1PlaylistsImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/passport/identify': {
-      id: '/api/v1/passport/identify'
-      path: '/api/v1/passport/identify'
-      fullPath: '/api/v1/passport/identify'
-      preLoaderRoute: typeof ApiV1PassportIdentifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/passkeys/$id': {
-      id: '/api/v1/passkeys/$id'
-      path: '/api/v1/passkeys/$id'
-      fullPath: '/api/v1/passkeys/$id'
-      preLoaderRoute: typeof ApiV1PasskeysIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/options/test-email': {
-      id: '/api/v1/options/test-email'
-      path: '/test-email'
-      fullPath: '/api/v1/options/test-email'
-      preLoaderRoute: typeof ApiV1OptionsTestEmailRouteImport
-      parentRoute: typeof ApiV1OptionsRoute
-    }
-    '/api/v1/options/test-credential': {
-      id: '/api/v1/options/test-credential'
-      path: '/test-credential'
-      fullPath: '/api/v1/options/test-credential'
-      preLoaderRoute: typeof ApiV1OptionsTestCredentialRouteImport
-      parentRoute: typeof ApiV1OptionsRoute
-    }
-    '/api/v1/notifications/unread-count': {
-      id: '/api/v1/notifications/unread-count'
-      path: '/api/v1/notifications/unread-count'
-      fullPath: '/api/v1/notifications/unread-count'
-      preLoaderRoute: typeof ApiV1NotificationsUnreadCountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/notifications/stream': {
-      id: '/api/v1/notifications/stream'
-      path: '/api/v1/notifications/stream'
-      fullPath: '/api/v1/notifications/stream'
-      preLoaderRoute: typeof ApiV1NotificationsStreamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/notifications/read-all': {
-      id: '/api/v1/notifications/read-all'
-      path: '/api/v1/notifications/read-all'
-      fullPath: '/api/v1/notifications/read-all'
-      preLoaderRoute: typeof ApiV1NotificationsReadAllRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/notifications/$id': {
-      id: '/api/v1/notifications/$id'
-      path: '/api/v1/notifications/$id'
-      fullPath: '/api/v1/notifications/$id'
-      preLoaderRoute: typeof ApiV1NotificationsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/network/$action': {
-      id: '/api/v1/network/$action'
-      path: '/api/v1/network/$action'
-      fullPath: '/api/v1/network/$action'
-      preLoaderRoute: typeof ApiV1NetworkActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/music/search': {
-      id: '/api/v1/music/search'
-      path: '/api/v1/music/search'
-      fullPath: '/api/v1/music/search'
-      preLoaderRoute: typeof ApiV1MusicSearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/moments/recent-tags': {
-      id: '/api/v1/moments/recent-tags'
-      path: '/api/v1/moments/recent-tags'
-      fullPath: '/api/v1/moments/recent-tags'
-      preLoaderRoute: typeof ApiV1MomentsRecentTagsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/moments/$id': {
-      id: '/api/v1/moments/$id'
-      path: '/api/v1/moments/$id'
-      fullPath: '/api/v1/moments/$id'
-      preLoaderRoute: typeof ApiV1MomentsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/upload-branding': {
-      id: '/api/v1/media/upload-branding'
-      path: '/api/v1/media/upload-branding'
-      fullPath: '/api/v1/media/upload-branding'
-      preLoaderRoute: typeof ApiV1MediaUploadBrandingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/upload': {
-      id: '/api/v1/media/upload'
-      path: '/api/v1/media/upload'
-      fullPath: '/api/v1/media/upload'
-      preLoaderRoute: typeof ApiV1MediaUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/test-connection': {
-      id: '/api/v1/media/test-connection'
-      path: '/api/v1/media/test-connection'
-      fullPath: '/api/v1/media/test-connection'
-      preLoaderRoute: typeof ApiV1MediaTestConnectionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/stats': {
-      id: '/api/v1/media/stats'
-      path: '/api/v1/media/stats'
-      fullPath: '/api/v1/media/stats'
-      preLoaderRoute: typeof ApiV1MediaStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/parse': {
-      id: '/api/v1/media/parse'
-      path: '/api/v1/media/parse'
-      fullPath: '/api/v1/media/parse'
-      preLoaderRoute: typeof ApiV1MediaParseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/exif': {
-      id: '/api/v1/media/exif'
-      path: '/api/v1/media/exif'
-      fullPath: '/api/v1/media/exif'
-      preLoaderRoute: typeof ApiV1MediaExifRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/download-url': {
-      id: '/api/v1/media/download-url'
-      path: '/api/v1/media/download-url'
-      fullPath: '/api/v1/media/download-url'
-      preLoaderRoute: typeof ApiV1MediaDownloadUrlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/douban-import': {
-      id: '/api/v1/media/douban-import'
-      path: '/api/v1/media/douban-import'
-      fullPath: '/api/v1/media/douban-import'
-      preLoaderRoute: typeof ApiV1MediaDoubanImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/media/$id': {
-      id: '/api/v1/media/$id'
-      path: '/api/v1/media/$id'
-      fullPath: '/api/v1/media/$id'
-      preLoaderRoute: typeof ApiV1MediaIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/location/reverse': {
-      id: '/api/v1/location/reverse'
-      path: '/api/v1/location/reverse'
-      fullPath: '/api/v1/location/reverse'
-      preLoaderRoute: typeof ApiV1LocationReverseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/links/apply': {
-      id: '/api/v1/links/apply'
-      path: '/api/v1/links/apply'
-      fullPath: '/api/v1/links/apply'
-      preLoaderRoute: typeof ApiV1LinksApplyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/install/status': {
-      id: '/api/v1/install/status'
-      path: '/api/v1/install/status'
-      fullPath: '/api/v1/install/status'
-      preLoaderRoute: typeof ApiV1InstallStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/install/finish': {
-      id: '/api/v1/install/finish'
-      path: '/api/v1/install/finish'
-      fullPath: '/api/v1/install/finish'
-      preLoaderRoute: typeof ApiV1InstallFinishRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/install/create-admin': {
-      id: '/api/v1/install/create-admin'
-      path: '/api/v1/install/create-admin'
-      fullPath: '/api/v1/install/create-admin'
-      preLoaderRoute: typeof ApiV1InstallCreateAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/import/$platform': {
-      id: '/api/v1/import/$platform'
-      path: '/api/v1/import/$platform'
-      fullPath: '/api/v1/import/$platform'
-      preLoaderRoute: typeof ApiV1ImportPlatformRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/i18n/locales': {
-      id: '/api/v1/i18n/locales'
-      path: '/api/v1/i18n/locales'
-      fullPath: '/api/v1/i18n/locales'
-      preLoaderRoute: typeof ApiV1I18nLocalesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/i18n/current': {
-      id: '/api/v1/i18n/current'
-      path: '/api/v1/i18n/current'
-      fullPath: '/api/v1/i18n/current'
-      preLoaderRoute: typeof ApiV1I18nCurrentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/i18n/$locale': {
-      id: '/api/v1/i18n/$locale'
-      path: '/api/v1/i18n/$locale'
-      fullPath: '/api/v1/i18n/$locale'
-      preLoaderRoute: typeof ApiV1I18nLocaleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/federation/webhook': {
-      id: '/api/v1/federation/webhook'
-      path: '/api/v1/federation/webhook'
-      fullPath: '/api/v1/federation/webhook'
-      preLoaderRoute: typeof ApiV1FederationWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/federation/verify': {
-      id: '/api/v1/federation/verify'
-      path: '/api/v1/federation/verify'
-      fullPath: '/api/v1/federation/verify'
-      preLoaderRoute: typeof ApiV1FederationVerifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/federation/token': {
-      id: '/api/v1/federation/token'
-      path: '/api/v1/federation/token'
-      fullPath: '/api/v1/federation/token'
-      preLoaderRoute: typeof ApiV1FederationTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/federation/metadata': {
-      id: '/api/v1/federation/metadata'
-      path: '/api/v1/federation/metadata'
-      fullPath: '/api/v1/federation/metadata'
-      preLoaderRoute: typeof ApiV1FederationMetadataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/federation/follow': {
-      id: '/api/v1/federation/follow'
-      path: '/api/v1/federation/follow'
-      fullPath: '/api/v1/federation/follow'
-      preLoaderRoute: typeof ApiV1FederationFollowRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/comments/pending-count': {
-      id: '/api/v1/comments/pending-count'
-      path: '/api/v1/comments/pending-count'
-      fullPath: '/api/v1/comments/pending-count'
-      preLoaderRoute: typeof ApiV1CommentsPendingCountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/comments/moderate': {
-      id: '/api/v1/comments/moderate'
-      path: '/api/v1/comments/moderate'
-      fullPath: '/api/v1/comments/moderate'
-      preLoaderRoute: typeof ApiV1CommentsModerateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/comments/federated': {
-      id: '/api/v1/comments/federated'
-      path: '/api/v1/comments/federated'
-      fullPath: '/api/v1/comments/federated'
-      preLoaderRoute: typeof ApiV1CommentsFederatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/comments/batch': {
-      id: '/api/v1/comments/batch'
-      path: '/api/v1/comments/batch'
-      fullPath: '/api/v1/comments/batch'
-      preLoaderRoute: typeof ApiV1CommentsBatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/comments/$id': {
-      id: '/api/v1/comments/$id'
-      path: '/api/v1/comments/$id'
-      fullPath: '/api/v1/comments/$id'
-      preLoaderRoute: typeof ApiV1CommentsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/categories/$id': {
-      id: '/api/v1/categories/$id'
-      path: '/$id'
-      fullPath: '/api/v1/categories/$id'
-      preLoaderRoute: typeof ApiV1CategoriesIdRouteImport
-      parentRoute: typeof ApiV1CategoriesRoute
-    }
-    '/api/v1/captcha/image': {
-      id: '/api/v1/captcha/image'
-      path: '/api/v1/captcha/image'
-      fullPath: '/api/v1/captcha/image'
-      preLoaderRoute: typeof ApiV1CaptchaImageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/captcha/challenge': {
-      id: '/api/v1/captcha/challenge'
-      path: '/api/v1/captcha/challenge'
-      fullPath: '/api/v1/captcha/challenge'
-      preLoaderRoute: typeof ApiV1CaptchaChallengeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/backup/$action': {
-      id: '/api/v1/backup/$action'
-      path: '/api/v1/backup/$action'
-      fullPath: '/api/v1/backup/$action'
-      preLoaderRoute: typeof ApiV1BackupActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/reset-password': {
-      id: '/api/v1/auth/reset-password'
-      path: '/api/v1/auth/reset-password'
-      fullPath: '/api/v1/auth/reset-password'
-      preLoaderRoute: typeof ApiV1AuthResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/refresh': {
-      id: '/api/v1/auth/refresh'
-      path: '/api/v1/auth/refresh'
-      fullPath: '/api/v1/auth/refresh'
-      preLoaderRoute: typeof ApiV1AuthRefreshRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/password': {
-      id: '/api/v1/auth/password'
-      path: '/api/v1/auth/password'
-      fullPath: '/api/v1/auth/password'
-      preLoaderRoute: typeof ApiV1AuthPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/me': {
-      id: '/api/v1/auth/me'
-      path: '/api/v1/auth/me'
-      fullPath: '/api/v1/auth/me'
-      preLoaderRoute: typeof ApiV1AuthMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/logout': {
-      id: '/api/v1/auth/logout'
-      path: '/api/v1/auth/logout'
-      fullPath: '/api/v1/auth/logout'
-      preLoaderRoute: typeof ApiV1AuthLogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/login': {
-      id: '/api/v1/auth/login'
-      path: '/api/v1/auth/login'
-      fullPath: '/api/v1/auth/login'
-      preLoaderRoute: typeof ApiV1AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/forgot-password': {
-      id: '/api/v1/auth/forgot-password'
-      path: '/api/v1/auth/forgot-password'
-      fullPath: '/api/v1/auth/forgot-password'
-      preLoaderRoute: typeof ApiV1AuthForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/archive/stats': {
-      id: '/api/v1/archive/stats'
-      path: '/api/v1/archive/stats'
-      fullPath: '/api/v1/archive/stats'
-      preLoaderRoute: typeof ApiV1ArchiveStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/analytics/$action': {
-      id: '/api/v1/analytics/$action'
-      path: '/api/v1/analytics/$action'
-      fullPath: '/api/v1/analytics/$action'
-      preLoaderRoute: typeof ApiV1AnalyticsActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/ai/providers': {
-      id: '/api/v1/ai/providers'
-      path: '/api/v1/ai/providers'
-      fullPath: '/api/v1/ai/providers'
-      preLoaderRoute: typeof ApiV1AiProvidersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/ai/$action': {
-      id: '/api/v1/ai/$action'
-      path: '/api/v1/ai/$action'
-      fullPath: '/api/v1/ai/$action'
-      preLoaderRoute: typeof ApiV1AiActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/stats': {
-      id: '/api/v1/admin/stats'
-      path: '/api/v1/admin/stats'
-      fullPath: '/api/v1/admin/stats'
-      preLoaderRoute: typeof ApiV1AdminStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/link-icons': {
-      id: '/api/v1/admin/link-icons'
-      path: '/api/v1/admin/link-icons'
-      fullPath: '/api/v1/admin/link-icons'
-      preLoaderRoute: typeof ApiV1AdminLinkIconsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/link-emails': {
-      id: '/api/v1/admin/link-emails'
-      path: '/api/v1/admin/link-emails'
-      fullPath: '/api/v1/admin/link-emails'
-      preLoaderRoute: typeof ApiV1AdminLinkEmailsRouteImport
+      fullPath: '/api/v1/$resource/$id'
+      preLoaderRoute: typeof ApiV1ResourceIdRouteImport
+      parentRoute: typeof ApiV1ResourceRoute
+    }
+    '/api/v1/admin/bootstrap': {
+      id: '/api/v1/admin/bootstrap'
+      path: '/api/v1/admin/bootstrap'
+      fullPath: '/api/v1/admin/bootstrap'
+      preLoaderRoute: typeof ApiV1AdminBootstrapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/admin/header-counts': {
@@ -3791,235 +3140,676 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminHeaderCountsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/admin/bootstrap': {
-      id: '/api/v1/admin/bootstrap'
-      path: '/api/v1/admin/bootstrap'
-      fullPath: '/api/v1/admin/bootstrap'
-      preLoaderRoute: typeof ApiV1AdminBootstrapRouteImport
+    '/api/v1/admin/link-emails': {
+      id: '/api/v1/admin/link-emails'
+      path: '/api/v1/admin/link-emails'
+      fullPath: '/api/v1/admin/link-emails'
+      preLoaderRoute: typeof ApiV1AdminLinkEmailsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/$resource/$id': {
-      id: '/api/v1/$resource/$id'
+    '/api/v1/admin/link-icons': {
+      id: '/api/v1/admin/link-icons'
+      path: '/api/v1/admin/link-icons'
+      fullPath: '/api/v1/admin/link-icons'
+      preLoaderRoute: typeof ApiV1AdminLinkIconsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/stats': {
+      id: '/api/v1/admin/stats'
+      path: '/api/v1/admin/stats'
+      fullPath: '/api/v1/admin/stats'
+      preLoaderRoute: typeof ApiV1AdminStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/ai/$action': {
+      id: '/api/v1/ai/$action'
+      path: '/api/v1/ai/$action'
+      fullPath: '/api/v1/ai/$action'
+      preLoaderRoute: typeof ApiV1AiActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/ai/providers': {
+      id: '/api/v1/ai/providers'
+      path: '/api/v1/ai/providers'
+      fullPath: '/api/v1/ai/providers'
+      preLoaderRoute: typeof ApiV1AiProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/analytics/': {
+      id: '/api/v1/analytics/'
+      path: '/api/v1/analytics'
+      fullPath: '/api/v1/analytics/'
+      preLoaderRoute: typeof ApiV1AnalyticsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/analytics/$action': {
+      id: '/api/v1/analytics/$action'
+      path: '/api/v1/analytics/$action'
+      fullPath: '/api/v1/analytics/$action'
+      preLoaderRoute: typeof ApiV1AnalyticsActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/archive/stats': {
+      id: '/api/v1/archive/stats'
+      path: '/api/v1/archive/stats'
+      fullPath: '/api/v1/archive/stats'
+      preLoaderRoute: typeof ApiV1ArchiveStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/forgot-password': {
+      id: '/api/v1/auth/forgot-password'
+      path: '/api/v1/auth/forgot-password'
+      fullPath: '/api/v1/auth/forgot-password'
+      preLoaderRoute: typeof ApiV1AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/login': {
+      id: '/api/v1/auth/login'
+      path: '/api/v1/auth/login'
+      fullPath: '/api/v1/auth/login'
+      preLoaderRoute: typeof ApiV1AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/logout': {
+      id: '/api/v1/auth/logout'
+      path: '/api/v1/auth/logout'
+      fullPath: '/api/v1/auth/logout'
+      preLoaderRoute: typeof ApiV1AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/me': {
+      id: '/api/v1/auth/me'
+      path: '/api/v1/auth/me'
+      fullPath: '/api/v1/auth/me'
+      preLoaderRoute: typeof ApiV1AuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/password': {
+      id: '/api/v1/auth/password'
+      path: '/api/v1/auth/password'
+      fullPath: '/api/v1/auth/password'
+      preLoaderRoute: typeof ApiV1AuthPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/refresh': {
+      id: '/api/v1/auth/refresh'
+      path: '/api/v1/auth/refresh'
+      fullPath: '/api/v1/auth/refresh'
+      preLoaderRoute: typeof ApiV1AuthRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/reset-password': {
+      id: '/api/v1/auth/reset-password'
+      path: '/api/v1/auth/reset-password'
+      fullPath: '/api/v1/auth/reset-password'
+      preLoaderRoute: typeof ApiV1AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/backup/$action': {
+      id: '/api/v1/backup/$action'
+      path: '/api/v1/backup/$action'
+      fullPath: '/api/v1/backup/$action'
+      preLoaderRoute: typeof ApiV1BackupActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/captcha/challenge': {
+      id: '/api/v1/captcha/challenge'
+      path: '/api/v1/captcha/challenge'
+      fullPath: '/api/v1/captcha/challenge'
+      preLoaderRoute: typeof ApiV1CaptchaChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/captcha/image': {
+      id: '/api/v1/captcha/image'
+      path: '/api/v1/captcha/image'
+      fullPath: '/api/v1/captcha/image'
+      preLoaderRoute: typeof ApiV1CaptchaImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/categories/$id': {
+      id: '/api/v1/categories/$id'
       path: '/$id'
-      fullPath: '/api/v1/$resource/$id'
-      preLoaderRoute: typeof ApiV1ResourceIdRouteImport
-      parentRoute: typeof ApiV1ResourceRoute
+      fullPath: '/api/v1/categories/$id'
+      preLoaderRoute: typeof ApiV1CategoriesIdRouteImport
+      parentRoute: typeof ApiV1CategoriesRoute
     }
-    '/api/v1/public/albums/': {
-      id: '/api/v1/public/albums/'
-      path: '/api/v1/public/albums'
-      fullPath: '/api/v1/public/albums/'
-      preLoaderRoute: typeof ApiV1PublicAlbumsIndexRouteImport
+    '/api/v1/comments/': {
+      id: '/api/v1/comments/'
+      path: '/api/v1/comments'
+      fullPath: '/api/v1/comments/'
+      preLoaderRoute: typeof ApiV1CommentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/admin/footprints/': {
-      id: '/api/v1/admin/footprints/'
-      path: '/api/v1/admin/footprints'
-      fullPath: '/api/v1/admin/footprints/'
-      preLoaderRoute: typeof ApiV1AdminFootprintsIndexRouteImport
+    '/api/v1/comments/$id': {
+      id: '/api/v1/comments/$id'
+      path: '/api/v1/comments/$id'
+      fullPath: '/api/v1/comments/$id'
+      preLoaderRoute: typeof ApiV1CommentsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/batch': {
+      id: '/api/v1/comments/batch'
+      path: '/api/v1/comments/batch'
+      fullPath: '/api/v1/comments/batch'
+      preLoaderRoute: typeof ApiV1CommentsBatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/federated': {
+      id: '/api/v1/comments/federated'
+      path: '/api/v1/comments/federated'
+      fullPath: '/api/v1/comments/federated'
+      preLoaderRoute: typeof ApiV1CommentsFederatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/moderate': {
+      id: '/api/v1/comments/moderate'
+      path: '/api/v1/comments/moderate'
+      fullPath: '/api/v1/comments/moderate'
+      preLoaderRoute: typeof ApiV1CommentsModerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/pending-count': {
+      id: '/api/v1/comments/pending-count'
+      path: '/api/v1/comments/pending-count'
+      fullPath: '/api/v1/comments/pending-count'
+      preLoaderRoute: typeof ApiV1CommentsPendingCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/follow': {
+      id: '/api/v1/federation/follow'
+      path: '/api/v1/federation/follow'
+      fullPath: '/api/v1/federation/follow'
+      preLoaderRoute: typeof ApiV1FederationFollowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/metadata': {
+      id: '/api/v1/federation/metadata'
+      path: '/api/v1/federation/metadata'
+      fullPath: '/api/v1/federation/metadata'
+      preLoaderRoute: typeof ApiV1FederationMetadataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/token': {
+      id: '/api/v1/federation/token'
+      path: '/api/v1/federation/token'
+      fullPath: '/api/v1/federation/token'
+      preLoaderRoute: typeof ApiV1FederationTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/verify': {
+      id: '/api/v1/federation/verify'
+      path: '/api/v1/federation/verify'
+      fullPath: '/api/v1/federation/verify'
+      preLoaderRoute: typeof ApiV1FederationVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/federation/webhook': {
+      id: '/api/v1/federation/webhook'
+      path: '/api/v1/federation/webhook'
+      fullPath: '/api/v1/federation/webhook'
+      preLoaderRoute: typeof ApiV1FederationWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/i18n/$locale': {
+      id: '/api/v1/i18n/$locale'
+      path: '/api/v1/i18n/$locale'
+      fullPath: '/api/v1/i18n/$locale'
+      preLoaderRoute: typeof ApiV1I18nLocaleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/i18n/current': {
+      id: '/api/v1/i18n/current'
+      path: '/api/v1/i18n/current'
+      fullPath: '/api/v1/i18n/current'
+      preLoaderRoute: typeof ApiV1I18nCurrentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/i18n/locales': {
+      id: '/api/v1/i18n/locales'
+      path: '/api/v1/i18n/locales'
+      fullPath: '/api/v1/i18n/locales'
+      preLoaderRoute: typeof ApiV1I18nLocalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/import/$platform': {
+      id: '/api/v1/import/$platform'
+      path: '/api/v1/import/$platform'
+      fullPath: '/api/v1/import/$platform'
+      preLoaderRoute: typeof ApiV1ImportPlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/install/create-admin': {
+      id: '/api/v1/install/create-admin'
+      path: '/api/v1/install/create-admin'
+      fullPath: '/api/v1/install/create-admin'
+      preLoaderRoute: typeof ApiV1InstallCreateAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/install/finish': {
+      id: '/api/v1/install/finish'
+      path: '/api/v1/install/finish'
+      fullPath: '/api/v1/install/finish'
+      preLoaderRoute: typeof ApiV1InstallFinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/install/status': {
+      id: '/api/v1/install/status'
+      path: '/api/v1/install/status'
+      fullPath: '/api/v1/install/status'
+      preLoaderRoute: typeof ApiV1InstallStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/links/apply': {
+      id: '/api/v1/links/apply'
+      path: '/api/v1/links/apply'
+      fullPath: '/api/v1/links/apply'
+      preLoaderRoute: typeof ApiV1LinksApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/location/reverse': {
+      id: '/api/v1/location/reverse'
+      path: '/api/v1/location/reverse'
+      fullPath: '/api/v1/location/reverse'
+      preLoaderRoute: typeof ApiV1LocationReverseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/': {
+      id: '/api/v1/media/'
+      path: '/api/v1/media'
+      fullPath: '/api/v1/media/'
+      preLoaderRoute: typeof ApiV1MediaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/$id': {
+      id: '/api/v1/media/$id'
+      path: '/api/v1/media/$id'
+      fullPath: '/api/v1/media/$id'
+      preLoaderRoute: typeof ApiV1MediaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/douban-import': {
+      id: '/api/v1/media/douban-import'
+      path: '/api/v1/media/douban-import'
+      fullPath: '/api/v1/media/douban-import'
+      preLoaderRoute: typeof ApiV1MediaDoubanImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/download-url': {
+      id: '/api/v1/media/download-url'
+      path: '/api/v1/media/download-url'
+      fullPath: '/api/v1/media/download-url'
+      preLoaderRoute: typeof ApiV1MediaDownloadUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/exif': {
+      id: '/api/v1/media/exif'
+      path: '/api/v1/media/exif'
+      fullPath: '/api/v1/media/exif'
+      preLoaderRoute: typeof ApiV1MediaExifRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/parse': {
+      id: '/api/v1/media/parse'
+      path: '/api/v1/media/parse'
+      fullPath: '/api/v1/media/parse'
+      preLoaderRoute: typeof ApiV1MediaParseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/stats': {
+      id: '/api/v1/media/stats'
+      path: '/api/v1/media/stats'
+      fullPath: '/api/v1/media/stats'
+      preLoaderRoute: typeof ApiV1MediaStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/test-connection': {
+      id: '/api/v1/media/test-connection'
+      path: '/api/v1/media/test-connection'
+      fullPath: '/api/v1/media/test-connection'
+      preLoaderRoute: typeof ApiV1MediaTestConnectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/upload': {
+      id: '/api/v1/media/upload'
+      path: '/api/v1/media/upload'
+      fullPath: '/api/v1/media/upload'
+      preLoaderRoute: typeof ApiV1MediaUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/media/upload-branding': {
+      id: '/api/v1/media/upload-branding'
+      path: '/api/v1/media/upload-branding'
+      fullPath: '/api/v1/media/upload-branding'
+      preLoaderRoute: typeof ApiV1MediaUploadBrandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/moments/': {
+      id: '/api/v1/moments/'
+      path: '/api/v1/moments'
+      fullPath: '/api/v1/moments/'
+      preLoaderRoute: typeof ApiV1MomentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/moments/$id': {
+      id: '/api/v1/moments/$id'
+      path: '/api/v1/moments/$id'
+      fullPath: '/api/v1/moments/$id'
+      preLoaderRoute: typeof ApiV1MomentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/moments/recent-tags': {
+      id: '/api/v1/moments/recent-tags'
+      path: '/api/v1/moments/recent-tags'
+      fullPath: '/api/v1/moments/recent-tags'
+      preLoaderRoute: typeof ApiV1MomentsRecentTagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/music/search': {
+      id: '/api/v1/music/search'
+      path: '/api/v1/music/search'
+      fullPath: '/api/v1/music/search'
+      preLoaderRoute: typeof ApiV1MusicSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/network/$action': {
+      id: '/api/v1/network/$action'
+      path: '/api/v1/network/$action'
+      fullPath: '/api/v1/network/$action'
+      preLoaderRoute: typeof ApiV1NetworkActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/': {
+      id: '/api/v1/notifications/'
+      path: '/api/v1/notifications'
+      fullPath: '/api/v1/notifications/'
+      preLoaderRoute: typeof ApiV1NotificationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/$id': {
+      id: '/api/v1/notifications/$id'
+      path: '/api/v1/notifications/$id'
+      fullPath: '/api/v1/notifications/$id'
+      preLoaderRoute: typeof ApiV1NotificationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/read-all': {
+      id: '/api/v1/notifications/read-all'
+      path: '/api/v1/notifications/read-all'
+      fullPath: '/api/v1/notifications/read-all'
+      preLoaderRoute: typeof ApiV1NotificationsReadAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/stream': {
+      id: '/api/v1/notifications/stream'
+      path: '/api/v1/notifications/stream'
+      fullPath: '/api/v1/notifications/stream'
+      preLoaderRoute: typeof ApiV1NotificationsStreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/unread-count': {
+      id: '/api/v1/notifications/unread-count'
+      path: '/api/v1/notifications/unread-count'
+      fullPath: '/api/v1/notifications/unread-count'
+      preLoaderRoute: typeof ApiV1NotificationsUnreadCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/options/test-credential': {
+      id: '/api/v1/options/test-credential'
+      path: '/test-credential'
+      fullPath: '/api/v1/options/test-credential'
+      preLoaderRoute: typeof ApiV1OptionsTestCredentialRouteImport
+      parentRoute: typeof ApiV1OptionsRoute
+    }
+    '/api/v1/options/test-email': {
+      id: '/api/v1/options/test-email'
+      path: '/test-email'
+      fullPath: '/api/v1/options/test-email'
+      preLoaderRoute: typeof ApiV1OptionsTestEmailRouteImport
+      parentRoute: typeof ApiV1OptionsRoute
+    }
+    '/api/v1/passkeys/': {
+      id: '/api/v1/passkeys/'
+      path: '/api/v1/passkeys'
+      fullPath: '/api/v1/passkeys/'
+      preLoaderRoute: typeof ApiV1PasskeysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/passkeys/$id': {
+      id: '/api/v1/passkeys/$id'
+      path: '/api/v1/passkeys/$id'
+      fullPath: '/api/v1/passkeys/$id'
+      preLoaderRoute: typeof ApiV1PasskeysIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/passport/identify': {
+      id: '/api/v1/passport/identify'
+      path: '/api/v1/passport/identify'
+      fullPath: '/api/v1/passport/identify'
+      preLoaderRoute: typeof ApiV1PassportIdentifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/playlists/import': {
+      id: '/api/v1/playlists/import'
+      path: '/api/v1/playlists/import'
+      fullPath: '/api/v1/playlists/import'
+      preLoaderRoute: typeof ApiV1PlaylistsImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/plugins/': {
+      id: '/api/v1/plugins/'
+      path: '/api/v1/plugins'
+      fullPath: '/api/v1/plugins/'
+      preLoaderRoute: typeof ApiV1PluginsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/plugins/$id': {
+      id: '/api/v1/plugins/$id'
+      path: '/api/v1/plugins/$id'
+      fullPath: '/api/v1/plugins/$id'
+      preLoaderRoute: typeof ApiV1PluginsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/plugins/upload': {
+      id: '/api/v1/plugins/upload'
+      path: '/api/v1/plugins/upload'
+      fullPath: '/api/v1/plugins/upload'
+      preLoaderRoute: typeof ApiV1PluginsUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/posts/$id': {
+      id: '/api/v1/posts/$id'
+      path: '/$id'
+      fullPath: '/api/v1/posts/$id'
+      preLoaderRoute: typeof ApiV1PostsIdRouteImport
+      parentRoute: typeof ApiV1PostsRoute
+    }
+    '/api/v1/profile/': {
+      id: '/api/v1/profile/'
+      path: '/api/v1/profile'
+      fullPath: '/api/v1/profile/'
+      preLoaderRoute: typeof ApiV1ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/profile/send-code': {
+      id: '/api/v1/profile/send-code'
+      path: '/api/v1/profile/send-code'
+      fullPath: '/api/v1/profile/send-code'
+      preLoaderRoute: typeof ApiV1ProfileSendCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/rss/parse': {
+      id: '/api/v1/rss/parse'
+      path: '/api/v1/rss/parse'
+      fullPath: '/api/v1/rss/parse'
+      preLoaderRoute: typeof ApiV1RssParseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/search/rebuild': {
+      id: '/api/v1/search/rebuild'
+      path: '/rebuild'
+      fullPath: '/api/v1/search/rebuild'
+      preLoaderRoute: typeof ApiV1SearchRebuildRouteImport
+      parentRoute: typeof ApiV1SearchRoute
+    }
+    '/api/v1/setup/save': {
+      id: '/api/v1/setup/save'
+      path: '/api/v1/setup/save'
+      fullPath: '/api/v1/setup/save'
+      preLoaderRoute: typeof ApiV1SetupSaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/setup/status': {
+      id: '/api/v1/setup/status'
+      path: '/api/v1/setup/status'
+      fullPath: '/api/v1/setup/status'
+      preLoaderRoute: typeof ApiV1SetupStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/setup/test-db': {
+      id: '/api/v1/setup/test-db'
+      path: '/api/v1/setup/test-db'
+      fullPath: '/api/v1/setup/test-db'
+      preLoaderRoute: typeof ApiV1SetupTestDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/$action': {
+      id: '/api/v1/social/$action'
+      path: '/api/v1/social/$action'
+      fullPath: '/api/v1/social/$action'
+      preLoaderRoute: typeof ApiV1SocialActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/feed-stats': {
+      id: '/api/v1/social/feed-stats'
+      path: '/api/v1/social/feed-stats'
+      fullPath: '/api/v1/social/feed-stats'
+      preLoaderRoute: typeof ApiV1SocialFeedStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/feed-timeline': {
+      id: '/api/v1/social/feed-timeline'
+      path: '/api/v1/social/feed-timeline'
+      fullPath: '/api/v1/social/feed-timeline'
+      preLoaderRoute: typeof ApiV1SocialFeedTimelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/fetch-feeds': {
+      id: '/api/v1/social/fetch-feeds'
+      path: '/api/v1/social/fetch-feeds'
+      fullPath: '/api/v1/social/fetch-feeds'
+      preLoaderRoute: typeof ApiV1SocialFetchFeedsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/system/status': {
+      id: '/api/v1/system/status'
+      path: '/api/v1/system/status'
+      fullPath: '/api/v1/system/status'
+      preLoaderRoute: typeof ApiV1SystemStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/system/update-check': {
+      id: '/api/v1/system/update-check'
+      path: '/api/v1/system/update-check'
+      fullPath: '/api/v1/system/update-check'
+      preLoaderRoute: typeof ApiV1SystemUpdateCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/tags/$id': {
+      id: '/api/v1/tags/$id'
+      path: '/$id'
+      fullPath: '/api/v1/tags/$id'
+      preLoaderRoute: typeof ApiV1TagsIdRouteImport
+      parentRoute: typeof ApiV1TagsRoute
+    }
+    '/api/v1/telegram/get-chat-id': {
+      id: '/api/v1/telegram/get-chat-id'
+      path: '/api/v1/telegram/get-chat-id'
+      fullPath: '/api/v1/telegram/get-chat-id'
+      preLoaderRoute: typeof ApiV1TelegramGetChatIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/setup-webhook': {
+      id: '/api/v1/telegram/setup-webhook'
+      path: '/api/v1/telegram/setup-webhook'
+      fullPath: '/api/v1/telegram/setup-webhook'
+      preLoaderRoute: typeof ApiV1TelegramSetupWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/test': {
+      id: '/api/v1/telegram/test'
+      path: '/api/v1/telegram/test'
+      fullPath: '/api/v1/telegram/test'
+      preLoaderRoute: typeof ApiV1TelegramTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/telegram/webhook': {
+      id: '/api/v1/telegram/webhook'
+      path: '/api/v1/telegram/webhook'
+      fullPath: '/api/v1/telegram/webhook'
+      preLoaderRoute: typeof ApiV1TelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/themes/': {
+      id: '/api/v1/themes/'
+      path: '/api/v1/themes'
+      fullPath: '/api/v1/themes/'
+      preLoaderRoute: typeof ApiV1ThemesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/themes/$id': {
+      id: '/api/v1/themes/$id'
+      path: '/api/v1/themes/$id'
+      fullPath: '/api/v1/themes/$id'
+      preLoaderRoute: typeof ApiV1ThemesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/themes/upload': {
+      id: '/api/v1/themes/upload'
+      path: '/api/v1/themes/upload'
+      fullPath: '/api/v1/themes/upload'
+      preLoaderRoute: typeof ApiV1ThemesUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/track/duration': {
+      id: '/api/v1/track/duration'
+      path: '/duration'
+      fullPath: '/api/v1/track/duration'
+      preLoaderRoute: typeof ApiV1TrackDurationRouteImport
+      parentRoute: typeof ApiV1TrackRoute
+    }
+    '/api/v1/unsubscribe/comment-reply': {
+      id: '/api/v1/unsubscribe/comment-reply'
+      path: '/api/v1/unsubscribe/comment-reply'
+      fullPath: '/api/v1/unsubscribe/comment-reply'
+      preLoaderRoute: typeof ApiV1UnsubscribeCommentReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/visitor/geo': {
+      id: '/api/v1/visitor/geo'
+      path: '/geo'
+      fullPath: '/api/v1/visitor/geo'
+      preLoaderRoute: typeof ApiV1VisitorGeoRouteImport
+      parentRoute: typeof ApiV1VisitorRoute
+    }
+    '/api/v1/visitor/weather': {
+      id: '/api/v1/visitor/weather'
+      path: '/weather'
+      fullPath: '/api/v1/visitor/weather'
+      preLoaderRoute: typeof ApiV1VisitorWeatherRouteImport
+      parentRoute: typeof ApiV1VisitorRoute
+    }
+    '/date/$year/$month/$day': {
+      id: '/date/$year/$month/$day'
+      path: '/$day'
+      fullPath: '/date/$year/$month/$day'
+      preLoaderRoute: typeof DateYearMonthDayRouteImport
+      parentRoute: typeof DateYearMonthRoute
     }
     '/api/v1/admin/ai-comments/': {
       id: '/api/v1/admin/ai-comments/'
       path: '/api/v1/admin/ai-comments'
       fullPath: '/api/v1/admin/ai-comments/'
       preLoaderRoute: typeof ApiV1AdminAiCommentsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/themes/$id/activate': {
-      id: '/api/v1/themes/$id/activate'
-      path: '/activate'
-      fullPath: '/api/v1/themes/$id/activate'
-      preLoaderRoute: typeof ApiV1ThemesIdActivateRouteImport
-      parentRoute: typeof ApiV1ThemesIdRoute
-    }
-    '/api/v1/sync/$platform/$action': {
-      id: '/api/v1/sync/$platform/$action'
-      path: '/api/v1/sync/$platform/$action'
-      fullPath: '/api/v1/sync/$platform/$action'
-      preLoaderRoute: typeof ApiV1SyncPlatformActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/social/fetch-feeds/status': {
-      id: '/api/v1/social/fetch-feeds/status'
-      path: '/status'
-      fullPath: '/api/v1/social/fetch-feeds/status'
-      preLoaderRoute: typeof ApiV1SocialFetchFeedsStatusRouteImport
-      parentRoute: typeof ApiV1SocialFetchFeedsRoute
-    }
-    '/api/v1/public/albums/$id': {
-      id: '/api/v1/public/albums/$id'
-      path: '/api/v1/public/albums/$id'
-      fullPath: '/api/v1/public/albums/$id'
-      preLoaderRoute: typeof ApiV1PublicAlbumsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/posts/slug/$slug': {
-      id: '/api/v1/posts/slug/$slug'
-      path: '/slug/$slug'
-      fullPath: '/api/v1/posts/slug/$slug'
-      preLoaderRoute: typeof ApiV1PostsSlugSlugRouteImport
-      parentRoute: typeof ApiV1PostsRoute
-    }
-    '/api/v1/posts/by-display-id/$displayId': {
-      id: '/api/v1/posts/by-display-id/$displayId'
-      path: '/by-display-id/$displayId'
-      fullPath: '/api/v1/posts/by-display-id/$displayId'
-      preLoaderRoute: typeof ApiV1PostsByDisplayIdDisplayIdRouteImport
-      parentRoute: typeof ApiV1PostsRoute
-    }
-    '/api/v1/posts/$id/navigation': {
-      id: '/api/v1/posts/$id/navigation'
-      path: '/navigation'
-      fullPath: '/api/v1/posts/$id/navigation'
-      preLoaderRoute: typeof ApiV1PostsIdNavigationRouteImport
-      parentRoute: typeof ApiV1PostsIdRoute
-    }
-    '/api/v1/posts/$id/episodes': {
-      id: '/api/v1/posts/$id/episodes'
-      path: '/episodes'
-      fullPath: '/api/v1/posts/$id/episodes'
-      preLoaderRoute: typeof ApiV1PostsIdEpisodesRouteImport
-      parentRoute: typeof ApiV1PostsIdRoute
-    }
-    '/api/v1/posts/$id/comments': {
-      id: '/api/v1/posts/$id/comments'
-      path: '/comments'
-      fullPath: '/api/v1/posts/$id/comments'
-      preLoaderRoute: typeof ApiV1PostsIdCommentsRouteImport
-      parentRoute: typeof ApiV1PostsIdRoute
-    }
-    '/api/v1/plugins/$id/$action': {
-      id: '/api/v1/plugins/$id/$action'
-      path: '/$action'
-      fullPath: '/api/v1/plugins/$id/$action'
-      preLoaderRoute: typeof ApiV1PluginsIdActionRouteImport
-      parentRoute: typeof ApiV1PluginsIdRoute
-    }
-    '/api/v1/playlists/$id/songs': {
-      id: '/api/v1/playlists/$id/songs'
-      path: '/api/v1/playlists/$id/songs'
-      fullPath: '/api/v1/playlists/$id/songs'
-      preLoaderRoute: typeof ApiV1PlaylistsIdSongsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/notifications/$id/read': {
-      id: '/api/v1/notifications/$id/read'
-      path: '/read'
-      fullPath: '/api/v1/notifications/$id/read'
-      preLoaderRoute: typeof ApiV1NotificationsIdReadRouteImport
-      parentRoute: typeof ApiV1NotificationsIdRoute
-    }
-    '/api/v1/network/oauth/$action': {
-      id: '/api/v1/network/oauth/$action'
-      path: '/api/v1/network/oauth/$action'
-      fullPath: '/api/v1/network/oauth/$action'
-      preLoaderRoute: typeof ApiV1NetworkOauthActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/comments/$id/reply': {
-      id: '/api/v1/comments/$id/reply'
-      path: '/reply'
-      fullPath: '/api/v1/comments/$id/reply'
-      preLoaderRoute: typeof ApiV1CommentsIdReplyRouteImport
-      parentRoute: typeof ApiV1CommentsIdRoute
-    }
-    '/api/v1/comments/$id/edit': {
-      id: '/api/v1/comments/$id/edit'
-      path: '/edit'
-      fullPath: '/api/v1/comments/$id/edit'
-      preLoaderRoute: typeof ApiV1CommentsIdEditRouteImport
-      parentRoute: typeof ApiV1CommentsIdRoute
-    }
-    '/api/v1/comments/$id/approve': {
-      id: '/api/v1/comments/$id/approve'
-      path: '/approve'
-      fullPath: '/api/v1/comments/$id/approve'
-      preLoaderRoute: typeof ApiV1CommentsIdApproveRouteImport
-      parentRoute: typeof ApiV1CommentsIdRoute
-    }
-    '/api/v1/backup/download/$filename': {
-      id: '/api/v1/backup/download/$filename'
-      path: '/api/v1/backup/download/$filename'
-      fullPath: '/api/v1/backup/download/$filename'
-      preLoaderRoute: typeof ApiV1BackupDownloadFilenameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/totp/$action': {
-      id: '/api/v1/auth/totp/$action'
-      path: '/api/v1/auth/totp/$action'
-      fullPath: '/api/v1/auth/totp/$action'
-      preLoaderRoute: typeof ApiV1AuthTotpActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/auth/passkey/available': {
-      id: '/api/v1/auth/passkey/available'
-      path: '/api/v1/auth/passkey/available'
-      fullPath: '/api/v1/auth/passkey/available'
-      preLoaderRoute: typeof ApiV1AuthPasskeyAvailableRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/albums/$id/photos': {
-      id: '/api/v1/albums/$id/photos'
-      path: '/api/v1/albums/$id/photos'
-      fullPath: '/api/v1/albums/$id/photos'
-      preLoaderRoute: typeof ApiV1AlbumsIdPhotosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/ai/providers/$id': {
-      id: '/api/v1/ai/providers/$id'
-      path: '/$id'
-      fullPath: '/api/v1/ai/providers/$id'
-      preLoaderRoute: typeof ApiV1AiProvidersIdRouteImport
-      parentRoute: typeof ApiV1AiProvidersRoute
-    }
-    '/api/v1/ai/conversations/$id': {
-      id: '/api/v1/ai/conversations/$id'
-      path: '/api/v1/ai/conversations/$id'
-      fullPath: '/api/v1/ai/conversations/$id'
-      preLoaderRoute: typeof ApiV1AiConversationsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/system/$action': {
-      id: '/api/v1/admin/system/$action'
-      path: '/api/v1/admin/system/$action'
-      fullPath: '/api/v1/admin/system/$action'
-      preLoaderRoute: typeof ApiV1AdminSystemActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/footprints/places': {
-      id: '/api/v1/admin/footprints/places'
-      path: '/api/v1/admin/footprints/places'
-      fullPath: '/api/v1/admin/footprints/places'
-      preLoaderRoute: typeof ApiV1AdminFootprintsPlacesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/footprints/geocode': {
-      id: '/api/v1/admin/footprints/geocode'
-      path: '/api/v1/admin/footprints/geocode'
-      fullPath: '/api/v1/admin/footprints/geocode'
-      preLoaderRoute: typeof ApiV1AdminFootprintsGeocodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/footprints/$id': {
-      id: '/api/v1/admin/footprints/$id'
-      path: '/api/v1/admin/footprints/$id'
-      fullPath: '/api/v1/admin/footprints/$id'
-      preLoaderRoute: typeof ApiV1AdminFootprintsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/analytics/stats': {
-      id: '/api/v1/admin/analytics/stats'
-      path: '/api/v1/admin/analytics/stats'
-      fullPath: '/api/v1/admin/analytics/stats'
-      preLoaderRoute: typeof ApiV1AdminAnalyticsStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/v1/admin/analytics/purge': {
-      id: '/api/v1/admin/analytics/purge'
-      path: '/api/v1/admin/analytics/purge'
-      fullPath: '/api/v1/admin/analytics/purge'
-      preLoaderRoute: typeof ApiV1AdminAnalyticsPurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/admin/ai-comments/$id': {
@@ -4029,25 +3819,228 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminAiCommentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/auth/passkey/$flow/$action': {
-      id: '/api/v1/auth/passkey/$flow/$action'
-      path: '/api/v1/auth/passkey/$flow/$action'
-      fullPath: '/api/v1/auth/passkey/$flow/$action'
-      preLoaderRoute: typeof ApiV1AuthPasskeyFlowActionRouteImport
+    '/api/v1/admin/analytics/purge': {
+      id: '/api/v1/admin/analytics/purge'
+      path: '/api/v1/admin/analytics/purge'
+      fullPath: '/api/v1/admin/analytics/purge'
+      preLoaderRoute: typeof ApiV1AdminAnalyticsPurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/albums/$id/photos/$mediaId': {
-      id: '/api/v1/albums/$id/photos/$mediaId'
-      path: '/$mediaId'
-      fullPath: '/api/v1/albums/$id/photos/$mediaId'
-      preLoaderRoute: typeof ApiV1AlbumsIdPhotosMediaIdRouteImport
-      parentRoute: typeof ApiV1AlbumsIdPhotosRoute
+    '/api/v1/admin/analytics/stats': {
+      id: '/api/v1/admin/analytics/stats'
+      path: '/api/v1/admin/analytics/stats'
+      fullPath: '/api/v1/admin/analytics/stats'
+      preLoaderRoute: typeof ApiV1AdminAnalyticsStatsRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/api/v1/admin/system/upgrade/status': {
-      id: '/api/v1/admin/system/upgrade/status'
-      path: '/api/v1/admin/system/upgrade/status'
-      fullPath: '/api/v1/admin/system/upgrade/status'
-      preLoaderRoute: typeof ApiV1AdminSystemUpgradeStatusRouteImport
+    '/api/v1/admin/footprints/': {
+      id: '/api/v1/admin/footprints/'
+      path: '/api/v1/admin/footprints'
+      fullPath: '/api/v1/admin/footprints/'
+      preLoaderRoute: typeof ApiV1AdminFootprintsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/footprints/$id': {
+      id: '/api/v1/admin/footprints/$id'
+      path: '/api/v1/admin/footprints/$id'
+      fullPath: '/api/v1/admin/footprints/$id'
+      preLoaderRoute: typeof ApiV1AdminFootprintsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/footprints/geocode': {
+      id: '/api/v1/admin/footprints/geocode'
+      path: '/api/v1/admin/footprints/geocode'
+      fullPath: '/api/v1/admin/footprints/geocode'
+      preLoaderRoute: typeof ApiV1AdminFootprintsGeocodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/footprints/places': {
+      id: '/api/v1/admin/footprints/places'
+      path: '/api/v1/admin/footprints/places'
+      fullPath: '/api/v1/admin/footprints/places'
+      preLoaderRoute: typeof ApiV1AdminFootprintsPlacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/admin/system/$action': {
+      id: '/api/v1/admin/system/$action'
+      path: '/api/v1/admin/system/$action'
+      fullPath: '/api/v1/admin/system/$action'
+      preLoaderRoute: typeof ApiV1AdminSystemActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/ai/conversations/$id': {
+      id: '/api/v1/ai/conversations/$id'
+      path: '/api/v1/ai/conversations/$id'
+      fullPath: '/api/v1/ai/conversations/$id'
+      preLoaderRoute: typeof ApiV1AiConversationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/ai/providers/$id': {
+      id: '/api/v1/ai/providers/$id'
+      path: '/$id'
+      fullPath: '/api/v1/ai/providers/$id'
+      preLoaderRoute: typeof ApiV1AiProvidersIdRouteImport
+      parentRoute: typeof ApiV1AiProvidersRoute
+    }
+    '/api/v1/albums/$id/photos': {
+      id: '/api/v1/albums/$id/photos'
+      path: '/api/v1/albums/$id/photos'
+      fullPath: '/api/v1/albums/$id/photos'
+      preLoaderRoute: typeof ApiV1AlbumsIdPhotosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/passkey/available': {
+      id: '/api/v1/auth/passkey/available'
+      path: '/api/v1/auth/passkey/available'
+      fullPath: '/api/v1/auth/passkey/available'
+      preLoaderRoute: typeof ApiV1AuthPasskeyAvailableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/totp/$action': {
+      id: '/api/v1/auth/totp/$action'
+      path: '/api/v1/auth/totp/$action'
+      fullPath: '/api/v1/auth/totp/$action'
+      preLoaderRoute: typeof ApiV1AuthTotpActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/backup/download/$filename': {
+      id: '/api/v1/backup/download/$filename'
+      path: '/api/v1/backup/download/$filename'
+      fullPath: '/api/v1/backup/download/$filename'
+      preLoaderRoute: typeof ApiV1BackupDownloadFilenameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/comments/$id/approve': {
+      id: '/api/v1/comments/$id/approve'
+      path: '/approve'
+      fullPath: '/api/v1/comments/$id/approve'
+      preLoaderRoute: typeof ApiV1CommentsIdApproveRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
+    '/api/v1/comments/$id/edit': {
+      id: '/api/v1/comments/$id/edit'
+      path: '/edit'
+      fullPath: '/api/v1/comments/$id/edit'
+      preLoaderRoute: typeof ApiV1CommentsIdEditRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
+    '/api/v1/comments/$id/reply': {
+      id: '/api/v1/comments/$id/reply'
+      path: '/reply'
+      fullPath: '/api/v1/comments/$id/reply'
+      preLoaderRoute: typeof ApiV1CommentsIdReplyRouteImport
+      parentRoute: typeof ApiV1CommentsIdRoute
+    }
+    '/api/v1/network/oauth/$action': {
+      id: '/api/v1/network/oauth/$action'
+      path: '/api/v1/network/oauth/$action'
+      fullPath: '/api/v1/network/oauth/$action'
+      preLoaderRoute: typeof ApiV1NetworkOauthActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/notifications/$id/read': {
+      id: '/api/v1/notifications/$id/read'
+      path: '/read'
+      fullPath: '/api/v1/notifications/$id/read'
+      preLoaderRoute: typeof ApiV1NotificationsIdReadRouteImport
+      parentRoute: typeof ApiV1NotificationsIdRoute
+    }
+    '/api/v1/playlists/$id/songs': {
+      id: '/api/v1/playlists/$id/songs'
+      path: '/api/v1/playlists/$id/songs'
+      fullPath: '/api/v1/playlists/$id/songs'
+      preLoaderRoute: typeof ApiV1PlaylistsIdSongsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/plugins/$id/$action': {
+      id: '/api/v1/plugins/$id/$action'
+      path: '/$action'
+      fullPath: '/api/v1/plugins/$id/$action'
+      preLoaderRoute: typeof ApiV1PluginsIdActionRouteImport
+      parentRoute: typeof ApiV1PluginsIdRoute
+    }
+    '/api/v1/posts/$id/comments': {
+      id: '/api/v1/posts/$id/comments'
+      path: '/comments'
+      fullPath: '/api/v1/posts/$id/comments'
+      preLoaderRoute: typeof ApiV1PostsIdCommentsRouteImport
+      parentRoute: typeof ApiV1PostsIdRoute
+    }
+    '/api/v1/posts/$id/episodes': {
+      id: '/api/v1/posts/$id/episodes'
+      path: '/episodes'
+      fullPath: '/api/v1/posts/$id/episodes'
+      preLoaderRoute: typeof ApiV1PostsIdEpisodesRouteImport
+      parentRoute: typeof ApiV1PostsIdRoute
+    }
+    '/api/v1/posts/$id/navigation': {
+      id: '/api/v1/posts/$id/navigation'
+      path: '/navigation'
+      fullPath: '/api/v1/posts/$id/navigation'
+      preLoaderRoute: typeof ApiV1PostsIdNavigationRouteImport
+      parentRoute: typeof ApiV1PostsIdRoute
+    }
+    '/api/v1/posts/by-display-id/$displayId': {
+      id: '/api/v1/posts/by-display-id/$displayId'
+      path: '/by-display-id/$displayId'
+      fullPath: '/api/v1/posts/by-display-id/$displayId'
+      preLoaderRoute: typeof ApiV1PostsByDisplayIdDisplayIdRouteImport
+      parentRoute: typeof ApiV1PostsRoute
+    }
+    '/api/v1/posts/slug/$slug': {
+      id: '/api/v1/posts/slug/$slug'
+      path: '/slug/$slug'
+      fullPath: '/api/v1/posts/slug/$slug'
+      preLoaderRoute: typeof ApiV1PostsSlugSlugRouteImport
+      parentRoute: typeof ApiV1PostsRoute
+    }
+    '/api/v1/public/albums/': {
+      id: '/api/v1/public/albums/'
+      path: '/api/v1/public/albums'
+      fullPath: '/api/v1/public/albums/'
+      preLoaderRoute: typeof ApiV1PublicAlbumsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/public/albums/$id': {
+      id: '/api/v1/public/albums/$id'
+      path: '/api/v1/public/albums/$id'
+      fullPath: '/api/v1/public/albums/$id'
+      preLoaderRoute: typeof ApiV1PublicAlbumsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/social/fetch-feeds/status': {
+      id: '/api/v1/social/fetch-feeds/status'
+      path: '/status'
+      fullPath: '/api/v1/social/fetch-feeds/status'
+      preLoaderRoute: typeof ApiV1SocialFetchFeedsStatusRouteImport
+      parentRoute: typeof ApiV1SocialFetchFeedsRoute
+    }
+    '/api/v1/sync/$platform/$action': {
+      id: '/api/v1/sync/$platform/$action'
+      path: '/api/v1/sync/$platform/$action'
+      fullPath: '/api/v1/sync/$platform/$action'
+      preLoaderRoute: typeof ApiV1SyncPlatformActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/themes/$id/activate': {
+      id: '/api/v1/themes/$id/activate'
+      path: '/activate'
+      fullPath: '/api/v1/themes/$id/activate'
+      preLoaderRoute: typeof ApiV1ThemesIdActivateRouteImport
+      parentRoute: typeof ApiV1ThemesIdRoute
+    }
+    '/api/v1/admin/ai-comments/$id/$action': {
+      id: '/api/v1/admin/ai-comments/$id/$action'
+      path: '/$action'
+      fullPath: '/api/v1/admin/ai-comments/$id/$action'
+      preLoaderRoute: typeof ApiV1AdminAiCommentsIdActionRouteImport
+      parentRoute: typeof ApiV1AdminAiCommentsIdRoute
+    }
+    '/api/v1/admin/sync/$platform/jobs': {
+      id: '/api/v1/admin/sync/$platform/jobs'
+      path: '/api/v1/admin/sync/$platform/jobs'
+      fullPath: '/api/v1/admin/sync/$platform/jobs'
+      preLoaderRoute: typeof ApiV1AdminSyncPlatformJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/admin/sync/$platform/sites': {
@@ -4057,25 +4050,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AdminSyncPlatformSitesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/admin/sync/$platform/jobs': {
-      id: '/api/v1/admin/sync/$platform/jobs'
-      path: '/api/v1/admin/sync/$platform/jobs'
-      fullPath: '/api/v1/admin/sync/$platform/jobs'
-      preLoaderRoute: typeof ApiV1AdminSyncPlatformJobsRouteImport
+    '/api/v1/admin/system/upgrade/status': {
+      id: '/api/v1/admin/system/upgrade/status'
+      path: '/api/v1/admin/system/upgrade/status'
+      fullPath: '/api/v1/admin/system/upgrade/status'
+      preLoaderRoute: typeof ApiV1AdminSystemUpgradeStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/admin/ai-comments/$id/$action': {
-      id: '/api/v1/admin/ai-comments/$id/$action'
-      path: '/$action'
-      fullPath: '/api/v1/admin/ai-comments/$id/$action'
-      preLoaderRoute: typeof ApiV1AdminAiCommentsIdActionRouteImport
-      parentRoute: typeof ApiV1AdminAiCommentsIdRoute
+    '/api/v1/albums/$id/photos/$mediaId': {
+      id: '/api/v1/albums/$id/photos/$mediaId'
+      path: '/$mediaId'
+      fullPath: '/api/v1/albums/$id/photos/$mediaId'
+      preLoaderRoute: typeof ApiV1AlbumsIdPhotosMediaIdRouteImport
+      parentRoute: typeof ApiV1AlbumsIdPhotosRoute
     }
-    '/api/v1/sync/$platform/job/$id/status': {
-      id: '/api/v1/sync/$platform/job/$id/status'
-      path: '/api/v1/sync/$platform/job/$id/status'
-      fullPath: '/api/v1/sync/$platform/job/$id/status'
-      preLoaderRoute: typeof ApiV1SyncPlatformJobIdStatusRouteImport
+    '/api/v1/auth/passkey/$flow/$action': {
+      id: '/api/v1/auth/passkey/$flow/$action'
+      path: '/api/v1/auth/passkey/$flow/$action'
+      fullPath: '/api/v1/auth/passkey/$flow/$action'
+      preLoaderRoute: typeof ApiV1AuthPasskeyFlowActionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/admin/sync/$platform/sites/$uuid': {
@@ -4084,6 +4077,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/admin/sync/$platform/sites/$uuid'
       preLoaderRoute: typeof ApiV1AdminSyncPlatformSitesUuidRouteImport
       parentRoute: typeof ApiV1AdminSyncPlatformSitesRoute
+    }
+    '/api/v1/sync/$platform/job/$id/status': {
+      id: '/api/v1/sync/$platform/job/$id/status'
+      path: '/api/v1/sync/$platform/job/$id/status'
+      fullPath: '/api/v1/sync/$platform/job/$id/status'
+      preLoaderRoute: typeof ApiV1SyncPlatformJobIdStatusRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/music/proxy/$platform/songs/$id/$asset': {
       id: '/api/v1/music/proxy/$platform/songs/$id/$asset'

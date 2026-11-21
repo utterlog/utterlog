@@ -22,10 +22,7 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
-          # setup-bun 只能下载 oven-sh/bun 的正式 release。1.4.0 目前还没有正式
-          # 发布（只有 canary），写成 1.4.0 会让这一步 404。package.json 的
-          # packageManager 声明的是目标版本，别照抄到这里。
-          bun-version: 1.3.14
+          bun-version: '1.4.5'
 
       - name: Install PostgreSQL and pgvector
         run: |

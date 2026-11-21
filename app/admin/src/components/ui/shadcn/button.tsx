@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 // shadcn/ui Button — the new admin design system. cva-driven variants +
 // Tailwind semantic tokens (see globals.css shadcn @theme block). Base UI is
 // not needed for a plain button; interactive primitives (Dialog, Select …)
-// will use @base-ui-components/react.
+// will use @base-ui/react.
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
   {

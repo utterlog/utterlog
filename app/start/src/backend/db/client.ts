@@ -9,6 +9,8 @@ export const sql = postgres({
   database: config.dbName,
   username: config.dbUser,
   password: config.dbPassword || undefined,
+  // Preserve v3 parameter typing for existing imports that write Dates to timestamp columns.
+  infer: true,
   max: 20,
   idle_timeout: 30,
   connect_timeout: 10,
