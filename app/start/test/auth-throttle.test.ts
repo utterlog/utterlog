@@ -21,6 +21,12 @@ describe('认证接口限流', () => {
     expect(Number(blocked?.headers.get('retry-after'))).toBeGreaterThan(0);
   });
 
+  test('安装向导的管理员验证共享同一条限流计数', () => {
+    const path = '/api/v1/install/create-admin';
+    expect(hammer(path, '1.2.3.4', 10)).toBeNull();
+    expect(checkAuthThrottle(post(`${path}/`), '1.2.3.4')?.status).toBe(429);
+  });
+
   test('找回密码更严，第 6 次就拦', () => {
     expect(hammer('/api/v1/auth/forgot-password', '1.2.3.4', 5)).toBeNull();
     expect(checkAuthThrottle(post('/api/v1/auth/forgot-password'), '1.2.3.4')?.status).toBe(429);

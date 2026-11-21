@@ -19,11 +19,12 @@
 type Bucket = { count: number; resetAt: number };
 
 const WINDOW_MS = 60_000;
+const INSTALL_ADMIN_PATH = '/api/v1/install/create-admin';
 
 // 每分钟允许的次数。登录给 10 次：正常人输错几次密码够用，
 // 爆破一小时也只有 600 次。找回/重置密码更严，它们会发邮件。
 const LIMITS: Array<{ match: (path: string) => boolean; max: number }> = [
-  { match: (p) => p.includes('/auth/login'), max: 10 },
+  { match: (p) => p.includes('/auth/login') || p === INSTALL_ADMIN_PATH, max: 10 },
   { match: (p) => p.includes('/auth/forgot-password') || p.includes('/auth/reset-password'), max: 5 },
   { match: (p) => p.includes('/auth/totp') || p.includes('/auth/passkey'), max: 20 },
 ];
@@ -46,13 +47,13 @@ function limitFor(path: string) {
 
 /**
  * 返回 429 表示该拦，返回 null 表示放行。
- * 只认 /api/v1/auth/* 下的几个敏感端点，其余一律放行。
+ * 限制认证端点与安装向导的管理员验证。
  */
 export function checkAuthThrottle(request: Request, ip: string): Response | null {
   if (request.method === 'GET' || request.method === 'HEAD') return null;
 
-  const path = new URL(request.url).pathname;
-  if (!path.startsWith('/api/v1/auth/')) return null;
+  const path = new URL(request.url).pathname.replace(/\/+$/, '');
+  if (!path.startsWith('/api/v1/auth/') && path !== INSTALL_ADMIN_PATH) return null;
 
   const max = limitFor(path);
   if (!max) return null;

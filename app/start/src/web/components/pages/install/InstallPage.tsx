@@ -15,12 +15,23 @@ interface StatusChecks {
 interface StatusResp {
   installed: boolean;
   pending_finish?: boolean;
-  install_token?: string;
   checks: StatusChecks;
   version: string;
 }
 
 const apiBase = publicApiBase();
+const installTokenKey = 'utterlog.install-token';
+
+function savedInstallToken(value?: string) {
+  try {
+    if (value === undefined) return sessionStorage.getItem(installTokenKey) || '';
+    if (value) sessionStorage.setItem(installTokenKey, value);
+    else sessionStorage.removeItem(installTokenKey);
+  } catch {
+    // If storage is unavailable, the administrator can verify their credentials again.
+  }
+  return '';
+}
 
 async function apiCall(path: string, opts: RequestInit = {}) {
   const r = await fetch(apiBase + path, {
@@ -60,13 +71,12 @@ export default function InstallPage() {
       const r = await apiCall('/install/status');
       setStatus(r.data);
       if (r.data.installed) {
+        savedInstallToken('');
         setStep('done');
-      } else if (r.data.pending_finish && r.data.install_token) {
-        setInstallToken(r.data.install_token);
-        setStep('site');
-      } else if (r.data.checks.schema && r.data.checks.admin_count === 0) {
-        // Schema ready, just need admin
-        setStep('welcome');
+      } else if (r.data.pending_finish) {
+        const token = savedInstallToken();
+        setInstallToken(token);
+        setStep(token ? 'site' : 'admin');
       }
     } catch (e: any) {
       setError('无法连接后端 API：' + e.message);
@@ -90,7 +100,10 @@ export default function InstallPage() {
         method: 'POST',
         body: JSON.stringify(admin),
       });
-      setInstallToken(r.data?.install_token || '');
+      const token = r.data.install_token;
+      savedInstallToken(token);
+      setInstallToken(token);
+      setAdmin(current => ({ ...current, password: '' }));
       setStep('site');
     } catch (e: any) {
       setError(e.message);
@@ -106,6 +119,8 @@ export default function InstallPage() {
         method: 'POST',
         body: JSON.stringify({ ...site, install_token: installToken }),
       });
+      savedInstallToken('');
+      setInstallToken('');
       setStep('done');
     } catch (e: any) {
       setError(e.message);
@@ -114,6 +129,7 @@ export default function InstallPage() {
   };
 
   // ===== Styles =====
+  const resuming = status?.pending_finish || Boolean(installToken);
   const pageStyle: React.CSSProperties = {
     minHeight: '100vh', background: '#f8f9fa',
     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
@@ -238,7 +254,7 @@ export default function InstallPage() {
           {step === 'admin' && (
             <>
               <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 20px' }}>
-                创建管理员账号 — 你将用它登录后台。
+                {resuming ? '请输入已创建的管理员账号和密码，继续安装。' : '创建管理员账号，之后用这个账号登录后台。'}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
@@ -246,11 +262,11 @@ export default function InstallPage() {
                   <input style={inputStyle} value={admin.username}
                     onChange={e => setAdmin({ ...admin, username: e.target.value })} placeholder="admin" />
                 </div>
-                <div>
+                {!resuming && <div>
                   <label style={labelStyle}>昵称</label>
                   <input style={inputStyle} value={admin.nickname}
                     onChange={e => setAdmin({ ...admin, nickname: e.target.value })} placeholder="留空默认同用户名" />
-                </div>
+                </div>}
                 <div>
                   <label style={labelStyle}>邮箱 *</label>
                   <input style={inputStyle} type="email" value={admin.email}
@@ -321,14 +337,17 @@ export default function InstallPage() {
             <>
               <button style={secondaryBtn} onClick={() => setStep('welcome')}>← 上一步</button>
               <button style={primaryBtn} onClick={submitAdmin} disabled={submitting}>
-                {submitting ? '创建中…' : '创建管理员 →'}
+                {submitting ? '提交中…' : resuming ? '验证管理员 →' : '创建管理员 →'}
               </button>
             </>
           )}
           {step === 'site' && (
-            <button style={primaryBtn} onClick={submitSite} disabled={submitting}>
-              {submitting ? '保存中…' : '完成安装'}
-            </button>
+            <>
+              <button style={secondaryBtn} onClick={() => setStep('admin')} disabled={submitting}>← 上一步</button>
+              <button style={primaryBtn} onClick={submitSite} disabled={submitting}>
+                {submitting ? '保存中…' : '完成安装'}
+              </button>
+            </>
           )}
           {step === 'done' && (
             <>

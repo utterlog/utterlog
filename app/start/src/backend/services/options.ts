@@ -11,7 +11,7 @@ const publicOptionAllowlist = new Set(['mapbox_access_token', 'footprint_mapbox_
 export function isSensitiveOptionName(name: string) {
   const key = name.trim().toLowerCase();
   if (!key || publicOptionAllowlist.has(key)) return false;
-  if (['smtp_pass', 's3_access_key', 's3_secret_key'].includes(key)) return true;
+  if (['smtp_pass', 's3_access_key', 's3_secret_key', 'install_session'].includes(key)) return true;
   return sensitiveSuffixes.some((suffix) => key.endsWith(suffix));
 }
 
