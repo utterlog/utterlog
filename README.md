@@ -4,116 +4,71 @@
 
 # Utterlog
 
-**自托管个人内容平台 — 文章、说说、相册、足迹、AI 工具，一个 Bun 进程全部搞定**
+**用于个人写作与内容归档的自托管博客系统**
 
-*A self-hosted personal content platform for independent writers — posts, moments, albums, footprints and AI tools, served by a single Bun process.*
+*An open-source, self-hosted publishing system for personal blogs.*
 
 [![CI](https://img.shields.io/github/actions/workflow/status/utterlog/utterlog/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/utterlog/utterlog/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/utterlog/utterlog?style=flat-square)](https://github.com/utterlog/utterlog/releases)
 [![License](https://img.shields.io/github/license/utterlog/utterlog?style=flat-square)](LICENSE)
-[![Bun](https://img.shields.io/badge/Bun-1.4-black?style=flat-square&logo=bun)](https://bun.sh)
-[![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react)](https://react.dev)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-19-4169e1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 
-[官网](https://utterlog.io) · [安装指南](INSTALL.md) · [部署文档](deploy/README.md) · [更新日志](CHANGELOG.md)
+[官网](https://utterlog.io) · [安装指南](INSTALL.md) · [开发说明](DEVELOPMENT.md) · [更新日志](CHANGELOG.md)
 
 </div>
 
-## 这是什么
-
-Utterlog 面向独立作者和个人站长，把博客运营需要的东西收进一个系统：文章、页面、说说、评论、媒体、相册、足迹、友链、订阅、统计与 AI 工具。数据、数据库和附件全部托管在你自己的服务器上，不依赖第三方 SaaS。
-
-前台、后台和全部 API 由 **TanStack Start Server Routes** 提供，跑在同一个 Bun 进程里——没有微服务，没有容器编排，一个 systemd 单元就是全部运维负担。
-
 ## 功能
 
-**内容管理**
-- 文章、页面、说说、评论、媒体库
-- 相册、足迹、友链、音乐与内容收藏
-- WordPress / Typecho 数据导入，PostgreSQL 备份
+- 发布文章、页面和说说，管理评论、媒体库、相册、足迹、音乐与收藏。
+- 支持内置主题与深色模式、自定义固定链接、RSS、站点地图和访问统计。
+- 管理友情链接和站外订阅。
+- 从 WordPress 或 Typecho 导入内容，并通过管理后台备份站点。
+- 管理后台支持 Passkey 登录与双因素认证。
+- 接入自选 AI 服务与模型，用于文章摘要、标签建议、配图和文章问答。
 
-**发布与触达**
-- 服务端渲染、固定链接、SEO、RSS 与站点地图
-- 公开页面 CDN 友好缓存，减少重复回源
-- 5 套内置主题（Utterlog / Azure / Flux / Nebula / Renascent）、深色模式、后台可视化设置
+## 架构
 
-**安全**
-- Passkey 无密码登录、双因素认证
-- 访问统计防刷：同页去重、行为限速、身份轮换保护
+博客前台使用 TanStack Start 服务端渲染，管理后台采用单页应用模式。两者使用 React 19 和 Tailwind CSS 4，并通过 Vite 构建。
 
-**AI 工具**
-- 可配置 AI Provider（支持自定义服务地址与模型）
-- 文章摘要、自动标签、AI 配图、文章 AI 伴读助手
+一个 Bun 进程在同一端口提供博客前台、`/admin` 和 `/api/v1`。后端使用 TypeScript，数据存于 PostgreSQL 18 或 19，需要启用 `pgvector`。媒体文件支持本地磁盘以及 S3、Cloudflare R2 等兼容的对象存储。
 
-## 技术栈
+## 安装
 
-| 层 | 技术 |
-|---|---|
-| 全栈框架 | TanStack Start（SSR + Server Routes） |
-| UI | React 19、Tailwind CSS 4 |
-| 路由与数据 | TanStack Router、TanStack Query |
-| 运行时 | Bun 1.4 |
-| 语言与构建 | TypeScript、Vite |
-| 数据库 | PostgreSQL 19 + pgvector（`PG_MAJOR=18` 可装上一个正式版） |
-| 存储 | 本地磁盘或 S3 / Cloudflare R2 |
-| 部署 | Bun + systemd，Nginx / Caddy / 1Panel / 宝塔反代 |
-
-## 快速开始
-
-一行安装（64 位 Linux + systemd，脚本自动补齐 Bun、PostgreSQL 19 + pgvector）：
+安装脚本适用于使用 systemd 的 64 位 Linux。在 Debian 和 Ubuntu 上，脚本可自动安装本地 PostgreSQL 和 `pgvector`。已有数据库也可直接接入，配置见 [安装指南](INSTALL.md)。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo bash
 ```
 
-指定域名并启用自动 HTTPS：
+使用公开域名时，可在运行安装器时指定 `DOMAIN`。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo DOMAIN=blog.example.com bash
 ```
 
-默认监听 `127.0.0.1:9260`，生产环境用 Nginx、Caddy、1Panel 或宝塔反向代理。详见 [INSTALL.md](INSTALL.md)。
+服务默认监听 `127.0.0.1:9260`。通过公开域名访问时，请在反向代理上配置 HTTPS。首次访问 `/install`，按向导创建管理员并设置站点信息。 [反向代理配置](deploy/README.md)
 
 ## 本地开发
 
-需要 Bun 1.4 和可用的 PostgreSQL：
+准备 Bun 1.4.5 和启用了 `pgvector` 的 PostgreSQL。将 `.env.example` 复制为 `.env`，填写数据库连接、`JWT_SECRET` 和 `APP_URL`，然后在仓库根目录运行以下命令。 [开发说明](DEVELOPMENT.md)
 
 ```bash
-bun install
+bun install --frozen-lockfile
+bun run build
 bun run dev
 ```
 
-常用命令：
+默认开发地址为 `http://localhost:9260`。完整校验可以运行 `bun run verify`，其中包含类型检查、构建、服务端测试和 API 覆盖检查。
+
+## 运维
 
 ```bash
-bun run check          # 类型检查（服务端 + TanStack Start）
-bun run build          # 构建后台 + 前台
-bun run test:server    # 服务端测试
-bun run verify         # 检查 + 构建 + 测试 + API 覆盖审计
+make update   # 拉取更新、构建并重启服务
+make status   # 查看服务状态
+make logs     # 跟踪服务日志
 ```
 
-## 部署与更新
+管理后台也可通过 systemd 更新应用。部署与运维命令在服务器上的安装目录中执行，默认目录为 `/opt/utterlog`。 [更新与运维](INSTALL.md#更新与运维)
 
-```bash
-make deploy   # 部署
-make update   # 更新
-make logs     # 查看日志
-```
+## 项目资料
 
-后台也支持一键升级：触发受限的 systemd 更新任务，自动拉取源码、校验构建、重启服务并健康检查。详见 [deploy/README.md](deploy/README.md)。
-
-## 文档
-
-- [INSTALL.md](INSTALL.md) — 安装指南
-- [DEVELOPMENT.md](DEVELOPMENT.md) — 开发说明
-- [deploy/](deploy/README.md) — 反代与 systemd 模板
-- [CHANGELOG.md](CHANGELOG.md) — 更新日志
-- [RELEASE_HISTORY.md](RELEASE_HISTORY.md) — 历史版本
-
-## 维护者
-
-[Utterlog contributors](https://github.com/utterlog/utterlog/graphs/contributors)
-
-## License
-
-[MIT](LICENSE)
+[更新日志](CHANGELOG.md) · [历史版本](RELEASE_HISTORY.md) · [贡献者](https://github.com/utterlog/utterlog/graphs/contributors) · [MIT 许可证](LICENSE)
