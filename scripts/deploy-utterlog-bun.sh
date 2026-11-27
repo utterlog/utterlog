@@ -51,7 +51,6 @@ USER="${UTTERLOG_DEPLOY_USER:-root}"
 REMOTE_PATH="${UTTERLOG_DEPLOY_PATH:?请设置 UTTERLOG_DEPLOY_PATH（服务器上的部署目录）}"
 SERVICE="${UTTERLOG_SERVICE:-utterlog-app}"
 REMOTE_BUN="${UTTERLOG_REMOTE_BUN:-/opt/bun/bin/bun}"
-HEALTH_PATH="/api/v1/install/status"
 APP_URL="${UTTERLOG_APP_URL:?请设置 UTTERLOG_APP_URL（如 https://your-domain.com）}"
 
 case "$USER" in (*[!a-zA-Z0-9_.-]*|'') echo "UTTERLOG_DEPLOY_USER 无效: $USER" >&2; exit 1 ;; esac
@@ -195,11 +194,13 @@ if [ -z "$REMOTE_PORT" ]; then
 fi
 REMOTE_PORT="${REMOTE_PORT:-9260}"
 case "$REMOTE_PORT" in (*[!0-9]*|'') err "服务器 PORT 无效: $REMOTE_PORT" ;; esac
-log "健康检查（本机 127.0.0.1:${REMOTE_PORT}${HEALTH_PATH}）"
+log "检查数据库和 schema（本机 127.0.0.1:${REMOTE_PORT}）"
 for i in $(seq 1 20); do
-  code="$("${SSH[@]}" "curl -s -o /dev/null -w '%{http_code}' -m5 http://127.0.0.1:${REMOTE_PORT}${HEALTH_PATH}" || true)"
-  [ "$code" = "200" ] && { ok "健康检查通过 (200)"; break; }
-  [ "$i" = "20" ] && err "健康检查超时（末次 code=$code）。查看: ssh -i ${SSH_KEY} ${USER}@${HOST} 'journalctl -u ${SERVICE} -n 50'"
+  if "${SSH[@]}" "bash '${REMOTE_PATH}/scripts/check-host.sh' 'http://127.0.0.1:${REMOTE_PORT}' '${REMOTE_BUN}' '' setup"; then
+    ok '健康检查通过'
+    break
+  fi
+  [ "$i" = "20" ] && err "健康检查超时。查看: ssh -i ${SSH_KEY} ${USER}@${HOST} 'journalctl -u ${SERVICE} -n 50'"
   sleep 3
 done
 

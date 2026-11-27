@@ -4,14 +4,16 @@ set -Eeuo pipefail
 
 REPO_URL="${UTTERLOG_REPO:-https://github.com/utterlog/utterlog.git}"
 INSTALL_DIR="${UTTERLOG_DIR:-/opt/utterlog}"
+DEFAULT_REF=main
+REF="${UTTERLOG_REF:-$DEFAULT_REF}"
 
 for arg in "$@"; do
   case "$arg" in
     -h|--help)
       printf '%s\n' \
-        'Usage: curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo bash' \
+        'Usage: curl -fsSL https://utterlog.io/install.sh | sudo bash' \
         '' \
-        'Environment: UTTERLOG_DIR, UTTERLOG_REPO, DOMAIN, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD.'
+        'Environment: UTTERLOG_DIR, UTTERLOG_REPO, UTTERLOG_REF, DOMAIN, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD.'
       exit 0
       ;;
   esac
@@ -45,16 +47,14 @@ install_git() {
 install_git
 
 if [ -d "$INSTALL_DIR/.git" ]; then
-  printf '==> Updating existing checkout: %s\n' "$INSTALL_DIR"
-  branch="$(git -c safe.directory="$INSTALL_DIR" -C "$INSTALL_DIR" symbolic-ref --short HEAD)"
-  git -c safe.directory="$INSTALL_DIR" -C "$INSTALL_DIR" fetch origin "$branch"
-  git -c safe.directory="$INSTALL_DIR" -C "$INSTALL_DIR" merge --ff-only "origin/$branch"
+  printf 'An installation already exists. Run sudo bash "%s/scripts/update-bun.sh".\n' "$INSTALL_DIR"
+  exit 1
 elif [ -e "$INSTALL_DIR" ]; then
   printf 'Install path exists but is not a Git checkout: %s\n' "$INSTALL_DIR" >&2
   exit 1
 else
   printf '==> Cloning Utterlog into %s\n' "$INSTALL_DIR"
-  git clone --depth 1 "$REPO_URL" "$INSTALL_DIR"
+  git clone --depth 1 --branch "$REF" -- "$REPO_URL" "$INSTALL_DIR"
 fi
 
 export UTTERLOG_INSTALL_DIR="$INSTALL_DIR"

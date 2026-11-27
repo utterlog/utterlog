@@ -57,8 +57,10 @@ psql_exec() {
 
 psql_exec postgres 'select 1' >/dev/null || { echo "Cannot connect to PostgreSQL at $PG_HOST:$PG_PORT." >&2; exit 2; }
 
+major="$(psql_exec postgres 'show server_version_num' | awk '{printf "%d", $1/10000}')"
+[ "$major" = 19 ] || { echo "PostgreSQL 19 is required. Server is running PostgreSQL $major." >&2; exit 3; }
+
 if [ "$(psql_exec postgres "select 1 from pg_available_extensions where name='vector'" || true)" != 1 ]; then
-  major="$(psql_exec postgres "show server_version_num" | awk '{printf "%d", $1/10000}')"
   echo "pgvector is not installed on the PostgreSQL server." >&2
   echo "On Debian/Ubuntu install: sudo apt install postgresql-${major}-pgvector" >&2
   exit 3

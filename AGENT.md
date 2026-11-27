@@ -128,8 +128,7 @@ checkout 直接跑 dev，那个文件不存在，Bun.serve 会对所有请求返
 
 ## 6. 数据库
 
-- PostgreSQL 18 / 19 + pgvector。安装器默认装 19（**19 仍是 beta，只在 PGDG 的
-  `-pgdg-testing` 里**），`PG_MAJOR=18` 退回 GA 版。当前 `schema.sql` 是从 18.3 导出的。
+- PostgreSQL 19 + pgvector。安装器从 PGDG 正式软件源安装 19，部署前验证主动连接的数据库版本。
 - 库名默认 `utterlog`，**实际由服务器 `.env` 的 `DB_NAME` 决定**。线上 psql 前先看
   `.env`，别照文档敲 `-d utterlog` 连错库。
 - 表前缀 `ul_`（env `DB_PREFIX`），id-center 用 `uid_`。

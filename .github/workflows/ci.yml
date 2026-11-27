@@ -8,8 +8,6 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-  # 与 scripts/deploy.sh 的 PG_MAJOR 默认值保持一致。19 仍是 beta，服务端包只在
-  # PGDG 的 -pgdg-testing 套件（组件名即主版本号），扩展包在 main。
   PG_MAJOR: '19'
 
 jobs:
@@ -18,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
@@ -33,22 +33,7 @@ jobs:
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt ${codename}-pgdg main" \
             | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update
-          # 未发布的主版本只在 -pgdg-testing 里，组件名就是主版本号，因此只会引入
-          # 这一个大版本，不会把其它 PGDG 包也拉到 testing 版本。
-          # 用 policy 的 Candidate 判断：主源的 postgresql-${PG_MAJOR}-pgvector 依赖
-          # postgresql-${PG_MAJOR}，会让 `apt-cache show` 对装不了的包名也返回成功。
-          apt_target=""
-          candidate="$(apt-cache policy "postgresql-${PG_MAJOR}" 2>/dev/null | awk '/Candidate:/ {print $2; exit}')"
-          if [ -z "$candidate" ] || [ "$candidate" = '(none)' ]; then
-            echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt ${codename}-pgdg-testing ${PG_MAJOR}" \
-              | sudo tee /etc/apt/sources.list.d/pgdg-testing.list >/dev/null
-            sudo apt-get update
-            # testing 套件是 NotAutomatic（优先级 100），不加 -t 的话 apt 会从 main
-            # 取旧 libpq5，postgresql-client-N 的 libpq5 (>= N~beta) 依赖就满足不了。
-            apt_target="-t ${codename}-pgdg-testing"
-          fi
-          apt-cache policy "postgresql-${PG_MAJOR}"
-          sudo apt-get install -y $apt_target "postgresql-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector"
+          sudo apt-get install -y "postgresql-${PG_MAJOR}" "postgresql-client-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector"
           # runner 镜像设了 create_main_cluster=false，装包不会自动建 ${PG_MAJOR}/main；
           # 预装的 PG16 集群又占着 5432（测试固定连这个端口），先移除再显式创建。
           sudo pg_dropcluster 16 main --stop 2>/dev/null || true
@@ -57,14 +42,16 @@ jobs:
           sudo pg_ctlcluster "${PG_MAJOR}" main start || sudo pg_ctlcluster "${PG_MAJOR}" main status
           sudo pg_isready -h 127.0.0.1 -p 5432
           psql --version
-          # 集成测试的 schema bootstrap 会 DROP/CREATE vector 扩展：需要 superuser，
-          # 且扩展要由测试角色自己创建，否则 owner 是 postgres，DROP 时报权限错。
+          # 与生产部署相同，应用使用普通角色，由 PostgreSQL 管理员预装扩展。
           sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'
-          create role utterlog_test with login superuser password 'utterlog_test';
+          create role utterlog_test with login password 'utterlog_test';
           create database utterlog_test owner utterlog_test;
+          create database utterlog_restore_test owner utterlog_test;
+          create database utterlog_upgrade_test owner utterlog_test;
           SQL
-          PGPASSWORD=utterlog_test psql -h 127.0.0.1 -U utterlog_test -d utterlog_test \
-            -v ON_ERROR_STOP=1 -c 'create extension vector'
+          for database in utterlog_test utterlog_restore_test utterlog_upgrade_test; do
+            sudo -u postgres psql -d "$database" -v ON_ERROR_STOP=1 -c 'create extension vector'
+          done
 
       - name: Install Bun app deps
         run: bun install --frozen-lockfile
@@ -85,6 +72,25 @@ jobs:
           DB_PASSWORD: utterlog_test
           JWT_SECRET: test-secret-for-server-tests
         run: bun run test:server
+
+      - name: Test database bootstrap and backup restore
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_NAME: utterlog_restore_test
+          DB_USER: utterlog_test
+          DB_PASSWORD: utterlog_test
+          DB_PREFIX: ul_
+        run: bun run test:restore
+
+      - name: Test upgrade and rollback from the previous release
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_NAME: utterlog_upgrade_test
+          DB_USER: utterlog_test
+          DB_PASSWORD: utterlog_test
+        run: bash scripts/test-host-update.sh
 
       - name: Audit API coverage
         run: bun run audit:api

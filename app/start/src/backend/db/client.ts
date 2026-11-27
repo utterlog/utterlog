@@ -1,7 +1,9 @@
-import postgres from 'postgres';
+import postgres, { type TransactionSql } from 'postgres';
 import { existsSync, readFileSync } from 'node:fs';
 import { config, table } from '../config';
 import { schemaCandidates } from '../paths';
+
+export const POSTGRES_MAJOR = 19;
 
 export const sql = postgres({
   host: config.dbHost,
@@ -151,22 +153,33 @@ export function splitSqlStatements(raw: string) {
   return statements;
 }
 
-export async function bootstrapSchemaIfFresh() {
-  if (await tableExists(table('users'))) return;
+async function bootstrapSchemaIfFresh(tx: TransactionSql) {
+  const [existing] = await tx<{ exists: boolean }[]>`
+    select to_regclass(${`public.${table('users')}`}) is not null as exists`;
+  if (existing?.exists) return false;
+
   const schemaPath = schemaCandidates().find((path) => existsSync(path));
-  if (!schemaPath) return;
+  if (!schemaPath) throw new Error('Cannot initialize database: schema.sql is missing');
   const raw = readFileSync(schemaPath, 'utf8').replace(/\bul_/g, config.dbPrefix);
   for (const statement of splitSqlStatements(raw)) {
     try {
-      await sql.unsafe(statement);
+      await tx.unsafe(statement);
     } catch (err) {
       const preview = statement.replace(/\s+/g, ' ').slice(0, 180);
       throw new Error(`schema bootstrap failed near: ${preview}`, { cause: err });
     }
   }
+  return true;
 }
 
-export async function runCoreMigrations() {
+async function dropLegacyIndex(tx: TransactionSql, name: string, relation: string, onlyNonUnique = false) {
+  const [index] = await tx`select 1 from pg_index
+    where indexrelid = to_regclass(${`public.${name}`}) and indrelid = to_regclass(${`public.${relation}`})
+      and (not ${onlyNonUnique} or not indisunique)`;
+  if (index) await tx`drop index ${tx(`public.${name}`)}`;
+}
+
+async function runCoreMigrations(sql: TransactionSql, fresh: boolean) {
   await sql`create extension if not exists vector`;
   await sql.unsafe(`alter table ${table('posts')} add column if not exists embedding vector(1536)`);
   await sql.unsafe(`create index if not exists idx_posts_embedding on ${table('posts')} using hnsw (embedding vector_cosine_ops)`);
@@ -197,7 +210,7 @@ export async function runCoreMigrations() {
   await sql.unsafe(`create unique index if not exists idx_comments_sync_provenance on ${table('comments')} (source_site_uuid, source_type, source_id) where source_site_uuid != ''`);
   await sql.unsafe(`create unique index if not exists idx_metas_sync_provenance on ${table('metas')} (source_site_uuid, source_type, source_id) where source_site_uuid != ''`);
   await sql.unsafe(`create unique index if not exists idx_links_sync_provenance on ${table('links')} (source_site_uuid, source_type, source_id) where source_site_uuid != ''`);
-  await sql.unsafe(`drop index if exists idx_media_sync_provenance`);
+  await dropLegacyIndex(sql, 'idx_media_sync_provenance', table('media'));
   await sql.unsafe(`alter table ${table('followers')} add column if not exists following_id integer default 0`);
   await sql.unsafe(`alter table ${table('users')} add column if not exists reset_token varchar(64) default ''`);
   await sql.unsafe(`alter table ${table('users')} add column if not exists reset_token_expires_at bigint default 0`);
@@ -235,7 +248,7 @@ export async function runCoreMigrations() {
   // on conflict do nothing，数据库层兜底。先清掉可能已存在的重复行（保留最早的）。
   await sql.unsafe(`delete from ${table('ai_comment_queue')} a using ${table('ai_comment_queue')} b
     where a.comment_id = b.comment_id and a.id > b.id`);
-  await sql.unsafe(`drop index if exists idx_ai_comment_queue_comment`);
+  await dropLegacyIndex(sql, 'idx_ai_comment_queue_comment', table('ai_comment_queue'), true);
   await sql.unsafe(`create unique index if not exists idx_ai_comment_queue_comment on ${table('ai_comment_queue')} (comment_id)`);
   // 外键补齐：本文件的 create table 带 references … on delete cascade，但全新安装
   // 走的是 schema.sql，那份没有外键 —— 硬删评论后队列行原地残留，点「发布」会插出
@@ -419,6 +432,8 @@ export async function runCoreMigrations() {
   )`);
   await sql.unsafe(`create index if not exists idx_stats_visitor_post_dates_post on ${table('stats_visitor_post_dates')} (post_id, date)`);
   await sql.unsafe(`create index if not exists idx_stats_visitor_post_dates_date on ${table('stats_visitor_post_dates')} (date)`);
+  if (fresh) return;
+
   // 安全中心（IP 封禁 / 安全事件 / IP 信誉）整体下线，schema.sql 里已经不再建
   // 这三张表；老库升上来还留着，在这里清掉。ip_reputation 早就没代码碰了。
   await sql.unsafe(`drop table if exists ${table('ip_bans')}`);
@@ -480,9 +495,14 @@ export async function runCoreMigrations() {
 
 export async function initDb() {
   if (!(await dbReady())) return false;
-  await bootstrapSchemaIfFresh();
-  if (await tableExists(table('users'))) {
-    await runCoreMigrations();
-  }
-  return true;
+  return sql.begin(async (tx) => {
+    const [{ version }] = await tx<{ version: number }[]>`select current_setting('server_version_num')::int as version`;
+    if (Math.floor(version / 10_000) !== POSTGRES_MAJOR) {
+      throw new Error(`Utterlog requires PostgreSQL ${POSTGRES_MAJOR}. Migrate the database before starting this version.`);
+    }
+    await tx`select pg_advisory_xact_lock(hashtext('utterlog:bootstrap'))`;
+    const fresh = await bootstrapSchemaIfFresh(tx);
+    await runCoreMigrations(tx, fresh);
+    return true;
+  });
 }

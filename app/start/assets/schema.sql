@@ -1,337 +1,12 @@
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
+
 --
 -- PostgreSQL database dump
 --
 
--- \restrict 6ycODpwHtO1bZBhD1SW8boycnYV0UzGzOtWvhb4mYmFUwbeXNdEA2DwrQYRE4Sy  -- psql meta-command, removed for lib/pq compatibility
 
--- Dumped from database version 18.3 (Debian 18.3-1.pgdg12+1)
--- Dumped by pg_dump version 18.3 (Debian 18.3-1.pgdg12+1)
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
--- SELECT pg_catalog.set_config('search_path', '', false);  -- Disabled: would persist on pooled connections, causing "relation does not exist" for unqualified table names. CREATE statements below use schema-qualified names so this is unnecessary.
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
-ALTER TABLE IF EXISTS ONLY public.ul_relationships DROP CONSTRAINT IF EXISTS ul_relationships_post_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_relationships DROP CONSTRAINT IF EXISTS ul_relationships_meta_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_posts DROP CONSTRAINT IF EXISTS ul_posts_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_post_meta DROP CONSTRAINT IF EXISTS ul_post_meta_post_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_playlists DROP CONSTRAINT IF EXISTS ul_playlists_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_playlist_songs DROP CONSTRAINT IF EXISTS ul_playlist_songs_playlist_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_playlist_songs DROP CONSTRAINT IF EXISTS ul_playlist_songs_music_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_notifications DROP CONSTRAINT IF EXISTS ul_notifications_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_music DROP CONSTRAINT IF EXISTS ul_music_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_movies DROP CONSTRAINT IF EXISTS ul_movies_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_moments DROP CONSTRAINT IF EXISTS ul_moments_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_goods DROP CONSTRAINT IF EXISTS ul_goods_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_follower_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_feed_items DROP CONSTRAINT IF EXISTS ul_feed_items_subscription_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_federated_users DROP CONSTRAINT IF EXISTS ul_federated_users_local_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_comments DROP CONSTRAINT IF EXISTS ul_comments_post_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_books DROP CONSTRAINT IF EXISTS ul_books_blog_author_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_messages DROP CONSTRAINT IF EXISTS ul_ai_messages_conversation_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_logs DROP CONSTRAINT IF EXISTS ul_ai_logs_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_conversations DROP CONSTRAINT IF EXISTS ul_ai_conversations_user_id_fkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_conversations DROP CONSTRAINT IF EXISTS ul_ai_conversations_provider_id_fkey;
-DROP INDEX IF EXISTS public.idx_users_status;
-DROP INDEX IF EXISTS public.idx_users_role;
-DROP INDEX IF EXISTS public.idx_users_email;
-DROP INDEX IF EXISTS public.idx_rss_subs_user;
-DROP INDEX IF EXISTS public.idx_relationships_post;
-DROP INDEX IF EXISTS public.idx_relationships_meta;
-DROP INDEX IF EXISTS public.idx_posts_type;
-DROP INDEX IF EXISTS public.idx_posts_status;
-DROP INDEX IF EXISTS public.idx_posts_slug;
-DROP INDEX IF EXISTS public.idx_posts_search;
-DROP INDEX IF EXISTS public.idx_posts_published;
-DROP INDEX IF EXISTS public.idx_posts_embedding;
-DROP INDEX IF EXISTS public.idx_posts_created;
-DROP INDEX IF EXISTS public.idx_posts_author;
-DROP INDEX IF EXISTS public.idx_post_meta_value;
-DROP INDEX IF EXISTS public.idx_post_meta_post;
-DROP INDEX IF EXISTS public.idx_post_meta_key;
-DROP INDEX IF EXISTS public.idx_playlists_default;
-DROP INDEX IF EXISTS public.idx_playlists_author;
-DROP INDEX IF EXISTS public.idx_playlist_songs_playlist;
-DROP INDEX IF EXISTS public.idx_playlist_songs_order;
-DROP INDEX IF EXISTS public.idx_passkeys_user;
-DROP INDEX IF EXISTS public.idx_passkeys_cred;
-DROP INDEX IF EXISTS public.idx_options_name;
-DROP INDEX IF EXISTS public.idx_options_autoload;
-DROP INDEX IF EXISTS public.idx_notifications_user;
-DROP INDEX IF EXISTS public.idx_notifications_unread;
-DROP INDEX IF EXISTS public.idx_notifications_created;
-DROP INDEX IF EXISTS public.idx_music_platform;
-DROP INDEX IF EXISTS public.idx_music_created;
-DROP INDEX IF EXISTS public.idx_music_author;
-DROP INDEX IF EXISTS public.idx_movies_created;
-DROP INDEX IF EXISTS public.idx_movies_author;
-DROP INDEX IF EXISTS public.idx_moments_visibility;
-DROP INDEX IF EXISTS public.idx_moments_source;
-DROP INDEX IF EXISTS public.idx_moments_created;
-DROP INDEX IF EXISTS public.idx_moments_author;
-DROP INDEX IF EXISTS public.idx_metas_type;
-DROP INDEX IF EXISTS public.idx_metas_slug_type;
-DROP INDEX IF EXISTS public.idx_metas_parent;
-DROP INDEX IF EXISTS public.idx_metas_order;
-DROP INDEX IF EXISTS public.idx_media_source;
-DROP INDEX IF EXISTS public.idx_media_driver;
-DROP INDEX IF EXISTS public.idx_media_created;
-DROP INDEX IF EXISTS public.idx_media_album;
-DROP INDEX IF EXISTS public.idx_links_status_order;
-DROP INDEX IF EXISTS public.idx_links_sync_provenance;
-DROP INDEX IF EXISTS public.idx_links_status;
-DROP INDEX IF EXISTS public.idx_links_order;
-DROP INDEX IF EXISTS public.idx_links_group;
-DROP INDEX IF EXISTS public.idx_goods_created;
-DROP INDEX IF EXISTS public.idx_goods_category;
-DROP INDEX IF EXISTS public.idx_goods_author;
-DROP INDEX IF EXISTS public.idx_followers_user;
-DROP INDEX IF EXISTS public.idx_followers_mutual;
-DROP INDEX IF EXISTS public.idx_followers_follower;
-DROP INDEX IF EXISTS public.idx_feed_items_sub;
-DROP INDEX IF EXISTS public.idx_feed_items_date;
-DROP INDEX IF EXISTS public.idx_federated_remote;
-DROP INDEX IF EXISTS public.idx_federated_local;
-DROP INDEX IF EXISTS public.idx_fed_tokens_user;
-DROP INDEX IF EXISTS public.idx_ai_comment_queue_comment;
-DROP INDEX IF EXISTS public.idx_ai_comment_queue_status;
-DROP INDEX IF EXISTS public.idx_comments_user;
-DROP INDEX IF EXISTS public.idx_comments_status;
-DROP INDEX IF EXISTS public.idx_comments_source;
-DROP INDEX IF EXISTS public.idx_comments_post_status_parent;
-DROP INDEX IF EXISTS public.idx_comments_post;
-DROP INDEX IF EXISTS public.idx_comments_parent;
-DROP INDEX IF EXISTS public.idx_comments_created;
-DROP INDEX IF EXISTS public.idx_books_progress;
-DROP INDEX IF EXISTS public.idx_books_created;
-DROP INDEX IF EXISTS public.idx_books_author;
-DROP INDEX IF EXISTS public.idx_albums_slug;
-DROP INDEX IF EXISTS public.idx_ai_msg_conv;
-DROP INDEX IF EXISTS public.idx_ai_logs_user;
-DROP INDEX IF EXISTS public.idx_ai_logs_created;
-DROP INDEX IF EXISTS public.idx_ai_logs_action;
-DROP INDEX IF EXISTS public.idx_ai_conv_user;
-DROP INDEX IF EXISTS public.idx_ai_conv_updated;
-DROP INDEX IF EXISTS public.idx_access_visitor;
-DROP INDEX IF EXISTS public.idx_access_path;
-DROP INDEX IF EXISTS public.idx_access_ip;
-DROP INDEX IF EXISTS public.idx_access_created;
-DROP INDEX IF EXISTS public.idx_access_country;
-ALTER TABLE IF EXISTS ONLY public.ul_videos DROP CONSTRAINT IF EXISTS ul_videos_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_users DROP CONSTRAINT IF EXISTS ul_users_username_key;
-ALTER TABLE IF EXISTS ONLY public.ul_users DROP CONSTRAINT IF EXISTS ul_users_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_users DROP CONSTRAINT IF EXISTS ul_users_email_key;
-ALTER TABLE IF EXISTS ONLY public.ul_rss_subscriptions DROP CONSTRAINT IF EXISTS ul_rss_subscriptions_user_id_feed_url_key;
-ALTER TABLE IF EXISTS ONLY public.ul_rss_subscriptions DROP CONSTRAINT IF EXISTS ul_rss_subscriptions_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_relationships DROP CONSTRAINT IF EXISTS ul_relationships_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_posts DROP CONSTRAINT IF EXISTS ul_posts_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_post_meta DROP CONSTRAINT IF EXISTS ul_post_meta_post_id_meta_key_key;
-ALTER TABLE IF EXISTS ONLY public.ul_post_meta DROP CONSTRAINT IF EXISTS ul_post_meta_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_playlists DROP CONSTRAINT IF EXISTS ul_playlists_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_playlist_songs DROP CONSTRAINT IF EXISTS ul_playlist_songs_playlist_id_music_id_key;
-ALTER TABLE IF EXISTS ONLY public.ul_playlist_songs DROP CONSTRAINT IF EXISTS ul_playlist_songs_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_passkeys DROP CONSTRAINT IF EXISTS ul_passkeys_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_passkeys DROP CONSTRAINT IF EXISTS ul_passkeys_credential_id_key;
-ALTER TABLE IF EXISTS ONLY public.ul_options DROP CONSTRAINT IF EXISTS ul_options_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_options DROP CONSTRAINT IF EXISTS ul_options_name_key;
-ALTER TABLE IF EXISTS ONLY public.ul_notifications DROP CONSTRAINT IF EXISTS ul_notifications_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_music DROP CONSTRAINT IF EXISTS ul_music_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_movies DROP CONSTRAINT IF EXISTS ul_movies_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_moments DROP CONSTRAINT IF EXISTS ul_moments_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_metas DROP CONSTRAINT IF EXISTS ul_metas_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_media DROP CONSTRAINT IF EXISTS ul_media_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_links DROP CONSTRAINT IF EXISTS ul_links_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_goods DROP CONSTRAINT IF EXISTS ul_goods_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_games DROP CONSTRAINT IF EXISTS ul_games_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_user_id_follower_id_key;
-ALTER TABLE IF EXISTS ONLY public.ul_followers DROP CONSTRAINT IF EXISTS ul_followers_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_feed_items DROP CONSTRAINT IF EXISTS ul_feed_items_subscription_id_guid_key;
-ALTER TABLE IF EXISTS ONLY public.ul_feed_items DROP CONSTRAINT IF EXISTS ul_feed_items_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_federation_tokens DROP CONSTRAINT IF EXISTS ul_federation_tokens_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_federated_users DROP CONSTRAINT IF EXISTS ul_federated_users_remote_site_remote_user_id_key;
-ALTER TABLE IF EXISTS ONLY public.ul_federated_users DROP CONSTRAINT IF EXISTS ul_federated_users_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_federated_users DROP CONSTRAINT IF EXISTS ul_federated_users_local_user_id_remote_site_key;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_comment_queue DROP CONSTRAINT IF EXISTS ul_ai_comment_queue_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_comments DROP CONSTRAINT IF EXISTS ul_comments_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_books DROP CONSTRAINT IF EXISTS ul_books_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_albums DROP CONSTRAINT IF EXISTS ul_albums_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_providers DROP CONSTRAINT IF EXISTS ul_ai_providers_slug_key;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_providers DROP CONSTRAINT IF EXISTS ul_ai_providers_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_messages DROP CONSTRAINT IF EXISTS ul_ai_messages_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_logs DROP CONSTRAINT IF EXISTS ul_ai_logs_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_ai_conversations DROP CONSTRAINT IF EXISTS ul_ai_conversations_pkey;
-ALTER TABLE IF EXISTS ONLY public.ul_access_logs DROP CONSTRAINT IF EXISTS ul_access_logs_pkey;
-ALTER TABLE IF EXISTS ONLY public.migrations DROP CONSTRAINT IF EXISTS migrations_pkey;
-ALTER TABLE IF EXISTS ONLY public.migrations DROP CONSTRAINT IF EXISTS migrations_migration_key;
-ALTER TABLE IF EXISTS public.ul_videos ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_rss_subscriptions ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_posts ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_post_meta ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_playlists ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_playlist_songs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_passkeys ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_options ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_notifications ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_music ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_movies ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_moments ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_metas ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_media ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_links ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_goods ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_games ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_followers ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_feed_items ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_federation_tokens ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_federated_users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_comments ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ai_comment_queue ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_books ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_albums ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ai_providers ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ai_messages ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ai_logs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_ai_conversations ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.ul_access_logs ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.migrations ALTER COLUMN id DROP DEFAULT;
-DROP SEQUENCE IF EXISTS public.ul_videos_id_seq;
-DROP TABLE IF EXISTS public.ul_videos;
-DROP SEQUENCE IF EXISTS public.ul_users_id_seq;
-DROP TABLE IF EXISTS public.ul_users;
-DROP SEQUENCE IF EXISTS public.ul_rss_subscriptions_id_seq;
-DROP TABLE IF EXISTS public.ul_rss_subscriptions;
-DROP TABLE IF EXISTS public.ul_relationships;
-DROP SEQUENCE IF EXISTS public.ul_posts_id_seq;
-DROP TABLE IF EXISTS public.ul_posts;
-DROP SEQUENCE IF EXISTS public.ul_post_meta_id_seq;
-DROP TABLE IF EXISTS public.ul_post_meta;
-DROP SEQUENCE IF EXISTS public.ul_playlists_id_seq;
-DROP TABLE IF EXISTS public.ul_playlists;
-DROP SEQUENCE IF EXISTS public.ul_playlist_songs_id_seq;
-DROP TABLE IF EXISTS public.ul_playlist_songs;
-DROP SEQUENCE IF EXISTS public.ul_ai_comment_queue_id_seq;
-DROP TABLE IF EXISTS public.ul_ai_comment_queue;
-DROP SEQUENCE IF EXISTS public.ul_passkeys_id_seq;
-DROP TABLE IF EXISTS public.ul_passkeys;
-DROP SEQUENCE IF EXISTS public.ul_options_id_seq;
-DROP TABLE IF EXISTS public.ul_options;
-DROP SEQUENCE IF EXISTS public.ul_notifications_id_seq;
-DROP TABLE IF EXISTS public.ul_notifications;
-DROP SEQUENCE IF EXISTS public.ul_music_id_seq;
-DROP TABLE IF EXISTS public.ul_music;
-DROP SEQUENCE IF EXISTS public.ul_movies_id_seq;
-DROP TABLE IF EXISTS public.ul_movies;
-DROP SEQUENCE IF EXISTS public.ul_moments_id_seq;
-DROP TABLE IF EXISTS public.ul_moments;
-DROP SEQUENCE IF EXISTS public.ul_metas_id_seq;
-DROP TABLE IF EXISTS public.ul_metas;
-DROP SEQUENCE IF EXISTS public.ul_media_id_seq;
-DROP TABLE IF EXISTS public.ul_media;
-DROP SEQUENCE IF EXISTS public.ul_links_id_seq;
-DROP TABLE IF EXISTS public.ul_links;
-DROP SEQUENCE IF EXISTS public.ul_goods_id_seq;
-DROP TABLE IF EXISTS public.ul_goods;
-DROP SEQUENCE IF EXISTS public.ul_games_id_seq;
-DROP TABLE IF EXISTS public.ul_games;
-DROP SEQUENCE IF EXISTS public.ul_followers_id_seq;
-DROP TABLE IF EXISTS public.ul_followers;
-DROP SEQUENCE IF EXISTS public.ul_feed_items_id_seq;
-DROP TABLE IF EXISTS public.ul_feed_items;
-DROP SEQUENCE IF EXISTS public.ul_federation_tokens_id_seq;
-DROP TABLE IF EXISTS public.ul_federation_tokens;
-DROP SEQUENCE IF EXISTS public.ul_federated_users_id_seq;
-DROP TABLE IF EXISTS public.ul_federated_users;
-DROP SEQUENCE IF EXISTS public.ul_comments_id_seq;
-DROP TABLE IF EXISTS public.ul_comments;
-DROP SEQUENCE IF EXISTS public.ul_books_id_seq;
-DROP TABLE IF EXISTS public.ul_books;
-DROP SEQUENCE IF EXISTS public.ul_albums_id_seq;
-DROP TABLE IF EXISTS public.ul_albums;
-DROP SEQUENCE IF EXISTS public.ul_ai_providers_id_seq;
-DROP TABLE IF EXISTS public.ul_ai_providers;
-DROP SEQUENCE IF EXISTS public.ul_ai_messages_id_seq;
-DROP TABLE IF EXISTS public.ul_ai_messages;
-DROP SEQUENCE IF EXISTS public.ul_ai_logs_id_seq;
-DROP TABLE IF EXISTS public.ul_ai_logs;
-DROP SEQUENCE IF EXISTS public.ul_ai_conversations_id_seq;
-DROP TABLE IF EXISTS public.ul_ai_conversations;
-DROP SEQUENCE IF EXISTS public.ul_access_logs_id_seq;
-DROP TABLE IF EXISTS public.ul_access_logs;
-DROP SEQUENCE IF EXISTS public.migrations_id_seq;
-DROP TABLE IF EXISTS public.migrations;
-DROP EXTENSION IF EXISTS vector;
-DROP EXTENSION IF EXISTS "uuid-ossp";
---
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-
-
---
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
-
-
---
--- Name: vector; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
-
-
---
--- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
-
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: migrations; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.migrations (
-    id integer NOT NULL,
-    migration character varying(255) NOT NULL,
-    executed_at integer NOT NULL
-);
-
-
---
--- Name: migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.migrations_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
+-- Dumped from database version 19.0
+-- Dumped by pg_dump version 19.0
 
 
 --
@@ -383,6 +58,47 @@ CREATE SEQUENCE public.ul_access_logs_id_seq
 --
 
 ALTER SEQUENCE public.ul_access_logs_id_seq OWNED BY public.ul_access_logs.id;
+
+
+--
+-- Name: ul_ai_comment_queue; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ul_ai_comment_queue (
+    id integer NOT NULL,
+    comment_id integer NOT NULL,
+    post_id integer NOT NULL,
+    comment_text text NOT NULL,
+    ai_reply text DEFAULT ''::text NOT NULL,
+    status character varying(20) DEFAULT 'pending'::character varying NOT NULL,
+    created_at bigint NOT NULL,
+    processed_at bigint DEFAULT 0 NOT NULL,
+    error_msg character varying(500),
+    reviewer_id integer DEFAULT 0 NOT NULL,
+    ai_audit_passed boolean,
+    ai_audit_confidence real,
+    ai_audit_reason text
+);
+
+
+--
+-- Name: ul_ai_comment_queue_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ul_ai_comment_queue_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ul_ai_comment_queue_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.ul_ai_comment_queue_id_seq OWNED BY public.ul_ai_comment_queue.id;
 
 
 --
@@ -674,47 +390,6 @@ CREATE SEQUENCE public.ul_comments_id_seq
 --
 
 ALTER SEQUENCE public.ul_comments_id_seq OWNED BY public.ul_comments.id;
-
-
---
--- Name: ul_ai_comment_queue; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ul_ai_comment_queue (
-    id integer NOT NULL,
-    comment_id integer NOT NULL,
-    post_id integer NOT NULL,
-    comment_text text NOT NULL,
-    ai_reply text DEFAULT ''::text NOT NULL,
-    status character varying(20) DEFAULT 'pending'::character varying NOT NULL,
-    created_at bigint NOT NULL,
-    processed_at bigint DEFAULT 0 NOT NULL,
-    error_msg character varying(500),
-    reviewer_id integer DEFAULT 0 NOT NULL,
-    ai_audit_passed boolean,
-    ai_audit_confidence real,
-    ai_audit_reason text
-);
-
-
---
--- Name: ul_ai_comment_queue_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.ul_ai_comment_queue_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ul_ai_comment_queue_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.ul_ai_comment_queue_id_seq OWNED BY public.ul_ai_comment_queue.id;
 
 
 --
@@ -1631,17 +1306,17 @@ ALTER SEQUENCE public.ul_videos_id_seq OWNED BY public.ul_videos.id;
 
 
 --
--- Name: migrations id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.migrations_id_seq'::regclass);
-
-
---
 -- Name: ul_access_logs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.ul_access_logs ALTER COLUMN id SET DEFAULT nextval('public.ul_access_logs_id_seq'::regclass);
+
+
+--
+-- Name: ul_ai_comment_queue id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_ai_comment_queue ALTER COLUMN id SET DEFAULT nextval('public.ul_ai_comment_queue_id_seq'::regclass);
 
 
 --
@@ -1691,13 +1366,6 @@ ALTER TABLE ONLY public.ul_books ALTER COLUMN id SET DEFAULT nextval('public.ul_
 --
 
 ALTER TABLE ONLY public.ul_comments ALTER COLUMN id SET DEFAULT nextval('public.ul_comments_id_seq'::regclass);
-
-
---
--- Name: ul_ai_comment_queue id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ai_comment_queue ALTER COLUMN id SET DEFAULT nextval('public.ul_ai_comment_queue_id_seq'::regclass);
 
 
 --
@@ -1855,27 +1523,19 @@ ALTER TABLE ONLY public.ul_videos ALTER COLUMN id SET DEFAULT nextval('public.ul
 
 
 --
--- Name: migrations migrations_migration_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.migrations
-    ADD CONSTRAINT migrations_migration_key UNIQUE (migration);
-
-
---
--- Name: migrations migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.migrations
-    ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
-
-
---
 -- Name: ul_access_logs ul_access_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.ul_access_logs
     ADD CONSTRAINT ul_access_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ul_ai_comment_queue ul_ai_comment_queue_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_ai_comment_queue
+    ADD CONSTRAINT ul_ai_comment_queue_pkey PRIMARY KEY (id);
 
 
 --
@@ -1940,14 +1600,6 @@ ALTER TABLE ONLY public.ul_books
 
 ALTER TABLE ONLY public.ul_comments
     ADD CONSTRAINT ul_comments_pkey PRIMARY KEY (id);
-
-
---
--- Name: ul_ai_comment_queue ul_ai_comment_queue_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ai_comment_queue
-    ADD CONSTRAINT ul_ai_comment_queue_pkey PRIMARY KEY (id);
 
 
 --
@@ -2250,6 +1902,20 @@ CREATE INDEX idx_access_visitor ON public.ul_access_logs USING btree (visitor_id
 
 
 --
+-- Name: idx_ai_comment_queue_comment; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_ai_comment_queue_comment ON public.ul_ai_comment_queue USING btree (comment_id);
+
+
+--
+-- Name: idx_ai_comment_queue_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_ai_comment_queue_status ON public.ul_ai_comment_queue USING btree (status, created_at DESC);
+
+
+--
 -- Name: idx_ai_conv_updated; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2369,20 +2035,6 @@ CREATE INDEX idx_comments_user ON public.ul_comments USING btree (user_id);
 
 
 --
--- Name: idx_ai_comment_queue_status; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_ai_comment_queue_status ON public.ul_ai_comment_queue USING btree (status, created_at DESC);
-
-
---
--- Name: idx_ai_comment_queue_comment; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_ai_comment_queue_comment ON public.ul_ai_comment_queue USING btree (comment_id);
-
-
---
 -- Name: idx_fed_tokens_user; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2432,6 +2084,13 @@ CREATE UNIQUE INDEX idx_followers_follower_site ON public.ul_followers USING btr
 
 
 --
+-- Name: idx_followers_following_site; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_followers_following_site ON public.ul_followers USING btree (user_id, source_site) WHERE (((source_site)::text <> ''::text) AND (following_id = 0));
+
+
+--
 -- Name: idx_followers_mutual; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2443,13 +2102,6 @@ CREATE INDEX idx_followers_mutual ON public.ul_followers USING btree (mutual) WH
 --
 
 CREATE INDEX idx_followers_user ON public.ul_followers USING btree (user_id);
-
-
---
--- Name: idx_followers_following_site; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_followers_following_site ON public.ul_followers USING btree (user_id, source_site) WHERE (((source_site)::text <> ''::text) AND (following_id = 0));
 
 
 --
@@ -2824,19 +2476,19 @@ CREATE INDEX idx_users_status ON public.ul_users USING btree (status);
 
 
 --
--- Name: ul_ai_conversations ul_ai_conversations_provider_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ul_ai_conversations
-    ADD CONSTRAINT ul_ai_conversations_provider_id_fkey FOREIGN KEY (provider_id) REFERENCES public.ul_ai_providers(id) ON DELETE SET NULL;
-
---
 -- Name: ul_ai_comment_queue ul_ai_comment_queue_comment_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.ul_ai_comment_queue
     ADD CONSTRAINT ul_ai_comment_queue_comment_fk FOREIGN KEY (comment_id) REFERENCES public.ul_comments(id) ON DELETE CASCADE;
 
+
+--
+-- Name: ul_ai_conversations ul_ai_conversations_provider_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ul_ai_conversations
+    ADD CONSTRAINT ul_ai_conversations_provider_id_fkey FOREIGN KEY (provider_id) REFERENCES public.ul_ai_providers(id) ON DELETE SET NULL;
 
 
 --
@@ -2994,5 +2646,3 @@ ALTER TABLE ONLY public.ul_relationships
 --
 -- PostgreSQL database dump complete
 --
-
--- \unrestrict 6ycODpwHtO1bZBhD1SW8boycnYV0UzGzOtWvhb4mYmFUwbeXNdEA2DwrQYRE4Sy  -- psql meta-command, removed for lib/pq compatibility

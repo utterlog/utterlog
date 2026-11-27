@@ -9,6 +9,11 @@ import { startBackupScheduler } from './routes/backup';
 import { startAiQueueRecovery } from './ai/comments';
 import { handleStartRequest, preloadStartServer, warmStartFrontend } from './web/start';
 
+if (Bun.which('git')) {
+  const revision = Bun.spawnSync(['git', 'rev-parse', 'HEAD'], { stderr: 'ignore' });
+  if (revision.success) process.env.BUILD_COMMIT = revision.stdout.toString().trim();
+}
+
 startCpuMonitor();
 
 const ready = await initDb();

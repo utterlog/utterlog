@@ -1,6 +1,6 @@
 {
   "name": "utterlog-bun",
-  "version": "1.6.0",
+  "version": "3.0.0",
   "packageManager": "bun@1.4.5",
   "private": true,
   "type": "module",
@@ -18,6 +18,7 @@
     "start": "NODE_ENV=production bun run app/start/src/backend/index.ts",
     "test:server": "JWT_SECRET=test-secret-for-server-tests bun test app/start/test",
     "test:integration": "UTTERLOG_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/start/test/comments-service.integration.test.ts",
+    "test:restore": "UTTERLOG_RESTORE_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/start/test/backup-restore.integration.test.ts",
     "audit:api": "bun scripts/audit-api-coverage.ts",
     "smoke:api": "bash scripts/api-smoke-test.sh",
     "build:web": "cd app/start && bun run sync:themes",

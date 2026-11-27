@@ -10,7 +10,8 @@ for arg in "$@"; do
       printf '%s\n' \
         'Usage: sudo bash scripts/update-bun.sh [--runtime]' \
         '' \
-        'Pulls the current Git branch, verifies and builds with Bun, then restarts utterlog-app.'
+        'Builds the next version separately, verifies the running site, and rolls back on failure.' \
+        'Set UTTERLOG_UPDATE_TAG to select a release when installed from a tag.'
       exit 0
       ;;
     *) printf 'Unknown argument: %s\n' "$arg" >&2; exit 2 ;;
@@ -40,28 +41,17 @@ case "$APP_USER" in (*[!a-zA-Z0-9_-]*|'') printf 'Invalid service user: %s\n' "$
 [ -n "$BUN_BIN" ] && [ -x "$BUN_BIN" ] || { printf 'Bun executable not found. Set UTTERLOG_BUN_BIN.\n' >&2; exit 1; }
 [ -d "$ROOT/.git" ] || { printf 'Utterlog install is not a Git checkout: %s\n' "$ROOT" >&2; exit 1; }
 
-mkdir -p "$(dirname "$REQUEST_FILE")" "$(dirname "$LOG_FILE")" "$(dirname "$LOCK_FILE")"
-rm -f "$REQUEST_FILE"
+mkdir -p "$ROOT/.runtime" "$(dirname "$REQUEST_FILE")" "$(dirname "$LOG_FILE")" "$(dirname "$LOCK_FILE")"
 touch "$LOG_FILE"
 
-if command -v flock >/dev/null 2>&1; then
-  exec 9>"$LOCK_FILE"
-  flock -n 9 || { printf 'Another Utterlog update is already running.\n' >&2; exit 1; }
-fi
+exec 9>"$LOCK_FILE"
+flock -n 9 || { printf 'Another Utterlog update is already running.\n' >&2; exit 1; }
+rm -f "$REQUEST_FILE"
 
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 ts() { date '+%Y/%m/%d %H:%M:%S'; }
 log() { printf '%s %s\n' "$(ts)" "$*"; }
-
-failed() {
-  local code=$?
-  rm -f "$REQUEST_FILE"
-  log "ERROR 更新任务失败（exit=$code）"
-  log '升级应用 [Utterlog] 失败 [TASK-END]'
-  exit "$code"
-}
-trap failed ERR
 
 app_home() {
   getent passwd "$APP_USER" 2>/dev/null | cut -d: -f6
@@ -78,52 +68,141 @@ run_as_app() {
   fi
 }
 
+ARTIFACTS=(node_modules app/start/node_modules app/admin/node_modules app/start/dist app/admin/dist)
+SWITCHED=()
+STAGE=""
+PREVIOUS=""
+SWITCHING=0
+OLD_REV=""
+PORT_VALUE="$(env_value PORT 9260)"
+HOST_URL="http://127.0.0.1:${PORT_VALUE}"
+ATTEMPTS="${UTTERLOG_HEALTH_ATTEMPTS:-60}"
+
+systemd() {
+  if [ "$(id -u)" -eq 0 ]; then
+    systemctl "$@" "$SERVICE" 9>&-
+  else
+    sudo systemctl "$@" "$SERVICE" 9>&-
+  fi
+}
+
+cleanup_stage() {
+  if [ -n "$STAGE" ]; then
+    run_as_app git worktree remove --force "$STAGE" >/dev/null 2>&1 || true
+  fi
+}
+
+failed() {
+  local code="$1" path rollback_ok=1
+  trap - ERR
+  trap '' INT TERM
+  set +e
+  if [ "$SWITCHING" -eq 1 ]; then
+    log "恢复上一版本 [$OLD_REV]"
+    if systemd stop; then
+      run_as_app git reset --keep "$OLD_REV" || rollback_ok=0
+      for path in "${SWITCHED[@]}"; do
+        if [ -e "$ROOT/$path" ] || [ -L "$ROOT/$path" ]; then
+          run_as_app mkdir -p "$STAGE/$(dirname "$path")"
+          run_as_app mv "$ROOT/$path" "$STAGE/$path" || rollback_ok=0
+        fi
+        if [ -e "$PREVIOUS/$path" ] || [ -L "$PREVIOUS/$path" ]; then
+          run_as_app mv "$PREVIOUS/$path" "$ROOT/$path" || rollback_ok=0
+        fi
+      done
+      systemd start || rollback_ok=0
+      for attempt in $(seq 1 "$ATTEMPTS"); do
+        if bash "$CHECK_HOST" "$HOST_URL" "$BUN_BIN"; then break; fi
+        if [ "$attempt" -eq "$ATTEMPTS" ]; then rollback_ok=0; else sleep 2; fi
+      done
+    else
+      rollback_ok=0
+    fi
+    if [ "$rollback_ok" -eq 1 ]; then log '上一版本已恢复'; else log "ERROR 自动回退未完成，上一版本产物保存在 $PREVIOUS"; fi
+  fi
+  if [ "$rollback_ok" -eq 1 ]; then cleanup_stage; fi
+  rm -f "$REQUEST_FILE"
+  log "ERROR 更新任务失败（exit=$code）"
+  log '升级应用 [Utterlog] 失败 [TASK-END]'
+  exit "$code"
+}
+
 cd "$ROOT"
+trap 'failed $?' ERR
+trap 'failed 130' INT
+trap 'failed 143' TERM
 log '升级应用 [Utterlog] 任务开始 [START]'
 log "安装目录 [$ROOT]"
 log "Bun [$($BUN_BIN --version)]"
 
-OLD_REV="$(git rev-parse HEAD)"
-BRANCH="$(git symbolic-ref --quiet --short HEAD || true)"
-[ -n "$BRANCH" ] || { log 'ERROR 当前 Git checkout 不在分支上'; false; }
-
-log "拉取源码 [$BRANCH]"
-run_as_app git fetch --tags origin "$BRANCH"
-run_as_app git merge --ff-only "origin/$BRANCH"
-NEW_REV="$(git rev-parse HEAD)"
+case "$ATTEMPTS" in (*[!0-9]*|''|0) log 'ERROR invalid UTTERLOG_HEALTH_ATTEMPTS'; false ;; esac
+[ -z "$(run_as_app git status --porcelain --untracked-files=no)" ] || { log 'ERROR 源码存在未提交修改'; false; }
+OLD_REV="$(run_as_app git rev-parse HEAD)"
+BRANCH="$(run_as_app git symbolic-ref --quiet --short HEAD || true)"
+if [ -n "$BRANCH" ]; then
+  run_as_app git fetch origin "$BRANCH"
+  NEW_REV="$(run_as_app git rev-parse FETCH_HEAD)"
+  run_as_app git merge-base --is-ancestor "$OLD_REV" "$NEW_REV"
+else
+  TAG="${UTTERLOG_UPDATE_TAG:-}"
+  if [ -z "$TAG" ]; then
+    TAG="$(curl -fsS --max-time 20 https://api.github.com/repos/utterlog/utterlog/releases/latest | "$BUN_BIN" -e '
+      const release = await Bun.stdin.json();
+      if (!release.assets?.some((asset) => asset.name === "install.sh")) process.exit(1);
+      console.log(release.tag_name);
+    ')"
+  fi
+  [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { log 'ERROR 无效的发布版本'; false; }
+  run_as_app git fetch origin "refs/tags/$TAG"
+  NEW_REV="$(run_as_app git rev-parse 'FETCH_HEAD^{commit}')"
+fi
 log "源码版本 [${OLD_REV:0:12} -> ${NEW_REV:0:12}]"
 
-log '安装 Bun 依赖'
-run_as_app "$BUN_BIN" install --frozen-lockfile
-log '类型检查、构建、测试与 API 审计'
-run_as_app "$BUN_BIN" run verify
+STAGE="$(run_as_app mktemp -d "$ROOT/.runtime/build.XXXXXX")"
+run_as_app git worktree add --detach "$STAGE" "$NEW_REV"
+log '在独立目录安装依赖、构建和验证'
+(cd "$STAGE" && run_as_app "$BUN_BIN" install --frozen-lockfile && \
+  run_as_app env UTTERLOG_INTEGRATION_DB=0 UTTERLOG_RESTORE_INTEGRATION_DB=0 "$BUN_BIN" run verify) || failed $?
+for path in "${ARTIFACTS[@]}"; do [ -d "$STAGE/$path" ]; done
 
-if command -v systemctl >/dev/null 2>&1; then
-  log "重启 systemd 服务 [$SERVICE]"
-  if [ "$(id -u)" -eq 0 ]; then
-    systemctl restart "$SERVICE"
-  else
-    sudo systemctl restart "$SERVICE"
-  fi
+PREVIOUS="$(run_as_app mktemp -d "$ROOT/.runtime/previous.XXXXXX")"
+CHECK_HOST="$PREVIOUS/check-host.sh"
+run_as_app cp "$STAGE/scripts/check-host.sh" "$CHECK_HOST"
+printf '%s\n' "$OLD_REV" > "$PREVIOUS/commit"
+SWITCHING=1
+systemd stop
+if [ -n "$BRANCH" ]; then
+  run_as_app git merge --ff-only "$NEW_REV"
 else
-  log 'ERROR 未检测到 systemctl，无法重启应用服务'
-  false
+  run_as_app git checkout --detach "$NEW_REV"
 fi
+for path in "${ARTIFACTS[@]}"; do
+  run_as_app mkdir -p "$PREVIOUS/$(dirname "$path")"
+  if [ -e "$ROOT/$path" ] || [ -L "$ROOT/$path" ]; then
+    run_as_app mv "$ROOT/$path" "$PREVIOUS/$path"
+  fi
+  SWITCHED+=("$path")
+  run_as_app mv "$STAGE/$path" "$ROOT/$path"
+done
+systemd start
 
-PORT_VALUE="$(env_value PORT 9260)"
-log "等待健康检查 [127.0.0.1:${PORT_VALUE}]"
-healthy=0
-for _ in $(seq 1 60); do
-  if curl -fsS --max-time 3 "http://127.0.0.1:${PORT_VALUE}/api/v1/install/status" >/dev/null 2>&1; then
-    healthy=1
-    break
+log "等待数据库、运行版本、首页和后台通过检查 [$HOST_URL]"
+for attempt in $(seq 1 "$ATTEMPTS"); do
+  if bash "$CHECK_HOST" "$HOST_URL" "$BUN_BIN" "$NEW_REV"; then break; fi
+  if [ "$attempt" -eq "$ATTEMPTS" ]; then
+    log "ERROR 健康检查超时，请查看 journalctl -u $SERVICE -n 100"
+    false
   fi
   sleep 2
 done
-[ "$healthy" -eq 1 ] || { log "ERROR 健康检查超时，请执行 journalctl -u $SERVICE -n 100"; false; }
 
-rm -f "$REQUEST_FILE"
-trap - ERR
+SWITCHING=0
+cleanup_stage
+trap - ERR INT TERM
+# Keep the immediate previous version and discard older snapshots created here.
+for old in "$ROOT"/.runtime/previous.*; do
+  if [ "$old" != "$PREVIOUS" ] && [ -f "$old/commit" ]; then run_as_app rm -rf -- "$old"; fi
+done
 log "当前源码 [$NEW_REV]"
 log '升级应用 [Utterlog] 成功 [TASK-END]'
 

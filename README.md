@@ -29,20 +29,20 @@
 
 博客前台使用 TanStack Start 服务端渲染，管理后台采用单页应用模式。两者使用 React 19 和 Tailwind CSS 4，并通过 Vite 构建。
 
-一个 Bun 进程在同一端口提供博客前台、`/admin` 和 `/api/v1`。后端使用 TypeScript，数据存于 PostgreSQL 18 或 19，需要启用 `pgvector`。媒体文件支持本地磁盘以及 S3、Cloudflare R2 等兼容的对象存储。
+一个 Bun 进程在同一端口提供博客前台、`/admin` 和 `/api/v1`。后端使用 TypeScript，数据存于 PostgreSQL 19，需要启用 `pgvector`。媒体文件支持本地磁盘以及 S3、Cloudflare R2 等兼容的对象存储。
 
 ## 安装
 
 安装脚本适用于使用 systemd 的 64 位 Linux。在 Debian 和 Ubuntu 上，脚本可自动安装本地 PostgreSQL 和 `pgvector`。已有数据库也可直接接入，配置见 [安装指南](INSTALL.md)。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo bash
+curl -fsSL https://utterlog.io/install.sh | sudo bash
 ```
 
 使用公开域名时，可在运行安装器时指定 `DOMAIN`。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/utterlog/utterlog/main/install.sh | sudo DOMAIN=blog.example.com bash
+curl -fsSL https://utterlog.io/install.sh | sudo DOMAIN=blog.example.com bash
 ```
 
 服务默认监听 `127.0.0.1:9260`。通过公开域名访问时，请在反向代理上配置 HTTPS。首次访问 `/install`，按向导创建管理员并设置站点信息。 [反向代理配置](deploy/README.md)

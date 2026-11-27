@@ -1,13 +1,35 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { cp, mkdir, rm } from 'node:fs/promises';
-import { basename, dirname, join } from 'node:path';
-import { validateBackupZipEntries } from '../backup/zip-safety';
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+import { restoreDatabase } from '../backup/restore-database';
+import { stageRestoreFiles } from '../backup/restore-files';
+import { crc32, extractBackupZip, readBackupZipEntries } from '../backup/zip-safety';
 import { config } from '../config';
+import { sql } from '../db/client';
 import { nowUnix, one } from '../db/helpers';
 import { optionValue, saveOption } from '../db/options';
 import { publicStorageUrl, putStorageObject, storageSettings } from '../media/storage';
 
 const backupDir = process.env.BACKUP_DIR || 'backups';
+const backupLock = 'utterlog:backup';
+
+async function withBackupLock<T>(run: () => Promise<T>): Promise<T> {
+  const connection = await sql.reserve();
+  try {
+    const [{ locked }] = await connection<{ locked: boolean }[]>`
+      select pg_try_advisory_lock(hashtext(${backupLock})) as locked`;
+    if (!locked) throw new BackupServiceError(409, 'BACKUP_BUSY', '已有备份任务正在运行');
+    try {
+      return await run();
+    } finally {
+      await connection`select pg_advisory_unlock(hashtext(${backupLock}))`.catch((error) => {
+        console.error('Failed to release backup advisory lock:', error);
+      });
+    }
+  } finally {
+    connection.release();
+  }
+}
 
 async function backupTimestamp(date = new Date()) {
   const timeZone = (await optionValue('site_timezone', 'UTC')).trim() || 'UTC';
@@ -31,13 +53,6 @@ async function runCommand(cmd: string[]) {
     proc.exited,
   ]);
   return { code, stdout, stderr };
-}
-
-async function restoreExtractedFiles(root: string) {
-  const uploadsRoot = join(root, 'uploads');
-  const contentRoot = join(root, 'content');
-  if (existsSync(uploadsRoot)) await cp(uploadsRoot, config.uploadDir, { recursive: true, force: true });
-  if (existsSync(contentRoot)) await cp(contentRoot, config.contentDir, { recursive: true, force: true });
 }
 
 function safeBackupPath(filename?: string) {
@@ -75,18 +90,6 @@ function fileCount(path: string): number {
   return readdirSync(path).reduce((sum, name) => sum + fileCount(join(path, name)), 0);
 }
 
-const crcTable = new Uint32Array(256).map((_, n) => {
-  let c = n;
-  for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
-  return c >>> 0;
-});
-
-function crc32(data: Uint8Array) {
-  let crc = 0xffffffff;
-  for (const byte of data) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
 function dosDateTime(date = new Date()) {
   const time = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
   const day = Math.max(1, date.getDate());
@@ -116,7 +119,7 @@ function buildZip(files: { name: string; data: Buffer }[]) {
     const local = Buffer.alloc(30);
     local.writeUInt32LE(0x04034b50, 0);
     local.writeUInt16LE(20, 4);
-    local.writeUInt16LE(0, 6);
+    local.writeUInt16LE(0x0800, 6); // Names are UTF-8.
     local.writeUInt16LE(0, 8);
     local.writeUInt16LE(stamp.time, 10);
     local.writeUInt16LE(stamp.date, 12);
@@ -131,7 +134,7 @@ function buildZip(files: { name: string; data: Buffer }[]) {
     central.writeUInt32LE(0x02014b50, 0);
     central.writeUInt16LE(20, 4);
     central.writeUInt16LE(20, 6);
-    central.writeUInt16LE(0, 8);
+    central.writeUInt16LE(0x0800, 8);
     central.writeUInt16LE(0, 10);
     central.writeUInt16LE(stamp.time, 12);
     central.writeUInt16LE(stamp.date, 14);
@@ -181,6 +184,7 @@ async function createBackupArchive(options: { includeUploads?: boolean } = {}) {
     '-p', String(config.dbPort),
     '-U', config.dbUser,
     '-d', config.dbName,
+    '--encoding=UTF8',
     '--no-owner',
     '--no-acl',
     '-f', dbDumpPath,
@@ -218,13 +222,15 @@ async function syncBackupToCloud(backup: Awaited<ReturnType<typeof createBackupA
 }
 
 async function createConfiguredBackup() {
-  const destination = await configuredBackupDestination();
-  const backup = await createBackupArchive({ includeUploads: destination === 'local' });
-  if (destination === 's3' || destination === 'r2') {
-    const cloud = await syncBackupToCloud(backup, destination);
-    return { ...backup, destination, cloud };
-  }
-  return { ...backup, destination };
+  return withBackupLock(async () => {
+    const destination = await configuredBackupDestination();
+    const backup = await createBackupArchive({ includeUploads: destination === 'local' });
+    if (destination === 's3' || destination === 'r2') {
+      const cloud = await syncBackupToCloud(backup, destination);
+      return { ...backup, destination, cloud };
+    }
+    return { ...backup, destination };
+  });
 }
 
 let backupSchedulerStarted = false;
@@ -266,6 +272,7 @@ async function runScheduledBackup() {
     ]);
     console.log(`[backup-scheduler] created=${backup.filename} destination=${backup.destination} deleted=${deleted}`);
   } catch (err) {
+    if (err instanceof BackupServiceError && err.code === 'BACKUP_BUSY') return;
     const message = err instanceof Error ? err.message : 'backup failed';
     await saveOption('backup_last_status', `error: ${message.slice(0, 240)}`).catch(() => {});
     console.error('[backup-scheduler] error', err);
@@ -331,38 +338,82 @@ export async function createBackupPayload() {
     await saveOption('backup_last_status', `ok: ${backup.filename}, destination=${backup.destination}, deleted=${deleted}`);
     return { ...backup, deleted_old_backups: deleted };
   } catch (error) {
+    if (error instanceof BackupServiceError) throw error;
     throw new BackupServiceError(500, 'DUMP_ERROR', error instanceof Error ? error.message : '数据库导出失败');
   }
 }
 
-export async function importBackupFile(uploaded: File) {
-  mkdirSync(backupDir, { recursive: true });
-  const tmpPath = join(backupDir, `import-${Date.now()}-${basename(uploaded.name || 'backup.zip')}`);
-  const extractDir = join(backupDir, `import-tmp-${Date.now()}`);
-  await mkdir(dirname(tmpPath), { recursive: true });
-  const uploadedBytes = Buffer.from(await uploaded.arrayBuffer());
+export function importBackupFile(uploaded: File) {
+  return withBackupLock(() => restoreBackup(uploaded));
+}
+
+async function restoreBackup(uploaded: File) {
+  let workDir: string | undefined;
   try {
-    validateBackupZipEntries(uploadedBytes);
-  } catch (error) {
-    throw new BackupServiceError(400, 'ZIP_UNSAFE', error instanceof Error ? error.message : '备份文件不安全');
-  }
-  writeFileSync(tmpPath, uploadedBytes);
-  await mkdir(extractDir, { recursive: true });
-  try {
-    const unzip = await runCommand(['unzip', '-q', tmpPath, '-d', extractDir]);
-    if (unzip.code !== 0) throw new BackupServiceError(400, 'ZIP_ERROR', unzip.stderr || '无效的备份文件');
-    const dbPath = join(extractDir, 'database.sql');
-    await restoreExtractedFiles(extractDir);
-    let dbRestored = false;
-    if (existsSync(dbPath)) {
-      const restore = await runCommand(['psql', '-h', config.dbHost, '-p', String(config.dbPort), '-U', config.dbUser, '-d', config.dbName, '-f', dbPath]);
-      if (restore.code !== 0) throw new BackupServiceError(500, 'RESTORE_ERROR', restore.stderr || '数据库恢复失败');
-      dbRestored = true;
+    let zip: ReturnType<typeof readBackupZipEntries>;
+    try {
+      zip = readBackupZipEntries(Buffer.from(await uploaded.arrayBuffer()));
+    } catch (error) {
+      throw new BackupServiceError(400, 'ZIP_UNSAFE', error instanceof Error ? error.message : '备份文件不安全');
     }
-    return { restored: true, db_restored: dbRestored, files: fileCount(extractDir) };
+    await mkdir(backupDir, { recursive: true });
+    workDir = await mkdtemp(join(backupDir, '.import-'));
+    try {
+      await extractBackupZip(zip, workDir);
+    } catch (error) {
+      throw new BackupServiceError(400, 'ZIP_ERROR', error instanceof Error ? error.message : '无效的备份文件');
+    }
+
+    const entries = zip.map(({ name }) => name);
+    let dump: string | undefined;
+    if (entries.includes('database.sql')) {
+      dump = new TextDecoder('utf-8', { fatal: true }).decode(await readFile(join(workDir, 'database.sql')));
+    }
+    const files = await stageRestoreFiles(workDir, entries);
+    let publishedTransaction: string | undefined;
+    try {
+      if (dump === undefined) {
+        files.publish();
+      } else {
+        await sql.begin(async (tx) => {
+          await restoreDatabase(tx, dump);
+          const [{ id }] = await tx<{ id: string }[]>`select pg_current_xact_id()::text as id`;
+          files.publish();
+          publishedTransaction = id;
+        });
+      }
+    } catch (error) {
+      const transactionId = publishedTransaction;
+      if (transactionId) {
+        // A dropped connection can hide the result of COMMIT from the client.
+        const outcome = await sql<{ status: string | null }[]>`
+          select pg_xact_status(${transactionId}::xid8) as status`.catch(() => []);
+        const status = outcome[0]?.status;
+        if (status === 'committed') {
+          await files.cleanup();
+          return { restored: true, db_restored: true, files: entries.length };
+        }
+        if (status !== 'aborted') {
+          console.error('Backup restore commit result unknown:', transactionId, files.workDirs, error);
+          throw new BackupServiceError(500, 'RESTORE_OUTCOME_UNKNOWN', '无法确认数据库是否已提交。请保留恢复暂存目录并查看服务日志');
+        }
+      }
+      try { files.rollback(); }
+      catch (rollbackError) {
+        console.error('Backup restore rollback failed:', rollbackError);
+        throw new BackupServiceError(500, 'RESTORE_ERROR', (rollbackError as Error).message);
+      }
+      await files.cleanup();
+      throw error;
+    }
+    await files.cleanup();
+    return { restored: true, db_restored: dump !== undefined, files: entries.length };
+  } catch (error) {
+    if (error instanceof BackupServiceError) throw error;
+    console.error('Backup restore failed:', error);
+    throw new BackupServiceError(500, 'RESTORE_ERROR', '恢复备份失败，请查看服务日志');
   } finally {
-    await rm(tmpPath, { force: true }).catch(() => {});
-    await rm(extractDir, { recursive: true, force: true }).catch(() => {});
+    if (workDir) await rm(workDir, { recursive: true, force: true }).catch(() => {});
   }
 }
 

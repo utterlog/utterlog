@@ -3,6 +3,8 @@ name: Build Bun release artifact
 on:
   push:
     tags: ['v*']
+  release:
+    types: [published]
   workflow_dispatch:
 
 env:
@@ -41,7 +43,7 @@ jobs:
             --exclude='content' \
             --exclude='.env' \
             -czf "utterlog-${RELEASE_VERSION}.tar.gz" \
-            AGENT.md LICENSE README.md INSTALL.md package.json bun.lock bunfig.toml tsconfig.json \
+            AGENT.md LICENSE README.md INSTALL.md .env.example package.json bun.lock bunfig.toml tsconfig.json \
             install.sh Makefile app deploy scripts
 
       - name: Upload release artifact
@@ -51,3 +53,46 @@ jobs:
           path: utterlog-${{ github.ref_name }}.tar.gz
           if-no-files-found: error
           retention-days: 14
+
+      - name: Prepare tagged installer
+        if: github.ref_type == 'tag'
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          [[ "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          bun -e 'if ("v" + (await Bun.file("package.json").json()).version !== process.env.RELEASE_VERSION) process.exit(1)'
+          mkdir release-files
+          sed "s/^DEFAULT_REF=main$/DEFAULT_REF=$RELEASE_VERSION/" install.sh > release-files/install.sh
+          cp scripts/update-bun.sh release-files/update-bun.sh
+          mv "utterlog-${RELEASE_VERSION}.tar.gz" release-files/
+          (cd release-files && sha256sum install.sh update-bun.sh "utterlog-${RELEASE_VERSION}.tar.gz" > SHA256SUMS)
+
+      - name: Upload tagged release files
+        if: github.ref_type == 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: release-files/
+          if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-files
+      - name: Attach verified files to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          existing="$(gh release view "$RELEASE_VERSION" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          for asset in install.sh update-bun.sh "utterlog-${RELEASE_VERSION}.tar.gz" SHA256SUMS; do
+            if ! grep -Fxq "$asset" <<< "$existing"; then
+              gh release upload "$RELEASE_VERSION" "$asset" --repo "$GITHUB_REPOSITORY"
+            fi
+          done

@@ -13,9 +13,7 @@ for arg in "$@"; do
         'Usage: sudo bash scripts/deploy.sh [--no-build] [--skip-db-setup]' \
         '' \
         'Installs Bun host prerequisites, configures PostgreSQL and systemd, builds and starts Utterlog.' \
-        '' \
-        'Environment:' \
-        '  PG_MAJOR   PostgreSQL major to install locally (default 19; set 18 for the last GA release)'
+        'Requires PostgreSQL 19 with pgvector.'
       exit 0
       ;;
     *) printf 'Unknown argument: %s\n' "$arg" >&2; exit 2 ;;
@@ -36,10 +34,6 @@ ROOT="${UTTERLOG_INSTALL_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 APP_USER="${UTTERLOG_SERVICE_USER:-utterlog}"
 APP_GROUP="${UTTERLOG_SERVICE_GROUP:-$APP_USER}"
 SERVICE="${UTTERLOG_SERVICE:-utterlog-app}"
-# PostgreSQL 主版本号。19 目前是 beta，服务端包只在 PGDG 的 -pgdg-testing
-# 套件里（组件名就是主版本号），扩展包仍在 main。设 PG_MAJOR=18 可退回上一个
-# 正式版。安装器会自己判断该不该加 testing 源，不用手工配。
-PG_MAJOR="${PG_MAJOR:-19}"
 UPDATE_REQUEST_FILE="${UTTERLOG_UPDATE_REQUEST_FILE:-$ROOT/.runtime/update.request}"
 ENV_FILE="$ROOT/.env"
 
@@ -51,7 +45,9 @@ install_base_packages() {
   if command -v apt-get >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq
-    apt-get install -y ca-certificates curl git gnupg openssl rsync unzip postgresql-client >/dev/null
+    apt-get install -y ca-certificates curl git gnupg openssl rsync unzip >/dev/null
+    configure_pgdg
+    apt-get install -y postgresql-client-19 >/dev/null
   elif command -v dnf >/dev/null 2>&1; then
     dnf install -y ca-certificates curl git openssl rsync unzip postgresql >/dev/null
   elif command -v yum >/dev/null 2>&1; then
@@ -67,10 +63,10 @@ version_at_least() {
 
 ensure_bun() {
   BUN_BIN="$(command -v bun || true)"
-  if [ -n "$BUN_BIN" ] && version_at_least "$($BUN_BIN --version)" 1.4.0; then
+  if [ -n "$BUN_BIN" ] && version_at_least "$($BUN_BIN --version)" 1.4.5; then
     return
   fi
-  log 'Installing Bun 1.4+'
+  log 'Installing Bun 1.4.5+'
   export BUN_INSTALL=/opt/bun
   curl -fsSL https://bun.sh/install | bash >/dev/null
   [ -x /opt/bun/bin/bun ] || die 'Bun installation failed.'
@@ -116,42 +112,45 @@ valid_ident() {
   [[ "$1" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]
 }
 
-# apt 里 postgresql-<major> 是否真的可安装。`apt-cache show` 不行——只要有别的
-# 包依赖这个名字，它就返回成功；要看 policy 的 Candidate 才准。
-pg_has_candidate() {
-  local candidate
-  candidate="$(apt-cache policy "postgresql-$1" 2>/dev/null | awk '/Candidate:/ {print $2; exit}')"
-  [ -n "$candidate" ] && [ "$candidate" != '(none)' ]
-}
-
-install_local_postgres() {
-  command -v apt-get >/dev/null 2>&1 || die "Automatic PostgreSQL ${PG_MAJOR} installation currently supports Debian/Ubuntu. Configure an external PostgreSQL ${PG_MAJOR} + pgvector instance and rerun with --skip-db-setup."
+configure_pgdg() {
   local codename
   codename="$(. /etc/os-release && printf '%s' "${VERSION_CODENAME:-}")"
   [ -n "$codename" ] || die 'Cannot determine Debian/Ubuntu codename.'
   install -d -m 0755 /usr/share/postgresql-common/pgdg
   curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
   printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg main\n' "$codename" > /etc/apt/sources.list.d/pgdg.list
-  rm -f /etc/apt/sources.list.d/pgdg-testing.list
   apt-get update -qq
-  # 未发布的主版本（当前的 19）只在 -pgdg-testing 里，且组件名就是主版本号，
-  # 所以只会引入这一个大版本的包，不会把其它 PGDG 包也拉到 testing 版本。
-  # 注意用 policy 判断而不是 `apt-cache show`：主源里的 postgresql-19-pgvector
-  # 依赖 postgresql-19，这会让 `show` 对一个装不了的包名也返回成功。
-  local apt_target=()
-  if ! pg_has_candidate "$PG_MAJOR"; then
-    log "PostgreSQL ${PG_MAJOR} is not in the PGDG main suite; enabling ${codename}-pgdg-testing"
-    printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg-testing %s\n' "$codename" "$PG_MAJOR" > /etc/apt/sources.list.d/pgdg-testing.list
-    apt-get update -qq
-    pg_has_candidate "$PG_MAJOR" \
-      || die "PostgreSQL ${PG_MAJOR} is unavailable for ${codename} in both PGDG suites. Set PG_MAJOR to a released major (for example PG_MAJOR=18) and rerun."
-    # PGDG 的 testing 套件是 NotAutomatic（优先级 100），apt 会宁可从 main 取旧的
-    # libpq5，导致 postgresql-client-N 的 libpq5 (>= N~beta) 依赖无法满足。用 -t
-    # 把该套件提到目标优先级，共享库才会跟着一起升。
-    apt_target=(-t "${codename}-pgdg-testing")
-  fi
-  apt-get install -y "${apt_target[@]}" "postgresql-${PG_MAJOR}" "postgresql-client-${PG_MAJOR}" "postgresql-${PG_MAJOR}-pgvector" >/dev/null
+}
+
+require_pg19() {
+  case "$1" in
+    19[0-9][0-9][0-9][0-9]) ;;
+    *) die "PostgreSQL 19 is required at ${2}. Migrate the existing database to 19 and update DB_HOST/DB_PORT. See INSTALL.md." ;;
+  esac
+}
+
+install_local_postgres() {
+  command -v apt-get >/dev/null 2>&1 || die 'Automatic PostgreSQL 19 installation supports Debian/Ubuntu. Configure PostgreSQL 19 with pgvector and rerun.'
+  apt-get install -y postgresql-19 postgresql-19-pgvector >/dev/null
   systemctl enable --now postgresql
+  if ! pg_lsclusters -h | awk -v port="$1" '$1 == 19 && $3 == port { found = 1 } END { exit !found }'; then
+    pg_createcluster 19 utterlog --port "$1" --start
+  fi
+}
+
+verify_database() {
+  local host port database user password version
+  host="$(env_get DB_HOST 127.0.0.1)"
+  port="$(env_get DB_PORT 5432)"
+  database="$(env_get DB_NAME utterlog)"
+  user="$(env_get DB_USER utterlog)"
+  password="$(env_get DB_PASSWORD)"
+  version="$(PGPASSWORD="$password" psql -X -h "$host" -p "$port" -U "$user" -d "$database" -v ON_ERROR_STOP=1 -tAc 'show server_version_num')" \
+    || die "Cannot connect to PostgreSQL at $host:$port/$database."
+  require_pg19 "$version" "$host:$port"
+  PGPASSWORD="$password" psql -X -h "$host" -p "$port" -U "$user" -d "$database" -v ON_ERROR_STOP=1 \
+    -c 'create extension if not exists vector' >/dev/null || die 'Ask the database administrator to enable pgvector.'
+  ok "PostgreSQL 19 ready at $host:$port/$database"
 }
 
 setup_database() {
@@ -167,30 +166,27 @@ setup_database() {
 
   if [ "$db_host" = 127.0.0.1 ] || [ "$db_host" = localhost ]; then
     if ! command -v pg_isready >/dev/null 2>&1 || ! pg_isready -h "$db_host" -p "$db_port" >/dev/null 2>&1; then
-      log "Installing local PostgreSQL ${PG_MAJOR} + pgvector"
-      install_local_postgres
+      log "Installing local PostgreSQL 19 + pgvector"
+      install_local_postgres "$db_port"
     fi
     id postgres >/dev/null 2>&1 || die 'Local PostgreSQL service user is missing.'
-    if runuser -u postgres -- psql -tAc "select 1 from pg_roles where rolname='$db_user'" | grep -q 1; then
-      runuser -u postgres -- psql -v ON_ERROR_STOP=1 -v "db_password=$db_password" >/dev/null <<SQL
+    local version
+    version="$(runuser -u postgres -- psql -X -p "$db_port" -d postgres -v ON_ERROR_STOP=1 -tAc 'show server_version_num')"
+    require_pg19 "$version" "$db_host:$db_port"
+    if runuser -u postgres -- psql -X -p "$db_port" -d postgres -tAc "select 1 from pg_roles where rolname='$db_user'" | grep -q 1; then
+      runuser -u postgres -- psql -X -p "$db_port" -d postgres -v ON_ERROR_STOP=1 -v "db_password=$db_password" >/dev/null <<SQL
 alter role "$db_user" with login password :'db_password';
 SQL
     else
-      runuser -u postgres -- psql -v ON_ERROR_STOP=1 -v "db_password=$db_password" >/dev/null <<SQL
+      runuser -u postgres -- psql -X -p "$db_port" -d postgres -v ON_ERROR_STOP=1 -v "db_password=$db_password" >/dev/null <<SQL
 create role "$db_user" with login password :'db_password';
 SQL
     fi
-    if ! runuser -u postgres -- psql -tAc "select 1 from pg_database where datname='$db_name'" | grep -q 1; then
-      runuser -u postgres -- createdb -O "$db_user" "$db_name"
+    if ! runuser -u postgres -- psql -X -p "$db_port" -d postgres -tAc "select 1 from pg_database where datname='$db_name'" | grep -q 1; then
+      runuser -u postgres -- createdb -p "$db_port" -O "$db_user" "$db_name"
     fi
-    runuser -u postgres -- psql -v ON_ERROR_STOP=1 -d "$db_name" -c 'create extension if not exists vector' >/dev/null
-  else
-    PGPASSWORD="$db_password" psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1 -tAc 'select 1' >/dev/null \
-      || die 'Cannot connect to the configured external PostgreSQL database.'
-    PGPASSWORD="$db_password" psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1 -c 'create extension if not exists vector' >/dev/null \
-      || die 'pgvector is unavailable or DB_USER cannot create the vector extension.'
+    runuser -u postgres -- psql -X -p "$db_port" -v ON_ERROR_STOP=1 -d "$db_name" -c 'create extension if not exists vector' >/dev/null
   fi
-  ok "PostgreSQL ready at $db_host:$db_port/$db_name"
 }
 
 render_unit() {
@@ -214,6 +210,10 @@ run_as_app() {
 
 log 'Installing host prerequisites'
 install_base_packages
+case "$(pg_dump --version)" in
+  *' 19.'*) ;;
+  *) die 'Install the PostgreSQL 19 client tools (including pg_dump) on PATH.' ;;
+esac
 ensure_bun
 ok "Bun $($BUN_BIN --version)"
 
@@ -253,13 +253,14 @@ env_set UTTERLOG_SERVICE_USER "$APP_USER"
 env_set UTTERLOG_UPDATE_PATH_UNIT utterlog-update.path
 env_set UTTERLOG_UPDATE_REQUEST_FILE "$UPDATE_REQUEST_FILE"
 
-mkdir -p "$ROOT/uploads" "$ROOT/content/themes" "$ROOT/content/plugins" "$ROOT/backup" "$ROOT/.runtime"
+mkdir -p "$ROOT/uploads" "$ROOT/content/themes" "$ROOT/content/plugins" "$ROOT/backups" "$ROOT/.runtime"
 chown -R "$APP_USER:$APP_GROUP" "$ROOT"
 chmod 600 "$ENV_FILE"
 
 if [ "$SETUP_DB" -eq 1 ]; then
   setup_database
 fi
+verify_database
 
 if [ "$BUILD" -eq 1 ]; then
   log 'Installing dependencies and verifying the Bun build'
@@ -279,7 +280,7 @@ systemctl restart "$SERVICE"
 PORT_VALUE="$(env_get PORT 9260)"
 log "Waiting for http://127.0.0.1:${PORT_VALUE}/api/v1/install/status"
 for attempt in $(seq 1 60); do
-  if curl -fsS --max-time 3 "http://127.0.0.1:${PORT_VALUE}/api/v1/install/status" >/dev/null 2>&1; then
+  if bash "$ROOT/scripts/check-host.sh" "http://127.0.0.1:${PORT_VALUE}" "$BUN_BIN" '' setup; then
     ok "Utterlog is running on 127.0.0.1:${PORT_VALUE}"
     printf 'Logs: journalctl -u %s -f\n' "$SERVICE"
     exit 0

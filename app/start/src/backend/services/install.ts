@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { TransactionSql } from 'postgres';
 import { z } from 'zod';
 import { config, table } from '../config';
-import { dbReady as databaseReady, sql, tableExists } from '../db/client';
+import { dbReady as databaseReady, POSTGRES_MAJOR, sql, tableExists } from '../db/client';
 import { nowUnix } from '../db/helpers';
 import { appVersion } from '../system/metrics';
 
@@ -159,15 +159,20 @@ export async function testSetupDatabase(input: unknown) {
   const postgres = (await import('postgres')).default;
   const client = postgres({ host, port, database, username, password: password || undefined, max: 1, connect_timeout: 5 });
   try {
-    const version = await client<{ server_version: string }[]>`show server_version`;
+    const [{ version, versionNum }] = await client<{ version: string; versionNum: number }[]>`
+      select current_setting('server_version') as version, current_setting('server_version_num')::int as "versionNum"`;
+    if (Math.floor(versionNum / 10_000) !== POSTGRES_MAJOR) {
+      throw new InstallServiceError(400, 'DB_VERSION_UNSUPPORTED', `需要 PostgreSQL ${POSTGRES_MAJOR}，当前服务器版本为 ${version}`);
+    }
     const serverInfo = await client<{ server_addr: string | null }[]>`select inet_server_addr()::text as server_addr`.catch(() => []);
     const existingTables = await client<{ count: number }[]>`
       select count(*)::int as count from information_schema.tables
       where table_schema = 'public' and table_name like ${`${config.dbPrefix}%`}`.catch(() => []);
-    return { ok: true, version: version[0]?.server_version || '', deployment: ['127.0.0.1', 'localhost', '::1'].includes(host) ? 'local' : 'external',
+    return { ok: true, version, deployment: ['127.0.0.1', 'localhost', '::1'].includes(host) ? 'local' : 'external',
       address: `${host}:${port}`, server_addr: serverInfo[0]?.server_addr || '',
       has_utterlog_tables: Number(existingTables[0]?.count || 0) > 0 };
   } catch (error) {
+    if (error instanceof InstallServiceError) throw error;
     throw new InstallServiceError(400, 'DB_CONNECT_FAILED', error instanceof Error ? error.message : '数据库连接失败');
   } finally {
     await client.end({ timeout: 1 }).catch(() => {});

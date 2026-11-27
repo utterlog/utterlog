@@ -7,7 +7,7 @@
 | 工具 | 版本 | 用途 |
 |---|---|---|
 | Bun | 1.4.0+ | 运行时、包管理、测试与构建 |
-| PostgreSQL | 19 + pgvector | 本地或外部数据库（18 亦可）|
+| PostgreSQL | 19 + pgvector | 本地或外部数据库|
 
 项目只维护根目录 `bun.lock`，不要在 workspace 下生成独立锁文件。
 
@@ -60,7 +60,7 @@ deploy/systemd/            主机服务与后台更新单元模板
 
 ## 数据库与测试
 
-本地 PostgreSQL 需要启用 pgvector：
+本地 PostgreSQL 19 需要启用 pgvector：
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -74,6 +74,16 @@ DB_HOST=127.0.0.1 DB_PORT=5432 \
 DB_NAME=utterlog_test DB_USER=utterlog_test DB_PASSWORD=utterlog_test \
 bun run test:server
 ```
+
+备份恢复集成测试需要空的 `utterlog_restore_test` 测试库。由数据库管理员预装 `vector`，将库交给普通测试角色，并使用 `ul_` 表前缀。测试会在库中写入测试数据，每次运行前请准备新的空库。
+
+```bash
+DB_HOST=127.0.0.1 DB_PORT=5432 DB_PREFIX=ul_ \
+DB_NAME=utterlog_restore_test DB_USER=utterlog_test DB_PASSWORD=utterlog_test \
+bun run test:restore
+```
+
+CI 还会从上一正式版构建并启动真实 Bun 服务，在独立的 `utterlog_upgrade_test` 库上验证健康检查失败后的应用回退，以及正常升级。可使用相同数据库连接参数运行 `bash scripts/test-host-update.sh`。
 
 schema 变更后：
 

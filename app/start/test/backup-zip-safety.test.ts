@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
-import { validateBackupZipEntries } from '../src/backend/backup/zip-safety';
+import { readBackupZipEntries } from '../src/backend/backup/zip-safety';
 
-function makeStoredZip(entries: { name: string; data?: string }[]) {
+function makeStoredZip(entries: { name: string; data?: string; mode?: number }[]) {
   const localParts: Buffer[] = [];
   const centralParts: Buffer[] = [];
   let offset = 0;
@@ -29,6 +29,7 @@ function makeStoredZip(entries: { name: string; data?: string }[]) {
     central.writeUInt32LE(data.length, 20);
     central.writeUInt32LE(data.length, 24);
     central.writeUInt16LE(name.length, 28);
+    central.writeUInt32LE((entry.mode ?? 0) * 65_536, 38);
     central.writeUInt32LE(offset, 42);
     centralParts.push(central, name);
     offset += local.length + name.length + data.length;
@@ -49,16 +50,21 @@ test('backup zip validation accepts expected backup layout', () => {
     { name: 'uploads/2026/image.png', data: 'png' },
     { name: 'content/themes/.gitkeep', data: '' },
   ]);
-  expect(validateBackupZipEntries(zip)).toEqual(['database.sql', 'uploads/2026/image.png', 'content/themes/.gitkeep']);
+  expect(readBackupZipEntries(zip).map(({ name }) => name)).toEqual(['database.sql', 'uploads/2026/image.png', 'content/themes/.gitkeep']);
 });
 
 test('backup zip validation rejects path traversal entries', () => {
-  expect(() => validateBackupZipEntries(makeStoredZip([{ name: '../evil.sql' }]))).toThrow();
-  expect(() => validateBackupZipEntries(makeStoredZip([{ name: 'uploads/../../evil.txt' }]))).toThrow();
-  expect(() => validateBackupZipEntries(makeStoredZip([{ name: '/tmp/evil.txt' }]))).toThrow();
-  expect(() => validateBackupZipEntries(makeStoredZip([{ name: 'uploads\\evil.txt' }]))).toThrow();
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: '../evil.sql' }]))).toThrow();
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: 'uploads/../../evil.txt' }]))).toThrow();
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: '/tmp/evil.txt' }]))).toThrow();
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: 'uploads\\evil.txt' }]))).toThrow();
 });
 
 test('backup zip validation rejects unexpected top-level entries', () => {
-  expect(() => validateBackupZipEntries(makeStoredZip([{ name: 'wp-config.php' }]))).toThrow();
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: 'wp-config.php' }]))).toThrow();
+});
+
+test('backup zip validation rejects symlinks and repeated target paths', () => {
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: 'uploads/link', mode: 0o120777 }]))).toThrow('普通文件');
+  expect(() => readBackupZipEntries(makeStoredZip([{ name: 'uploads/image.png' }, { name: 'uploads/image.png' }]))).toThrow('重复路径');
 });

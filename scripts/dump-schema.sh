@@ -19,16 +19,31 @@ DB_PORT="${DB_PORT:-$(env_value DB_PORT 5432)}"
 DB_NAME="${DB_NAME:-$(env_value DB_NAME utterlog)}"
 DB_USER="${DB_USER:-$(env_value DB_USER utterlog)}"
 DB_PASSWORD="${DB_PASSWORD:-$(env_value DB_PASSWORD '')}"
+DB_PREFIX="${DB_PREFIX:-$(env_value DB_PREFIX ul_)}"
+
+if ! [[ "$DB_PREFIX" =~ ^[a-z_][a-z0-9_]*$ ]]; then
+  printf 'Invalid DB_PREFIX: %s\n' "$DB_PREFIX" >&2
+  exit 2
+fi
 
 command -v pg_dump >/dev/null 2>&1 || { echo 'pg_dump is required (install postgresql-client).' >&2; exit 2; }
 tmp_schema="$(mktemp "${TMPDIR:-/tmp}/utterlog-schema.XXXXXX")"
 trap 'rm -f "$tmp_schema"' EXIT
 
 echo "Dumping schema from $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME ..."
-PGPASSWORD="$DB_PASSWORD" pg_dump \
-  -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
-  --schema-only --no-owner --no-acl --no-privileges --if-exists --clean \
-  > "$tmp_schema"
+{
+  printf 'CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;\n\n'
+  # Keep only application objects and omit psql commands and session-wide settings.
+  PGPASSWORD="$DB_PASSWORD" pg_dump \
+    -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+    --schema-only --no-owner --no-acl --strict-names --table="public.${DB_PREFIX}*" \
+    | sed -E "s/(^|[^[:alnum:]_])${DB_PREFIX}/\1ul_/g" \
+    | awk '
+        /^\\/ || /^SET / || /^SELECT pg_catalog\.set_config\(/ { next }
+        !NF { blank++; next }
+        { if (seen && blank) print ""; if (seen && blank > 1) print ""; print; blank = 0; seen = 1 }
+      '
+} > "$tmp_schema"
 mv "$tmp_schema" "$SCHEMA_FILE"
 trap - EXIT
 

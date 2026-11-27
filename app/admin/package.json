@@ -1,7 +1,7 @@
 {
   "name": "utterlog-admin",
   "private": true,
-  "version": "1.6.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -41,7 +41,7 @@
     "tailwindcss": "^4.3.5",
     "tailwindcss-motion": "^1.1.1",
     "typescript": "^7.0.2",
-    "vite": "^8.3.8",
+    "vite": "^8.4.0",
     "vite-plugin-compression2": "^2.5.4"
   }
 }

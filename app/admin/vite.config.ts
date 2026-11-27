@@ -7,7 +7,7 @@ import path from 'node:path';
 import { readFileSync } from 'node:fs';
 
 const appVersion = JSON.parse(
-  readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8'),
+  readFileSync(path.resolve(import.meta.dirname, '../../package.json'), 'utf8'),
 ).version as string;
 
 // Admin runs as a TanStack Start app in SPA mode: no SSR (it is auth-gated
@@ -43,7 +43,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(import.meta.dirname, 'src'),
     },
   },
   define: {
