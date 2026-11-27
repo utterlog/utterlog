@@ -16,7 +16,7 @@
   "scripts": {
     "dev": "bun run app/start/src/backend/index.ts",
     "start": "NODE_ENV=production bun run app/start/src/backend/index.ts",
-    "test:server": "JWT_SECRET=test-secret-for-server-tests bun test app/start/test",
+    "test:server": "JWT_SECRET=test-secret-for-server-tests bun test --isolate app/start/test",
     "test:integration": "UTTERLOG_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/start/test/comments-service.integration.test.ts",
     "test:restore": "UTTERLOG_RESTORE_INTEGRATION_DB=1 JWT_SECRET=test-secret-for-server-tests bun test app/start/test/backup-restore.integration.test.ts",
     "audit:api": "bun scripts/audit-api-coverage.ts",
