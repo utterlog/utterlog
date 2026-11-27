@@ -36,13 +36,13 @@
 安装脚本适用于使用 systemd 的 64 位 Linux。在 Debian 和 Ubuntu 上，脚本可自动安装本地 PostgreSQL 和 `pgvector`。已有数据库也可直接接入，配置见 [安装指南](INSTALL.md)。
 
 ```bash
-curl -fsSL https://utterlog.io/install.sh | sudo bash
+curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/install.sh | sudo bash
 ```
 
 使用公开域名时，可在运行安装器时指定 `DOMAIN`。
 
 ```bash
-curl -fsSL https://utterlog.io/install.sh | sudo DOMAIN=blog.example.com bash
+curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/install.sh | sudo DOMAIN=blog.example.com bash
 ```
 
 服务默认监听 `127.0.0.1:9260`。通过公开域名访问时，请在反向代理上配置 HTTPS。首次访问 `/install`，按向导创建管理员并设置站点信息。 [反向代理配置](deploy/README.md)

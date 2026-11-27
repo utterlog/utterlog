@@ -20,13 +20,13 @@ Utterlog 使用 **PostgreSQL 19** 和 pgvector。Debian/Ubuntu 安装器从 PGDG
 ## 一行安装
 
 ```bash
-curl -fsSL https://utterlog.io/install.sh | sudo bash
+curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/install.sh | sudo bash
 ```
 
 指定公开域名：
 
 ```bash
-curl -fsSL https://utterlog.io/install.sh \
+curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/install.sh \
   | sudo DOMAIN=blog.example.com bash
 ```
 
@@ -47,7 +47,7 @@ curl -fsSL https://utterlog.io/install.sh \
 首次安装前传入数据库配置：
 
 ```bash
-curl -fsSL https://utterlog.io/install.sh \
+curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/install.sh \
   | sudo DB_HOST=db.example.internal \
       DB_PORT=5432 \
       DB_NAME=utterlog \
@@ -118,7 +118,7 @@ make logs
 
 后台“一键升级”通过 `utterlog-update.path` 触发同一个脚本。脚本先在独立目录构建，再切换源码和产物，并检查数据库、运行提交、首页和后台。失败时回退应用源码和产物。升级前请备份数据库，数据库主版本迁移和已提交的 schema 迁移需按各自的备份恢复流程处理。
 
-如果旧 systemd 实例还没有 `scripts/check-host.sh`，第一次使用新版升级器时执行 `curl -fsSL https://utterlog.io/update.sh | sudo bash`。已有 PostgreSQL 18 实例先完成数据库迁移。
+如果旧 systemd 实例还没有 `scripts/check-host.sh`，第一次使用新版升级器时执行 `curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/update-bun.sh | sudo UTTERLOG_INSTALL_DIR=/opt/utterlog bash`。已有 PostgreSQL 18 实例先完成数据库迁移。
 
 ## 故障排查
 

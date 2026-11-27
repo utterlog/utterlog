@@ -11,7 +11,7 @@ for arg in "$@"; do
   case "$arg" in
     -h|--help)
       printf '%s\n' \
-        'Usage: curl -fsSL https://utterlog.io/install.sh | sudo bash' \
+        'Usage: curl -fsSL https://github.com/utterlog/utterlog/releases/latest/download/install.sh | sudo bash' \
         '' \
         'Environment: UTTERLOG_DIR, UTTERLOG_REPO, UTTERLOG_REF, DOMAIN, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD.'
       exit 0
